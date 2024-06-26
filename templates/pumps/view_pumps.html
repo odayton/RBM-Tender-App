@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>View Pump Details</h2>
+    <p>Select a table to view its details.</p>
+    <select id="tableSelect" class="form-control">
+        <option value="Pump_Details">Pump Details</option>
+        <option value="Large_Seismic_Springs">Large Seismic Springs</option>
+        <option value="Additional_Price_Adders">Additional Price Adders</option>
+        <option value="Small_Seismic_Springs">Small Seismic Springs</option>
+        <option value="Inertia_Bases">Inertia Bases</option>
+    </select>
+    <div id="tableContainer" class="mt-4"></div>
+</div>
+
+<script>
+document.getElementById('tableSelect').addEventListener('change', function() {
+    var tableName = this.value;
+    fetch('/get_table_data/' + tableName)
+        .then(response => response.json())
+        .then(data => {
+            var tableContainer = document.getElementById('tableContainer');
+            var tableHtml = '<table class="table table-bordered">';
+            tableHtml += '<thead><tr>';
+            data.columns.forEach(column => {
+                tableHtml += '<th>' + column + '</th>';
+            });
+            tableHtml += '</tr></thead><tbody>';
+            data.rows.forEach(row => {
+                tableHtml += '<tr>';
+                row.forEach(cell => {
+                    tableHtml += '<td>' + cell + '</td>';
+                });
+                tableHtml += '</tr>';
+            });
+            tableHtml += '</tbody></table>';
+            tableContainer.innerHTML = tableHtml;
+        });
+});
+
+// Trigger change event to load initial table
+document.getElementById('tableSelect').dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

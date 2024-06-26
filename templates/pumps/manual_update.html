@@ -1,0 +1,178 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manual Database Update</h2>
+    <p>Use this form to manually update the database or upload an Excel file for batch updates.</p>
+
+    <!-- Form for manual input -->
+    <form method="POST">
+        <div class="form-group">
+            <label for="table">Select Table</label>
+            <select class="form-control" id="table" name="table" required>
+                <option value="Large_Seismic_Springs">Large Seismic Springs</option>
+                <option value="Additional_Price_Adders">Additional Price Adders</option>
+                <option value="Small_Seismic_Springs">Small Seismic Springs</option>
+                <option value="Inertia_Bases">Inertia Bases</option>
+            </select>
+        </div>
+
+        <div id="form-fields"></div>
+
+        <button type="submit" class="btn btn-primary">Add Record</button>
+    </form>
+
+    <hr>
+
+    <!-- Form for Excel upload -->
+    <h3>Upload Excel File</h3>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="file">Choose Excel file</label>
+            <input type="file" class="form-control-file" id="file" name="file" accept=".xlsx">
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tableSelect = document.getElementById('table');
+    const formFields = document.getElementById('form-fields');
+
+    const fields = {
+        'Large_Seismic_Springs': `
+            <div class="form-group">
+                <label for="part_number">Part Number</label>
+                <input type="text" class="form-control" id="part_number" name="part_number" required>
+            </div>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="max_load_kg">Max Load (kg)</label>
+                <input type="number" step="0.01" class="form-control" id="max_load_kg" name="max_load_kg" required>
+            </div>
+            <div class="form-group">
+                <label for="static_deflection">Static Deflection</label>
+                <input type="number" step="0.01" class="form-control" id="static_deflection" name="static_deflection" required>
+            </div>
+            <div class="form-group">
+                <label for="spring_constant_kg_mm">Spring Constant (kg/mm)</label>
+                <input type="number" step="0.01" class="form-control" id="spring_constant_kg_mm" name="spring_constant_kg_mm" required>
+            </div>
+            <div class="form-group">
+                <label for="inner">Inner</label>
+                <input type="text" class="form-control" id="inner" name="inner" required>
+            </div>
+            <div class="form-group">
+                <label for="outer">Outer</label>
+                <input type="text" class="form-control" id="outer" name="outer" required>
+            </div>
+            <div class="form-group">
+                <label for="cost">Cost</label>
+                <input type="number" step="0.01" class="form-control" id="cost" name="cost" required>
+            </div>
+        `,
+        'Additional_Price_Adders': `
+            <div class="form-group">
+                <label for="ip_adder">IP Adder</label>
+                <input type="number" step="0.01" class="form-control" id="ip_adder" name="ip_adder" required>
+            </div>
+            <div class="form-group">
+                <label for="drip_tray_adder">Drip Tray Adder</label>
+                <input type="number" step="0.01" class="form-control" id="drip_tray_adder" name="drip_tray_adder" required>
+            </div>
+        `,
+        'Small_Seismic_Springs': `
+            <div class="form-group">
+                <label for="part_number">Part Number</label>
+                <input type="text" class="form-control" id="part_number" name="part_number" required>
+            </div>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="max_load_kg">Max Load (kg)</label>
+                <input type="number" step="0.01" class="form-control" id="max_load_kg" name="max_load_kg" required>
+            </div>
+            <div class="form-group">
+                <label for="static_deflection">Static Deflection</label>
+                <input type="number" step="0.01" class="form-control" id="static_deflection" name="static_deflection" required>
+            </div>
+            <div class="form-group">
+                <label for="spring_constant_kg_mm">Spring Constant (kg/mm)</label>
+                <input type="number" step="0.01" class="form-control" id="spring_constant_kg_mm" name="spring_constant_kg_mm" required>
+            </div>
+            <div class="form-group">
+                <label for="stripe_1">Stripe 1</label>
+                <input type="text" class="form-control" id="stripe_1" name="stripe_1" required>
+            </div>
+            <div class="form-group">
+                <label for="stripe_2">Stripe 2</label>
+                <input type="text" class="form-control" id="stripe_2" name="stripe_2" required>
+            </div>
+            <div class="form-group">
+                <label for="cost">Cost</label>
+                <input type="number" step="0.01" class="form-control" id="cost" name="cost" required>
+            </div>
+        `,
+        'Inertia_Bases': `
+            <div class="form-group">
+                <label for="part_number">Part Number</label>
+                <input type="text" class="form-control" id="part_number" name="part_number" required>
+            </div>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="length">Length</label>
+                <input type="number" step="0.01" class="form-control" id="length" name="length" required>
+            </div>
+            <div class="form-group">
+                <label for="width">Width</label>
+                <input type="number" step="0.01" class="form-control" id="width" name="width" required>
+            </div>
+            <div class="form-group">
+                <label for="height">Height</label>
+                <input type="number" step="0.01" class="form-control" id="height" name="height" required>
+            </div>
+            <div class="form-group">
+                <label for="spring_mount_height">Spring Mount Height</label>
+                <input type="number" step="0.01" class="form-control" id="spring_mount_height" name="spring_mount_height" required>
+            </div>
+            <div class="form-group">
+                <label for="spring_type">Spring Type</label>
+                <input type="text" class="form-control" id="spring_type" name="spring_type" required>
+            </div>
+            <div class="form-group">
+                <label for="weight">Weight</label>
+                <input type="number" step="0.01" class="form-control" id="weight" name="weight" required>
+            </div>
+            <div class="form-group">
+                <label for="spring_qty">Spring Quantity</label>
+                <input type="number" class="form-control" id="spring_qty" name="spring_qty" required>
+            </div>
+            <div class="form-group">
+                <label for="spring_load">Spring Load</label>
+                <input type="number" step="0.01" class="form-control" id="spring_load" name="spring_load" required>
+            </div>
+            <div class="form-group">
+                <label for="cost">Cost</label>
+                <input type="number" step="0.01" class="form-control" id="cost" name="cost" required>
+            </div>
+        `
+    };
+
+    tableSelect.addEventListener('change', function() {
+        formFields.innerHTML = fields[this.value];
+    });
+
+    // Trigger change event to load the form fields for the default selection
+    tableSelect.dispatchEvent(new Event('change'));
+});
+</script>
+{% endblock %}

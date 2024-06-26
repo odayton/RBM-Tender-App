@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2>Search Pumps</h2>
+    <form id="search-form" method="POST" action="{{ url_for('pumps.search_pumps') }}">
+        {{ form.hidden_tag() }}
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                <label for="flow">Flow (L/s)</label>
+                {{ form.flow(class="form-control no-spinner", id="flow", placeholder="Flow") }}
+            </div>
+            <div class="form-group col-md-2">
+                <label for="head">Head</label>
+                {{ form.head(class="form-control no-spinner", id="head", placeholder="Head") }}
+            </div>
+            <div class="form-group col-md-2">
+                <label for="head_unit">Head Unit</label>
+                {{ form.head_unit(class="form-control", id="head_unit") }}
+            </div>
+            <div class="form-group col-md-2">
+                <label for="poles">Poles</label>
+                {{ form.poles(class="form-control", id="poles") }}
+            </div>
+            <div class="form-group col-md-2">
+                <label for="model_type">Model Type</label>
+                {{ form.model_type(class="form-control", id="model_type") }}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <div id="search-results" class="mt-4">
+        {% if results %}
+            <h4>Search Results</h4>
+            <div class="table-container">
+                <table class="table table-bordered table-resizable">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Name</th>
+                            <th>Flow (L/s)</th>
+                            <th>Head (kPa)</th>
+                            <th>Head (m)</th>
+                            <th>Poles</th>
+                            <th>kW</th>
+                            <th>Cost ($)</th>
+                            <th>Add</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in results %}
+                            <tr>
+                                <td>{{ row['SKU'] }}</td>
+                                <td>{{ row['Name'] }}</td>
+                                <td>{{ row['Flow_L_s'] }}</td>
+                                <td>{{ row['Head_kPa'] }}</td>
+                                <td>{{ row['Head_m'] }}</td>
+                                <td>{{ row['Poles'] }}</td>
+                                <td>{{ row['kW'] }}</td>
+                                <td>{{ row['Cost'] }}</td>
+                                <td><button type="button" class="btn btn-success add-to-quote" data-sku="{{ row['SKU'] }}" data-name="{{ row['Name'] }}" data-flow="{{ row['Flow_L_s'] }}" data-head="{{ row['Head_kPa'] }}" data-cost="{{ row['Cost'] }}">Add</button></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>No results found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.add-to-quote').forEach(button => {
+        button.addEventListener('click', () => {
+            const sku = button.getAttribute('data-sku');
+            const name = button.getAttribute('data-name');
+            const flow = button.getAttribute('data-flow');
+            const head = button.getAttribute('data-head');
+            const cost = button.getAttribute('data-cost');
+
+            fetch('{{ url_for("pumps.add_to_quote") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ form.csrf_token._value() }}'
+                },
+                body: JSON.stringify({
+                    sku: sku,
+                    name: name,
+                    flow: flow,
+                    head: head,
+                    cost: cost
+                })
+            }).then(response => response.json()).then(data => {
+                if (data.status === 'success') {
+                    alert('Pump added to quote!');
+                } else {
+                    alert('Error adding pump to quote.');
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
