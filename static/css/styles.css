@@ -10,6 +10,7 @@ body {
     width: 100% !important;
     z-index: 1000 !important;
     position: relative !important;
+    color: #ffffff !important;
 }
 
 /* Style for navbar links */
@@ -66,7 +67,7 @@ body {
     background-color: #3a3a3c !important;
     padding: 20px !important;
     transition: margin-left 0.3s ease;
-    position: relative; /* Added for option 2 */
+    position: relative;
 }
 
 .main-content.with-sidebar {
@@ -168,8 +169,17 @@ input[type=number] {
     -moz-appearance: textfield; 
     appearance: textfield; 
 }
+
 .container {
-    max-width: 1200px;
+    max-width: 90%; /* Adjusted for larger width */
+    margin: auto; /* Center the content */
+}
+
+.inset-box {
+    background-color: #2d2d2f !important;
+    border-radius: 10px !important;
+    padding: 20px !important;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3) !important;
 }
 
 .table thead th {
@@ -182,10 +192,16 @@ input[type=number] {
     text-align: center;
 }
 
-.form-control {
-    width: 80px;
-    margin: 0 auto;
+.form-control, .form-group label {
+    width: 100% !important;
 }
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
 
 h2, h4 {
     margin-top: 20px;
@@ -198,4 +214,17 @@ h2, h4 {
 
 .btn-success {
     margin-top: 20px;
+}
+
+/* Sidebar Hover Effect */
+.sidebar-toggle:hover::after {
+    content: 'Toggle Sidebar';
+    position: absolute;
+    left: 35px;
+    background-color: #ffffff;
+    color: #000000;
+    padding: 5px;
+    border-radius: 5px;
+    z-index: 1002;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }

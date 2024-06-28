@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pump Management System</title>
+    <title>Page Title</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -23,16 +23,16 @@
                 <a class="nav-link" href="{{ url_for('home') }}">Home</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('pumps.pumps') }}" onclick="showSidebar('pumps')">Pumps</a>
+                <a class="nav-link" href="{{ url_for('pumps.pumps') }}">Pumps</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('hydronics.hydronics') }}" onclick="showSidebar('hydronics')">Hydronics</a>
+                <a class="nav-link" href="{{ url_for('hydronics.hydronics') }}">Hydronics</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('hydraulic.hydraulic') }}" onclick="showSidebar('hydraulic')">Hydraulic</a>
+                <a class="nav-link" href="{{ url_for('hydraulic.hydraulic') }}">Hydraulic</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('quotes.view_quotes') }}" onclick="showSidebar('quotes')">Quotes</a>
+                <a class="nav-link" href="{{ url_for('quotes.view_quotes') }}">Quotes</a>
             </li>
         </ul>
     </div>
@@ -46,7 +46,7 @@
 <!-- Sidebar -->
 <div id="sidebar" class="sidebar">
     <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('pumps.pumps') }}" onclick="showSidebar('pumps')">Pumps</a>
+        <a class="nav-link" href="{{ url_for('pumps.pumps') }}">Pumps</a>
     </li>
     <div id="pumps-sidebar" class="sidebar-content">
         <a class="nav-link" href="{{ url_for('pumps.add_pump_page') }}">Add Pump</a>
@@ -67,10 +67,10 @@
     </div>
 </div>
 
-<div class="container-fluid mt-4">
+<div class="container mt-4">
     <div class="row">
         <!-- Main Content -->
-        <div class="col-md-10 main-content no-sidebar">
+        <div class="col-12 main-content no-sidebar inset-box">
             {% block content %}{% endblock %}
         </div>
     </div>

@@ -1,11 +1,11 @@
 # blueprints/pumps.py
 
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, flash, current_app, jsonify, redirect, url_for
 from werkzeug.utils import secure_filename
 import os
 import tempfile
 import shutil
-from extract_pdf import extract_pdf_info
+from utils.extract_pdf import extract_pdf_info
 from utils.db_utils import fetch_all_from_table, insert_into_db, update_db_from_excel, write_to_db, get_db_connection
 from blueprints.forms import SearchPumpsForm, ManualUpdateForm
 
@@ -13,11 +13,11 @@ pumps_bp = Blueprint('pumps', __name__)
 
 @pumps_bp.route('/')
 def pumps():
-    return render_template('pumps.html')
+    return render_template('pumps/pumps.html')
 
 @pumps_bp.route('/add')
 def add_pump_page():
-    return render_template('add_pump.html')
+    return render_template('pumps/add_pump.html')
 
 @pumps_bp.route('/view')
 def view_pumps_page():
@@ -28,7 +28,7 @@ def view_pumps_page():
         'Small_Seismic_Springs',
         'Inertia_Bases'
     ]
-    return render_template('view_pumps.html', tables=tables)
+    return render_template('pumps/view_pumps.html', tables=tables)
 
 @pumps_bp.route('/get_table_data/<table_name>', methods=['GET'])
 def get_table_data(table_name):
@@ -94,7 +94,7 @@ def manual_update():
 
             flash('Record added successfully')
             return redirect(url_for('pumps.manual_update'))
-    return render_template('manual_update.html', form=form)
+    return render_template('pumps/manual_update.html', form=form)
 
 @pumps_bp.route('/tech-data-upload', methods=['GET', 'POST'])
 def tech_data_upload():
@@ -124,7 +124,7 @@ def tech_data_upload():
             except Exception as e:
                 flash(f"An error occurred: {e}")
                 return redirect(request.url)
-    return render_template('tech_data_upload.html')
+    return render_template('pumps/tech_data_upload.html')
 
 @pumps_bp.route('/search', methods=['GET', 'POST'])
 def search_pumps():
@@ -174,7 +174,7 @@ def search_pumps():
         results = [dict(zip(columns, row)) for row in rows]
         conn.close()
 
-    return render_template('search_pumps.html', form=form, results=results)
+    return render_template('pumps/search_pumps.html', form=form, results=results)
 
 @pumps_bp.route('/add_to_quote', methods=['POST'])
 def add_to_quote():

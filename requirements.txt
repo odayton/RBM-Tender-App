@@ -9,3 +9,4 @@ numpy==1.23.5
 sqlalchemy==1.4.22
 WTForms==2.3.3
 requests==2.26.0
+Werkzeug==2.0.1

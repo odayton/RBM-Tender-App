@@ -1,8 +1,19 @@
 {% extends "layout.html" %}
 
+{% block title %}
+    Add Pump
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
+<div class="container">
     <h2>Add Pump</h2>
-    <!-- Add Pump form goes here -->
+    <form method="post" action="{{ url_for('pumps.add_pump') }}">
+        <div class="form-group">
+            <label for="pumpName">Pump Name</label>
+            <input type="text" class="form-control" id="pumpName" name="pumpName" required>
+        </div>
+        <!-- Add other fields here -->
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
 </div>
 {% endblock %}

@@ -1,45 +1,51 @@
 {% extends "layout.html" %}
 
+{% block title %}
+    View Pumps
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>View Pump Details</h2>
-    <p>Select a table to view its details.</p>
-    <select id="tableSelect" class="form-control">
-        <option value="Pump_Details">Pump Details</option>
-        <option value="Large_Seismic_Springs">Large Seismic Springs</option>
-        <option value="Additional_Price_Adders">Additional Price Adders</option>
-        <option value="Small_Seismic_Springs">Small Seismic Springs</option>
-        <option value="Inertia_Bases">Inertia Bases</option>
-    </select>
-    <div id="tableContainer" class="mt-4"></div>
+<div class="container">
+    <h2>View Pumps</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Name</th>
+                    <th>Flow</th>
+                    <th>Head</th>
+                    <th>Poles</th>
+                    <th>Cost</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Data will be populated via JS -->
+            </tbody>
+        </table>
+    </div>
 </div>
-
 <script>
-document.getElementById('tableSelect').addEventListener('change', function() {
-    var tableName = this.value;
-    fetch('/get_table_data/' + tableName)
-        .then(response => response.json())
-        .then(data => {
-            var tableContainer = document.getElementById('tableContainer');
-            var tableHtml = '<table class="table table-bordered">';
-            tableHtml += '<thead><tr>';
-            data.columns.forEach(column => {
-                tableHtml += '<th>' + column + '</th>';
-            });
-            tableHtml += '</tr></thead><tbody>';
-            data.rows.forEach(row => {
-                tableHtml += '<tr>';
-                row.forEach(cell => {
-                    tableHtml += '<td>' + cell + '</td>';
+    document.addEventListener("DOMContentLoaded", function() {
+        // Fetch and populate table data
+        fetch('{{ url_for("pumps.get_table_data", table_name="Pump_Details") }}')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('table-body');
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.sku}</td>
+                        <td>${row.name}</td>
+                        <td>${row.flow_l_s}</td>
+                        <td>${row.head_kpa}</td>
+                        <td>${row.poles}</td>
+                        <td>${row.cost}</td>
+                    `;
+                    tableBody.appendChild(tr);
                 });
-                tableHtml += '</tr>';
-            });
-            tableHtml += '</tbody></table>';
-            tableContainer.innerHTML = tableHtml;
-        });
-});
-
-// Trigger change event to load initial table
-document.getElementById('tableSelect').dispatchEvent(new Event('change'));
+            })
+            .catch(error => console.error('Error fetching table data:', error));
+    });
 </script>
 {% endblock %}
