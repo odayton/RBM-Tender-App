@@ -22,7 +22,6 @@ class QuoteItemForm(FlaskForm):
     price = FloatField('Price', validators=[DataRequired()])
     total_price = FloatField('Total Price', validators=[DataRequired()])
 
-
 class ManualUpdateForm(FlaskForm):
     table = SelectField('Table', choices=[
         ('Large_Seismic_Springs', 'Large Seismic Springs'),
