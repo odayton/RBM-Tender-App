@@ -1,5 +1,7 @@
 import re
 import fitz  # PyMuPDF
+import os
+from PIL import Image
 
 def extract_rotated_text(pdf_path):
     pdf_document = fitz.open(pdf_path)
@@ -18,13 +20,15 @@ def extract_text_pymupdf(pdf_path):
             page = pdf_document.load_page(page_num)
             text += page.get_text("text")
         
+        pdf_document.close()
         return text
     except Exception as e:
         return f"Error processing PDF with PyMuPDF: {e}"
 
-def extract_blank_nbg_tech_data(pdf_path):
+def extract_blank_nbg_tech_data(pdf_path, image_output_folder="extracted_images"):
     text_pymupdf = extract_text_pymupdf(pdf_path)
-    return extract_blank_pdf_info(text_pymupdf, pdf_path)
+    image = extract_and_crop_image_from_pdf(pdf_path, text_pymupdf, image_output_folder)
+    return extract_blank_pdf_info(text_pymupdf, pdf_path), image
 
 def extract_blank_pdf_info(text, pdf_path):
     pdf_info = {
@@ -79,6 +83,44 @@ def extract_blank_pdf_info(text, pdf_path):
         pdf_info['weight'] = float(weight_match.group(1))
 
     return pdf_info
+
+def extract_and_crop_image_from_pdf(pdf_path, text, output_folder="extracted_images"):
+    pdf_document = fitz.open(pdf_path)
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Extract SKU and Name for image naming
+    sku_match = re.search(r'Product No\.\s*:\s*(\d+)', text)
+    name_match = re.search(r'\b(NBG[\w\s-]+/\d+)', text)
+    sku = sku_match.group(1) if sku_match else "unknown_sku"
+    name = name_match.group(1).replace("/", "-") if name_match else "unknown_name"
+    image_base_name = f"{sku}-{name}"
+
+    cropped_image_path = None
+
+    # Only render and save the third page as an image
+    if len(pdf_document) >= 3:
+        page_num = 2  # Third page (0-indexed)
+        page = pdf_document.load_page(page_num)
+        pix = page.get_pixmap()
+        full_image_path = os.path.join(output_folder, f"{image_base_name}.png")
+        pix.save(full_image_path)
+
+        # Crop the image using specified pixel values
+        img = Image.open(full_image_path)
+        left = 50   # Adjust as needed
+        top = 75   # Adjust as needed
+        right = 525 # Adjust as needed
+        bottom = 450 # Adjust as needed
+        crop_box = (left, top, right, bottom)
+        cropped_img = img.crop(crop_box)
+        cropped_image_path = os.path.join(output_folder, f"{image_base_name}_graph.png")
+        cropped_img.save(cropped_image_path)
+        
+        # Remove the full image as it's not needed
+        os.remove(full_image_path)
+
+    pdf_document.close()
+    return cropped_image_path
 
 # Placeholder for the future historic data extraction logic
 def extract_historic_nbg_tech_data(pdf_path):

@@ -32,9 +32,11 @@ def blank_tech_data_upload():
                             filename = secure_filename(file.filename)
                             temp_path = os.path.join(tempfile.gettempdir(), filename)
                             file.save(temp_path)
-                            extracted_data = process_and_store_pdf(temp_path, extract_blank_nbg_tech_data)
-                            all_extracted_data.append(extracted_data)
-                            print(f"Extracted Data: {extracted_data}")
+                            extracted_text, extracted_images = process_and_store_pdf(temp_path, extract_blank_nbg_tech_data)
+                            all_extracted_data.append((extracted_text, extracted_images))
+                            print(f"Extracted Text: {extracted_text}")
+                            for img_path in extracted_images:
+                                print(f"Saved Image: {img_path}")
 
                 if zip_file and allowed_zip_file(zip_file.filename):
                     zip_filename = secure_filename(zip_file.filename)
@@ -44,8 +46,10 @@ def blank_tech_data_upload():
                     extracted_data = extract_and_process_zip(temp_path, extract_blank_nbg_tech_data)
                     all_extracted_data.extend(extracted_data)
 
-                for data in all_extracted_data:
-                    print(f"Extracted Data: {data}")
+                for text, images in all_extracted_data:
+                    print(f"Extracted Text: {text}")
+                    for img_path in images:
+                        print(f"Saved Image: {img_path}")
 
                 flash('Blank tech data uploaded successfully')
                 return redirect(url_for('admin.blank_tech_data_upload'))
@@ -58,12 +62,12 @@ def view_blank_tech_data():
 
 def process_and_store_pdf(pdf_path, extraction_function):
     try:
-        extracted_data = extraction_function(pdf_path)
-        print(f"Extracted Data from {pdf_path}:\n{extracted_data}")
-        return extracted_data
+        extracted_text, extracted_images = extraction_function(pdf_path, image_output_folder="extracted_images")
+        print(f"Extracted Text from {pdf_path}:\n{extracted_text}")
+        return extracted_text, extracted_images
     except Exception as e:
         print(f"Error processing PDF {pdf_path}: {e}")
-        return None
+        return None, None
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pdf'}
@@ -84,10 +88,12 @@ def extract_and_process_zip(zip_path, extraction_function):
                     if allowed_file(file):
                         file_path = os.path.join(root, file)
                         print(f"Processing extracted file: {file_path}")
-                        data = process_and_store_pdf(file_path, extraction_function)
-                        if data:
-                            extracted_data.append(data)
-                            print(f"Extracted Data from {file_path}: {data}")
+                        text, images = process_and_store_pdf(file_path, extraction_function)
+                        if text is not None and images is not None:
+                            extracted_data.append((text, images))
+                            print(f"Extracted Text from {file_path}: {text}")
+                            for img_path in images:
+                                print(f"Saved Image: {img_path}")
                         else:
                             print(f"Failed to extract data from {file_path}")
     return extracted_data
