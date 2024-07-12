@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>New Quote</h2>
+    <form id="new-quote-form" method="POST" action="{{ url_for('new_quote_page') }}">
+        <div class="form-group">
+            <label for="project">Project</label>
+            <input type="text" class="form-control" id="project" name="project" required>
+        </div>
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Reference</th>
+                    <th>Flow</th>
+                    <th>Head</th>
+                    <th>Quantity</th>
+                    <th>Inertia Base</th>
+                    <th>Seismic Springs</th>
+                    <th>Drip Tray</th>
+                    <th>IP-56</th>
+                    <th>IP-66</th>
+                    <th>Net Unit Value</th>
+                    <th>Total Value</th>
+                </tr>
+            </thead>
+            <tbody id="quote-items">
+                <!-- Dynamic rows will be added here -->
+            </tbody>
+        </table>
+        <div class="form-group mt-4">
+            <label for="subtotal">Subtotal</label>
+            <input type="number" class="form-control" id="subtotal" name="subtotal" readonly>
+        </div>
+        <div class="form-group mt-2">
+            <label for="freight">Freight Price</label>
+            <input type="number" class="form-control" id="freight" name="freight">
+        </div>
+        <div class="form-group mt-2">
+            <label for="total">Total Price</label>
+            <input type="number" class="form-control" id="total" name="total" readonly>
+        </div>
+        <button type="submit" class="btn btn-primary mt-4">Save Quote</button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const freightInput = document.getElementById('freight');
+    const subtotalInput = document.getElementById('subtotal');
+    const totalInput = document.getElementById('total');
+
+    freightInput.addEventListener('input', () => {
+        const subtotal = parseFloat(subtotalInput.value) || 0;
+        const freight = parseFloat(freightInput.value) || 0;
+        totalInput.value = (subtotal + freight).toFixed(2);
+    });
+});
+</script>
+{% endblock %}

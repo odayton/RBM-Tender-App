@@ -1,0 +1,984 @@
+2024-07-11 10:59:33,949 INFO  * Restarting with stat
+2024-07-11 10:59:35,457 WARNING  * Debugger is active!
+2024-07-11 10:59:35,462 INFO  * Debugger PIN: 254-385-555
+2024-07-11 10:59:35,929 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 10:59:38,557 INFO 127.0.0.1 - - [11/Jul/2024 10:59:38] "GET / HTTP/1.1" 200 -
+2024-07-11 10:59:38,753 INFO 127.0.0.1 - - [11/Jul/2024 10:59:38] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 10:59:38,755 INFO 127.0.0.1 - - [11/Jul/2024 10:59:38] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 10:59:38,799 INFO 127.0.0.1 - - [11/Jul/2024 10:59:38] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 10:59:38,860 INFO 127.0.0.1 - - [11/Jul/2024 10:59:38] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 10:59:42,268 INFO Rendering admin dashboard
+2024-07-11 10:59:42,272 INFO 127.0.0.1 - - [11/Jul/2024 10:59:42] "GET /admin/admin HTTP/1.1" 200 -
+2024-07-11 10:59:42,311 INFO 127.0.0.1 - - [11/Jul/2024 10:59:42] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 10:59:42,315 INFO 127.0.0.1 - - [11/Jul/2024 10:59:42] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 10:59:42,419 INFO 127.0.0.1 - - [11/Jul/2024 10:59:42] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 10:59:42,429 INFO 127.0.0.1 - - [11/Jul/2024 10:59:42] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 10:59:43,398 INFO 127.0.0.1 - - [11/Jul/2024 10:59:43] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 10:59:43,436 INFO 127.0.0.1 - - [11/Jul/2024 10:59:43] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 10:59:43,438 INFO 127.0.0.1 - - [11/Jul/2024 10:59:43] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 10:59:43,439 INFO 127.0.0.1 - - [11/Jul/2024 10:59:43] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 10:59:43,491 INFO 127.0.0.1 - - [11/Jul/2024 10:59:43] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 10:59:48,840 INFO 127.0.0.1 - - [11/Jul/2024 10:59:48] "POST /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 10:59:48,874 INFO 127.0.0.1 - - [11/Jul/2024 10:59:48] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 10:59:48,881 INFO 127.0.0.1 - - [11/Jul/2024 10:59:48] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 10:59:48,882 INFO 127.0.0.1 - - [11/Jul/2024 10:59:48] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 10:59:48,942 INFO 127.0.0.1 - - [11/Jul/2024 10:59:48] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:04:17,893 INFO  * Restarting with stat
+2024-07-11 11:04:19,293 WARNING  * Debugger is active!
+2024-07-11 11:04:19,298 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:04:19,884 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:04:28,131 INFO 127.0.0.1 - - [11/Jul/2024 11:04:28] "GET / HTTP/1.1" 200 -
+2024-07-11 11:04:28,339 INFO 127.0.0.1 - - [11/Jul/2024 11:04:28] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:04:28,341 INFO 127.0.0.1 - - [11/Jul/2024 11:04:28] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:04:28,400 INFO 127.0.0.1 - - [11/Jul/2024 11:04:28] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:04:28,403 INFO 127.0.0.1 - - [11/Jul/2024 11:04:28] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:04:35,133 INFO Rendering admin dashboard
+2024-07-11 11:04:35,140 INFO 127.0.0.1 - - [11/Jul/2024 11:04:35] "GET /admin/admin HTTP/1.1" 200 -
+2024-07-11 11:04:35,187 INFO 127.0.0.1 - - [11/Jul/2024 11:04:35] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:04:35,187 INFO 127.0.0.1 - - [11/Jul/2024 11:04:35] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:04:35,268 INFO 127.0.0.1 - - [11/Jul/2024 11:04:35] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:04:35,322 INFO 127.0.0.1 - - [11/Jul/2024 11:04:35] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:04:36,848 INFO 127.0.0.1 - - [11/Jul/2024 11:04:36] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:04:36,880 INFO 127.0.0.1 - - [11/Jul/2024 11:04:36] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:04:36,883 INFO 127.0.0.1 - - [11/Jul/2024 11:04:36] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:04:36,887 INFO 127.0.0.1 - - [11/Jul/2024 11:04:36] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:04:36,952 INFO 127.0.0.1 - - [11/Jul/2024 11:04:36] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:04:42,970 INFO 127.0.0.1 - - [11/Jul/2024 11:04:42] "POST /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:04:43,040 INFO 127.0.0.1 - - [11/Jul/2024 11:04:43] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:04:43,044 INFO 127.0.0.1 - - [11/Jul/2024 11:04:43] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:04:43,052 INFO 127.0.0.1 - - [11/Jul/2024 11:04:43] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:04:43,097 INFO 127.0.0.1 - - [11/Jul/2024 11:04:43] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:07:31,262 INFO  * Restarting with stat
+2024-07-11 11:07:32,494 WARNING  * Debugger is active!
+2024-07-11 11:07:32,499 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:07:32,913 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:07:35,703 INFO 127.0.0.1 - - [11/Jul/2024 11:07:35] "GET / HTTP/1.1" 200 -
+2024-07-11 11:07:35,916 INFO 127.0.0.1 - - [11/Jul/2024 11:07:35] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:07:35,918 INFO 127.0.0.1 - - [11/Jul/2024 11:07:35] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:07:35,952 INFO 127.0.0.1 - - [11/Jul/2024 11:07:35] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:07:35,958 INFO 127.0.0.1 - - [11/Jul/2024 11:07:35] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:07:45,444 INFO Rendering admin dashboard
+2024-07-11 11:07:45,449 INFO 127.0.0.1 - - [11/Jul/2024 11:07:45] "GET /admin/admin HTTP/1.1" 200 -
+2024-07-11 11:07:45,475 INFO 127.0.0.1 - - [11/Jul/2024 11:07:45] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:07:45,477 INFO 127.0.0.1 - - [11/Jul/2024 11:07:45] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:07:45,524 INFO 127.0.0.1 - - [11/Jul/2024 11:07:45] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:07:45,527 INFO 127.0.0.1 - - [11/Jul/2024 11:07:45] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:07:46,514 INFO 127.0.0.1 - - [11/Jul/2024 11:07:46] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:07:46,554 INFO 127.0.0.1 - - [11/Jul/2024 11:07:46] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:07:46,558 INFO 127.0.0.1 - - [11/Jul/2024 11:07:46] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:07:46,560 INFO 127.0.0.1 - - [11/Jul/2024 11:07:46] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:07:46,625 INFO 127.0.0.1 - - [11/Jul/2024 11:07:46] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:07:52,203 INFO 127.0.0.1 - - [11/Jul/2024 11:07:52] "POST /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:07:52,237 INFO 127.0.0.1 - - [11/Jul/2024 11:07:52] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:07:52,238 INFO 127.0.0.1 - - [11/Jul/2024 11:07:52] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:07:52,242 INFO 127.0.0.1 - - [11/Jul/2024 11:07:52] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:07:52,284 INFO 127.0.0.1 - - [11/Jul/2024 11:07:52] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:09:47,647 INFO  * Restarting with stat
+2024-07-11 11:09:48,851 WARNING  * Debugger is active!
+2024-07-11 11:09:48,855 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:09:49,309 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:10:10,874 INFO 127.0.0.1 - - [11/Jul/2024 11:10:10] "GET / HTTP/1.1" 200 -
+2024-07-11 11:10:11,865 INFO 127.0.0.1 - - [11/Jul/2024 11:10:11] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:10:11,871 INFO 127.0.0.1 - - [11/Jul/2024 11:10:11] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:10:11,882 INFO 127.0.0.1 - - [11/Jul/2024 11:10:11] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:10:12,387 INFO 127.0.0.1 - - [11/Jul/2024 11:10:12] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:10:12,827 INFO 127.0.0.1 - - [11/Jul/2024 11:10:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 11:10:13,249 INFO Rendering admin dashboard
+2024-07-11 11:10:13,277 INFO 127.0.0.1 - - [11/Jul/2024 11:10:13] "[35m[1mGET /admin/admin HTTP/1.1[0m" 500 -
+2024-07-11 11:10:13,328 INFO 127.0.0.1 - - [11/Jul/2024 11:10:13] "GET /admin/admin?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 11:10:13,329 INFO 127.0.0.1 - - [11/Jul/2024 11:10:13] "GET /admin/admin?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 11:10:13,519 INFO 127.0.0.1 - - [11/Jul/2024 11:10:13] "GET /admin/admin?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:10:13,527 INFO 127.0.0.1 - - [11/Jul/2024 11:10:13] "GET /admin/admin?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 11:10:13,578 INFO 127.0.0.1 - - [11/Jul/2024 11:10:13] "GET /admin/admin?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:11:40,989 INFO  * Restarting with stat
+2024-07-11 11:11:42,329 WARNING  * Debugger is active!
+2024-07-11 11:11:42,333 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:11:42,743 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:11:45,149 INFO 127.0.0.1 - - [11/Jul/2024 11:11:45] "GET / HTTP/1.1" 200 -
+2024-07-11 11:11:46,310 INFO 127.0.0.1 - - [11/Jul/2024 11:11:46] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:11:46,314 INFO 127.0.0.1 - - [11/Jul/2024 11:11:46] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:11:46,325 INFO 127.0.0.1 - - [11/Jul/2024 11:11:46] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:11:46,791 INFO 127.0.0.1 - - [11/Jul/2024 11:11:46] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:11:47,119 INFO 127.0.0.1 - - [11/Jul/2024 11:11:47] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 11:11:47,877 INFO Rendering admin dashboard
+2024-07-11 11:11:47,881 INFO 127.0.0.1 - - [11/Jul/2024 11:11:47] "GET /admin/admin HTTP/1.1" 200 -
+2024-07-11 11:11:47,917 INFO 127.0.0.1 - - [11/Jul/2024 11:11:47] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:11:47,917 INFO 127.0.0.1 - - [11/Jul/2024 11:11:47] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:11:47,985 INFO 127.0.0.1 - - [11/Jul/2024 11:11:47] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:11:47,998 INFO 127.0.0.1 - - [11/Jul/2024 11:11:47] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:11:49,174 INFO 127.0.0.1 - - [11/Jul/2024 11:11:49] "[35m[1mGET /admin/admin/blank-tech-data-upload HTTP/1.1[0m" 500 -
+2024-07-11 11:11:49,197 INFO 127.0.0.1 - - [11/Jul/2024 11:11:49] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 11:11:49,198 INFO 127.0.0.1 - - [11/Jul/2024 11:11:49] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 11:11:49,274 INFO 127.0.0.1 - - [11/Jul/2024 11:11:49] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 11:11:49,278 INFO 127.0.0.1 - - [11/Jul/2024 11:11:49] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:11:49,365 INFO 127.0.0.1 - - [11/Jul/2024 11:11:49] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:15:37,705 INFO  * Restarting with stat
+2024-07-11 11:15:39,189 WARNING  * Debugger is active!
+2024-07-11 11:15:39,193 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:15:39,615 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:15:41,775 INFO 127.0.0.1 - - [11/Jul/2024 11:15:41] "GET / HTTP/1.1" 200 -
+2024-07-11 11:15:41,965 INFO 127.0.0.1 - - [11/Jul/2024 11:15:41] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:15:41,967 INFO 127.0.0.1 - - [11/Jul/2024 11:15:41] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:15:42,017 INFO 127.0.0.1 - - [11/Jul/2024 11:15:42] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:15:42,063 INFO 127.0.0.1 - - [11/Jul/2024 11:15:42] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:15:48,755 INFO Rendering admin dashboard
+2024-07-11 11:15:48,759 INFO 127.0.0.1 - - [11/Jul/2024 11:15:48] "GET /admin/admin HTTP/1.1" 200 -
+2024-07-11 11:15:48,793 INFO 127.0.0.1 - - [11/Jul/2024 11:15:48] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:15:48,798 INFO 127.0.0.1 - - [11/Jul/2024 11:15:48] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:15:48,887 INFO 127.0.0.1 - - [11/Jul/2024 11:15:48] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:15:48,937 INFO 127.0.0.1 - - [11/Jul/2024 11:15:48] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:15:49,941 INFO 127.0.0.1 - - [11/Jul/2024 11:15:49] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:15:49,993 INFO 127.0.0.1 - - [11/Jul/2024 11:15:49] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:15:49,997 INFO 127.0.0.1 - - [11/Jul/2024 11:15:49] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:15:50,001 INFO 127.0.0.1 - - [11/Jul/2024 11:15:50] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:15:50,066 INFO 127.0.0.1 - - [11/Jul/2024 11:15:50] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:15:55,946 INFO 127.0.0.1 - - [11/Jul/2024 11:15:55] "POST /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:15:55,987 INFO 127.0.0.1 - - [11/Jul/2024 11:15:55] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:15:55,990 INFO 127.0.0.1 - - [11/Jul/2024 11:15:55] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:15:55,993 INFO 127.0.0.1 - - [11/Jul/2024 11:15:55] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:15:56,048 INFO 127.0.0.1 - - [11/Jul/2024 11:15:56] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:21:36,423 INFO  * Restarting with stat
+2024-07-11 11:21:37,749 WARNING  * Debugger is active!
+2024-07-11 11:21:37,752 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:21:38,249 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:21:40,238 INFO 127.0.0.1 - - [11/Jul/2024 11:21:40] "GET / HTTP/1.1" 200 -
+2024-07-11 11:21:41,208 INFO 127.0.0.1 - - [11/Jul/2024 11:21:41] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:21:41,210 INFO 127.0.0.1 - - [11/Jul/2024 11:21:41] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:21:41,779 INFO 127.0.0.1 - - [11/Jul/2024 11:21:41] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:21:41,780 INFO 127.0.0.1 - - [11/Jul/2024 11:21:41] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:21:42,118 INFO 127.0.0.1 - - [11/Jul/2024 11:21:42] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 11:21:42,626 INFO Rendering admin dashboard
+2024-07-11 11:21:42,630 INFO 127.0.0.1 - - [11/Jul/2024 11:21:42] "GET /admin/admin HTTP/1.1" 200 -
+2024-07-11 11:21:42,669 INFO 127.0.0.1 - - [11/Jul/2024 11:21:42] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:21:42,670 INFO 127.0.0.1 - - [11/Jul/2024 11:21:42] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:21:42,734 INFO 127.0.0.1 - - [11/Jul/2024 11:21:42] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:21:42,741 INFO 127.0.0.1 - - [11/Jul/2024 11:21:42] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:21:44,102 INFO 127.0.0.1 - - [11/Jul/2024 11:21:44] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:21:44,132 INFO 127.0.0.1 - - [11/Jul/2024 11:21:44] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:21:44,134 INFO 127.0.0.1 - - [11/Jul/2024 11:21:44] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:21:44,188 INFO 127.0.0.1 - - [11/Jul/2024 11:21:44] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:21:44,224 INFO 127.0.0.1 - - [11/Jul/2024 11:21:44] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:21:49,236 INFO 127.0.0.1 - - [11/Jul/2024 11:21:49] "POST /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:21:49,273 INFO 127.0.0.1 - - [11/Jul/2024 11:21:49] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:21:49,279 INFO 127.0.0.1 - - [11/Jul/2024 11:21:49] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:21:49,280 INFO 127.0.0.1 - - [11/Jul/2024 11:21:49] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:21:49,333 INFO 127.0.0.1 - - [11/Jul/2024 11:21:49] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:25:29,105 INFO  * Restarting with stat
+2024-07-11 11:25:30,344 WARNING  * Debugger is active!
+2024-07-11 11:25:30,349 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:25:30,740 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:25:32,663 INFO 127.0.0.1 - - [11/Jul/2024 11:25:32] "GET / HTTP/1.1" 200 -
+2024-07-11 11:25:33,830 INFO 127.0.0.1 - - [11/Jul/2024 11:25:33] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:25:33,844 INFO 127.0.0.1 - - [11/Jul/2024 11:25:33] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:25:33,896 INFO 127.0.0.1 - - [11/Jul/2024 11:25:33] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:25:34,507 INFO 127.0.0.1 - - [11/Jul/2024 11:25:34] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:25:34,851 INFO 127.0.0.1 - - [11/Jul/2024 11:25:34] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 11:25:35,563 INFO Rendering admin dashboard
+2024-07-11 11:25:35,583 INFO 127.0.0.1 - - [11/Jul/2024 11:25:35] "[35m[1mGET /admin/admin HTTP/1.1[0m" 500 -
+2024-07-11 11:25:35,642 INFO 127.0.0.1 - - [11/Jul/2024 11:25:35] "GET /admin/admin?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 11:25:35,644 INFO 127.0.0.1 - - [11/Jul/2024 11:25:35] "GET /admin/admin?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 11:25:35,751 INFO 127.0.0.1 - - [11/Jul/2024 11:25:35] "GET /admin/admin?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 11:25:35,755 INFO 127.0.0.1 - - [11/Jul/2024 11:25:35] "GET /admin/admin?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:25:35,904 INFO 127.0.0.1 - - [11/Jul/2024 11:25:35] "GET /admin/admin?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:26:06,636 INFO  * Restarting with stat
+2024-07-11 11:26:07,949 WARNING  * Debugger is active!
+2024-07-11 11:26:07,954 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:26:08,355 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:26:10,162 INFO 127.0.0.1 - - [11/Jul/2024 11:26:10] "GET / HTTP/1.1" 200 -
+2024-07-11 11:26:10,385 INFO 127.0.0.1 - - [11/Jul/2024 11:26:10] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:26:10,389 INFO 127.0.0.1 - - [11/Jul/2024 11:26:10] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:26:10,533 INFO 127.0.0.1 - - [11/Jul/2024 11:26:10] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:26:10,592 INFO 127.0.0.1 - - [11/Jul/2024 11:26:10] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:26:12,228 INFO Rendering admin dashboard
+2024-07-11 11:26:12,259 INFO 127.0.0.1 - - [11/Jul/2024 11:26:12] "[35m[1mGET /admin/admin HTTP/1.1[0m" 500 -
+2024-07-11 11:26:12,282 INFO 127.0.0.1 - - [11/Jul/2024 11:26:12] "GET /admin/admin?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 11:26:12,283 INFO 127.0.0.1 - - [11/Jul/2024 11:26:12] "GET /admin/admin?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 11:26:12,352 INFO 127.0.0.1 - - [11/Jul/2024 11:26:12] "GET /admin/admin?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 11:26:12,354 INFO 127.0.0.1 - - [11/Jul/2024 11:26:12] "GET /admin/admin?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:26:43,666 INFO  * Detected change in 'c:\\Users\\spuda\\OneDrive\\Desktop\\RBM Tender App\\app\\blueprints\\admin.py', reloading
+2024-07-11 11:26:43,998 INFO  * Restarting with stat
+2024-07-11 11:28:18,135 INFO  * Restarting with stat
+2024-07-11 11:28:19,600 WARNING  * Debugger is active!
+2024-07-11 11:28:19,604 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:28:20,028 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:28:22,735 INFO 127.0.0.1 - - [11/Jul/2024 11:28:22] "GET / HTTP/1.1" 200 -
+2024-07-11 11:28:24,024 INFO 127.0.0.1 - - [11/Jul/2024 11:28:24] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:28:24,031 INFO 127.0.0.1 - - [11/Jul/2024 11:28:24] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:28:24,039 INFO 127.0.0.1 - - [11/Jul/2024 11:28:24] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:28:24,654 INFO 127.0.0.1 - - [11/Jul/2024 11:28:24] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:28:25,000 INFO 127.0.0.1 - - [11/Jul/2024 11:28:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 11:28:25,539 INFO Rendering admin dashboard
+2024-07-11 11:28:25,556 INFO 127.0.0.1 - - [11/Jul/2024 11:28:25] "[35m[1mGET /admin/admin/dashboard HTTP/1.1[0m" 500 -
+2024-07-11 11:28:25,591 INFO 127.0.0.1 - - [11/Jul/2024 11:28:25] "GET /admin/admin/dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 11:28:25,592 INFO 127.0.0.1 - - [11/Jul/2024 11:28:25] "GET /admin/admin/dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 11:28:25,673 INFO 127.0.0.1 - - [11/Jul/2024 11:28:25] "GET /admin/admin/dashboard?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 11:28:25,681 INFO 127.0.0.1 - - [11/Jul/2024 11:28:25] "GET /admin/admin/dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:28:25,793 INFO 127.0.0.1 - - [11/Jul/2024 11:28:25] "GET /admin/admin/dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:28:47,194 INFO  * Restarting with stat
+2024-07-11 11:28:48,355 WARNING  * Debugger is active!
+2024-07-11 11:28:48,360 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:28:48,735 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:28:51,034 INFO 127.0.0.1 - - [11/Jul/2024 11:28:51] "GET / HTTP/1.1" 200 -
+2024-07-11 11:28:51,209 INFO 127.0.0.1 - - [11/Jul/2024 11:28:51] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:28:51,212 INFO 127.0.0.1 - - [11/Jul/2024 11:28:51] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:28:51,316 INFO 127.0.0.1 - - [11/Jul/2024 11:28:51] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:28:51,373 INFO 127.0.0.1 - - [11/Jul/2024 11:28:51] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:28:52,703 INFO Rendering admin dashboard
+2024-07-11 11:28:52,708 INFO 127.0.0.1 - - [11/Jul/2024 11:28:52] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 11:28:52,760 INFO 127.0.0.1 - - [11/Jul/2024 11:28:52] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:28:52,762 INFO 127.0.0.1 - - [11/Jul/2024 11:28:52] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:28:52,763 INFO 127.0.0.1 - - [11/Jul/2024 11:28:52] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:28:52,832 INFO 127.0.0.1 - - [11/Jul/2024 11:28:52] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:28:54,393 INFO 127.0.0.1 - - [11/Jul/2024 11:28:54] "[35m[1mGET /admin/admin/blank-tech-data-upload HTTP/1.1[0m" 500 -
+2024-07-11 11:28:54,437 INFO 127.0.0.1 - - [11/Jul/2024 11:28:54] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 11:28:54,440 INFO 127.0.0.1 - - [11/Jul/2024 11:28:54] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 11:28:54,569 INFO 127.0.0.1 - - [11/Jul/2024 11:28:54] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 11:28:54,571 INFO 127.0.0.1 - - [11/Jul/2024 11:28:54] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:28:54,687 INFO 127.0.0.1 - - [11/Jul/2024 11:28:54] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:31:01,512 INFO  * Detected change in 'c:\\Users\\spuda\\OneDrive\\Desktop\\RBM Tender App\\app\\blueprints\\admin.py', reloading
+2024-07-11 11:31:01,765 INFO  * Restarting with stat
+2024-07-11 11:31:55,872 INFO  * Restarting with stat
+2024-07-11 11:31:57,017 WARNING  * Debugger is active!
+2024-07-11 11:31:57,021 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:31:57,440 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:31:59,696 INFO 127.0.0.1 - - [11/Jul/2024 11:31:59] "GET / HTTP/1.1" 200 -
+2024-07-11 11:32:00,630 INFO 127.0.0.1 - - [11/Jul/2024 11:32:00] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:32:00,633 INFO 127.0.0.1 - - [11/Jul/2024 11:32:00] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:32:01,180 INFO 127.0.0.1 - - [11/Jul/2024 11:32:01] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:32:01,182 INFO 127.0.0.1 - - [11/Jul/2024 11:32:01] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:32:01,528 INFO 127.0.0.1 - - [11/Jul/2024 11:32:01] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 11:32:02,235 INFO Rendering admin dashboard
+2024-07-11 11:32:02,239 INFO 127.0.0.1 - - [11/Jul/2024 11:32:02] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 11:32:02,274 INFO 127.0.0.1 - - [11/Jul/2024 11:32:02] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:32:02,275 INFO 127.0.0.1 - - [11/Jul/2024 11:32:02] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:32:02,347 INFO 127.0.0.1 - - [11/Jul/2024 11:32:02] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:32:02,348 INFO 127.0.0.1 - - [11/Jul/2024 11:32:02] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:32:03,260 INFO 127.0.0.1 - - [11/Jul/2024 11:32:03] "[35m[1mGET /admin/admin/blank-tech-data-upload HTTP/1.1[0m" 500 -
+2024-07-11 11:32:03,284 INFO 127.0.0.1 - - [11/Jul/2024 11:32:03] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 11:32:03,286 INFO 127.0.0.1 - - [11/Jul/2024 11:32:03] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 11:32:03,349 INFO 127.0.0.1 - - [11/Jul/2024 11:32:03] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 11:32:03,354 INFO 127.0.0.1 - - [11/Jul/2024 11:32:03] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:34:31,049 INFO  * Restarting with stat
+2024-07-11 11:34:32,278 WARNING  * Debugger is active!
+2024-07-11 11:34:32,282 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:34:32,692 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:34:34,808 INFO 127.0.0.1 - - [11/Jul/2024 11:34:34] "GET / HTTP/1.1" 200 -
+2024-07-11 11:34:36,318 INFO 127.0.0.1 - - [11/Jul/2024 11:34:36] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:34:36,321 INFO 127.0.0.1 - - [11/Jul/2024 11:34:36] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:34:36,413 INFO 127.0.0.1 - - [11/Jul/2024 11:34:36] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:34:36,414 INFO 127.0.0.1 - - [11/Jul/2024 11:34:36] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:34:36,715 INFO 127.0.0.1 - - [11/Jul/2024 11:34:36] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 11:34:37,355 INFO Rendering admin dashboard
+2024-07-11 11:34:37,359 INFO 127.0.0.1 - - [11/Jul/2024 11:34:37] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 11:34:37,402 INFO 127.0.0.1 - - [11/Jul/2024 11:34:37] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:34:37,406 INFO 127.0.0.1 - - [11/Jul/2024 11:34:37] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:34:37,471 INFO 127.0.0.1 - - [11/Jul/2024 11:34:37] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:34:37,525 INFO 127.0.0.1 - - [11/Jul/2024 11:34:37] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:34:38,752 INFO 127.0.0.1 - - [11/Jul/2024 11:34:38] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:34:38,784 INFO 127.0.0.1 - - [11/Jul/2024 11:34:38] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:34:38,787 INFO 127.0.0.1 - - [11/Jul/2024 11:34:38] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:34:38,788 INFO 127.0.0.1 - - [11/Jul/2024 11:34:38] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:34:38,825 INFO 127.0.0.1 - - [11/Jul/2024 11:34:38] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:40:01,140 INFO  * Restarting with stat
+2024-07-11 11:40:02,457 WARNING  * Debugger is active!
+2024-07-11 11:40:02,462 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:40:02,897 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:40:09,292 INFO 127.0.0.1 - - [11/Jul/2024 11:40:09] "GET / HTTP/1.1" 200 -
+2024-07-11 11:40:10,836 INFO 127.0.0.1 - - [11/Jul/2024 11:40:10] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:40:10,837 INFO 127.0.0.1 - - [11/Jul/2024 11:40:10] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:40:10,924 INFO 127.0.0.1 - - [11/Jul/2024 11:40:10] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:40:10,925 INFO 127.0.0.1 - - [11/Jul/2024 11:40:10] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:40:11,268 INFO 127.0.0.1 - - [11/Jul/2024 11:40:11] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 11:40:12,444 INFO Rendering admin dashboard
+2024-07-11 11:40:12,449 INFO 127.0.0.1 - - [11/Jul/2024 11:40:12] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 11:40:12,494 INFO 127.0.0.1 - - [11/Jul/2024 11:40:12] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:40:12,495 INFO 127.0.0.1 - - [11/Jul/2024 11:40:12] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:40:12,551 INFO 127.0.0.1 - - [11/Jul/2024 11:40:12] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:40:12,557 INFO 127.0.0.1 - - [11/Jul/2024 11:40:12] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:40:13,571 INFO 127.0.0.1 - - [11/Jul/2024 11:40:13] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:40:13,616 INFO 127.0.0.1 - - [11/Jul/2024 11:40:13] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:40:13,622 INFO 127.0.0.1 - - [11/Jul/2024 11:40:13] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:40:13,721 INFO 127.0.0.1 - - [11/Jul/2024 11:40:13] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:40:13,724 INFO 127.0.0.1 - - [11/Jul/2024 11:40:13] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:43:54,877 INFO  * Restarting with stat
+2024-07-11 11:43:56,289 WARNING  * Debugger is active!
+2024-07-11 11:43:56,296 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:43:56,763 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:43:59,122 INFO 127.0.0.1 - - [11/Jul/2024 11:43:59] "GET / HTTP/1.1" 200 -
+2024-07-11 11:44:00,118 INFO 127.0.0.1 - - [11/Jul/2024 11:44:00] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:44:00,119 INFO 127.0.0.1 - - [11/Jul/2024 11:44:00] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:44:00,712 INFO 127.0.0.1 - - [11/Jul/2024 11:44:00] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:44:00,713 INFO 127.0.0.1 - - [11/Jul/2024 11:44:00] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:44:01,065 INFO 127.0.0.1 - - [11/Jul/2024 11:44:01] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 11:44:01,595 INFO Rendering admin dashboard
+2024-07-11 11:44:01,599 INFO 127.0.0.1 - - [11/Jul/2024 11:44:01] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 11:44:01,636 INFO 127.0.0.1 - - [11/Jul/2024 11:44:01] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:44:01,638 INFO 127.0.0.1 - - [11/Jul/2024 11:44:01] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:44:01,689 INFO 127.0.0.1 - - [11/Jul/2024 11:44:01] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:44:01,696 INFO 127.0.0.1 - - [11/Jul/2024 11:44:01] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:44:03,019 INFO 127.0.0.1 - - [11/Jul/2024 11:44:03] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:44:03,088 INFO 127.0.0.1 - - [11/Jul/2024 11:44:03] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:44:03,089 INFO 127.0.0.1 - - [11/Jul/2024 11:44:03] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:44:03,145 INFO 127.0.0.1 - - [11/Jul/2024 11:44:03] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:44:03,151 INFO 127.0.0.1 - - [11/Jul/2024 11:44:03] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:46:22,217 INFO  * Restarting with stat
+2024-07-11 11:46:23,518 WARNING  * Debugger is active!
+2024-07-11 11:46:23,522 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:46:23,939 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:46:27,536 INFO 127.0.0.1 - - [11/Jul/2024 11:46:27] "GET / HTTP/1.1" 200 -
+2024-07-11 11:46:28,613 INFO 127.0.0.1 - - [11/Jul/2024 11:46:28] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:46:28,622 INFO 127.0.0.1 - - [11/Jul/2024 11:46:28] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:46:28,632 INFO 127.0.0.1 - - [11/Jul/2024 11:46:28] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:46:29,194 INFO 127.0.0.1 - - [11/Jul/2024 11:46:29] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:46:29,545 INFO 127.0.0.1 - - [11/Jul/2024 11:46:29] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 11:46:30,449 INFO Rendering admin dashboard
+2024-07-11 11:46:30,453 INFO 127.0.0.1 - - [11/Jul/2024 11:46:30] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 11:46:30,493 INFO 127.0.0.1 - - [11/Jul/2024 11:46:30] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:46:30,493 INFO 127.0.0.1 - - [11/Jul/2024 11:46:30] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:46:30,706 INFO 127.0.0.1 - - [11/Jul/2024 11:46:30] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:46:30,706 INFO 127.0.0.1 - - [11/Jul/2024 11:46:30] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:46:31,778 INFO 127.0.0.1 - - [11/Jul/2024 11:46:31] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:46:31,810 INFO 127.0.0.1 - - [11/Jul/2024 11:46:31] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:46:31,815 INFO 127.0.0.1 - - [11/Jul/2024 11:46:31] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:46:31,886 INFO 127.0.0.1 - - [11/Jul/2024 11:46:31] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:46:31,889 INFO 127.0.0.1 - - [11/Jul/2024 11:46:31] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:46:48,319 INFO Processing PDF: C:\Users\spuda\AppData\Local\Temp\tmpbx0n20ec\99796317-NBG-50-32-160-139.pdf, Historical: False
+2024-07-11 11:46:48,340 INFO xref found: pos=b'329789'
+2024-07-11 11:46:48,341 INFO read_xref_from: start=329789, token=/b'xref'
+2024-07-11 11:46:48,341 INFO xref objects: {1: (None, 29, 0), 2: (None, 346, 0), 3: (None, 427, 0), 4: (None, 464, 0), 5: (None, 541, 0), 6: (None, 777, 0), 7: (None, 829, 0), 8: (None, 80345, 0), 9: (None, 89429, 0), 10: (None, 89771, 0), 11: (None, 89941, 0), 12: (None, 90349, 0), 13: (None, 90885, 0), 14: (None, 91182, 0), 15: (None, 91267, 0), 16: (None, 108846, 0), 17: (None, 109009, 0), 18: (None, 109654, 0), 19: (None, 110831, 0), 20: (None, 111109, 0), 21: (None, 111196, 0), 22: (None, 152171, 0), 23: (None, 152339, 0), 24: (None, 152850, 0), 25: (None, 153671, 0), 26: (None, 153956, 0), 27: (None, 154043, 0), 28: (None, 181576, 0), 29: (None, 181815, 0), 30: (None, 181868, 0), 31: (None, 299946, 0), 32: (None, 300185, 0), 33: (None, 300238, 0), 34: (None, 302260, 0), 35: (None, 302527, 0), 36: (None, 302954, 0), 37: (None, 303161, 0), 38: (None, 303214, 0), 39: (None, 305710, 0)}
+2024-07-11 11:46:48,343 INFO trailer: {'Size': 40, 'Root': <PDFObjRef:2>, 'Info': <PDFObjRef:1>, 'ID': [b'[Ng\x98q\xf9)\xf2\x06\x94Y\xf3\x89y\xaa\xcb', b'']}
+2024-07-11 11:46:48,363 INFO trailer: {'Size': 40, 'Root': <PDFObjRef:2>, 'Info': <PDFObjRef:1>, 'ID': [b'[Ng\x98q\xf9)\xf2\x06\x94Y\xf3\x89y\xaa\xcb', b'']}
+2024-07-11 11:46:48,365 INFO Pages: Kids=[<PDFObjRef:34>, <PDFObjRef:31>, <PDFObjRef:28>, <PDFObjRef:5>]
+2024-07-11 11:46:48,366 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>, 'XO1': <PDFObjRef:39>}}, 'Contents': [<PDFObjRef:38>, <PDFObjRef:37>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705], 'Annots': [<PDFObjRef:35>]}
+2024-07-11 11:46:48,366 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>, 'XO1': <PDFObjRef:39>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 11:46:48,367 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>, 'XO1': <PDFObjRef:39>}}, streams=[<PDFObjRef:38>, <PDFObjRef:37>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 11:46:48,368 INFO get_font: create: objid=22, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'IYWFNM+Arial,Bold', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:24>], 'ToUnicode': <PDFObjRef:23>}
+2024-07-11 11:46:48,369 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'IYWFNM+Arial,Bold', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:25>, 'W': [38, [722], 82, [611], 80, [889], 83, [611], 68, [556], 81, [611], 92, [556], 3, [278], 72, [556], 29, [333], 85, [389], 87, [333], 71, [611], 69, [611], 51, [667], 75, [611], 39, [722], 52, [778], 17, [278], 86, [556], 70, [556], 76, [278], 49, [722], 37, [722], 42, [778], 24, [556], 19, [556], 16, [333], 22, [556], 21, [556], 20, [556], 25, [556], 18, [278], 28, [556], 36, [722], 41, [611], 40, [667], 54, [667], 44, [278], 58, [944], 4, [333], 88, [611], 73, [333], 79, [278], 26, [556], 43, [722], 93, [500]], 'PDF4NET:SessionID': 994798999, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(23): raw=440, {'Filter': /'FlateDecode', 'Length': 439}>}
+2024-07-11 11:46:48,376 INFO get_font: create: objid=16, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'QRQANR+Arial', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:18>], 'ToUnicode': <PDFObjRef:17>}
+2024-07-11 11:46:48,378 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'QRQANR+Arial', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:19>, 'W': [53, [722], 37, [667], 48, [833], 3, [278], 54, [667], 92, [500], 86, [500], 87, [278], 72, [556], 80, [833], 20, [556], 51, [667], 85, [333], 82, [556], 71, [556], 88, [556], 70, [500], 49, [722], 17, [278], 29, [278], 28, [556], 26, [556], 25, [556], 22, [556], 81, [556], 16, [333], 79, [222], 73, [278], 83, [556], 76, [222], 74, [556], 15, [278], 68, [556], 89, [500], 44, [278], 50, [778], 24, [556], 90, [722], 75, [556], 21, [556], 27, [556], 11, [333], 69, [556], 12, [333], 41, [611], 36, [667], 40, [667], 55, [611], 91, [500], 93, [500], 78, [500], 39, [722], 38, [722], 84, [556], 47, [556], 58, [944], 19, [556], 131, [400], 18, [278], 241, [333], 52, [778], 42, [778], 45, [500], 23, [556], 60, [667], 43, [722], 57, [667], 8, [889], 149, [549], 56, [722], 2, [278], 62, [278], 64, [278], 13, [389], 32, [584], 4, [278], 59, [667]], 'PDF4NET:SessionID': 994798999, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(17): raw=574, {'Filter': /'FlateDecode', 'Length': 573}>}
+2024-07-11 11:46:48,387 INFO get_font: create: objid=10, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'LFRKUM+Arial,Italic', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:12>], 'ToUnicode': <PDFObjRef:11>}
+2024-07-11 11:46:48,389 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'LFRKUM+Arial,Italic', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:13>, 'W': [51, [667], 85, [333], 76, [222], 81, [556], 87, [278], 72, [556], 71, [556], 3, [278], 73, [278], 82, [556], 80, [833], 42, [778], 88, [556], 86, [500], 70, [500], 38, [722], 62, [278], 21, [556], 19, [556], 23, [556], 17, [278], 25, [556], 64, [278]], 'PDF4NET:SessionID': 994798999, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(11): raw=337, {'Filter': /'FlateDecode', 'Length': 336}>}
+2024-07-11 11:46:48,399 INFO Processing xobj: <PDFStream(8): raw=8910, {'Subtype': /'Image', 'Width': 827, 'Height': 188, 'BitsPerComponent': 8, 'ColorSpace': [/'Indexed', /'DeviceRGB', 255, <PDFObjRef:9>], 'Filter': /'FlateDecode', 'Length': 8909}>
+2024-07-11 11:46:48,404 INFO Processing xobj: <PDFStream(39): raw=23900, {'Subtype': /'Image', 'Filter': /'DCTDecode', 'Decode': [0, 1, 0, 1, 0, 1], 'Width': 500, 'Height': 450, 'BitsPerComponent': 8, 'ColorSpace': /'DeviceRGB', 'Length': 23899}>
+2024-07-11 11:46:48,437 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:33>, <PDFObjRef:32>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-11 11:46:48,438 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 11:46:48,439 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>}}, streams=[<PDFObjRef:33>, <PDFObjRef:32>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 11:46:48,441 INFO Processing xobj: <PDFStream(8): raw=8910, {'Subtype': /'Image', 'Width': 827, 'Height': 188, 'BitsPerComponent': 8, 'ColorSpace': [/'Indexed', /'DeviceRGB', 255, <PDFObjRef:9>], 'Filter': /'FlateDecode', 'Length': 8909}>
+2024-07-11 11:46:48,478 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:30>, <PDFObjRef:29>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-11 11:46:48,479 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 11:46:48,479 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>}}, streams=[<PDFObjRef:30>, <PDFObjRef:29>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 11:46:48,487 INFO Processing xobj: <PDFStream(8): raw=8910, {'Subtype': /'Image', 'Width': 827, 'Height': 188, 'BitsPerComponent': 8, 'ColorSpace': [/'Indexed', /'DeviceRGB', 255, <PDFObjRef:9>], 'Filter': /'FlateDecode', 'Length': 8909}>
+2024-07-11 11:46:48,753 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:7>, <PDFObjRef:6>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-11 11:46:48,754 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 11:46:48,754 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:22>, 'F1': <PDFObjRef:16>, 'F2': <PDFObjRef:10>}, 'XObject': {'XO0': <PDFObjRef:8>}}, streams=[<PDFObjRef:7>, <PDFObjRef:6>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 11:46:48,761 INFO Processing xobj: <PDFStream(8): raw=8910, {'Subtype': /'Image', 'Width': 827, 'Height': 188, 'BitsPerComponent': 8, 'ColorSpace': [/'Indexed', /'DeviceRGB', 255, <PDFObjRef:9>], 'Filter': /'FlateDecode', 'Length': 8909}>
+2024-07-11 11:46:49,555 INFO Extracted text from PDF: Company name: RBM Systems
+Created by:
+Phone:
+
+Date:
+
+Qty. Description
+
+1
+
+NBG 50-32-160/139 AAFE2CESBQQEIW1
+
+Product No.: 99796317
+
+Note! Product picture may differ from actual product
+
+Non-self-priming, single-stage, centrifugal volute pump designed according to ISO 5199 with dimensions and rated
+performance according to ISO 2858 (16 bar). Flanges are PN 16 with dimensions according to AS2129 table E. The
+pump has an axial suction port, radial discharge port, horizontal shaft and a back pull-ou...
+2024-07-11 11:46:49,558 INFO Extracted dimensions: 0.0, 0.0, 0.0
+2024-07-11 11:46:49,558 INFO Determined model type: NBG
+2024-07-11 11:46:49,560 INFO Extracted PDF info: {'sku': '99796317', 'name': 'NBG 50-32-160/139', 'flow_l_s': 0.0, 'head_kpa': 0.0, 'head_m': 0.0, 'poles': 0, 'kw': 0.0, 'ie_class': 'Motor', 'mei': 0.0, 'absorbed_power': 0.0, 'npsh': 0.0, 'npsh_unit': '', 'efficiency': 0.0, 'weight': 0.0, 'length': 0.0, 'width': 0.0, 'height': 0.0, 'cost': 0.0, 'path_to_graph': ''}
+2024-07-11 11:46:49,560 INFO Extracted PDF info: {'sku': '99796317', 'name': 'NBG 50-32-160/139', 'flow_l_s': 0.0, 'head_kpa': 0.0, 'head_m': 0.0, 'poles': 0, 'kw': 0.0, 'ie_class': 'Motor', 'mei': 0.0, 'absorbed_power': 0.0, 'npsh': 0.0, 'npsh_unit': '', 'efficiency': 0.0, 'weight': 0.0, 'length': 0.0, 'width': 0.0, 'height': 0.0, 'cost': 0.0, 'path_to_graph': ''}
+2024-07-11 11:46:49,566 INFO Writing to GeneralPumpDetails table, data: {'sku': '99796317', 'name': 'NBG 50-32-160/139', 'flow_l_s': 0.0, 'head_kpa': 0.0, 'head_m': 0.0, 'poles': 0, 'kw': 0.0, 'ie_class': 'Motor', 'mei': 0.0, 'absorbed_power': 0.0, 'npsh': 0.0, 'npsh_unit': '', 'efficiency': 0.0, 'weight': 0.0, 'length': 0.0, 'width': 0.0, 'height': 0.0, 'cost': 0.0, 'path_to_graph': ''}
+2024-07-11 11:46:49,603 INFO 127.0.0.1 - - [11/Jul/2024 11:46:49] "[35m[1mPOST /admin/admin/blank-tech-data-upload HTTP/1.1[0m" 500 -
+2024-07-11 11:46:49,634 INFO 127.0.0.1 - - [11/Jul/2024 11:46:49] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 11:46:49,635 INFO 127.0.0.1 - - [11/Jul/2024 11:46:49] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 11:46:49,699 INFO 127.0.0.1 - - [11/Jul/2024 11:46:49] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 11:46:49,702 INFO 127.0.0.1 - - [11/Jul/2024 11:46:49] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:46:49,782 INFO 127.0.0.1 - - [11/Jul/2024 11:46:49] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:47:54,251 INFO 127.0.0.1 - - [11/Jul/2024 11:47:54] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 11:47:55,970 INFO Rendering admin dashboard
+2024-07-11 11:47:55,972 INFO 127.0.0.1 - - [11/Jul/2024 11:47:55] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 11:47:56,014 INFO 127.0.0.1 - - [11/Jul/2024 11:47:56] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:47:56,022 INFO 127.0.0.1 - - [11/Jul/2024 11:47:56] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:47:56,131 INFO 127.0.0.1 - - [11/Jul/2024 11:47:56] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:47:56,144 INFO 127.0.0.1 - - [11/Jul/2024 11:47:56] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:47:57,127 INFO 127.0.0.1 - - [11/Jul/2024 11:47:57] "GET /admin/admin/view-blank-tech-data HTTP/1.1" 200 -
+2024-07-11 11:47:57,157 INFO 127.0.0.1 - - [11/Jul/2024 11:47:57] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:47:57,161 INFO 127.0.0.1 - - [11/Jul/2024 11:47:57] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:47:57,162 INFO 127.0.0.1 - - [11/Jul/2024 11:47:57] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:47:57,219 INFO 127.0.0.1 - - [11/Jul/2024 11:47:57] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:51:18,201 INFO  * Restarting with stat
+2024-07-11 11:51:19,884 WARNING  * Debugger is active!
+2024-07-11 11:51:19,893 INFO  * Debugger PIN: 254-385-555
+2024-07-11 11:51:20,348 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 11:51:21,908 INFO 127.0.0.1 - - [11/Jul/2024 11:51:21] "GET / HTTP/1.1" 200 -
+2024-07-11 11:51:22,121 INFO 127.0.0.1 - - [11/Jul/2024 11:51:22] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:51:22,123 INFO 127.0.0.1 - - [11/Jul/2024 11:51:22] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:51:22,186 INFO 127.0.0.1 - - [11/Jul/2024 11:51:22] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:51:22,195 INFO 127.0.0.1 - - [11/Jul/2024 11:51:22] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:51:26,308 INFO Rendering admin dashboard
+2024-07-11 11:51:26,313 INFO 127.0.0.1 - - [11/Jul/2024 11:51:26] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 11:51:26,352 INFO 127.0.0.1 - - [11/Jul/2024 11:51:26] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 11:51:26,354 INFO 127.0.0.1 - - [11/Jul/2024 11:51:26] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 11:51:26,469 INFO 127.0.0.1 - - [11/Jul/2024 11:51:26] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 11:51:26,475 INFO 127.0.0.1 - - [11/Jul/2024 11:51:26] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 11:51:29,793 INFO 127.0.0.1 - - [11/Jul/2024 11:51:29] "[35m[1mGET /admin/admin/blank-tech-data-upload HTTP/1.1[0m" 500 -
+2024-07-11 11:51:29,827 INFO 127.0.0.1 - - [11/Jul/2024 11:51:29] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 11:51:29,828 INFO 127.0.0.1 - - [11/Jul/2024 11:51:29] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 11:51:29,905 INFO 127.0.0.1 - - [11/Jul/2024 11:51:29] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 11:51:29,908 INFO 127.0.0.1 - - [11/Jul/2024 11:51:29] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:51:29,993 INFO 127.0.0.1 - - [11/Jul/2024 11:51:29] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 11:53:07,337 INFO  * Detected change in 'c:\\Users\\spuda\\OneDrive\\Desktop\\RBM Tender App\\app\\blueprints\\admin.py', reloading
+2024-07-11 11:53:07,631 INFO  * Restarting with stat
+2024-07-11 13:19:26,819 INFO  * Restarting with stat
+2024-07-11 13:19:28,387 WARNING  * Debugger is active!
+2024-07-11 13:19:28,394 INFO  * Debugger PIN: 254-385-555
+2024-07-11 13:19:28,943 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 13:19:30,965 INFO 127.0.0.1 - - [11/Jul/2024 13:19:30] "GET / HTTP/1.1" 200 -
+2024-07-11 13:19:31,242 INFO 127.0.0.1 - - [11/Jul/2024 13:19:31] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 13:19:31,244 INFO 127.0.0.1 - - [11/Jul/2024 13:19:31] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 13:19:31,429 INFO 127.0.0.1 - - [11/Jul/2024 13:19:31] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 13:19:31,440 INFO 127.0.0.1 - - [11/Jul/2024 13:19:31] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 13:19:38,644 INFO Rendering admin dashboard
+2024-07-11 13:19:38,649 INFO 127.0.0.1 - - [11/Jul/2024 13:19:38] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 13:19:38,699 INFO 127.0.0.1 - - [11/Jul/2024 13:19:38] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 13:19:38,712 INFO 127.0.0.1 - - [11/Jul/2024 13:19:38] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 13:19:38,814 INFO 127.0.0.1 - - [11/Jul/2024 13:19:38] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 13:19:38,822 INFO 127.0.0.1 - - [11/Jul/2024 13:19:38] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 13:19:40,071 INFO 127.0.0.1 - - [11/Jul/2024 13:19:40] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 13:19:40,102 INFO 127.0.0.1 - - [11/Jul/2024 13:19:40] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 13:19:40,104 INFO 127.0.0.1 - - [11/Jul/2024 13:19:40] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 13:19:40,105 INFO 127.0.0.1 - - [11/Jul/2024 13:19:40] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 13:19:40,164 INFO 127.0.0.1 - - [11/Jul/2024 13:19:40] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 13:19:45,854 INFO Processing PDF: C:\Users\spuda\AppData\Local\Temp\99796419-NBG-65-40-250-230.pdf, Historical: False
+2024-07-11 13:19:45,873 INFO xref found: pos=b'325604'
+2024-07-11 13:19:45,875 INFO read_xref_from: start=325604, token=/b'xref'
+2024-07-11 13:19:45,875 INFO xref objects: {1: (None, 29, 0), 2: (None, 346, 0), 3: (None, 427, 0), 4: (None, 464, 0), 5: (None, 541, 0), 6: (None, 753, 0), 7: (None, 805, 0), 8: (None, 87789, 0), 9: (None, 87950, 0), 10: (None, 88588, 0), 11: (None, 89754, 0), 12: (None, 90032, 0), 13: (None, 90119, 0), 14: (None, 130882, 0), 15: (None, 131050, 0), 16: (None, 131551, 0), 17: (None, 132337, 0), 18: (None, 132622, 0), 19: (None, 132709, 0), 20: (None, 159949, 0), 21: (None, 160119, 0), 22: (None, 160527, 0), 23: (None, 161064, 0), 24: (None, 161361, 0), 25: (None, 161446, 0), 26: (None, 178930, 0), 27: (None, 179145, 0), 28: (None, 179198, 0), 29: (None, 296294, 0), 30: (None, 296509, 0), 31: (None, 296562, 0), 32: (None, 298096, 0), 33: (None, 298352, 0), 34: (None, 298781, 0), 35: (None, 298988, 0), 36: (None, 299041, 0), 37: (None, 301525, 0)}
+2024-07-11 13:19:45,878 INFO trailer: {'Size': 38, 'Root': <PDFObjRef:2>, 'Info': <PDFObjRef:1>, 'ID': [b'4{\xd49\x81\x1cN\x9c\xa5\xe5\x83\x89\xb3\xec-\xd4', b'']}
+2024-07-11 13:19:45,914 INFO trailer: {'Size': 38, 'Root': <PDFObjRef:2>, 'Info': <PDFObjRef:1>, 'ID': [b'4{\xd49\x81\x1cN\x9c\xa5\xe5\x83\x89\xb3\xec-\xd4', b'']}
+2024-07-11 13:19:45,916 INFO Pages: Kids=[<PDFObjRef:32>, <PDFObjRef:29>, <PDFObjRef:26>, <PDFObjRef:5>]
+2024-07-11 13:19:45,918 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, 'Contents': [<PDFObjRef:36>, <PDFObjRef:35>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705], 'Annots': [<PDFObjRef:33>]}
+2024-07-11 13:19:45,919 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 13:19:45,920 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, streams=[<PDFObjRef:36>, <PDFObjRef:35>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 13:19:45,921 INFO get_font: create: objid=20, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'ZAWHMP+Arial,Italic', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:22>], 'ToUnicode': <PDFObjRef:21>}
+2024-07-11 13:19:45,922 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'ZAWHMP+Arial,Italic', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:23>, 'W': [51, [667], 85, [333], 76, [222], 81, [556], 87, [278], 72, [556], 71, [556], 3, [278], 73, [278], 82, [556], 80, [833], 42, [778], 88, [556], 86, [500], 70, [500], 38, [722], 62, [278], 21, [556], 19, [556], 23, [556], 17, [278], 26, [556], 64, [278]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(21): raw=337, {'Filter': /'FlateDecode', 'Length': 336}>}
+2024-07-11 13:19:45,934 INFO get_font: create: objid=14, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'QKDACH+Arial,Bold', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:16>], 'ToUnicode': <PDFObjRef:15>}
+2024-07-11 13:19:45,935 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'QKDACH+Arial,Bold', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:17>, 'W': [52, [778], 87, [333], 92, [556], 17, [278], 39, [722], 72, [556], 86, [556], 70, [556], 85, [389], 76, [278], 83, [611], 82, [611], 81, [611], 49, [722], 37, [722], 42, [778], 3, [278], 25, [556], 24, [556], 16, [333], 23, [556], 19, [556], 21, [556], 18, [278], 22, [556], 36, [722], 41, [611], 40, [667], 54, [667], 50, [778], 58, [944], 20, [556], 4, [333], 51, [667], 71, [611], 88, [611], 80, [889], 68, [556], 73, [333], 79, [278], 28, [556], 26, [556], 43, [722], 93, [500]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(15): raw=430, {'Filter': /'FlateDecode', 'Length': 429}>}
+2024-07-11 13:19:45,943 INFO get_font: create: objid=8, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'MNTGNS+Arial', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:10>], 'ToUnicode': <PDFObjRef:9>}
+2024-07-11 13:19:45,948 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'MNTGNS+Arial', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:11>, 'W': [20, [556], 51, [667], 85, [333], 82, [556], 71, [556], 88, [556], 70, [500], 87, [278], 3, [278], 49, [722], 17, [278], 29, [278], 28, [556], 26, [556], 25, [556], 23, [556], 81, [556], 16, [333], 86, [500], 72, [556], 79, [222], 73, [278], 83, [556], 76, [222], 80, [833], 74, [556], 15, [278], 68, [556], 89, [500], 44, [278], 54, [667], 50, [778], 24, [556], 90, [722], 75, [556], 21, [556], 27, [556], 11, [333], 69, [556], 12, [333], 41, [611], 36, [667], 40, [667], 55, [611], 91, [500], 93, [500], 78, [500], 39, [722], 92, [500], 38, [722], 84, [556], 47, [556], 58, [944], 19, [556], 131, [400], 18, [278], 241, [333], 53, [722], 22, [556], 37, [667], 52, [778], 48, [833], 42, [778], 45, [500], 60, [667], 43, [722], 57, [667], 8, [889], 149, [549], 2, [278], 62, [278], 64, [278], 13, [389], 32, [584], 4, [278], 59, [667]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(9): raw=568, {'Filter': /'FlateDecode', 'Length': 567}>}
+2024-07-11 13:19:45,962 INFO Processing xobj: <PDFStream(37): raw=23900, {'Subtype': /'Image', 'Filter': /'DCTDecode', 'Decode': [0, 1, 0, 1, 0, 1], 'Width': 500, 'Height': 450, 'BitsPerComponent': 8, 'ColorSpace': /'DeviceRGB', 'Length': 23899}>
+2024-07-11 13:19:46,009 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:31>, <PDFObjRef:30>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-11 13:19:46,009 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 13:19:46,010 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:31>, <PDFObjRef:30>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 13:19:46,045 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:28>, <PDFObjRef:27>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-11 13:19:46,046 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 13:19:46,047 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:28>, <PDFObjRef:27>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 13:19:46,347 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:7>, <PDFObjRef:6>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-11 13:19:46,348 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 13:19:46,349 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:7>, <PDFObjRef:6>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 13:19:47,264 INFO Extracted text from PDF: Product No.: 99796419
+
+Note! Product picture may differ from actual product
+
+Non-self-priming, single-stage, centrifugal volute pump designed according to ISO 5199 with dimensions and rated
+performance according to ISO 2858 (16 bar). Flanges are PN 16 with dimensions according to AS2129 table E. The
+pump has an axial suction port, radial discharge port, horizontal shaft and a back pull-out design enabling removal of
+the motor, motor stool, cover and impeller without disturbing the pump housing o...
+2024-07-11 13:19:47,266 INFO Extracted PDF info: {'sku': '99796419', 'name': 'NBG 65-40-250/230', 'flow_l_s': 0.0, 'head_kpa': 0.0, 'head_m': 0.0, 'poles': 0, 'kw': 0.0, 'ie_class': 'Motor', 'mei': 0.0, 'absorbed_power': 0.0, 'npsh': 0.0, 'npsh_unit': '', 'efficiency': 0.0, 'weight': 0.0, 'length': 0.0, 'width': 0.0, 'height': 0.0, 'cost': 0.0, 'path_to_graph': ''}
+2024-07-11 13:19:47,271 INFO Writing to GeneralPumpDetails table, data: {'sku': '99796419', 'name': 'NBG 65-40-250/230', 'flow_l_s': 0.0, 'head_kpa': 0.0, 'head_m': 0.0, 'poles': 0, 'kw': 0.0, 'ie_class': 'Motor', 'mei': 0.0, 'absorbed_power': 0.0, 'npsh': 0.0, 'npsh_unit': '', 'efficiency': 0.0, 'weight': 0.0, 'length': 0.0, 'width': 0.0, 'height': 0.0, 'cost': 0.0, 'path_to_graph': ''}
+2024-07-11 13:19:47,303 INFO 127.0.0.1 - - [11/Jul/2024 13:19:47] "[35m[1mPOST /admin/admin/blank-tech-data-upload HTTP/1.1[0m" 500 -
+2024-07-11 13:19:47,332 INFO 127.0.0.1 - - [11/Jul/2024 13:19:47] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 13:19:47,333 INFO 127.0.0.1 - - [11/Jul/2024 13:19:47] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 13:19:47,396 INFO 127.0.0.1 - - [11/Jul/2024 13:19:47] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 13:19:47,398 INFO 127.0.0.1 - - [11/Jul/2024 13:19:47] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 13:19:47,459 INFO 127.0.0.1 - - [11/Jul/2024 13:19:47] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 13:57:13,884 INFO  * Restarting with stat
+2024-07-11 13:57:14,858 WARNING  * Debugger is active!
+2024-07-11 13:57:14,864 INFO  * Debugger PIN: 254-385-555
+2024-07-11 13:57:15,296 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 13:57:17,574 INFO 127.0.0.1 - - [11/Jul/2024 13:57:17] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2024-07-11 13:57:19,158 INFO 127.0.0.1 - - [11/Jul/2024 13:57:19] "GET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 13:57:19,161 INFO 127.0.0.1 - - [11/Jul/2024 13:57:19] "GET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 13:57:19,266 INFO 127.0.0.1 - - [11/Jul/2024 13:57:19] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 13:57:19,308 INFO 127.0.0.1 - - [11/Jul/2024 13:57:19] "GET /?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 13:57:19,575 INFO 127.0.0.1 - - [11/Jul/2024 13:57:19] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 16:02:36,478 INFO  * Restarting with stat
+2024-07-11 16:02:37,680 WARNING  * Debugger is active!
+2024-07-11 16:02:37,687 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:02:38,380 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:02:40,138 INFO 127.0.0.1 - - [11/Jul/2024 16:02:40] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2024-07-11 16:02:40,392 INFO 127.0.0.1 - - [11/Jul/2024 16:02:40] "GET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 16:02:40,396 INFO 127.0.0.1 - - [11/Jul/2024 16:02:40] "GET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 16:02:40,671 INFO 127.0.0.1 - - [11/Jul/2024 16:02:40] "GET /?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 16:02:40,678 INFO 127.0.0.1 - - [11/Jul/2024 16:02:40] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 16:02:41,391 INFO 127.0.0.1 - - [11/Jul/2024 16:02:41] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 16:04:37,992 INFO  * Restarting with stat
+2024-07-11 16:04:39,537 WARNING  * Debugger is active!
+2024-07-11 16:04:39,541 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:04:40,054 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:04:42,297 INFO 127.0.0.1 - - [11/Jul/2024 16:04:42] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2024-07-11 16:04:43,429 INFO 127.0.0.1 - - [11/Jul/2024 16:04:43] "GET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 16:04:43,432 INFO 127.0.0.1 - - [11/Jul/2024 16:04:43] "GET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 16:04:44,092 INFO 127.0.0.1 - - [11/Jul/2024 16:04:44] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 16:04:44,209 INFO 127.0.0.1 - - [11/Jul/2024 16:04:44] "GET /?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 16:06:45,671 INFO  * Restarting with stat
+2024-07-11 16:06:47,004 WARNING  * Debugger is active!
+2024-07-11 16:06:47,011 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:06:47,439 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:06:49,247 INFO 127.0.0.1 - - [11/Jul/2024 16:06:49] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2024-07-11 16:06:50,389 INFO 127.0.0.1 - - [11/Jul/2024 16:06:50] "GET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 16:06:50,390 INFO 127.0.0.1 - - [11/Jul/2024 16:06:50] "GET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 16:06:50,986 INFO 127.0.0.1 - - [11/Jul/2024 16:06:50] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 16:06:51,128 INFO 127.0.0.1 - - [11/Jul/2024 16:06:51] "GET /?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 16:08:49,344 INFO  * Restarting with stat
+2024-07-11 16:08:50,553 WARNING  * Debugger is active!
+2024-07-11 16:08:50,557 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:08:50,976 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:08:53,182 INFO 127.0.0.1 - - [11/Jul/2024 16:08:53] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2024-07-11 16:08:54,694 INFO 127.0.0.1 - - [11/Jul/2024 16:08:54] "GET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 16:08:54,697 INFO 127.0.0.1 - - [11/Jul/2024 16:08:54] "GET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 16:08:54,798 INFO 127.0.0.1 - - [11/Jul/2024 16:08:54] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 16:08:55,006 INFO 127.0.0.1 - - [11/Jul/2024 16:08:55] "GET /?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 16:10:34,829 INFO  * Restarting with stat
+2024-07-11 16:10:36,299 WARNING  * Debugger is active!
+2024-07-11 16:10:36,304 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:10:36,769 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:10:38,770 INFO 127.0.0.1 - - [11/Jul/2024 16:10:38] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2024-07-11 16:10:40,308 INFO 127.0.0.1 - - [11/Jul/2024 16:10:40] "GET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 16:10:40,310 INFO 127.0.0.1 - - [11/Jul/2024 16:10:40] "GET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 16:10:40,397 INFO 127.0.0.1 - - [11/Jul/2024 16:10:40] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 16:10:40,399 INFO 127.0.0.1 - - [11/Jul/2024 16:10:40] "GET /?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 16:15:43,214 INFO  * Restarting with stat
+2024-07-11 16:15:44,562 WARNING  * Debugger is active!
+2024-07-11 16:15:44,568 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:15:44,997 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:15:46,812 INFO 127.0.0.1 - - [11/Jul/2024 16:15:46] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2024-07-11 16:15:48,253 INFO 127.0.0.1 - - [11/Jul/2024 16:15:48] "GET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 16:15:48,256 INFO 127.0.0.1 - - [11/Jul/2024 16:15:48] "GET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 16:15:48,355 INFO 127.0.0.1 - - [11/Jul/2024 16:15:48] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 16:15:48,356 INFO 127.0.0.1 - - [11/Jul/2024 16:15:48] "GET /?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 16:17:36,342 INFO  * Restarting with stat
+2024-07-11 16:17:37,556 WARNING  * Debugger is active!
+2024-07-11 16:17:37,560 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:17:37,983 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:17:41,983 INFO 127.0.0.1 - - [11/Jul/2024 16:17:41] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2024-07-11 16:17:42,221 INFO 127.0.0.1 - - [11/Jul/2024 16:17:42] "GET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 16:17:42,223 INFO 127.0.0.1 - - [11/Jul/2024 16:17:42] "GET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 16:17:42,471 INFO 127.0.0.1 - - [11/Jul/2024 16:17:42] "GET /?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 16:17:42,487 INFO 127.0.0.1 - - [11/Jul/2024 16:17:42] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 16:19:05,015 INFO  * Detected change in 'c:\\Users\\spuda\\OneDrive\\Desktop\\RBM Tender App\\app\\blueprints\\pumps.py', reloading
+2024-07-11 16:19:05,260 INFO  * Restarting with stat
+2024-07-11 16:19:10,751 INFO  * Restarting with stat
+2024-07-11 16:19:12,011 WARNING  * Debugger is active!
+2024-07-11 16:19:12,016 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:19:12,540 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:19:14,264 INFO 127.0.0.1 - - [11/Jul/2024 16:19:14] "GET / HTTP/1.1" 200 -
+2024-07-11 16:19:15,317 INFO 127.0.0.1 - - [11/Jul/2024 16:19:15] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:19:15,319 INFO 127.0.0.1 - - [11/Jul/2024 16:19:15] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:19:15,978 INFO 127.0.0.1 - - [11/Jul/2024 16:19:15] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:19:15,979 INFO 127.0.0.1 - - [11/Jul/2024 16:19:15] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:19:16,335 INFO 127.0.0.1 - - [11/Jul/2024 16:19:16] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 16:19:17,009 INFO Rendering admin dashboard
+2024-07-11 16:19:17,014 INFO 127.0.0.1 - - [11/Jul/2024 16:19:17] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 16:19:17,059 INFO 127.0.0.1 - - [11/Jul/2024 16:19:17] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:19:17,061 INFO 127.0.0.1 - - [11/Jul/2024 16:19:17] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:19:17,120 INFO 127.0.0.1 - - [11/Jul/2024 16:19:17] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:19:17,121 INFO 127.0.0.1 - - [11/Jul/2024 16:19:17] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:19:18,461 INFO 127.0.0.1 - - [11/Jul/2024 16:19:18] "[35m[1mGET /admin/admin/blank-tech-data-upload HTTP/1.1[0m" 500 -
+2024-07-11 16:19:18,486 INFO 127.0.0.1 - - [11/Jul/2024 16:19:18] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2024-07-11 16:19:18,486 INFO 127.0.0.1 - - [11/Jul/2024 16:19:18] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2024-07-11 16:19:18,565 INFO 127.0.0.1 - - [11/Jul/2024 16:19:18] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=ubuntu.ttf HTTP/1.1" 200 -
+2024-07-11 16:19:18,566 INFO 127.0.0.1 - - [11/Jul/2024 16:19:18] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 16:19:18,665 INFO 127.0.0.1 - - [11/Jul/2024 16:19:18] "GET /admin/admin/blank-tech-data-upload?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2024-07-11 16:20:37,027 INFO  * Detected change in 'c:\\Users\\spuda\\OneDrive\\Desktop\\RBM Tender App\\app\\blueprints\\admin.py', reloading
+2024-07-11 16:20:37,284 INFO  * Restarting with stat
+2024-07-11 16:20:39,047 WARNING  * Debugger is active!
+2024-07-11 16:20:39,055 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:20:39,584 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:20:51,638 INFO  * Detected change in 'c:\\Users\\spuda\\OneDrive\\Desktop\\RBM Tender App\\app\\blueprints\\forms.py', reloading
+2024-07-11 16:20:51,946 INFO  * Restarting with stat
+2024-07-11 16:20:53,484 WARNING  * Debugger is active!
+2024-07-11 16:20:53,488 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:20:53,917 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:21:01,906 INFO  * Restarting with stat
+2024-07-11 16:21:03,220 WARNING  * Debugger is active!
+2024-07-11 16:21:03,227 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:21:03,636 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:21:05,562 INFO 127.0.0.1 - - [11/Jul/2024 16:21:05] "GET / HTTP/1.1" 200 -
+2024-07-11 16:21:07,125 INFO 127.0.0.1 - - [11/Jul/2024 16:21:07] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:21:07,128 INFO 127.0.0.1 - - [11/Jul/2024 16:21:07] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:21:07,227 INFO 127.0.0.1 - - [11/Jul/2024 16:21:07] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:21:07,228 INFO 127.0.0.1 - - [11/Jul/2024 16:21:07] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:21:07,551 INFO 127.0.0.1 - - [11/Jul/2024 16:21:07] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 16:21:08,277 INFO Rendering admin dashboard
+2024-07-11 16:21:08,280 INFO 127.0.0.1 - - [11/Jul/2024 16:21:08] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 16:21:08,316 INFO 127.0.0.1 - - [11/Jul/2024 16:21:08] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:21:08,318 INFO 127.0.0.1 - - [11/Jul/2024 16:21:08] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:21:08,372 INFO 127.0.0.1 - - [11/Jul/2024 16:21:08] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:21:08,380 INFO 127.0.0.1 - - [11/Jul/2024 16:21:08] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:21:09,746 INFO 127.0.0.1 - - [11/Jul/2024 16:21:09] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:21:09,776 INFO 127.0.0.1 - - [11/Jul/2024 16:21:09] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:21:09,778 INFO 127.0.0.1 - - [11/Jul/2024 16:21:09] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:21:09,843 INFO 127.0.0.1 - - [11/Jul/2024 16:21:09] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:21:09,846 INFO 127.0.0.1 - - [11/Jul/2024 16:21:09] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:21:14,672 INFO 127.0.0.1 - - [11/Jul/2024 16:21:14] "POST /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:21:14,710 INFO 127.0.0.1 - - [11/Jul/2024 16:21:14] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:21:14,712 INFO 127.0.0.1 - - [11/Jul/2024 16:21:14] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:21:14,793 INFO 127.0.0.1 - - [11/Jul/2024 16:21:14] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:21:14,800 INFO 127.0.0.1 - - [11/Jul/2024 16:21:14] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:21:22,173 INFO Rendering admin dashboard
+2024-07-11 16:21:22,176 INFO 127.0.0.1 - - [11/Jul/2024 16:21:22] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 16:21:22,205 INFO 127.0.0.1 - - [11/Jul/2024 16:21:22] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:21:22,206 INFO 127.0.0.1 - - [11/Jul/2024 16:21:22] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:21:22,210 INFO 127.0.0.1 - - [11/Jul/2024 16:21:22] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:21:22,268 INFO 127.0.0.1 - - [11/Jul/2024 16:21:22] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:21:23,530 INFO 127.0.0.1 - - [11/Jul/2024 16:21:23] "GET /admin/admin/view-blank-tech-data HTTP/1.1" 200 -
+2024-07-11 16:21:23,571 INFO 127.0.0.1 - - [11/Jul/2024 16:21:23] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:21:23,574 INFO 127.0.0.1 - - [11/Jul/2024 16:21:23] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:21:23,579 INFO 127.0.0.1 - - [11/Jul/2024 16:21:23] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:21:23,623 INFO 127.0.0.1 - - [11/Jul/2024 16:21:23] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:24:11,366 INFO  * Restarting with stat
+2024-07-11 16:24:12,601 WARNING  * Debugger is active!
+2024-07-11 16:24:12,604 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:24:13,045 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:24:14,953 INFO 127.0.0.1 - - [11/Jul/2024 16:24:14] "GET / HTTP/1.1" 200 -
+2024-07-11 16:24:15,415 INFO 127.0.0.1 - - [11/Jul/2024 16:24:15] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:24:15,422 INFO 127.0.0.1 - - [11/Jul/2024 16:24:15] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:24:16,448 INFO 127.0.0.1 - - [11/Jul/2024 16:24:16] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:24:16,449 INFO 127.0.0.1 - - [11/Jul/2024 16:24:16] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:24:16,534 INFO Rendering admin dashboard
+2024-07-11 16:24:16,539 INFO 127.0.0.1 - - [11/Jul/2024 16:24:16] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 16:24:16,754 INFO 127.0.0.1 - - [11/Jul/2024 16:24:16] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:24:16,754 INFO 127.0.0.1 - - [11/Jul/2024 16:24:16] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:24:16,844 INFO 127.0.0.1 - - [11/Jul/2024 16:24:16] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:24:16,845 INFO 127.0.0.1 - - [11/Jul/2024 16:24:16] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:24:17,211 INFO 127.0.0.1 - - [11/Jul/2024 16:24:17] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 16:24:17,753 INFO 127.0.0.1 - - [11/Jul/2024 16:24:17] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:24:17,805 INFO 127.0.0.1 - - [11/Jul/2024 16:24:17] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:24:17,807 INFO 127.0.0.1 - - [11/Jul/2024 16:24:17] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:24:17,912 INFO 127.0.0.1 - - [11/Jul/2024 16:24:17] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:24:17,968 INFO 127.0.0.1 - - [11/Jul/2024 16:24:17] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:24:22,254 INFO 127.0.0.1 - - [11/Jul/2024 16:24:22] "POST /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:24:22,293 INFO 127.0.0.1 - - [11/Jul/2024 16:24:22] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:24:22,293 INFO 127.0.0.1 - - [11/Jul/2024 16:24:22] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:24:22,332 INFO 127.0.0.1 - - [11/Jul/2024 16:24:22] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:24:22,379 INFO 127.0.0.1 - - [11/Jul/2024 16:24:22] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:29:14,490 INFO  * Restarting with stat
+2024-07-11 16:29:15,674 WARNING  * Debugger is active!
+2024-07-11 16:29:15,679 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:29:16,132 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:29:18,192 INFO 127.0.0.1 - - [11/Jul/2024 16:29:18] "GET / HTTP/1.1" 200 -
+2024-07-11 16:29:19,866 INFO 127.0.0.1 - - [11/Jul/2024 16:29:19] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:29:19,870 INFO 127.0.0.1 - - [11/Jul/2024 16:29:19] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:29:19,955 INFO 127.0.0.1 - - [11/Jul/2024 16:29:19] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:29:19,955 INFO 127.0.0.1 - - [11/Jul/2024 16:29:19] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:29:20,288 INFO 127.0.0.1 - - [11/Jul/2024 16:29:20] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 16:29:20,753 INFO Rendering admin dashboard
+2024-07-11 16:29:20,758 INFO 127.0.0.1 - - [11/Jul/2024 16:29:20] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 16:29:20,797 INFO 127.0.0.1 - - [11/Jul/2024 16:29:20] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:29:20,799 INFO 127.0.0.1 - - [11/Jul/2024 16:29:20] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:29:20,855 INFO 127.0.0.1 - - [11/Jul/2024 16:29:20] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:29:20,862 INFO 127.0.0.1 - - [11/Jul/2024 16:29:20] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:29:21,902 INFO 127.0.0.1 - - [11/Jul/2024 16:29:21] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:29:21,929 INFO 127.0.0.1 - - [11/Jul/2024 16:29:21] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:29:21,930 INFO 127.0.0.1 - - [11/Jul/2024 16:29:21] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:29:21,988 INFO 127.0.0.1 - - [11/Jul/2024 16:29:21] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:29:21,994 INFO 127.0.0.1 - - [11/Jul/2024 16:29:21] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:29:25,999 INFO 127.0.0.1 - - [11/Jul/2024 16:29:25] "POST /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:29:26,031 INFO 127.0.0.1 - - [11/Jul/2024 16:29:26] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:29:26,034 INFO 127.0.0.1 - - [11/Jul/2024 16:29:26] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:29:26,087 INFO 127.0.0.1 - - [11/Jul/2024 16:29:26] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:29:26,129 INFO 127.0.0.1 - - [11/Jul/2024 16:29:26] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:30:36,366 INFO  * Restarting with stat
+2024-07-11 16:30:37,723 WARNING  * Debugger is active!
+2024-07-11 16:30:37,727 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:30:38,134 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:30:39,911 INFO 127.0.0.1 - - [11/Jul/2024 16:30:39] "GET / HTTP/1.1" 200 -
+2024-07-11 16:30:41,501 INFO 127.0.0.1 - - [11/Jul/2024 16:30:41] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:30:41,506 INFO 127.0.0.1 - - [11/Jul/2024 16:30:41] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:30:41,592 INFO 127.0.0.1 - - [11/Jul/2024 16:30:41] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:30:41,592 INFO 127.0.0.1 - - [11/Jul/2024 16:30:41] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:30:41,941 INFO 127.0.0.1 - - [11/Jul/2024 16:30:41] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 16:30:42,539 INFO Rendering admin dashboard
+2024-07-11 16:30:42,543 INFO 127.0.0.1 - - [11/Jul/2024 16:30:42] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 16:30:42,581 INFO 127.0.0.1 - - [11/Jul/2024 16:30:42] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:30:42,582 INFO 127.0.0.1 - - [11/Jul/2024 16:30:42] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:30:42,657 INFO 127.0.0.1 - - [11/Jul/2024 16:30:42] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:30:42,714 INFO 127.0.0.1 - - [11/Jul/2024 16:30:42] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:30:43,392 INFO 127.0.0.1 - - [11/Jul/2024 16:30:43] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:30:43,421 INFO 127.0.0.1 - - [11/Jul/2024 16:30:43] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:30:43,422 INFO 127.0.0.1 - - [11/Jul/2024 16:30:43] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:30:43,479 INFO 127.0.0.1 - - [11/Jul/2024 16:30:43] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:30:43,483 INFO 127.0.0.1 - - [11/Jul/2024 16:30:43] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:30:47,378 INFO Form submitted via POST
+2024-07-11 16:30:47,379 WARNING Form validation failed
+2024-07-11 16:30:47,382 INFO 127.0.0.1 - - [11/Jul/2024 16:30:47] "POST /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:30:47,418 INFO 127.0.0.1 - - [11/Jul/2024 16:30:47] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:30:47,418 INFO 127.0.0.1 - - [11/Jul/2024 16:30:47] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:30:47,486 INFO 127.0.0.1 - - [11/Jul/2024 16:30:47] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:30:47,492 INFO 127.0.0.1 - - [11/Jul/2024 16:30:47] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:31:58,106 INFO  * Restarting with stat
+2024-07-11 16:31:59,485 WARNING  * Debugger is active!
+2024-07-11 16:31:59,491 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:31:59,909 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:32:02,586 INFO 127.0.0.1 - - [11/Jul/2024 16:32:02] "GET / HTTP/1.1" 200 -
+2024-07-11 16:32:04,154 INFO 127.0.0.1 - - [11/Jul/2024 16:32:04] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:32:04,160 INFO 127.0.0.1 - - [11/Jul/2024 16:32:04] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:32:04,253 INFO 127.0.0.1 - - [11/Jul/2024 16:32:04] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:32:04,254 INFO 127.0.0.1 - - [11/Jul/2024 16:32:04] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:32:04,560 INFO 127.0.0.1 - - [11/Jul/2024 16:32:04] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 16:32:05,456 INFO Rendering admin dashboard
+2024-07-11 16:32:05,461 INFO 127.0.0.1 - - [11/Jul/2024 16:32:05] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 16:32:05,543 INFO 127.0.0.1 - - [11/Jul/2024 16:32:05] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:32:05,549 INFO 127.0.0.1 - - [11/Jul/2024 16:32:05] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:32:05,627 INFO 127.0.0.1 - - [11/Jul/2024 16:32:05] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:32:05,687 INFO 127.0.0.1 - - [11/Jul/2024 16:32:05] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:32:06,646 INFO 127.0.0.1 - - [11/Jul/2024 16:32:06] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:32:06,686 INFO 127.0.0.1 - - [11/Jul/2024 16:32:06] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:32:06,688 INFO 127.0.0.1 - - [11/Jul/2024 16:32:06] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:32:06,786 INFO 127.0.0.1 - - [11/Jul/2024 16:32:06] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:32:06,794 INFO 127.0.0.1 - - [11/Jul/2024 16:32:06] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:32:10,971 INFO Form submitted via POST
+2024-07-11 16:32:10,973 WARNING Form validation failed
+2024-07-11 16:32:10,974 WARNING Form errors: {'folder': ['This field is required.']}
+2024-07-11 16:32:10,976 INFO 127.0.0.1 - - [11/Jul/2024 16:32:10] "POST /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:32:11,043 INFO 127.0.0.1 - - [11/Jul/2024 16:32:11] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:32:11,045 INFO 127.0.0.1 - - [11/Jul/2024 16:32:11] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:32:11,129 INFO 127.0.0.1 - - [11/Jul/2024 16:32:11] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:32:11,134 INFO 127.0.0.1 - - [11/Jul/2024 16:32:11] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:33:19,471 INFO  * Restarting with stat
+2024-07-11 16:33:20,914 WARNING  * Debugger is active!
+2024-07-11 16:33:20,921 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:33:21,391 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:33:23,466 INFO 127.0.0.1 - - [11/Jul/2024 16:33:23] "GET / HTTP/1.1" 200 -
+2024-07-11 16:33:24,981 INFO 127.0.0.1 - - [11/Jul/2024 16:33:24] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:33:24,983 INFO 127.0.0.1 - - [11/Jul/2024 16:33:24] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:33:25,073 INFO 127.0.0.1 - - [11/Jul/2024 16:33:25] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:33:25,075 INFO 127.0.0.1 - - [11/Jul/2024 16:33:25] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:33:25,381 INFO 127.0.0.1 - - [11/Jul/2024 16:33:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 16:33:26,022 INFO Rendering admin dashboard
+2024-07-11 16:33:26,028 INFO 127.0.0.1 - - [11/Jul/2024 16:33:26] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 16:33:26,063 INFO 127.0.0.1 - - [11/Jul/2024 16:33:26] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:33:26,073 INFO 127.0.0.1 - - [11/Jul/2024 16:33:26] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:33:26,142 INFO 127.0.0.1 - - [11/Jul/2024 16:33:26] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:33:26,159 INFO 127.0.0.1 - - [11/Jul/2024 16:33:26] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:33:27,298 INFO 127.0.0.1 - - [11/Jul/2024 16:33:27] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:33:27,325 INFO 127.0.0.1 - - [11/Jul/2024 16:33:27] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:33:27,327 INFO 127.0.0.1 - - [11/Jul/2024 16:33:27] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:33:27,374 INFO 127.0.0.1 - - [11/Jul/2024 16:33:27] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:33:27,378 INFO 127.0.0.1 - - [11/Jul/2024 16:33:27] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:33:31,029 INFO Form submitted via POST
+2024-07-11 16:33:31,030 WARNING Form validation failed
+2024-07-11 16:33:31,032 WARNING Form errors: {'folder': ['This field is required.']}
+2024-07-11 16:33:31,033 INFO 127.0.0.1 - - [11/Jul/2024 16:33:31] "POST /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:33:31,063 INFO 127.0.0.1 - - [11/Jul/2024 16:33:31] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:33:31,066 INFO 127.0.0.1 - - [11/Jul/2024 16:33:31] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:33:31,113 INFO 127.0.0.1 - - [11/Jul/2024 16:33:31] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:33:31,121 INFO 127.0.0.1 - - [11/Jul/2024 16:33:31] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:34:58,232 INFO  * Restarting with stat
+2024-07-11 16:34:59,540 WARNING  * Debugger is active!
+2024-07-11 16:34:59,551 INFO  * Debugger PIN: 254-385-555
+2024-07-11 16:34:59,978 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-11 16:35:01,697 INFO 127.0.0.1 - - [11/Jul/2024 16:35:01] "GET / HTTP/1.1" 200 -
+2024-07-11 16:35:02,662 INFO 127.0.0.1 - - [11/Jul/2024 16:35:02] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:35:02,664 INFO 127.0.0.1 - - [11/Jul/2024 16:35:02] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:35:03,194 INFO 127.0.0.1 - - [11/Jul/2024 16:35:03] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:35:03,245 INFO 127.0.0.1 - - [11/Jul/2024 16:35:03] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:35:03,605 INFO 127.0.0.1 - - [11/Jul/2024 16:35:03] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-11 16:35:04,151 INFO Rendering admin dashboard
+2024-07-11 16:35:04,154 INFO 127.0.0.1 - - [11/Jul/2024 16:35:04] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 16:35:04,201 INFO 127.0.0.1 - - [11/Jul/2024 16:35:04] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:35:04,202 INFO 127.0.0.1 - - [11/Jul/2024 16:35:04] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:35:04,270 INFO 127.0.0.1 - - [11/Jul/2024 16:35:04] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:35:04,326 INFO 127.0.0.1 - - [11/Jul/2024 16:35:04] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:35:05,282 INFO 127.0.0.1 - - [11/Jul/2024 16:35:05] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:35:05,311 INFO 127.0.0.1 - - [11/Jul/2024 16:35:05] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:35:05,312 INFO 127.0.0.1 - - [11/Jul/2024 16:35:05] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:35:05,315 INFO 127.0.0.1 - - [11/Jul/2024 16:35:05] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:35:05,362 INFO 127.0.0.1 - - [11/Jul/2024 16:35:05] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:35:09,314 INFO Form submitted via POST
+2024-07-11 16:35:09,314 INFO Form validation successful
+2024-07-11 16:35:09,314 INFO Files: [<FileStorage: '99796419-NBG-65-40-250-230.pdf' ('application/pdf')>], Folder: <FileStorage: '' ('application/octet-stream')>
+2024-07-11 16:35:09,319 INFO Saving file to C:\Users\spuda\AppData\Local\Temp\99796419-NBG-65-40-250-230.pdf
+2024-07-11 16:35:09,320 INFO Processing PDF: C:\Users\spuda\AppData\Local\Temp\99796419-NBG-65-40-250-230.pdf
+2024-07-11 16:35:09,320 INFO Processing Blank NBG Tech Data PDF: C:\Users\spuda\AppData\Local\Temp\99796419-NBG-65-40-250-230.pdf
+2024-07-11 16:35:09,348 INFO xref found: pos=b'325604'
+2024-07-11 16:35:09,349 INFO read_xref_from: start=325604, token=/b'xref'
+2024-07-11 16:35:09,349 INFO xref objects: {1: (None, 29, 0), 2: (None, 346, 0), 3: (None, 427, 0), 4: (None, 464, 0), 5: (None, 541, 0), 6: (None, 753, 0), 7: (None, 805, 0), 8: (None, 87789, 0), 9: (None, 87950, 0), 10: (None, 88588, 0), 11: (None, 89754, 0), 12: (None, 90032, 0), 13: (None, 90119, 0), 14: (None, 130882, 0), 15: (None, 131050, 0), 16: (None, 131551, 0), 17: (None, 132337, 0), 18: (None, 132622, 0), 19: (None, 132709, 0), 20: (None, 159949, 0), 21: (None, 160119, 0), 22: (None, 160527, 0), 23: (None, 161064, 0), 24: (None, 161361, 0), 25: (None, 161446, 0), 26: (None, 178930, 0), 27: (None, 179145, 0), 28: (None, 179198, 0), 29: (None, 296294, 0), 30: (None, 296509, 0), 31: (None, 296562, 0), 32: (None, 298096, 0), 33: (None, 298352, 0), 34: (None, 298781, 0), 35: (None, 298988, 0), 36: (None, 299041, 0), 37: (None, 301525, 0)}
+2024-07-11 16:35:09,351 INFO trailer: {'Size': 38, 'Root': <PDFObjRef:2>, 'Info': <PDFObjRef:1>, 'ID': [b'4{\xd49\x81\x1cN\x9c\xa5\xe5\x83\x89\xb3\xec-\xd4', b'']}
+2024-07-11 16:35:09,382 INFO trailer: {'Size': 38, 'Root': <PDFObjRef:2>, 'Info': <PDFObjRef:1>, 'ID': [b'4{\xd49\x81\x1cN\x9c\xa5\xe5\x83\x89\xb3\xec-\xd4', b'']}
+2024-07-11 16:35:09,383 INFO Pages: Kids=[<PDFObjRef:32>, <PDFObjRef:29>, <PDFObjRef:26>, <PDFObjRef:5>]
+2024-07-11 16:35:09,385 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, 'Contents': [<PDFObjRef:36>, <PDFObjRef:35>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705], 'Annots': [<PDFObjRef:33>]}
+2024-07-11 16:35:09,386 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 16:35:09,386 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, streams=[<PDFObjRef:36>, <PDFObjRef:35>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 16:35:09,387 INFO get_font: create: objid=20, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'ZAWHMP+Arial,Italic', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:22>], 'ToUnicode': <PDFObjRef:21>}
+2024-07-11 16:35:09,388 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'ZAWHMP+Arial,Italic', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:23>, 'W': [51, [667], 85, [333], 76, [222], 81, [556], 87, [278], 72, [556], 71, [556], 3, [278], 73, [278], 82, [556], 80, [833], 42, [778], 88, [556], 86, [500], 70, [500], 38, [722], 62, [278], 21, [556], 19, [556], 23, [556], 17, [278], 26, [556], 64, [278]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(21): raw=337, {'Filter': /'FlateDecode', 'Length': 336}>}
+2024-07-11 16:35:09,398 INFO get_font: create: objid=14, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'QKDACH+Arial,Bold', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:16>], 'ToUnicode': <PDFObjRef:15>}
+2024-07-11 16:35:09,400 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'QKDACH+Arial,Bold', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:17>, 'W': [52, [778], 87, [333], 92, [556], 17, [278], 39, [722], 72, [556], 86, [556], 70, [556], 85, [389], 76, [278], 83, [611], 82, [611], 81, [611], 49, [722], 37, [722], 42, [778], 3, [278], 25, [556], 24, [556], 16, [333], 23, [556], 19, [556], 21, [556], 18, [278], 22, [556], 36, [722], 41, [611], 40, [667], 54, [667], 50, [778], 58, [944], 20, [556], 4, [333], 51, [667], 71, [611], 88, [611], 80, [889], 68, [556], 73, [333], 79, [278], 28, [556], 26, [556], 43, [722], 93, [500]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(15): raw=430, {'Filter': /'FlateDecode', 'Length': 429}>}
+2024-07-11 16:35:09,405 INFO get_font: create: objid=8, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'MNTGNS+Arial', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:10>], 'ToUnicode': <PDFObjRef:9>}
+2024-07-11 16:35:09,408 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'MNTGNS+Arial', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:11>, 'W': [20, [556], 51, [667], 85, [333], 82, [556], 71, [556], 88, [556], 70, [500], 87, [278], 3, [278], 49, [722], 17, [278], 29, [278], 28, [556], 26, [556], 25, [556], 23, [556], 81, [556], 16, [333], 86, [500], 72, [556], 79, [222], 73, [278], 83, [556], 76, [222], 80, [833], 74, [556], 15, [278], 68, [556], 89, [500], 44, [278], 54, [667], 50, [778], 24, [556], 90, [722], 75, [556], 21, [556], 27, [556], 11, [333], 69, [556], 12, [333], 41, [611], 36, [667], 40, [667], 55, [611], 91, [500], 93, [500], 78, [500], 39, [722], 92, [500], 38, [722], 84, [556], 47, [556], 58, [944], 19, [556], 131, [400], 18, [278], 241, [333], 53, [722], 22, [556], 37, [667], 52, [778], 48, [833], 42, [778], 45, [500], 60, [667], 43, [722], 57, [667], 8, [889], 149, [549], 2, [278], 62, [278], 64, [278], 13, [389], 32, [584], 4, [278], 59, [667]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(9): raw=568, {'Filter': /'FlateDecode', 'Length': 567}>}
+2024-07-11 16:35:09,419 INFO Processing xobj: <PDFStream(37): raw=23900, {'Subtype': /'Image', 'Filter': /'DCTDecode', 'Decode': [0, 1, 0, 1, 0, 1], 'Width': 500, 'Height': 450, 'BitsPerComponent': 8, 'ColorSpace': /'DeviceRGB', 'Length': 23899}>
+2024-07-11 16:35:09,458 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:31>, <PDFObjRef:30>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-11 16:35:09,459 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 16:35:09,461 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:31>, <PDFObjRef:30>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 16:35:09,493 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:28>, <PDFObjRef:27>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-11 16:35:09,494 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 16:35:09,494 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:28>, <PDFObjRef:27>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 16:35:09,815 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:7>, <PDFObjRef:6>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-11 16:35:09,816 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-11 16:35:09,816 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:7>, <PDFObjRef:6>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-11 16:35:10,841 INFO Extracted text from Blank NBG Tech Data PDF: Product No.: 99796419
+
+Note! Product picture may differ from actual product
+
+Non-self-priming, single-stage, centrifugal volute pump designed according to ISO 5199 with dimensions and rated
+performance according to ISO 2858 (16 bar). Flanges are PN 16 with dimensions according to AS2129 table E. The
+pump has an axial suction port, radial discharge port, horizontal shaft and a back pull-out design enabling removal of
+the motor, motor stool, cover and impeller without disturbing the pump housing o...
+2024-07-11 16:35:10,867 ERROR Error processing PDF C:\Users\spuda\AppData\Local\Temp\99796419-NBG-65-40-250-230.pdf: 'NoneType' object is not subscriptable
+2024-07-11 16:35:10,869 INFO 127.0.0.1 - - [11/Jul/2024 16:35:10] "[32mPOST /admin/admin/blank-tech-data-upload HTTP/1.1[0m" 302 -
+2024-07-11 16:35:10,880 INFO 127.0.0.1 - - [11/Jul/2024 16:35:10] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-11 16:35:10,912 INFO 127.0.0.1 - - [11/Jul/2024 16:35:10] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:35:10,915 INFO 127.0.0.1 - - [11/Jul/2024 16:35:10] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:35:10,969 INFO 127.0.0.1 - - [11/Jul/2024 16:35:10] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:35:10,977 INFO 127.0.0.1 - - [11/Jul/2024 16:35:10] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:35:39,916 INFO Rendering admin dashboard
+2024-07-11 16:35:39,918 INFO 127.0.0.1 - - [11/Jul/2024 16:35:39] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-11 16:35:39,969 INFO 127.0.0.1 - - [11/Jul/2024 16:35:39] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:35:39,975 INFO 127.0.0.1 - - [11/Jul/2024 16:35:39] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:35:39,976 INFO 127.0.0.1 - - [11/Jul/2024 16:35:39] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:35:40,127 INFO 127.0.0.1 - - [11/Jul/2024 16:35:40] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-11 16:35:41,491 INFO 127.0.0.1 - - [11/Jul/2024 16:35:41] "GET /admin/admin/view-blank-tech-data HTTP/1.1" 200 -
+2024-07-11 16:35:41,521 INFO 127.0.0.1 - - [11/Jul/2024 16:35:41] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-11 16:35:41,523 INFO 127.0.0.1 - - [11/Jul/2024 16:35:41] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-11 16:35:41,524 INFO 127.0.0.1 - - [11/Jul/2024 16:35:41] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-11 16:35:41,587 INFO 127.0.0.1 - - [11/Jul/2024 16:35:41] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-12 10:40:16,933 INFO  * Restarting with stat
+2024-07-12 10:40:18,153 WARNING  * Debugger is active!
+2024-07-12 10:40:18,160 INFO  * Debugger PIN: 254-385-555
+2024-07-12 10:40:18,667 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-12 10:40:20,808 INFO 127.0.0.1 - - [12/Jul/2024 10:40:20] "GET / HTTP/1.1" 200 -
+2024-07-12 10:40:21,840 INFO 127.0.0.1 - - [12/Jul/2024 10:40:21] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-12 10:40:21,846 INFO 127.0.0.1 - - [12/Jul/2024 10:40:21] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-12 10:40:21,867 INFO 127.0.0.1 - - [12/Jul/2024 10:40:21] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-12 10:40:22,425 INFO 127.0.0.1 - - [12/Jul/2024 10:40:22] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-12 10:40:22,742 INFO 127.0.0.1 - - [12/Jul/2024 10:40:22] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-12 10:40:23,553 INFO 127.0.0.1 - - [12/Jul/2024 10:40:23] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-12 10:40:23,626 INFO 127.0.0.1 - - [12/Jul/2024 10:40:23] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-12 10:40:23,626 INFO 127.0.0.1 - - [12/Jul/2024 10:40:23] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-12 10:40:23,745 INFO 127.0.0.1 - - [12/Jul/2024 10:40:23] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-12 10:40:23,748 INFO 127.0.0.1 - - [12/Jul/2024 10:40:23] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-12 10:40:24,666 INFO 127.0.0.1 - - [12/Jul/2024 10:40:24] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-12 10:40:24,736 INFO 127.0.0.1 - - [12/Jul/2024 10:40:24] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-12 10:40:24,737 INFO 127.0.0.1 - - [12/Jul/2024 10:40:24] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-12 10:40:24,842 INFO 127.0.0.1 - - [12/Jul/2024 10:40:24] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-12 10:40:24,842 INFO 127.0.0.1 - - [12/Jul/2024 10:40:24] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-12 10:40:28,803 INFO Processing Blank NBG Tech Data PDF: C:\Users\spuda\AppData\Local\Temp\99796419-NBG-65-40-250-230.pdf
+2024-07-12 10:40:28,817 INFO xref found: pos=b'325604'
+2024-07-12 10:40:28,818 INFO read_xref_from: start=325604, token=/b'xref'
+2024-07-12 10:40:28,820 INFO xref objects: {1: (None, 29, 0), 2: (None, 346, 0), 3: (None, 427, 0), 4: (None, 464, 0), 5: (None, 541, 0), 6: (None, 753, 0), 7: (None, 805, 0), 8: (None, 87789, 0), 9: (None, 87950, 0), 10: (None, 88588, 0), 11: (None, 89754, 0), 12: (None, 90032, 0), 13: (None, 90119, 0), 14: (None, 130882, 0), 15: (None, 131050, 0), 16: (None, 131551, 0), 17: (None, 132337, 0), 18: (None, 132622, 0), 19: (None, 132709, 0), 20: (None, 159949, 0), 21: (None, 160119, 0), 22: (None, 160527, 0), 23: (None, 161064, 0), 24: (None, 161361, 0), 25: (None, 161446, 0), 26: (None, 178930, 0), 27: (None, 179145, 0), 28: (None, 179198, 0), 29: (None, 296294, 0), 30: (None, 296509, 0), 31: (None, 296562, 0), 32: (None, 298096, 0), 33: (None, 298352, 0), 34: (None, 298781, 0), 35: (None, 298988, 0), 36: (None, 299041, 0), 37: (None, 301525, 0)}
+2024-07-12 10:40:28,821 INFO trailer: {'Size': 38, 'Root': <PDFObjRef:2>, 'Info': <PDFObjRef:1>, 'ID': [b'4{\xd49\x81\x1cN\x9c\xa5\xe5\x83\x89\xb3\xec-\xd4', b'']}
+2024-07-12 10:40:28,836 INFO trailer: {'Size': 38, 'Root': <PDFObjRef:2>, 'Info': <PDFObjRef:1>, 'ID': [b'4{\xd49\x81\x1cN\x9c\xa5\xe5\x83\x89\xb3\xec-\xd4', b'']}
+2024-07-12 10:40:28,838 INFO Pages: Kids=[<PDFObjRef:32>, <PDFObjRef:29>, <PDFObjRef:26>, <PDFObjRef:5>]
+2024-07-12 10:40:28,838 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, 'Contents': [<PDFObjRef:36>, <PDFObjRef:35>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705], 'Annots': [<PDFObjRef:33>]}
+2024-07-12 10:40:28,839 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-12 10:40:28,840 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, streams=[<PDFObjRef:36>, <PDFObjRef:35>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-12 10:40:28,840 INFO get_font: create: objid=20, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'ZAWHMP+Arial,Italic', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:22>], 'ToUnicode': <PDFObjRef:21>}
+2024-07-12 10:40:28,841 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'ZAWHMP+Arial,Italic', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:23>, 'W': [51, [667], 85, [333], 76, [222], 81, [556], 87, [278], 72, [556], 71, [556], 3, [278], 73, [278], 82, [556], 80, [833], 42, [778], 88, [556], 86, [500], 70, [500], 38, [722], 62, [278], 21, [556], 19, [556], 23, [556], 17, [278], 26, [556], 64, [278]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(21): raw=337, {'Filter': /'FlateDecode', 'Length': 336}>}
+2024-07-12 10:40:28,847 INFO get_font: create: objid=14, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'QKDACH+Arial,Bold', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:16>], 'ToUnicode': <PDFObjRef:15>}
+2024-07-12 10:40:28,849 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'QKDACH+Arial,Bold', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:17>, 'W': [52, [778], 87, [333], 92, [556], 17, [278], 39, [722], 72, [556], 86, [556], 70, [556], 85, [389], 76, [278], 83, [611], 82, [611], 81, [611], 49, [722], 37, [722], 42, [778], 3, [278], 25, [556], 24, [556], 16, [333], 23, [556], 19, [556], 21, [556], 18, [278], 22, [556], 36, [722], 41, [611], 40, [667], 54, [667], 50, [778], 58, [944], 20, [556], 4, [333], 51, [667], 71, [611], 88, [611], 80, [889], 68, [556], 73, [333], 79, [278], 28, [556], 26, [556], 43, [722], 93, [500]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(15): raw=430, {'Filter': /'FlateDecode', 'Length': 429}>}
+2024-07-12 10:40:28,852 INFO get_font: create: objid=8, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'MNTGNS+Arial', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:10>], 'ToUnicode': <PDFObjRef:9>}
+2024-07-12 10:40:28,854 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'MNTGNS+Arial', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:11>, 'W': [20, [556], 51, [667], 85, [333], 82, [556], 71, [556], 88, [556], 70, [500], 87, [278], 3, [278], 49, [722], 17, [278], 29, [278], 28, [556], 26, [556], 25, [556], 23, [556], 81, [556], 16, [333], 86, [500], 72, [556], 79, [222], 73, [278], 83, [556], 76, [222], 80, [833], 74, [556], 15, [278], 68, [556], 89, [500], 44, [278], 54, [667], 50, [778], 24, [556], 90, [722], 75, [556], 21, [556], 27, [556], 11, [333], 69, [556], 12, [333], 41, [611], 36, [667], 40, [667], 55, [611], 91, [500], 93, [500], 78, [500], 39, [722], 92, [500], 38, [722], 84, [556], 47, [556], 58, [944], 19, [556], 131, [400], 18, [278], 241, [333], 53, [722], 22, [556], 37, [667], 52, [778], 48, [833], 42, [778], 45, [500], 60, [667], 43, [722], 57, [667], 8, [889], 149, [549], 2, [278], 62, [278], 64, [278], 13, [389], 32, [584], 4, [278], 59, [667]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(9): raw=568, {'Filter': /'FlateDecode', 'Length': 567}>}
+2024-07-12 10:40:28,864 INFO Processing xobj: <PDFStream(37): raw=23900, {'Subtype': /'Image', 'Filter': /'DCTDecode', 'Decode': [0, 1, 0, 1, 0, 1], 'Width': 500, 'Height': 450, 'BitsPerComponent': 8, 'ColorSpace': /'DeviceRGB', 'Length': 23899}>
+2024-07-12 10:40:28,897 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:31>, <PDFObjRef:30>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-12 10:40:28,897 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-12 10:40:28,898 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:31>, <PDFObjRef:30>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-12 10:40:28,920 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:28>, <PDFObjRef:27>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-12 10:40:28,921 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-12 10:40:28,922 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:28>, <PDFObjRef:27>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-12 10:40:29,176 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:7>, <PDFObjRef:6>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-12 10:40:29,177 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-12 10:40:29,177 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:7>, <PDFObjRef:6>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-12 10:40:30,032 INFO Extracted text from Blank NBG Tech Data PDF: Product No.: 99796419
+
+Note! Product picture may differ from actual product
+
+Non-self-priming, single-stage, centrifugal volute pump designed according to ISO 5199 with dimensions and rated
+performance according to ISO 2858 (16 bar). Flanges are PN 16 with dimensions according to AS2129 table E. The
+pump has an axial suction port, radial discharge port, horizontal shaft and a back pull-out design enabling removal of
+the motor, motor stool, cover and impeller without disturbing the pump housing o...
+2024-07-12 10:40:30,057 INFO 127.0.0.1 - - [12/Jul/2024 10:40:30] "[32mPOST /admin/admin/blank-tech-data-upload HTTP/1.1[0m" 302 -
+2024-07-12 10:40:30,067 INFO 127.0.0.1 - - [12/Jul/2024 10:40:30] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-12 10:40:30,095 INFO 127.0.0.1 - - [12/Jul/2024 10:40:30] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-12 10:40:30,100 INFO 127.0.0.1 - - [12/Jul/2024 10:40:30] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-12 10:40:30,163 INFO 127.0.0.1 - - [12/Jul/2024 10:40:30] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-12 10:40:30,210 INFO 127.0.0.1 - - [12/Jul/2024 10:40:30] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-12 10:42:04,072 INFO  * Restarting with stat
+2024-07-12 10:42:05,272 WARNING  * Debugger is active!
+2024-07-12 10:42:05,277 INFO  * Debugger PIN: 254-385-555
+2024-07-12 10:42:05,674 INFO  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+2024-07-12 10:42:07,613 INFO 127.0.0.1 - - [12/Jul/2024 10:42:07] "GET / HTTP/1.1" 200 -
+2024-07-12 10:42:09,055 INFO 127.0.0.1 - - [12/Jul/2024 10:42:09] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-12 10:42:09,059 INFO 127.0.0.1 - - [12/Jul/2024 10:42:09] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-12 10:42:09,167 INFO 127.0.0.1 - - [12/Jul/2024 10:42:09] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-12 10:42:09,167 INFO 127.0.0.1 - - [12/Jul/2024 10:42:09] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-12 10:42:09,532 INFO 127.0.0.1 - - [12/Jul/2024 10:42:09] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-07-12 10:42:10,091 INFO 127.0.0.1 - - [12/Jul/2024 10:42:10] "GET /admin/admin/dashboard HTTP/1.1" 200 -
+2024-07-12 10:42:10,130 INFO 127.0.0.1 - - [12/Jul/2024 10:42:10] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-12 10:42:10,130 INFO 127.0.0.1 - - [12/Jul/2024 10:42:10] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-12 10:42:10,182 INFO 127.0.0.1 - - [12/Jul/2024 10:42:10] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-12 10:42:10,187 INFO 127.0.0.1 - - [12/Jul/2024 10:42:10] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-12 10:42:11,226 INFO 127.0.0.1 - - [12/Jul/2024 10:42:11] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-12 10:42:11,252 INFO 127.0.0.1 - - [12/Jul/2024 10:42:11] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-12 10:42:11,252 INFO 127.0.0.1 - - [12/Jul/2024 10:42:11] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-12 10:42:11,252 INFO 127.0.0.1 - - [12/Jul/2024 10:42:11] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-12 10:42:11,291 INFO 127.0.0.1 - - [12/Jul/2024 10:42:11] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-12 10:42:15,138 INFO Processing Blank NBG Tech Data PDF: C:\Users\spuda\AppData\Local\Temp\99796419-NBG-65-40-250-230.pdf
+2024-07-12 10:42:15,171 INFO xref found: pos=b'325604'
+2024-07-12 10:42:15,172 INFO read_xref_from: start=325604, token=/b'xref'
+2024-07-12 10:42:15,173 INFO xref objects: {1: (None, 29, 0), 2: (None, 346, 0), 3: (None, 427, 0), 4: (None, 464, 0), 5: (None, 541, 0), 6: (None, 753, 0), 7: (None, 805, 0), 8: (None, 87789, 0), 9: (None, 87950, 0), 10: (None, 88588, 0), 11: (None, 89754, 0), 12: (None, 90032, 0), 13: (None, 90119, 0), 14: (None, 130882, 0), 15: (None, 131050, 0), 16: (None, 131551, 0), 17: (None, 132337, 0), 18: (None, 132622, 0), 19: (None, 132709, 0), 20: (None, 159949, 0), 21: (None, 160119, 0), 22: (None, 160527, 0), 23: (None, 161064, 0), 24: (None, 161361, 0), 25: (None, 161446, 0), 26: (None, 178930, 0), 27: (None, 179145, 0), 28: (None, 179198, 0), 29: (None, 296294, 0), 30: (None, 296509, 0), 31: (None, 296562, 0), 32: (None, 298096, 0), 33: (None, 298352, 0), 34: (None, 298781, 0), 35: (None, 298988, 0), 36: (None, 299041, 0), 37: (None, 301525, 0)}
+2024-07-12 10:42:15,174 INFO trailer: {'Size': 38, 'Root': <PDFObjRef:2>, 'Info': <PDFObjRef:1>, 'ID': [b'4{\xd49\x81\x1cN\x9c\xa5\xe5\x83\x89\xb3\xec-\xd4', b'']}
+2024-07-12 10:42:15,206 INFO trailer: {'Size': 38, 'Root': <PDFObjRef:2>, 'Info': <PDFObjRef:1>, 'ID': [b'4{\xd49\x81\x1cN\x9c\xa5\xe5\x83\x89\xb3\xec-\xd4', b'']}
+2024-07-12 10:42:15,208 INFO Pages: Kids=[<PDFObjRef:32>, <PDFObjRef:29>, <PDFObjRef:26>, <PDFObjRef:5>]
+2024-07-12 10:42:15,210 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, 'Contents': [<PDFObjRef:36>, <PDFObjRef:35>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705], 'Annots': [<PDFObjRef:33>]}
+2024-07-12 10:42:15,210 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-12 10:42:15,211 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}, 'XObject': {'XO0': <PDFObjRef:37>}}, streams=[<PDFObjRef:36>, <PDFObjRef:35>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-12 10:42:15,212 INFO get_font: create: objid=20, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'ZAWHMP+Arial,Italic', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:22>], 'ToUnicode': <PDFObjRef:21>}
+2024-07-12 10:42:15,215 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'ZAWHMP+Arial,Italic', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:23>, 'W': [51, [667], 85, [333], 76, [222], 81, [556], 87, [278], 72, [556], 71, [556], 3, [278], 73, [278], 82, [556], 80, [833], 42, [778], 88, [556], 86, [500], 70, [500], 38, [722], 62, [278], 21, [556], 19, [556], 23, [556], 17, [278], 26, [556], 64, [278]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(21): raw=337, {'Filter': /'FlateDecode', 'Length': 336}>}
+2024-07-12 10:42:15,224 INFO get_font: create: objid=14, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'QKDACH+Arial,Bold', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:16>], 'ToUnicode': <PDFObjRef:15>}
+2024-07-12 10:42:15,227 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'QKDACH+Arial,Bold', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:17>, 'W': [52, [778], 87, [333], 92, [556], 17, [278], 39, [722], 72, [556], 86, [556], 70, [556], 85, [389], 76, [278], 83, [611], 82, [611], 81, [611], 49, [722], 37, [722], 42, [778], 3, [278], 25, [556], 24, [556], 16, [333], 23, [556], 19, [556], 21, [556], 18, [278], 22, [556], 36, [722], 41, [611], 40, [667], 54, [667], 50, [778], 58, [944], 20, [556], 4, [333], 51, [667], 71, [611], 88, [611], 80, [889], 68, [556], 73, [333], 79, [278], 28, [556], 26, [556], 43, [722], 93, [500]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(15): raw=430, {'Filter': /'FlateDecode', 'Length': 429}>}
+2024-07-12 10:42:15,234 INFO get_font: create: objid=8, spec={'Type': /'Font', 'Subtype': /'Type0', 'BaseFont': /'MNTGNS+Arial', 'Encoding': /'Identity-H', 'DescendantFonts': [<PDFObjRef:10>], 'ToUnicode': <PDFObjRef:9>}
+2024-07-12 10:42:15,239 INFO get_font: create: objid=None, spec={'Type': /'Font', 'Subtype': /'CIDFontType2', 'BaseFont': /'MNTGNS+Arial', 'CIDToGIDMap': /'Identity', 'CIDSystemInfo': {'Registry': b'Adobe', 'Ordering': b'Identity', 'Supplement': 0}, 'FontDescriptor': <PDFObjRef:11>, 'W': [20, [556], 51, [667], 85, [333], 82, [556], 71, [556], 88, [556], 70, [500], 87, [278], 3, [278], 49, [722], 17, [278], 29, [278], 28, [556], 26, [556], 25, [556], 23, [556], 81, [556], 16, [333], 86, [500], 72, [556], 79, [222], 73, [278], 83, [556], 76, [222], 80, [833], 74, [556], 15, [278], 68, [556], 89, [500], 44, [278], 54, [667], 50, [778], 24, [556], 90, [722], 75, [556], 21, [556], 27, [556], 11, [333], 69, [556], 12, [333], 41, [611], 36, [667], 40, [667], 55, [611], 91, [500], 93, [500], 78, [500], 39, [722], 92, [500], 38, [722], 84, [556], 47, [556], 58, [944], 19, [556], 131, [400], 18, [278], 241, [333], 53, [722], 22, [556], 37, [667], 52, [778], 48, [833], 42, [778], 45, [500], 60, [667], 43, [722], 57, [667], 8, [889], 149, [549], 2, [278], 62, [278], 64, [278], 13, [389], 32, [584], 4, [278], 59, [667]], 'PDF4NET:SessionID': 1000000000, 'Encoding': /'Identity-H', 'ToUnicode': <PDFStream(9): raw=568, {'Filter': /'FlateDecode', 'Length': 567}>}
+2024-07-12 10:42:15,261 INFO Processing xobj: <PDFStream(37): raw=23900, {'Subtype': /'Image', 'Filter': /'DCTDecode', 'Decode': [0, 1, 0, 1, 0, 1], 'Width': 500, 'Height': 450, 'BitsPerComponent': 8, 'ColorSpace': /'DeviceRGB', 'Length': 23899}>
+2024-07-12 10:42:15,320 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:31>, <PDFObjRef:30>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-12 10:42:15,321 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-12 10:42:15,323 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:31>, <PDFObjRef:30>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-12 10:42:15,343 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:28>, <PDFObjRef:27>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-12 10:42:15,344 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-12 10:42:15,345 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:28>, <PDFObjRef:27>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-12 10:42:15,663 INFO Page: {'Type': /'Page', 'Resources': {'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, 'Contents': [<PDFObjRef:7>, <PDFObjRef:6>], 'MediaBox': [0, 0, 595.27557373, 841.8897705], 'Parent': <PDFObjRef:4>, 'CropBox': [0, 0, 595.27557373, 841.8897705]}
+2024-07-12 10:42:15,664 INFO Processing page: <PDFPage: Resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, MediaBox=[0, 0, 595.27557373, 841.8897705]>
+2024-07-12 10:42:15,665 INFO render_contents: resources={'Font': {'F0': <PDFObjRef:20>, 'F1': <PDFObjRef:14>, 'F2': <PDFObjRef:8>}}, streams=[<PDFObjRef:7>, <PDFObjRef:6>], ctm=(1, 0, 0, 1, 0, 0)
+2024-07-12 10:42:16,540 INFO Extracted text from Blank NBG Tech Data PDF: Product No.: 99796419
+
+Note! Product picture may differ from actual product
+
+Non-self-priming, single-stage, centrifugal volute pump designed according to ISO 5199 with dimensions and rated
+performance according to ISO 2858 (16 bar). Flanges are PN 16 with dimensions according to AS2129 table E. The
+pump has an axial suction port, radial discharge port, horizontal shaft and a back pull-out design enabling removal of
+the motor, motor stool, cover and impeller without disturbing the pump housing o...
+2024-07-12 10:42:16,564 INFO 127.0.0.1 - - [12/Jul/2024 10:42:16] "[32mPOST /admin/admin/blank-tech-data-upload HTTP/1.1[0m" 302 -
+2024-07-12 10:42:16,574 INFO 127.0.0.1 - - [12/Jul/2024 10:42:16] "GET /admin/admin/blank-tech-data-upload HTTP/1.1" 200 -
+2024-07-12 10:42:16,601 INFO 127.0.0.1 - - [12/Jul/2024 10:42:16] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2024-07-12 10:42:16,603 INFO 127.0.0.1 - - [12/Jul/2024 10:42:16] "[36mGET /static/images/sidebar-toggle-icon.png HTTP/1.1[0m" 304 -
+2024-07-12 10:42:16,675 INFO 127.0.0.1 - - [12/Jul/2024 10:42:16] "[36mGET /static/js/sidebar.js HTTP/1.1[0m" 304 -
+2024-07-12 10:42:16,687 INFO 127.0.0.1 - - [12/Jul/2024 10:42:16] "[36mGET /static/js/table.js HTTP/1.1[0m" 304 -
+2024-07-12 10:43:31,015 INFO  * Detected change in 'c:\\Users\\spuda\\OneDrive\\Desktop\\RBM Tender App\\app\\utils\\extract_pdf.py', reloading
+2024-07-12 10:43:31,333 INFO  * Restarting with stat

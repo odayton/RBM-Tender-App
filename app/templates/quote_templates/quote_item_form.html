@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add Item to Quote</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.item_id.label(class="form-control-label") }}
+            {{ form.item_id(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.item_type.label(class="form-control-label") }}
+            {{ form.item_type(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.quantity.label(class="form-control-label") }}
+            {{ form.quantity(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.price.label(class="form-control-label") }}
+            {{ form.price(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.total_price.label(class="form-control-label") }}
+            {{ form.total_price(class="form-control") }}
+        </div>
+        <button type="submit" class="btn btn-primary">Add Item</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Admin Dashboard
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Admin Dashboard</h2>
+    <ul>
+        <li><a href="{{ url_for('admin.blank_tech_data_upload') }}">Upload Blank Tech Data</a></li>
+        <li><a href="{{ url_for('admin.view_blank_tech_data') }}">View Blank Tech Data</a></li>
+        <!-- Add more admin links here -->
+    </ul>
+</div>
+{% endblock %}
