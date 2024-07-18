@@ -8,9 +8,9 @@ def get_db_connection():
 def fetch_historic_with_general():
     conn = get_db_connection()
     query = '''
-    SELECT h.sku, h.name, h.flow, h.flow_unit, h.head, h.head_unit, g.kw, g.poles, h.efficiency, h.absorbed_power, h.npsh
-    FROM HistoricPumpDetails h
-    JOIN GeneralPumpDetails g ON h.sku = g.sku
+    SELECT h.sku, h.name, h.flow, h.flow_unit, h.head, h.head_unit, g.kw, g.poles, h.efficiency, h.absorbed_power, h.npsh 
+    FROM HistoricPumpData h
+    LEFT JOIN GeneralPumpDetails g ON h.sku = g.sku
     '''
     rows = conn.execute(query).fetchall()
     conn.close()

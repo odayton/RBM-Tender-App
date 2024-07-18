@@ -7,9 +7,12 @@ def get_db_connection():
 
 def fetch_all_from_table(table_name):
     conn = get_db_connection()
-    rows = conn.execute(f'SELECT * FROM {table_name}').fetchall()
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT * FROM {table_name}")
+    data = cursor.fetchall()
+    cursor.close()
     conn.close()
-    return rows
+    return data
 
 def insert_into_db(table_name, data):
     conn = get_db_connection()
@@ -19,6 +22,16 @@ def insert_into_db(table_name, data):
     conn.execute(sql, tuple(data.values()))
     conn.commit()
     conn.close()
+
+def record_exists(table_name, column, value):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    sql = f'SELECT 1 FROM {table_name} WHERE {column} = ? LIMIT 1'
+    cursor.execute(sql, (value,))
+    exists = cursor.fetchone() is not None
+    cursor.close()
+    conn.close()
+    return exists
 
 def write_to_db(data, table_name):
     conn = sqlite3.connect('instance/RBM_Product.db')

@@ -3,14 +3,14 @@ import tempfile
 import zipfile
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from werkzeug.utils import secure_filename
-from app.utils.extract_pdf import extract_historic_nbg_tech_data
-from app.utils.db_utils import fetch_all_from_table, insert_into_db
+from app.utils.extract_pdf import extract_blank_nbg_tech_data, extract_historic_nbg_tech_data
+from app.utils.db_utils import fetch_all_from_table, insert_into_db, record_exists
 from app.utils.view_utils import fetch_historic_with_general
 from app.blueprints.forms import ManualUpdateForm, BlankTechDataUploadForm, HistoricTechDataUploadForm, SearchPumpsForm
 
 pumps_bp = Blueprint('pumps', __name__)
 
-@pumps_bp.route('/pumps/pumps')
+@pumps_bp.route('/pumps', methods=['GET'])
 def pumps():
     return render_template('pumps/pumps.html')
 
@@ -23,7 +23,9 @@ def add_pump_page():
             filename = secure_filename(file.filename)
             file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
-            extract_blank_nbg_tech_data(file_path)
+            extracted_text, extracted_images = process_and_store_pdf(file_path, extract_blank_nbg_tech_data, "extracted_blank_graphs")
+            if not record_exists('GeneralPumpDetails', 'sku', extracted_text['sku']):
+                insert_into_db('GeneralPumpDetails', extracted_text)
             flash('File uploaded and processed successfully.')
             return redirect(url_for('pumps.add_pump_page'))
     return render_template('pumps/add_pump.html', form=form)
@@ -86,24 +88,19 @@ def tech_data_upload():
                         file.save(temp_path)
                         extracted_text, extracted_images = process_and_store_pdf(temp_path, extract_historic_nbg_tech_data, "extracted_historic_graphs", is_historic=True)
                         all_extracted_data.append((extracted_text, extracted_images))
-                        print(f"Extracted Text: {extracted_text}")
-                        insert_into_db('HistoricPumpDetails', extracted_text)  # Insert into HistoricPumpDetails
-                        for img_path in extracted_images:
-                            print(f"Saved Image: {img_path}")
+                        if not record_exists('HistoricPumpData', 'sku', extracted_text['sku']):
+                            insert_into_db('HistoricPumpData', extracted_text)
 
             if zip_file and allowed_zip_file(zip_file.filename):
                 zip_filename = secure_filename(zip_file.filename)
                 temp_path = os.path.join(tempfile.gettempdir(), zip_filename)
                 zip_file.save(temp_path)
-                print(f"ZIP file saved to: {temp_path}")
                 extracted_data = extract_and_process_zip(temp_path, extract_historic_nbg_tech_data, "extracted_historic_graphs", is_historic=True)
                 all_extracted_data.extend(extracted_data)
 
             for text, images in all_extracted_data:
-                print(f"Extracted Text: {text}")
-                insert_into_db('HistoricPumpDetails', text)  # Insert into HistoricPumpDetails
-                for img_path in images:
-                    print(f"Saved Image: {img_path}")
+                if not record_exists('HistoricPumpData', 'sku', text['sku']):
+                    insert_into_db('HistoricPumpData', text)
 
             flash('Historic tech data uploaded successfully.')
             return redirect(url_for('pumps.tech_data_upload'))
@@ -151,8 +148,6 @@ def extract_and_process_zip(zip_path, extraction_function, output_folder, is_his
                         if text is not None and images is not None:
                             extracted_data.append((text, images))
                             print(f"Extracted Text from {file_path}: {text}")
-                            for img_path in images:
-                                print(f"Saved Image: {img_path}")
                         else:
                             print(f"Failed to extract data from {file_path}")
     return extracted_data
