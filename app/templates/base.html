@@ -23,7 +23,7 @@
                 <a class="nav-link" href="{{ url_for('home') }}">Home</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('pumps.view_pumps_page') }}">Pumps</a>
+                <a class="nav-link" href="{{ url_for('pumps.pumps') }}">Pumps</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('hydronics.hydronics') }}">Hydronics</a>
@@ -46,11 +46,11 @@
 <!-- Sidebar -->
 <div id="sidebar" class="sidebar">
     <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('pumps.view_pumps_page') }}">Pumps</a>
+        <a class="nav-link" href="{{ url_for('pumps.pumps') }}">Pumps</a>
     </li>
     <div id="pumps-sidebar" class="sidebar-content">
         <a class="nav-link" href="{{ url_for('pumps.add_pump_page') }}">Add Pump</a>
-        <a class="nav-link" href="{{ url_for('pumps.view_pumps_page') }}">View Pumps</a>
+        <a class="nav-link" href="{{ url_for('pumps.view_historic_pumps') }}">View Pumps</a>
         <a class="nav-link" href="{{ url_for('pumps.search_pumps') }}">Search Pumps</a>
         <a class="nav-link" href="{{ url_for('pumps.manual_update_page') }}">Manual Update</a>
         <a class="nav-link" href="{{ url_for('pumps.tech_data_upload') }}">Tech Data Upload</a>

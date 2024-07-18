@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}
+    View Historic Pumps
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Historic Pump Details</h2>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Flow</th>
+                <th>Flow Unit</th>
+                <th>Head</th>
+                <th>Head Unit</th>
+                <th>KW</th>
+                <th>Poles</th>
+                <th>Efficiency</th>
+                <th>Absorbed Power</th>
+                <th>NPSH</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                <td>{{ row['sku'] }}</td>
+                <td>{{ row['name'] }}</td>
+                <td>{{ row['flow'] }}</td>
+                <td>{{ row['flow_unit'] }}</td>
+                <td>{{ row['head'] }}</td>
+                <td>{{ row['head_unit'] }}</td>
+                <td>{{ row['kw'] }}</td>
+                <td>{{ row['poles'] }}</td>
+                <td>{{ row['efficiency'] }}</td>
+                <td>{{ row['absorbed_power'] }}</td>
+                <td>{{ row['npsh'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

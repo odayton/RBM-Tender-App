@@ -54,7 +54,12 @@ class SearchPumpsForm(FlaskForm):
     poles = SelectField('Poles', choices=[('', 'Any'), ('2', '2P'), ('4', '4P')], validators=[Optional()])
     model_type = SelectField('Model Type', choices=[('', 'Any'), ('NBG', 'NBG'), ('CR', 'CR')], validators=[Optional()])
 
-class TechDataUploadForm(FlaskForm):
+class BlankTechDataUploadForm(FlaskForm):
     file = FileField('Upload PDF File(s)', validators=[Optional()])
-    folder = FileField('Upload Folder', validators=[Optional()])
+    zip_file = FileField('Upload ZIP File', validators=[Optional()])
+    submit = SubmitField('Upload')
+
+class HistoricTechDataUploadForm(FlaskForm):
+    file = FileField('Upload PDF File(s)', validators=[Optional()])
+    zip_file = FileField('Upload ZIP File', validators=[Optional()])
     submit = SubmitField('Upload')

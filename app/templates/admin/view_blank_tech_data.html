@@ -13,32 +13,36 @@
                 <tr>
                     <th>SKU</th>
                     <th>Name</th>
-                    <th>Flow (L/s)</th>
-                    <th>Head (kPa)</th>
                     <th>Poles</th>
-                    <th>kW</th>
+                    <th>KW</th>
                     <th>IE Class</th>
                     <th>MEI</th>
-                    <th>Absorbed Power</th>
-                    <th>NPSH</th>
-                    <th>Efficiency</th>
                     <th>Weight</th>
                     <th>Length</th>
                     <th>Width</th>
                     <th>Height</th>
-                    <th>Cost</th>
+                    <th>Image Path</th>
                 </tr>
             </thead>
             <tbody>
-                {% for row in data.rows %}
+                {% for row in data %}
                 <tr>
-                    {% for cell in row %}
-                    <td>{{ cell }}</td>
-                    {% endfor %}
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                    <td>{{ row[4] }}</td>
+                    <td>{{ row[5] }}</td>
+                    <td>{{ row[6] }}</td>
+                    <td>{{ row[7] }}</td>
+                    <td>{{ row[8] }}</td>
+                    <td>{{ row[9] }}</td>
+                    <td>{{ row[10] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    <a href="{{ url_for('admin.download_blank_tech_data') }}" class="btn btn-primary">Download as Excel</a>
 </div>
 {% endblock %}
