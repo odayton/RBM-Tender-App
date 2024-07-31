@@ -52,6 +52,16 @@ def update_db_from_excel(table_name, data):
     conn.commit()
     conn.close()
 
+def record_exists(table_name, sku, flow, head):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    sql = f'SELECT 1 FROM {table_name} WHERE sku = ? AND flow = ? AND head = ? LIMIT 1'
+    cursor.execute(sql, (sku, flow, head))
+    exists = cursor.fetchone() is not None
+    cursor.close()
+    conn.close()
+    return exists
+
 # Ensure the updated schema for the tables
 def create_tables():
     conn = sqlite3.connect('instance/RBM_Product.db')

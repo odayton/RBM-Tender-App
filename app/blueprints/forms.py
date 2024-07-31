@@ -1,3 +1,4 @@
+# app/forms.py
 from flask_wtf import FlaskForm
 from wtforms import StringField, FloatField, FileField, SelectField, IntegerField, TextAreaField, SubmitField
 from wtforms.validators import DataRequired, Optional, Email, NumberRange
@@ -63,3 +64,6 @@ class HistoricTechDataUploadForm(FlaskForm):
     file = FileField('Upload PDF File(s)', validators=[Optional()])
     zip_file = FileField('Upload ZIP File', validators=[Optional()])
     submit = SubmitField('Upload')
+
+class CSRFForm(FlaskForm):  # Add this class
+    submit = SubmitField('Submit')

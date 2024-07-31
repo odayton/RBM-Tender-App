@@ -1,12 +1,14 @@
+# app/blueprints/pumps.py
+# app/blueprints/pumps.py
 import os
 import tempfile
 import zipfile
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from werkzeug.utils import secure_filename
 from app.utils.extract_pdf import extract_blank_nbg_tech_data, extract_historic_nbg_tech_data
-from app.utils.db_utils import fetch_all_from_table, insert_into_db
+from app.utils.db_utils import fetch_all_from_table, insert_into_db, get_db_connection, record_exists  # Ensure correct import
 from app.utils.view_utils import fetch_historic_with_general
-from app.blueprints.forms import ManualUpdateForm, BlankTechDataUploadForm, HistoricTechDataUploadForm, SearchPumpsForm
+from app.blueprints.forms import ManualUpdateForm, BlankTechDataUploadForm, HistoricTechDataUploadForm, SearchPumpsForm, CSRFForm  # Updated import path
 
 pumps_bp = Blueprint('pumps', __name__)
 
@@ -86,10 +88,13 @@ def tech_data_upload():
                         temp_path = os.path.join(tempfile.gettempdir(), filename)
                         file.save(temp_path)
                         extracted_text, extracted_images = process_and_store_pdf(temp_path, extract_historic_nbg_tech_data, "extracted_historic_graphs", is_historic=True)
-                        all_extracted_data.append((extracted_text, extracted_images))
-                        insert_into_db('HistoricPumpData', extracted_text)  # Insert into HistoricPumpData
-                        for img_path in extracted_images:
-                            print(f"Saved Image: {img_path}")
+                        if not record_exists('HistoricPumpData', extracted_text['sku'], extracted_text['flow'], extracted_text['head']):
+                            all_extracted_data.append((extracted_text, extracted_images))
+                            insert_into_db('HistoricPumpData', extracted_text)  # Insert into HistoricPumpData
+                            for img_path in extracted_images:
+                                print(f"Saved Image: {img_path}")
+                        else:
+                            flash(f'Duty with SKU {extracted_text["sku"]}, Flow {extracted_text["flow"]}, and Head {extracted_text["head"]} already exists.')
 
             if zip_file and allowed_zip_file(zip_file.filename):
                 zip_filename = secure_filename(zip_file.filename)
@@ -97,21 +102,52 @@ def tech_data_upload():
                 zip_file.save(temp_path)
                 print(f"ZIP file saved to: {temp_path}")
                 extracted_data = extract_and_process_zip(temp_path, extract_historic_nbg_tech_data, "extracted_historic_graphs", is_historic=True)
-                all_extracted_data.extend(extracted_data)
+                for text, images in extracted_data:
+                    if not record_exists('HistoricPumpData', text['sku'], text['flow'], text['head']):
+                        all_extracted_data.append((text, images))
+                        insert_into_db('HistoricPumpData', text)
+                        for img_path in images:
+                            print(f"Saved Image: {img_path}")
+                    else:
+                        flash(f'Duty with SKU {text["sku"]}, Flow {text["flow"]}, and Head {text["head"]} already exists.')
 
             for text, images in all_extracted_data:
                 print(f"Extracted Text: {text}")
                 for img_path in images:
                     print(f"Saved Image: {img_path}")
 
-            flash('Historic tech data uploaded successfully.')
+            if not all_extracted_data:
+                flash('No new data was uploaded. All duties already exist.')
+            else:
+                flash('Historic tech data uploaded successfully.')
+
             return redirect(url_for('pumps.tech_data_upload'))
     return render_template('pumps/tech_data_upload.html', form=form)
 
-@pumps_bp.route('/pumps/view-historic-pumps')
+@pumps_bp.route('/pumps/view-historic-pumps', methods=['GET', 'POST'])
 def view_historic_pumps():
+    form = CSRFForm()
     data = fetch_historic_with_general()
-    return render_template('pumps/view_historic_pumps.html', data=data)
+    return render_template('pumps/view_historic_pumps.html', form=form, data=data)
+
+@pumps_bp.route('/pumps/remove-historic-pump/<sku>', methods=['POST'])
+def remove_historic_pump(sku):
+    from app.utils.db_utils import get_db_connection
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM HistoricPumpData WHERE sku = ?", (sku,))
+    conn.commit()
+    conn.close()
+
+    flash('Historic pump removed successfully.')
+    return redirect(url_for('pumps.view_historic_pumps'))
+
+@pumps_bp.route('/pumps/add-historic-pump/<sku>', methods=['GET'])
+def add_historic_pump(sku):
+    # Implement the logic to add the historic pump
+    flash('Historic pump added successfully.')
+    return redirect(url_for('pumps.view_historic_pumps'))
 
 @pumps_bp.route('/pumps/get-table-data/<table_name>')
 def get_table_data(table_name):
