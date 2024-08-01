@@ -1,5 +1,4 @@
 # app/blueprints/pumps.py
-# app/blueprints/pumps.py
 import os
 import tempfile
 import zipfile
@@ -65,9 +64,91 @@ def search_pumps():
     form = SearchPumpsForm()
     results = []
     if form.validate_on_submit():
-        # Implement search logic here
-        pass
+        flow = form.flow.data
+        head = form.head.data
+        head_unit = form.head_unit.data
+        poles = form.poles.data
+        model_type = form.model_type.data
+
+        print(f"Form Data - Flow: {flow}, Head: {head}, Head Unit: {head_unit}, Poles: {poles}, Model Type: {model_type}")
+
+        query = """
+            SELECT h.*, g.poles, g.kw
+            FROM HistoricPumpData h
+            LEFT JOIN GeneralPumpDetails g ON h.sku = g.sku
+            WHERE 1=1
+        """
+        params = []
+
+        if flow is not None:
+            flow_min = flow * 0.95
+            flow_max = flow * 1.05
+            query += " AND h.flow BETWEEN ? AND ?"
+            params.extend([flow_min, flow_max])
+            print(f"Flow Range: {flow_min} - {flow_max}")
+        if head is not None:
+            head_min = head * 0.95
+            head_max = head * 1.05
+            query += " AND h.head BETWEEN ? AND ?"
+            params.extend([head_min, head_max])
+            print(f"Head Range: {head_min} - {head_max}")
+        if head_unit:
+            query += " AND LOWER(h.head_unit) = LOWER(?)"
+            params.append(head_unit)
+            print(f"Head Unit: {head_unit}")
+        if poles:
+            query += " AND g.poles = ?"
+            params.append(poles)
+            print(f"Poles: {poles}")
+        if model_type:
+            query += " AND h.model_type = ?"
+            params.append(model_type)
+            print(f"Model Type: {model_type}")
+
+        print(f"Executing Query: {query} with Params: {params}")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Print database schema
+        cursor.execute("PRAGMA table_info(HistoricPumpData)")
+        schema = cursor.fetchall()
+        print("Database Schema (HistoricPumpData):")
+        for column in schema:
+            print(dict(column))
+
+        cursor.execute("PRAGMA table_info(GeneralPumpDetails)")
+        schema = cursor.fetchall()
+        print("Database Schema (GeneralPumpDetails):")
+        for column in schema:
+            print(dict(column))
+
+        # Print all data in the table
+        cursor.execute("SELECT * FROM HistoricPumpData")
+        all_data = cursor.fetchall()
+        print("All Data in HistoricPumpData:")
+        for data in all_data:
+            print(dict(data))
+
+        cursor.execute("SELECT * FROM GeneralPumpDetails")
+        all_data = cursor.fetchall()
+        print("All Data in GeneralPumpDetails:")
+        for data in all_data:
+            print(dict(data))
+
+        # Execute the search query
+        cursor.execute(query, params)
+        results = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        # Convert results to dictionaries
+        results = [dict(row) for row in results]
+
+        print(f"Query Results: {results}")
+
     return render_template('pumps/search_pumps.html', form=form, results=results)
+
 
 @pumps_bp.route('/pumps/tech-data-upload', methods=['GET', 'POST'])
 def tech_data_upload():
