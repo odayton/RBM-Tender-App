@@ -254,3 +254,55 @@ h2, h4 {
     gap: 10px;
     align-items: center;
 }
+
+/* Style for the modal popup */
+.modal-content {
+    background-color: #2d2d2f !important; /* Matches the inset-box background */
+    color: white !important; /* Ensure text is visible */
+    border-radius: 10px !important; /* Consistent border radius */
+}
+
+/* Style for the modal header */
+.modal-header {
+    border-bottom: 1px solid #444 !important; /* Slightly lighter border for separation */
+    color: white !important; /* Text color for header */
+}
+
+/* Style for the modal title */
+.modal-title {
+    color: white !important; /* Ensure title is visible */
+}
+
+/* Style for modal close button */
+.modal-header .close {
+    color: white !important; /* Close button color */
+    opacity: 0.8; /* Slight opacity for a softer appearance */
+}
+
+.modal-header .close:hover {
+    opacity: 1; /* Full opacity on hover */
+}
+
+/* Style for the modal body */
+.modal-body {
+    padding: 20px !important; /* Add padding for content */
+}
+
+/* Style for form controls within the modal */
+.modal-body .form-control {
+    background-color: #3a3a3c !important; /* Dark input background */
+    border: 1px solid #555 !important; /* Darker border */
+    color: white !important; /* Text color */
+}
+
+/* Style for the form labels */
+.modal-body label {
+    color: white !important; /* Ensure labels are visible */
+}
+
+/* Style for dropdowns within the modal */
+.modal-body select {
+    background-color: #3a3a3c !important;
+    border: 1px solid #555 !important;
+    color: white !important;
+}
