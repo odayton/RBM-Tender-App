@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}
+Quotes
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Quotes</h2>
+
+    <!-- Summary Statistics -->
+    <div class="inset-box mb-4">
+        <div class="row text-center mb-4">
+            <div class="col">
+                <h4>Total Deals Amount:</h4>
+                <p>{{ total_deal_amount }}</p>
+            </div>
+            <div class="col">
+                <h4>Average per deal:</h4>
+                <p>{{ avg_deal_amount }}</p>
+            </div>
+            <div class="col">
+                <h4>Quotes (MTD):</h4>
+                <p>{{ quotes_mtd }}</p>
+            </div>
+            <div class="col">
+                <h4>Quotes Last Month:</h4>
+                <p>{{ quotes_last_month }}</p>
+            </div>
+            <div class="col">
+                <h4>Average Deal Age:</h4>
+                <p>{{ avg_deal_age }} days</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deal Stages and Search/Actions -->
+    <div class="inset-box">
+        <div class="search-actions-container">
+            <input type="text" class="form-control" placeholder="Search name or description">
+            <div class="actions-buttons">
+                <button type="button" class="btn btn-primary">Actions</button>
+                <button type="button" class="btn btn-primary">Import</button>
+                <button type="button" class="btn btn-success create-deal-btn" data-toggle="modal" data-target="#createDealModal">Create deal</button>
+            </div>
+        </div>
+        <div class="row text-center mb-4">
+            <div class="col">
+                <h4>Sales Lead</h4>
+            </div>
+            <div class="col">
+                <h4>Qualification / Tender</h4>
+            </div>
+            <div class="col">
+                <h4>Proposal</h4>
+            </div>
+            <div class="col">
+                <h4>Negotiation</h4>
+            </div>
+            <div class="col">
+                <h4>Closed Won</h4>
+            </div>
+            <div class="col">
+                <h4>Closed Lost</h4>
+            </div>
+            <div class="col">
+                <h4>Abandoned</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Deal Modal -->
+<div class="modal fade" id="createDealModal" tabindex="-1" role="dialog" aria-labelledby="createDealModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createDealModalLabel">Create Deal</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% include 'quote/create_deal_panel.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
