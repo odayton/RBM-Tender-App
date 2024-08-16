@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Deal Details
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Deal: {{ deal.name }}</h2>
+    <div class="row">
+        <!-- Left Column: Deal Information -->
+        <div class="col-md-4">
+            <h4>Deal Information</h4>
+            <ul class="list-group">
+                <li class="list-group-item"><strong>Stage:</strong> {{ deal.stage }}</li>
+                <li class="list-group-item"><strong>Type:</strong> {{ deal.type }}</li>
+                <li class="list-group-item"><strong>Location:</strong> {{ deal.location }}</li>
+                <li class="list-group-item"><strong>Close Date:</strong> {{ deal.close_date }}</li>
+                <li class="list-group-item"><strong>Owner:</strong> {{ deal.owner }}</li>
+            </ul>
+        </div>
+
+        <!-- Middle Column: Quotes and Line Items -->
+        <div class="col-md-4">
+            <h4>Quotes</h4>
+            <ul class="list-group">
+                {% for quote in quotes %}
+                <li class="list-group-item">
+                    <strong>Quote #:</strong> {{ quote.quote_number }}
+                    <strong>Total:</strong> {{ quote.total_amount }}
+                </li>
+                {% else %}
+                <li class="list-group-item">No quotes available.</li>
+                {% endfor %}
+            </ul>
+
+            <h4>Line Items</h4>
+            <ul class="list-group">
+                {% for item in line_items %}
+                <li class="list-group-item">
+                    <strong>Product:</strong> {{ item.product_type }} (ID: {{ item.product_id }})
+                    <strong>Qty:</strong> {{ item.quantity }}
+                    <strong>Total Price:</strong> {{ item.total_price }}
+                </li>
+                {% else %}
+                <li class="list-group-item">No line items available.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Right Column: Customer Information -->
+        <div class="col-md-4">
+            <h4>Customer Information</h4>
+            <!-- Placeholder, update as needed -->
+            <ul class="list-group">
+                <li class="list-group-item"><strong>Contact Name:</strong> TBD</li>
+                <li class="list-group-item"><strong>Company Name:</strong> TBD</li>
+                <li class="list-group-item"><strong>Email:</strong> TBD</li>
+                <li class="list-group-item"><strong>Phone:</strong> TBD</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -5,14 +5,84 @@ import pandas as pd
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
 from app.utils.extract_pdf import extract_blank_nbg_tech_data
-from app.utils.db_utils import fetch_all_from_table, insert_into_db
-from app.blueprints.forms import BlankTechDataUploadForm
+from app.utils.db_utils import fetch_all_from_table, insert_into_db, get_db_connection
+from app.blueprints.forms import BlankTechDataUploadForm, ContactForm, DealOwnerForm, CompanyForm
 
 admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/admin/dashboard')
 def admin_dashboard():
     return render_template('admin/dashboard.html')
+
+# Route for creating a new contact
+@admin_bp.route('/admin/create_contact', methods=['GET', 'POST'])
+def create_contact():
+    form = ContactForm()
+
+    # Populate the company_id choices
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, company_name FROM Companies')
+    companies = cursor.fetchall()
+    conn.close()
+
+    form.company_id.choices = [(company['id'], company['company_name']) for company in companies]
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            contact_data = {
+                'representative_name': form.representative_name.data,
+                'representative_email': form.representative_email.data,
+                'phone_number': form.phone_number.data,
+                'company_id': form.company_id.data,
+            }
+
+            try:
+                insert_into_db('Contacts', contact_data)
+                flash('Contact created successfully!', 'success')
+                print('Contact created successfully!')
+                return redirect(url_for('admin.create_contact'))
+            except Exception as e:
+                flash(f"Error creating contact: {str(e)}", "danger")
+                print(f"Error creating contact: {str(e)}")
+
+    return render_template('admin/create_contact.html', form=form)
+
+# Route for creating a new deal owner
+@admin_bp.route('/admin/create-deal-owner', methods=['GET', 'POST'])
+def create_deal_owner():
+    form = DealOwnerForm()
+    if form.validate_on_submit():
+        deal_owner_data = {
+            'name': form.name.data,
+            'email': form.email.data,
+            'phone_number': form.phone_number.data
+        }
+        try:
+            insert_into_db('DealOwners', deal_owner_data)  # Ensure the table name is correct
+            flash("Deal owner created successfully!", "success")
+            return redirect(url_for('admin.create_deal_owner'))
+        except Exception as e:
+            flash(f"Error creating deal owner: {str(e)}", "danger")
+    return render_template('admin/create_deal_owner.html', form=form)
+
+# Route for creating a new company
+@admin_bp.route('/admin/create-company', methods=['GET', 'POST'])
+def create_company():
+    form = CompanyForm()
+    if form.validate_on_submit():
+        company_data = {
+            'company_name': form.company_name.data, 
+            'address': form.address.data
+        }
+        try:
+            insert_into_db('Companies', company_data)
+            flash("Company created successfully!", "success")
+            return redirect(url_for('admin.create_company'))
+        except Exception as e:
+            flash(f"Error creating company: {str(e)}", "danger")
+    return render_template('admin/create_company.html', form=form)
+
 
 @admin_bp.route('/admin/blank-tech-data-upload', methods=['GET', 'POST'])
 def blank_tech_data_upload():

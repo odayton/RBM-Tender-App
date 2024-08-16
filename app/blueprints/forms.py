@@ -1,25 +1,58 @@
 # app/forms.py
 from flask_wtf import FlaskForm
-from wtforms import StringField, FloatField, FileField, SelectField, IntegerField, TextAreaField, SubmitField
+from wtforms import StringField, FloatField, FileField, SelectField, IntegerField, DateField, SubmitField
 from wtforms.validators import DataRequired, Optional, Email, NumberRange
 
-class CustomerForm(FlaskForm):
-    company_name = StringField('Company Name', validators=[DataRequired()])
+class DealForm(FlaskForm):
+    deal_name = StringField('Deal Name', validators=[DataRequired()])
+    deal_stage = SelectField('Deal Stage', choices=[
+        ('Sales Lead', 'Sales Lead'),
+        ('Qualification / Tender', 'Qualification / Tender'),
+        ('Proposal', 'Proposal'),
+        ('Negotiation', 'Negotiation'),
+        ('Closed Won', 'Closed Won'),
+        ('Closed Lost', 'Closed Lost'),
+        ('Abandoned', 'Abandoned')
+    ], validators=[DataRequired()])
+    deal_type = SelectField('Deal Type', choices=[
+        ('HVAC Mechanical', 'HVAC Mechanical'),
+        ('Hydraulic', 'Hydraulic'),
+        ('OEM', 'OEM'),
+        ('Wholesaler', 'Wholesaler'),
+        ('Merchant', 'Merchant')
+    ], validators=[DataRequired()])
+    deal_location = SelectField('Deal Location', choices=[
+        ('Queensland', 'Queensland'),
+        ('New South Wales', 'New South Wales'),
+        ('Victoria', 'Victoria'),
+        ('Australian Capital Territory', 'Australian Capital Territory'),
+        ('Western Australia', 'Western Australia'),
+        ('Northern Territory', 'Northern Territory'),
+        ('Tasmania', 'Tasmania')
+    ], validators=[DataRequired()])
+    close_date = DateField('Close Date', validators=[DataRequired()])
+    deal_owner = SelectField('Deal Owner', choices=[], validators=[Optional()])
+    contact_id = SelectField('Contact', choices=[], validators=[Optional()])
+    company_id = SelectField('Company', choices=[], validators=[Optional()])
+    submit = SubmitField('Save Changes')
+
+class ContactForm(FlaskForm):
     representative_name = StringField('Representative Name', validators=[DataRequired()])
     representative_email = StringField('Representative Email', validators=[DataRequired(), Email()])
-
-class QuoteForm(FlaskForm):
-    project_name = StringField('Project Name', validators=[DataRequired()])
+    phone_number = StringField('Phone Number', validators=[DataRequired()])
     company_id = SelectField('Company', coerce=int, validators=[DataRequired()])
-    deal_location = StringField('Deal Location', validators=[Optional()])
-    terms_conditions = TextAreaField('Terms and Conditions', validators=[Optional()])
+    submit = SubmitField('Save Changes')
 
-class QuoteItemForm(FlaskForm):
-    item_id = SelectField('Pump', coerce=int, validators=[DataRequired()])
-    item_type = StringField('Item Type', default='Pump', validators=[DataRequired()])
-    quantity = IntegerField('Quantity', validators=[DataRequired(), NumberRange(min=1)])
-    price = FloatField('Price', validators=[DataRequired(), NumberRange(min=0)])
-    total_price = FloatField('Total Price', validators=[DataRequired(), NumberRange(min=0)])
+class DealOwnerForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    phone_number = StringField('Phone Number', validators=[DataRequired()])
+    submit = SubmitField('Create Deal Owner')
+
+class CompanyForm(FlaskForm):
+    company_name = StringField('Company Name', validators=[DataRequired()])
+    address = StringField('Address', validators=[DataRequired()])
+    submit = SubmitField('Create Company')
 
 class ManualUpdateForm(FlaskForm):
     table = SelectField('Table', choices=[

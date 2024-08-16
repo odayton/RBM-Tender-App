@@ -67,6 +67,7 @@ def create_tables():
     conn = sqlite3.connect('instance/RBM_Product.db')
     cursor = conn.cursor()
 
+    # Table creation for GeneralPumpDetails
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS GeneralPumpDetails (
         sku TEXT,
@@ -83,6 +84,7 @@ def create_tables():
     )
     ''')
 
+    # Table creation for HistoricPumpData
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS HistoricPumpData (
         sku TEXT,
@@ -98,6 +100,7 @@ def create_tables():
     )
     ''')
 
+    # Table creation for InertiaBases
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS InertiaBases (
         PartNumber TEXT PRIMARY KEY,
@@ -113,6 +116,7 @@ def create_tables():
     )
     ''')
 
+    # Table creation for SmallSeismicSprings
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS SmallSeismicSprings (
         PartNumber TEXT PRIMARY KEY,
@@ -126,6 +130,7 @@ def create_tables():
     )
     ''')
 
+    # Table creation for LargeSeismicSprings
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS LargeSeismicSprings (
         PartNumber TEXT PRIMARY KEY,
@@ -139,6 +144,7 @@ def create_tables():
     )
     ''')
 
+    # Table creation for AdditionalPriceAdders
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS AdditionalPriceAdders (
         IPAdder REAL,
@@ -146,12 +152,87 @@ def create_tables():
     )
     ''')
 
+    # Table creation for RubberMounts
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS RubberMounts (
         PartNumber TEXT PRIMARY KEY,
         Name TEXT,
         Weight REAL,
         Cost REAL
+    )
+    ''')
+
+    # Table creation for Companies
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Companies (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        company_name TEXT,
+        address TEXT,
+        created_at TEXT,
+        updated_at TEXT
+    )
+    ''')
+
+    # Table creation for Contacts
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Contacts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        representative_name TEXT,
+        representative_email TEXT,
+        phone_number TEXT, 
+        company_id INTEGER,
+        FOREIGN KEY (company_id) REFERENCES Companies (id)
+    )
+    ''')
+
+    #Table creation for Deal Owner
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS DealOwners (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT,
+        phone_number TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+    ''')
+
+    # Table creation for Deals
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Deals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        stage TEXT,
+        type TEXT,
+        location TEXT,
+        close_date TEXT,
+        owner TEXT,
+        contact_id INTEGER,
+        company_id INTEGER,
+        created_at TEXT,
+        updated_at TEXT,
+        amount REAL DEFAULT 0.0
+    )
+    ''')
+
+    # Table creation for Quotes
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Quotes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        deal_id INTEGER,
+        quote_number TEXT,
+        created_at TEXT,
+        updated_at TEXT
+    )
+    ''')
+
+    # Table creation for LineItems
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS LineItems (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        quote_id INTEGER,
+        product_name TEXT,
+        quantity INTEGER,
+        price REAL
     )
     ''')
 

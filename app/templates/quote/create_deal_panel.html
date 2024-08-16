@@ -1,59 +1,88 @@
-<div class="container">
-    <form>
+<div class="create-deal-form">
+    <form id="createDealForm" method="POST" action="{{ url_for('quotes.view_quotes') }}">
+        {{ form.hidden_tag() }}
+        
+        <!-- Deal Name -->
         <div class="form-group">
             <label for="dealName">Deal Name</label>
-            <input type="text" class="form-control" id="dealName" placeholder="Enter deal name">
+            <input type="text" class="form-control" id="dealName" name="dealName" required>
         </div>
+
+        <!-- Deal Stage -->
         <div class="form-group">
             <label for="dealStage">Deal Stage</label>
-            <select class="form-control" id="dealStage">
-                <option>Sales Lead</option>
-                <option>Qualification / Tender</option>
-                <option>Proposal</option>
-                <option>Negotiation</option>
-                <option>Closed Won</option>
-                <option>Closed Lost</option>
-                <option>Abandoned</option>
+            <select class="form-control" id="dealStage" name="dealStage" required>
+                <option value="Sales Lead" selected>Sales Lead</option>
+                <option value="Qualification / Tender">Qualification / Tender</option>
+                <option value="Proposal">Proposal</option>
+                <option value="Negotiation">Negotiation</option>
+                <option value="Closed Won">Closed Won</option>
+                <option value="Closed Lost">Closed Lost</option>
+                <option value="Abandoned">Abandoned</option>
             </select>
         </div>
+
+        <!-- Deal Type -->
         <div class="form-group">
             <label for="dealType">Deal Type</label>
-            <select class="form-control" id="dealType">
-                <option>HVAC Mechanical</option>
-                <option>Hydraulic</option>
-                <option>OEM</option>
-                <option>Wholesaler</option>
-                <option>Merchant</option>
+            <select class="form-control" id="dealType" name="dealType" required>
+                <option value="HVAC Mechanical">HVAC Mechanical</option>
+                <option value="Hydraulic">Hydraulic</option>
+                <option value="OEM">OEM</option>
+                <option value="Wholesaler">Wholesaler</option>
+                <option value="Merchant">Merchant</option>
             </select>
         </div>
+
+        <!-- Deal Location -->
         <div class="form-group">
             <label for="dealLocation">Deal Location</label>
-            <select class="form-control" id="dealLocation">
-                <option>Queensland</option>
-                <option>New South Wales</option>
-                <option>Victoria</option>
-                <option>Australian Capital Territory</option>
-                <option>Western Australia</option>
-                <option>Northern Territory</option>
-                <option>Tasmania</option>
+            <select class="form-control" id="dealLocation" name="dealLocation" required>
+                <option value="Queensland">Queensland</option>
+                <option value="New South Wales">New South Wales</option>
+                <option value="Victoria">Victoria</option>
+                <option value="Australian Capital Territory">Australian Capital Territory</option>
+                <option value="Western Australia">Western Australia</option>
+                <option value="Northern Territory">Northern Territory</option>
+                <option value="Tasmania">Tasmania</option>
             </select>
         </div>
+
+        <!-- Close Date -->
         <div class="form-group">
             <label for="closeDate">Close Date</label>
-            <input type="date" class="form-control" id="closeDate" value="{{ (current_date + timedelta(days=90)).strftime('%d/%m/%Y') }}">
+            <input type="date" class="form-control" id="closeDate" name="closeDate" 
+                   value="{{ (current_date + timedelta(days=90)).strftime('%Y-%m-%d') }}" required>
         </div>
+
+        <!-- Deal Owner -->
+        <div class="form-group">
+            <label for="dealOwner">Deal Owner</label>
+            <select class="form-control" id="dealOwner" name="dealOwner">
+                <!-- Options to be populated dynamically -->
+            </select>
+        </div>
+
+        <!-- Contact -->
         <div class="form-group">
             <label for="contact">Contact</label>
-            <select class="form-control" id="contact">
-                <!-- Options will be dynamically loaded -->
+            <select class="form-control" id="contact" name="contact">
+                <!-- Options to be populated dynamically -->
             </select>
         </div>
+
+        <!-- Company -->
         <div class="form-group">
             <label for="company">Company</label>
-            <select class="form-control" id="company">
-                <!-- Options will be dynamically loaded -->
+            <select class="form-control" id="company" name="company">
+                <!-- Options to be populated dynamically -->
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Save</button>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
     </form>
 </div>
