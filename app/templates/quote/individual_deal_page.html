@@ -27,7 +27,7 @@
                 {% for quote in quotes %}
                 <li class="list-group-item">
                     <strong>Quote #:</strong> {{ quote.quote_number }}
-                    <strong>Total:</strong> {{ quote.total_amount }}
+                    <strong>Total:</strong> {{ quote.total_amount or 'N/A' }}
                 </li>
                 {% else %}
                 <li class="list-group-item">No quotes available.</li>
@@ -38,9 +38,9 @@
             <ul class="list-group">
                 {% for item in line_items %}
                 <li class="list-group-item">
-                    <strong>Product:</strong> {{ item.product_type }} (ID: {{ item.product_id }})
+                    <strong>Product:</strong> {{ item.product_name }} (ID: {{ item.id }})
                     <strong>Qty:</strong> {{ item.quantity }}
-                    <strong>Total Price:</strong> {{ item.total_price }}
+                    <strong>Total Price:</strong> {{ item.price | round(2) }}
                 </li>
                 {% else %}
                 <li class="list-group-item">No line items available.</li>
@@ -51,12 +51,11 @@
         <!-- Right Column: Customer Information -->
         <div class="col-md-4">
             <h4>Customer Information</h4>
-            <!-- Placeholder, update as needed -->
             <ul class="list-group">
-                <li class="list-group-item"><strong>Contact Name:</strong> TBD</li>
-                <li class="list-group-item"><strong>Company Name:</strong> TBD</li>
-                <li class="list-group-item"><strong>Email:</strong> TBD</li>
-                <li class="list-group-item"><strong>Phone:</strong> TBD</li>
+                <li class="list-group-item"><strong>Contact Name:</strong> {{ contact.representative_name }}</li>
+                <li class="list-group-item"><strong>Company Name:</strong> {{ company.company_name }}</li>
+                <li class="list-group-item"><strong>Email:</strong> {{ contact.representative_email }}</li>
+                <li class="list-group-item"><strong>Phone:</strong> {{ contact.phone_number }}</li>
             </ul>
         </div>
     </div>

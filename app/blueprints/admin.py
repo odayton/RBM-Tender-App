@@ -53,13 +53,13 @@ def create_contact():
 def create_deal_owner():
     form = DealOwnerForm()
     if form.validate_on_submit():
-        deal_owner_data = {
-            'name': form.name.data,
+        owner_data = {
+            'owner_name': form.owner_name.data,
             'email': form.email.data,
             'phone_number': form.phone_number.data
         }
         try:
-            insert_into_db('DealOwners', deal_owner_data)  # Ensure the table name is correct
+            insert_into_db('DealOwners', owner_data)
             flash("Deal owner created successfully!", "success")
             return redirect(url_for('admin.create_deal_owner'))
         except Exception as e:

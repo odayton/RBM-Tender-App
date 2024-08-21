@@ -5,13 +5,13 @@
         <!-- Deal Name -->
         <div class="form-group">
             <label for="dealName">Deal Name</label>
-            <input type="text" class="form-control" id="dealName" name="dealName" required>
+            <input type="text" class="form-control" id="dealName" name="deal_name" required>
         </div>
 
         <!-- Deal Stage -->
         <div class="form-group">
             <label for="dealStage">Deal Stage</label>
-            <select class="form-control" id="dealStage" name="dealStage" required>
+            <select class="form-control" id="dealStage" name="deal_stage" required>
                 <option value="Sales Lead" selected>Sales Lead</option>
                 <option value="Qualification / Tender">Qualification / Tender</option>
                 <option value="Proposal">Proposal</option>
@@ -25,7 +25,7 @@
         <!-- Deal Type -->
         <div class="form-group">
             <label for="dealType">Deal Type</label>
-            <select class="form-control" id="dealType" name="dealType" required>
+            <select class="form-control" id="dealType" name="deal_type" required>
                 <option value="HVAC Mechanical">HVAC Mechanical</option>
                 <option value="Hydraulic">Hydraulic</option>
                 <option value="OEM">OEM</option>
@@ -37,7 +37,7 @@
         <!-- Deal Location -->
         <div class="form-group">
             <label for="dealLocation">Deal Location</label>
-            <select class="form-control" id="dealLocation" name="dealLocation" required>
+            <select class="form-control" id="dealLocation" name="deal_location" required>
                 <option value="Queensland">Queensland</option>
                 <option value="New South Wales">New South Wales</option>
                 <option value="Victoria">Victoria</option>
@@ -51,31 +51,37 @@
         <!-- Close Date -->
         <div class="form-group">
             <label for="closeDate">Close Date</label>
-            <input type="date" class="form-control" id="closeDate" name="closeDate" 
+            <input type="date" class="form-control" id="closeDate" name="close_date" 
                    value="{{ (current_date + timedelta(days=90)).strftime('%Y-%m-%d') }}" required>
         </div>
 
         <!-- Deal Owner -->
         <div class="form-group">
             <label for="dealOwner">Deal Owner</label>
-            <select class="form-control" id="dealOwner" name="dealOwner">
-                <!-- Options to be populated dynamically -->
+            <select class="form-control" id="dealOwner" name="deal_owner" required>
+                {% for owner_id, owner_name in form.deal_owner.choices %}
+                    <option value="{{ owner_id }}">{{ owner_name }}</option>
+                {% endfor %}
             </select>
         </div>
 
         <!-- Contact -->
         <div class="form-group">
             <label for="contact">Contact</label>
-            <select class="form-control" id="contact" name="contact">
-                <!-- Options to be populated dynamically -->
+            <select class="form-control" id="contact" name="contact_id" required>
+                {% for contact_id, contact_name in form.contact_id.choices %}
+                    <option value="{{ contact_id }}">{{ contact_name }}</option>
+                {% endfor %}
             </select>
         </div>
 
         <!-- Company -->
         <div class="form-group">
             <label for="company">Company</label>
-            <select class="form-control" id="company" name="company">
-                <!-- Options to be populated dynamically -->
+            <select class="form-control" id="company" name="company_id" required>
+                {% for company_id, company_name in form.company_id.choices %}
+                    <option value="{{ company_id }}">{{ company_name }}</option>
+                {% endfor %}
             </select>
         </div>
 

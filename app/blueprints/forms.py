@@ -44,7 +44,7 @@ class ContactForm(FlaskForm):
     submit = SubmitField('Save Changes')
 
 class DealOwnerForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
+    owner_name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone_number = StringField('Phone Number', validators=[DataRequired()])
     submit = SubmitField('Create Deal Owner')

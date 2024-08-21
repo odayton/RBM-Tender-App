@@ -14,14 +14,18 @@ def fetch_all_from_table(table_name):
     conn.close()
     return data
 
-def insert_into_db(table_name, data):
+def insert_into_db(table_name, data, return_last_id=False):
     conn = get_db_connection()
+    cursor = conn.cursor()
     columns = ', '.join(data.keys())
     placeholders = ', '.join(['?'] * len(data))
     sql = f'INSERT INTO {table_name} ({columns}) VALUES ({placeholders})'
-    conn.execute(sql, tuple(data.values()))
+    cursor.execute(sql, tuple(data.values()))
     conn.commit()
+    last_id = cursor.lastrowid if return_last_id else None
+    cursor.close()
     conn.close()
+    return last_id
 
 def record_exists(table_name, column, value):
     conn = get_db_connection()
@@ -189,7 +193,7 @@ def create_tables():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS DealOwners (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
+        owner_name TEXT,
         email TEXT,
         phone_number TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
