@@ -7,7 +7,7 @@ class DealForm(FlaskForm):
     deal_name = StringField('Deal Name', validators=[DataRequired()])
     deal_stage = SelectField('Deal Stage', choices=[
         ('Sales Lead', 'Sales Lead'),
-        ('Qualification / Tender', 'Qualification / Tender'),
+        ('Tender', 'Tender'),
         ('Proposal', 'Proposal'),
         ('Negotiation', 'Negotiation'),
         ('Closed Won', 'Closed Won'),

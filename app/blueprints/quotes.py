@@ -36,7 +36,7 @@ def view_quotes():
 
     deals_by_stage = {
         'Sales Lead': [],
-        'Qualification / Tender': [],
+        'Tender': [],
         'Proposal': [],
         'Negotiation': [],
         'Closed Won': [],
@@ -45,7 +45,11 @@ def view_quotes():
     }
 
     for deal in deals:
-        deals_by_stage[deal['stage']].append(deal)
+        stage = deal['stage']
+        if stage in deals_by_stage:
+            deals_by_stage[stage].append(deal)
+        else:
+            print(f"Unknown stage: {stage}") 
 
     cursor.close()
     conn.close()

@@ -69,8 +69,8 @@ Quotes
             <div class="col deal-column">
                 <h4>Tender</h4>
                 <div class="inset-box stage-container" id="tender-stage">
-                    {% if deals_by_stage['Tender'] %}
-                        {% for deal in deals_by_stage['Tender'] %}
+                    {% if deals_by_stage['Tender'] %}  <!-- Updated key -->
+                        {% for deal in deals_by_stage['Tender'] %}  <!-- Updated key -->
                             <a href="{{ url_for('quotes.view_deal', deal_id=deal.id) }}" class="deal-card" draggable="true" data-deal-id="{{ deal.id }}">
                                 <strong>{{ deal.name | truncate(20) }}</strong><br>
                                 {{ deal.type }}<br>
