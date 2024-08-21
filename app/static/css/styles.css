@@ -1,4 +1,3 @@
-/* General Styles */
 /* Set the background color for all pages */
 body {
     background-color: #3a3a3c !important;
@@ -6,8 +5,6 @@ body {
     margin: 0; /* Reset default margin */
     font-family: Arial, sans-serif; /* Set default font */
 }
-
-/* Navbar Styles */
 /* Style for the navbar */
 .navbar {
     background-color: #37779e !important;
@@ -16,18 +13,14 @@ body {
     position: relative !important;
     color: #ffffff !important;
 }
-
 /* Style for navbar links */
 .navbar-nav .nav-link {
     color: #ffffff !important;
 }
-
 /* Style for navbar links on hover */
 .navbar-nav .nav-link:hover {
     background-color: #799285 !important;
 }
-
-/* Sidebar Styles */
 /* Style for the sidebar */
 .sidebar {
     background-color: #37779e !important;
@@ -41,33 +34,86 @@ body {
     transform: translateX(-250px) !important;
     z-index: 900 !important;
 }
-
 /* Style for active sidebar */
 .sidebar.active {
     transform: translateX(0) !important;
 }
-
 /* Style for sidebar links */
 .sidebar .nav-link {
     color: #ffffff !important;
 }
-
 /* Style for sidebar links on hover */
 .sidebar .nav-link:hover {
     background-color: #799285 !important;
 }
-
 /* Add top margin to sidebar links */
 .sidebar .sidebar-content {
     margin-top: 70px;
 }
-
 /* Hide toggle sidebar button on the home page */
 .home #sidebar-toggle {
     display: none;
 }
-
-/* Sidebar Toggle Button */
+/* Additional styling for main content */
+.main-content {
+    background-color: #3a3a3c !important;
+    padding: 20px !important;
+    transition: margin-left 0.3s ease;
+    position: relative;
+}
+.main-content.with-sidebar {
+    margin-left: 250px !important;
+}
+.main-content.no-sidebar {
+    margin-left: 0 !important;
+}
+/* Style for table text */
+.table td, .table th {
+    color: white !important;
+}
+/* Style for table borders */
+.table {
+    border: 1px solid white !important;
+    width: 100%;
+}
+/* Add borders to table cells */
+.table td, .table th {
+    border: 1px solid #dddddd !important;
+    padding: 8px;
+}
+/* Sticky table headers */
+.table thead th {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 0;
+    background-color: #37779e;
+    z-index: 2;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+}
+/* Style for resizable table columns */
+.table-resizable th {
+    position: relative;
+    white-space: nowrap;
+    padding-right: 16px; /* Ensure space for the resizer */
+}
+.table-resizable th .resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    cursor: col-resize;
+    background-color: #ffffff; /* Optional: Add color to the resizer handle for visibility */
+}
+/* Add cursor style for resizing */
+.table-resizable th.resizing {
+    cursor: ew-resize;
+}
+/* Ensure table container scrolls */
+.table-container {
+    overflow-y: auto;
+    max-height: 70vh; /* Adjust the height as needed */
+}
 /* Style for the sidebar toggle button */
 .sidebar-toggle {
     position: fixed;
@@ -79,116 +125,9 @@ body {
     border: none;
     transition: left 0.3s ease;
 }
-
-/* Adjust position when sidebar is active */
 .sidebar.active + .sidebar-toggle {
     left: 260px;
 }
-
-/* Main Content Styles */
-/* Additional styling for main content */
-.main-content {
-    background-color: #3a3a3c !important;
-    padding: 20px !important;
-    transition: margin-left 0.3s ease;
-    position: relative;
-}
-
-.main-content.with-sidebar {
-    margin-left: 250px !important;
-}
-
-.main-content.no-sidebar {
-    margin-left: 0 !important;
-}
-
-/* Container Styles */
-.container {
-    max-width: 90%; /* Adjusted for larger width */
-    margin: auto; /* Center the content */
-}
-
-.inset-box {
-    background-color: #2d2d2f !important;
-    border-radius: 10px !important;
-    padding: 20px !important;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3) !important;
-    position: relative;
-    z-index: 1;
-    margin-bottom: 20px; /* Ensure spacing between boxes */
-}
-
-/* Specific adjustments for inset boxes */
-.inset-box + .inset-box {
-    margin-top: 50px; /* Ensure the background box is lower */
-    z-index: 0;
-}
-
-/* List Group Styles */
-/* Style for list group items to ensure text is visible */
-.list-group-item {
-    background-color: #444 !important; /* Darker background for contrast */
-    color: #ffffff !important; /* Ensure text color is white */
-    border-color: #555 !important; /* Slightly darker border for separation */
-}
-
-/* Table Styles */
-/* Style for table text */
-.table td, .table th {
-    color: white !important;
-}
-
-/* Style for table borders */
-.table {
-    border: 1px solid white !important;
-    width: 100%;
-}
-
-/* Add borders to table cells */
-.table td, .table th {
-    border: 1px solid #dddddd !important;
-    padding: 8px;
-}
-
-/* Sticky table headers */
-.table thead th {
-    position: -webkit-sticky; /* For Safari */
-    position: sticky;
-    top: 0;
-    background-color: #37779e;
-    z-index: 2;
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
-}
-
-/* Style for resizable table columns */
-.table-resizable th {
-    position: relative;
-    white-space: nowrap;
-    padding-right: 16px; /* Ensure space for the resizer */
-}
-
-.table-resizable th .resizer {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 1px;
-    cursor: col-resize;
-    background-color: #ffffff; /* Optional: Add color to the resizer handle for visibility */
-}
-
-/* Add cursor style for resizing */
-.table-resizable th.resizing {
-    cursor: ew-resize;
-}
-
-/* Ensure table container scrolls */
-.table-container {
-    overflow-y: auto;
-    max-height: 70vh; /* Adjust the height as needed */
-}
-
-/* Specific Table Column Styles */
 /* Adjust width of the Name column in the Pump_Details table */
 table th:nth-child(2), table td:nth-child(2) {
     max-width: 400px;
@@ -196,8 +135,6 @@ table th:nth-child(2), table td:nth-child(2) {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-/* Form Styles */
 /* Remove spinner controls from number inputs */
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 
@@ -205,25 +142,30 @@ input[type=number]::-webkit-outer-spin-button {
     appearance: none; 
     margin: 0; 
 }
-
 input[type=number] { 
     -moz-appearance: textfield; 
     appearance: textfield; 
 }
-
+.container {
+    max-width: 90%; /* Adjusted for larger width */
+    margin: auto; /* Center the content */
+}
+.inset-box {
+    background-color: #2d2d2f !important;
+    border-radius: 10px !important;
+    padding: 20px !important;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
 /* Title styles */
 h2, h4 {
     margin-top: 20px;
     margin-bottom: 20px;
 }
-
 /* Row styling */
 .row {
-    margin-bottom: 20px; /* Ensure proper spacing between rows */
+    margin-bottom: 20px;
 }
-
-/* Button Styling */
-/* General button styles */
+/* Button styling */
 .btn {
     height: 40px; /* Ensure consistent height */
     padding: 0 15px; /* Horizontal padding */
@@ -238,38 +180,49 @@ h2, h4 {
     outline: none;
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
-
-/* Primary button styles */
 .btn-primary {
     background-color: #007bff !important;
 }
-
 .btn-primary:hover {
     background-color: #0056b3 !important;
 }
-
-/* Success button styles */
 .btn-success {
     background-color: #28a745 !important;
 }
-
 .btn-success:hover {
     background-color: #218838 !important;
 }
-
 /* Specific styling for the Create Deal button */
 .create-deal-btn {
     /* Additional specific styles can be added here */
     vertical-align: middle; /* Ensure text is vertically centered */
     line-height: 40px; /* Match line-height to the button height */
 }
+/* Use CSS Grid for alignment */
+.search-actions-container {
+    display: grid;
+    grid-template-columns: 1fr auto; /* Input takes available space, buttons auto-size */
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+}
+.search-actions-container .form-control {
+    width: 100%; /* Full width of the grid area */
+    max-width: 600px; /* Limit the maximum width */
+}
+.actions-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, auto); /* Each button auto-sized */
+    gap: 10px;
+    align-items: center;
+}
 
-/* Modal Styles */
 /* Style for the modal popup */
 .modal-content {
     background-color: #2d2d2f !important; /* Matches the inset-box background */
     color: white !important; /* Ensure text is visible */
     border-radius: 10px !important; /* Consistent border radius */
+    z-index: 1050; /* Ensure modal is in front */
 }
 
 /* Style for the modal header */
@@ -317,28 +270,9 @@ h2, h4 {
     color: white !important;
 }
 
-/* Search and Action Container Styles */
-/* Use CSS Grid for alignment */
-.search-actions-container {
-    display: grid;
-    grid-template-columns: 1fr auto; /* Input takes available space, buttons auto-size */
-    align-items: center;
-    gap: 10px;
-    padding: 10px 0;
-}
-
-/* Style for search input */
-.search-actions-container .form-control {
-    width: 100%; /* Full width of the grid area */
-    max-width: 600px; /* Limit the maximum width */
-}
-
-/* Style for action buttons */
-.actions-buttons {
-    display: grid;
-    grid-template-columns: repeat(3, auto); /* Each button auto-sized */
-    gap: 10px;
-    align-items: center;
+/* Ensure the modal backdrop is behind the modal */
+.modal-backdrop {
+    z-index: 1040 !important; /* Bootstrap default z-index for modal backdrop */
 }
 
 /* Deal Card Styles */

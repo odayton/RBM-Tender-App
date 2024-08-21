@@ -75,27 +75,15 @@ def view_quotes():
                 'updated_at': datetime.now().strftime('%Y-%m-%d')
             }
 
-            # Insert into the Deals table
-            try:
-                insert_into_db('Deals', deal_data)
-                success_message = "Deal created successfully!"
-                flash(success_message, "success")
-                print(success_message)
-                # Fetch the ID of the newly created deal
-                conn = get_db_connection()
-                cursor = conn.cursor()
-                cursor.execute('SELECT last_insert_rowid()')
-                deal_id = cursor.fetchone()[0]
-                conn.close()
+            # Insert into the Deals table and retrieve the new deal ID
+            deal_id = insert_into_db('Deals', deal_data)
+
+            if deal_id:
                 return redirect(url_for('quotes.view_deal', deal_id=deal_id))
-            except Exception as e:
-                error_message = f"Error creating deal: {str(e)}"
-                flash(error_message, "danger")
-                print(error_message)
+            else:
+                flash("Error creating deal.", "danger")
         else:
-            error_message = "Please correct the errors in the form."
-            flash(error_message, "danger")
-            print(error_message)
+            flash("Please correct the errors in the form.", "danger")
 
     # Fetch data for rendering quotes page (e.g., summary stats)
     conn = get_db_connection()

@@ -14,7 +14,7 @@ def fetch_all_from_table(table_name):
     conn.close()
     return data
 
-def insert_into_db(table_name, data, return_last_id=False):
+def insert_into_db(table_name, data):
     conn = get_db_connection()
     cursor = conn.cursor()
     columns = ', '.join(data.keys())
@@ -22,10 +22,11 @@ def insert_into_db(table_name, data, return_last_id=False):
     sql = f'INSERT INTO {table_name} ({columns}) VALUES ({placeholders})'
     cursor.execute(sql, tuple(data.values()))
     conn.commit()
-    last_id = cursor.lastrowid if return_last_id else None
+    last_id = cursor.lastrowid  # Get the ID of the last inserted row
     cursor.close()
     conn.close()
     return last_id
+
 
 def record_exists(table_name, column, value):
     conn = get_db_connection()
