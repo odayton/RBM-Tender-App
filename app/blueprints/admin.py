@@ -4,8 +4,13 @@ import zipfile
 import pandas as pd
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
+
 from app.utils.extract_pdf import extract_blank_nbg_tech_data
-from app.utils.db_utils import fetch_all_from_table, insert_into_db, get_db_connection
+from app.utils.db_utils.db_connection import get_db_connection
+from app.utils.db_utils.db_contacts import insert_contact, fetch_all_contacts
+from app.utils.db_utils.db_deal_owners import insert_deal_owner
+from app.utils.db_utils.db_companies import insert_company, fetch_all_companies
+from app.utils.db_utils.db_pumps import fetch_all_general_pumps, insert_general_pump_details
 from app.blueprints.forms import BlankTechDataUploadForm, ContactForm, DealOwnerForm, CompanyForm
 
 admin_bp = Blueprint('admin', __name__)
@@ -19,13 +24,8 @@ def admin_dashboard():
 def create_contact():
     form = ContactForm()
 
-    # Populate the company_id choices
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT id, company_name FROM Companies')
-    companies = cursor.fetchall()
-    conn.close()
-
+    # Fetch all companies to populate the company_id choices
+    companies = fetch_all_companies()
     form.company_id.choices = [(company['id'], company['company_name']) for company in companies]
 
     if request.method == 'POST':
@@ -38,13 +38,11 @@ def create_contact():
             }
 
             try:
-                insert_into_db('Contacts', contact_data)
+                insert_contact(contact_data)
                 flash('Contact created successfully!', 'success')
-                print('Contact created successfully!')
                 return redirect(url_for('admin.create_contact'))
             except Exception as e:
                 flash(f"Error creating contact: {str(e)}", "danger")
-                print(f"Error creating contact: {str(e)}")
 
     return render_template('admin/create_contact.html', form=form)
 
@@ -59,7 +57,7 @@ def create_deal_owner():
             'phone_number': form.phone_number.data
         }
         try:
-            insert_into_db('DealOwners', owner_data)
+            insert_deal_owner(owner_data)
             flash("Deal owner created successfully!", "success")
             return redirect(url_for('admin.create_deal_owner'))
         except Exception as e:
@@ -76,13 +74,12 @@ def create_company():
             'address': form.address.data
         }
         try:
-            insert_into_db('Companies', company_data)
+            insert_company(company_data)
             flash("Company created successfully!", "success")
             return redirect(url_for('admin.create_company'))
         except Exception as e:
             flash(f"Error creating company: {str(e)}", "danger")
     return render_template('admin/create_company.html', form=form)
-
 
 @admin_bp.route('/admin/blank-tech-data-upload', methods=['GET', 'POST'])
 def blank_tech_data_upload():
@@ -106,7 +103,7 @@ def blank_tech_data_upload():
                             extracted_text, extracted_images = process_and_store_pdf(temp_path, extract_blank_nbg_tech_data, "extracted_blank_graphs")
                             all_extracted_data.append((extracted_text, extracted_images))
                             print(f"Extracted Text: {extracted_text}")
-                            insert_into_db('GeneralPumpDetails', extracted_text)  # Insert into GeneralPumpDetails
+                            insert_general_pump_details(extracted_text)  # Insert into GeneralPumpDetails
                             for img_path in extracted_images:
                                 print(f"Saved Image: {img_path}")
 
@@ -121,7 +118,7 @@ def blank_tech_data_upload():
                 for text, images in all_extracted_data:
                     if text:
                         print(f"Extracted Text: {text}")
-                        insert_into_db('GeneralPumpDetails', text)  # Insert into GeneralPumpDetails
+                        insert_general_pump_details(text)  # Insert into GeneralPumpDetails
                         for img_path in images:
                             print(f"Saved Image: {img_path}")
 
@@ -131,12 +128,12 @@ def blank_tech_data_upload():
 
 @admin_bp.route('/admin/view-blank-tech-data')
 def view_blank_tech_data():
-    data = fetch_all_from_table('GeneralPumpDetails')
+    data = fetch_all_general_pumps()
     return render_template('admin/view_blank_tech_data.html', data=data)
 
 @admin_bp.route('/admin/download-blank-tech-data')
 def download_blank_tech_data():
-    data = fetch_all_from_table('GeneralPumpDetails')
+    data = fetch_all_general_pumps()
 
     # Convert data to DataFrame
     df = pd.DataFrame(data, columns=['SKU', 'Name', 'Poles', 'KW', 'IE Class', 'MEI', 'Weight', 'Length', 'Width', 'Height', 'Image Path'])

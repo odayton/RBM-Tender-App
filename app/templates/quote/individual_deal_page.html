@@ -5,59 +5,151 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Deal: {{ deal.name }}</h2>
+<div class="container-fluid">
     <div class="row">
-        <!-- Left Column: Deal Information -->
-        <div class="col-md-4">
+        <!-- Left Column: Deal Information (Inset Box) -->
+        <div class="col-md-3 p-3 inset-box" style="background-color: #555; color: #fff; min-height: 100vh; border-radius: 10px;">
             <h4>Deal Information</h4>
-            <ul class="list-group">
-                <li class="list-group-item"><strong>Stage:</strong> {{ deal.stage }}</li>
-                <li class="list-group-item"><strong>Type:</strong> {{ deal.type }}</li>
-                <li class="list-group-item"><strong>Location:</strong> {{ deal.location }}</li>
-                <li class="list-group-item"><strong>Close Date:</strong> {{ deal.close_date }}</li>
-                <li class="list-group-item"><strong>Owner:</strong> {{ deal.owner }}</li>
+            <ul class="list-unstyled">
+                <li><strong>Deal Name:</strong> {{ deal.name }}</li>
+                <li><strong>Stage:</strong> {{ deal.stage }}</li>
+                <li><strong>Type:</strong> {{ deal.type }}</li>
+                <li><strong>Location:</strong> {{ deal.location }}</li>
+                <li><strong>Close Date:</strong> {{ deal.close_date }}</li>
+                <li><strong>Owner:</strong> {{ deal.owner }}</li>
             </ul>
         </div>
 
-        <!-- Middle Column: Quotes and Line Items -->
-        <div class="col-md-4">
-            <h4>Quotes</h4>
-            <ul class="list-group">
-                {% for quote in quotes %}
-                <li class="list-group-item">
-                    <strong>Quote #:</strong> {{ quote.quote_number }}
-                    <strong>Total:</strong> {{ quote.total_amount or 'N/A' }}
-                </li>
-                {% else %}
-                <li class="list-group-item">No quotes available.</li>
+        <!-- Middle Column: Revisions and Line Items (Inset Box) -->
+        <div class="col-md-6 p-3 inset-box" style="background-color: #444; color: #fff; min-height: 100vh; border-radius: 10px;">
+            <!-- Revision Tabs -->
+            <div class="mb-3">
+                <button class="btn btn-primary">Rev 0.0</button>
+                {% for revision in revisions %}
+                    <button class="btn btn-primary">Rev {{ revision.version }}</button>
                 {% endfor %}
-            </ul>
+                <!-- Add Revision Button -->
+                <button class="btn btn-secondary ml-2" onclick="addNewRevision()">+</button>
+            </div>
 
-            <h4>Line Items</h4>
-            <ul class="list-group">
-                {% for item in line_items %}
-                <li class="list-group-item">
-                    <strong>Product:</strong> {{ item.product_name }} (ID: {{ item.id }})
-                    <strong>Qty:</strong> {{ item.quantity }}
-                    <strong>Total Price:</strong> {{ item.price | round(2) }}
-                </li>
-                {% else %}
-                <li class="list-group-item">No line items available.</li>
-                {% endfor %}
-            </ul>
+            <!-- Nested Inset Box for Line Items and Actions -->
+            <div class="p-3 inset-box" style="background-color: #555; border-radius: 10px;">
+                <!-- Another Inset Box for Actions and Table -->
+                <div class="p-3 inset-box" style="background-color: #666; border-radius: 10px;">
+                    <!-- Table for Line Items -->
+                    <div class="bg-light text-dark p-3 mb-3" style="border-radius: 5px;">
+                        <h5>Line Items</h5>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if revisions %}
+                                    {% for revision in revisions %}
+                                        {% if revision.line_items %}
+                                            {% for item in revision.line_items %}
+                                                <tr>
+                                                    <td>{{ item.description }}</td>
+                                                    <td>{{ item.amount }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="2" class="text-center">No line items found for this revision.</td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="2" class="text-center">No revisions found for this deal.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Buttons for Adding Items and Save -->
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <button class="btn btn-primary">Add Pumps</button>
+                            <button class="btn btn-primary ml-2">Add Line Item</button>
+                        </div>
+                        <button class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Right Column: Customer Information -->
-        <div class="col-md-4">
-            <h4>Customer Information</h4>
-            <ul class="list-group">
-                <li class="list-group-item"><strong>Contact Name:</strong> {{ contact.representative_name }}</li>
-                <li class="list-group-item"><strong>Company Name:</strong> {{ company.company_name }}</li>
-                <li class="list-group-item"><strong>Email:</strong> {{ contact.representative_email }}</li>
-                <li class="list-group-item"><strong>Phone:</strong> {{ contact.phone_number }}</li>
-            </ul>
+        <!-- Right Column: Contacts and Actions -->
+        <div class="col-md-3">
+            <!-- Contacts Section (Inset Box) -->
+            <div class="p-3 inset-box mb-4" style="background-color: #444; color: #fff; border-radius: 10px;">
+                <div class="d-flex justify-content-between">
+                    <h5>Contacts</h5>
+                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addContactCompanyModal">
+                        + Add
+                    </button>
+                </div>
+                <button class="btn btn-primary btn-block mt-2">{{ deal.contact_name }}</button>
+            </div>
+
+            <!-- Action Buttons Section (Inset Box) -->
+            <div class="p-3 inset-box" style="background-color: #444; color: #fff; border-radius: 10px;">
+                <button class="btn btn-primary btn-block mb-2">Save PDF</button>
+                <button class="btn btn-primary btn-block mb-2">Save Excel</button>
+                <button class="btn btn-primary btn-block mb-2">Save Schedule</button>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Modal for Adding Contacts/Companies -->
+<div class="modal fade" id="addContactCompanyModal" tabindex="-1" role="dialog" aria-labelledby="addContactCompanyModalLabel" aria-hidden="true">
+    <!-- Modal Content for Adding Contacts/Companies -->
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addContactCompanyModalLabel">Add Contact/Company</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('quotes.add_contact_company', deal_id=deal.id) }}">
+                    <div class="form-group">
+                        <label for="entityType">Select Contact/Company</label>
+                        <select class="form-control" id="entityType" name="entity_type">
+                            <option value="contact">Contact</option>
+                            <option value="company">Company</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="entityId">Select</label>
+                        <select class="form-control" id="entityId" name="entity_id">
+                            {% if all_contacts and all_contacts|length > 0 %}
+                                {% for contact in all_contacts %}
+                                    <option value="{{ contact.id }}">{{ contact.representative_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                            {% if all_companies and all_companies|length > 0 %}
+                                {% for company in all_companies %}
+                                    <option value="{{ company.id }}">{{ company.company_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add to Deal</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/deal_details.js') }}"></script>
 {% endblock %}

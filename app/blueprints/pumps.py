@@ -1,13 +1,14 @@
 # app/blueprints/pumps.py
+
 import os
 import tempfile
 import zipfile
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from werkzeug.utils import secure_filename
 from app.utils.extract_pdf import extract_blank_nbg_tech_data, extract_historic_nbg_tech_data
-from app.utils.db_utils import fetch_all_from_table, insert_into_db, get_db_connection, record_exists  # Ensure correct import
+from app.utils.db_utils.db_connection import insert_into_db, get_db_connection, record_exists  # Updated import
 from app.utils.view_utils import fetch_historic_with_general
-from app.blueprints.forms import ManualUpdateForm, BlankTechDataUploadForm, HistoricTechDataUploadForm, SearchPumpsForm, CSRFForm  # Updated import path
+from app.blueprints.forms import ManualUpdateForm, BlankTechDataUploadForm, HistoricTechDataUploadForm, SearchPumpsForm, CSRFForm
 
 pumps_bp = Blueprint('pumps', __name__)
 
@@ -70,8 +71,6 @@ def search_pumps():
         poles = form.poles.data
         model_type = form.model_type.data
 
-        print(f"Form Data - Flow: {flow}, Head: {head}, Head Unit: {head_unit}, Poles: {poles}, Model Type: {model_type}")
-
         query = """
             SELECT h.*, g.poles, g.kw
             FROM HistoricPumpData h
@@ -85,70 +84,31 @@ def search_pumps():
             flow_max = flow * 1.05
             query += " AND h.flow BETWEEN ? AND ?"
             params.extend([flow_min, flow_max])
-            print(f"Flow Range: {flow_min} - {flow_max}")
         if head is not None:
             head_min = head * 0.95
             head_max = head * 1.05
             query += " AND h.head BETWEEN ? AND ?"
             params.extend([head_min, head_max])
-            print(f"Head Range: {head_min} - {head_max}")
         if head_unit:
             query += " AND LOWER(h.head_unit) = LOWER(?)"
             params.append(head_unit)
-            print(f"Head Unit: {head_unit}")
         if poles:
             query += " AND g.poles = ?"
             params.append(poles)
-            print(f"Poles: {poles}")
         if model_type:
             query += " AND h.model_type = ?"
             params.append(model_type)
-            print(f"Model Type: {model_type}")
-
-        print(f"Executing Query: {query} with Params: {params}")
 
         conn = get_db_connection()
         cursor = conn.cursor()
-
-        # Print database schema
-        cursor.execute("PRAGMA table_info(HistoricPumpData)")
-        schema = cursor.fetchall()
-        print("Database Schema (HistoricPumpData):")
-        for column in schema:
-            print(dict(column))
-
-        cursor.execute("PRAGMA table_info(GeneralPumpDetails)")
-        schema = cursor.fetchall()
-        print("Database Schema (GeneralPumpDetails):")
-        for column in schema:
-            print(dict(column))
-
-        # Print all data in the table
-        cursor.execute("SELECT * FROM HistoricPumpData")
-        all_data = cursor.fetchall()
-        print("All Data in HistoricPumpData:")
-        for data in all_data:
-            print(dict(data))
-
-        cursor.execute("SELECT * FROM GeneralPumpDetails")
-        all_data = cursor.fetchall()
-        print("All Data in GeneralPumpDetails:")
-        for data in all_data:
-            print(dict(data))
-
-        # Execute the search query
         cursor.execute(query, params)
         results = cursor.fetchall()
         cursor.close()
         conn.close()
 
-        # Convert results to dictionaries
         results = [dict(row) for row in results]
 
-        print(f"Query Results: {results}")
-
     return render_template('pumps/search_pumps.html', form=form, results=results)
-
 
 @pumps_bp.route('/pumps/tech-data-upload', methods=['GET', 'POST'])
 def tech_data_upload():
@@ -171,7 +131,7 @@ def tech_data_upload():
                         extracted_text, extracted_images = process_and_store_pdf(temp_path, extract_historic_nbg_tech_data, "extracted_historic_graphs", is_historic=True)
                         if not record_exists('HistoricPumpData', extracted_text['sku'], extracted_text['flow'], extracted_text['head']):
                             all_extracted_data.append((extracted_text, extracted_images))
-                            insert_into_db('HistoricPumpData', extracted_text)  # Insert into HistoricPumpData
+                            insert_into_db('HistoricPumpData', extracted_text)
                             for img_path in extracted_images:
                                 print(f"Saved Image: {img_path}")
                         else:
@@ -181,7 +141,6 @@ def tech_data_upload():
                 zip_filename = secure_filename(zip_file.filename)
                 temp_path = os.path.join(tempfile.gettempdir(), zip_filename)
                 zip_file.save(temp_path)
-                print(f"ZIP file saved to: {temp_path}")
                 extracted_data = extract_and_process_zip(temp_path, extract_historic_nbg_tech_data, "extracted_historic_graphs", is_historic=True)
                 for text, images in extracted_data:
                     if not record_exists('HistoricPumpData', text['sku'], text['flow'], text['head']):
@@ -208,13 +167,11 @@ def tech_data_upload():
 @pumps_bp.route('/pumps/view-historic-pumps', methods=['GET', 'POST'])
 def view_historic_pumps():
     form = CSRFForm()
-    data = fetch_historic_with_general()
+    data = fetch_historic_with_general()  # Ensure this function fetches the appropriate data from your DB
     return render_template('pumps/view_historic_pumps.html', form=form, data=data)
 
 @pumps_bp.route('/pumps/remove-historic-pump/<sku>', methods=['POST'])
 def remove_historic_pump(sku):
-    from app.utils.db_utils import get_db_connection
-
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM HistoricPumpData WHERE sku = ?", (sku,))
@@ -232,7 +189,14 @@ def add_historic_pump(sku):
 
 @pumps_bp.route('/pumps/get-table-data/<table_name>')
 def get_table_data(table_name):
-    data = fetch_all_from_table(table_name)
+    # Assuming there’s a new specific fetch function, update accordingly:
+    if table_name == "GeneralPumpDetails":
+        data = fetch_general_pump_details()  # This should be defined in `db_pumps.py`
+    elif table_name == "HistoricPumpData":
+        data = fetch_historic_pump_data()  # This should be defined in `db_pumps.py`
+    else:
+        data = []
+
     return jsonify(data)
 
 def allowed_file(filename):
@@ -253,23 +217,14 @@ def process_and_store_pdf(pdf_path, extraction_function, output_folder, is_histo
 def extract_and_process_zip(zip_path, extraction_function, output_folder, is_historic=False):
     extracted_data = []
     with tempfile.TemporaryDirectory() as temp_dir:
-        print(f"Extracting ZIP file to temporary directory: {temp_dir}")
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(temp_dir)
-            print(f"ZIP file extracted to: {temp_dir}")
             for root, dirs, files in os.walk(temp_dir):
                 for file in files:
-                    print(f"Found file in ZIP: {file}")
                     if allowed_file(file):
                         file_path = os.path.join(root, file)
-                        print(f"Processing extracted file: {file_path}")
                         text, images = process_and_store_pdf(file_path, extraction_function, output_folder, is_historic)
                         if text is not None and images is not None:
                             extracted_data.append((text, images))
-                            print(f"Extracted Text from {file_path}: {text}")
-                            insert_into_db('HistoricPumpData' if is_historic else 'GeneralPumpDetails', text)  # Insert into appropriate table
-                            for img_path in images:
-                                print(f"Saved Image: {img_path}")
-                        else:
-                            print(f"Failed to extract data from {file_path}")
+                            insert_into_db('HistoricPumpData' if is_historic else 'GeneralPumpDetails', text)
     return extracted_data

@@ -1,6 +1,6 @@
 # app/forms.py
 from flask_wtf import FlaskForm
-from wtforms import StringField, FloatField, FileField, SelectField, IntegerField, DateField, SubmitField
+from wtforms import StringField, FloatField, FileField, SelectField, IntegerField, DateField, SubmitField, SelectMultipleField
 from wtforms.validators import DataRequired, Optional, Email, NumberRange
 
 class DealForm(FlaskForm):
@@ -34,6 +34,8 @@ class DealForm(FlaskForm):
     deal_owner = SelectField('Deal Owner', choices=[], validators=[Optional()])
     contact_id = SelectField('Contact', choices=[], validators=[Optional()])
     company_id = SelectField('Company', choices=[], validators=[Optional()])
+    contacts = SelectMultipleField('Contacts', choices=[], validators=[Optional()])
+    companies = SelectMultipleField('Companies', choices=[], validators=[Optional()])
     submit = SubmitField('Save Changes')
 
 class ContactForm(FlaskForm):
