@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from app.utils.db_utils.db_deals import insert_deal, fetch_all_deals, update_deal_stage_in_db, fetch_deal_by_id, fetch_revisions_by_deal_id
 from app.utils.db_utils.db_contacts import fetch_all_contacts, add_contact_to_deal
 from app.utils.db_utils.db_companies import fetch_all_companies, add_company_to_deal
-from app.utils.db_utils.db_line_items import insert_line_item
+from app.utils.db_utils.db_line_items import insert_line_item, fetch_line_items_by_deal_id
 from app.utils.db_utils.db_deal_owners import fetch_all_deal_owners
 from app.utils.db_utils.db_connection import get_db_connection
 from app.blueprints.forms import DealForm
@@ -99,12 +99,21 @@ def view_deal(deal_id):
     # Fetch revisions for the deal
     revisions = fetch_revisions_by_deal_id(deal_id) or []  # Ensure we pass an empty list if no revisions
 
+    # Fetch line items for the deal
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM LineItems WHERE deal_id = ?", (deal_id,))
+    line_items = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
     return render_template(
         'quote/individual_deal_page.html',
         deal=deal,
         all_contacts=contacts,
         all_companies=companies,
-        revisions=revisions
+        revisions=revisions,
+        line_items=line_items  # Pass the line items to the template
     )
 #endregion
 
@@ -188,3 +197,45 @@ def get_deal_stats():
 
     return total_deal_amount, avg_deal_amount, quotes_mtd, quotes_last_month, avg_deal_age
 #endregion
+
+#region "Add Pumps to Quote"
+@quotes_bp.route('/deals/<int:deal_id>/add_pump', methods=['GET'])
+def add_pump_to_deal(deal_id):
+    # Extract pump data from the URL parameters
+    sku = request.args.get('sku')
+    flow = request.args.get('flow')
+    head = request.args.get('head')
+
+    # Fetch pump name based on SKU from the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM GeneralPumpDetails WHERE sku = ?", (sku,))
+    pump_name = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if pump_name is None:
+        flash('Pump not found.', 'danger')
+        return redirect(url_for('quotes.view_deal', deal_id=deal_id))
+
+    # Create a line item for this pump using the flow and head from the form
+    pump_data = {
+        'deal_id': deal_id,
+        'entity_type': 'pump',
+        'entity_id': sku,
+        'pump_name': pump_name[0],  # Use the fetched pump name
+        'flow': flow,  # Use flow from the search form
+        'head': head,  # Use head from the search form
+        'description': '',
+        'amount': 0,
+        'created_at': datetime.now().strftime('%Y-%m-%d'),
+        'updated_at': datetime.now().strftime('%Y-%m-%d')
+    }
+
+    insert_line_item(pump_data)
+
+    # Redirect back to the deal page after adding the pump
+    return redirect(url_for('quotes.view_deal', deal_id=deal_id))
+
+#endregion
+

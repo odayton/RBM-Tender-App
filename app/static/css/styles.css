@@ -399,3 +399,18 @@ h2, h4 {
 h4 {
     color: #ffffff !important;  /* Set title text color to white to stand out against dark background */
 }
+
+/* Style for table text inside tbody of the line-items-table */
+#line-items-table tbody tr td {
+    color: black !important; /* Set the text color to black for table cells in tbody */
+}
+
+/* Style for text color inside input fields in the line-items-table */
+#line-items-table tbody input {
+    color: black !important; /* Set the input text color to black */
+}
+
+/* Ensure the background remains white inside the inputs for consistency in the line-items-table */
+#line-items-table tbody input.form-control {
+    background-color: white !important; /* Keep input fields background white */
+}

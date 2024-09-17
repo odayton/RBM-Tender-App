@@ -8,7 +8,7 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Left Column: Deal Information (Inset Box) -->
-        <div class="col-md-3 p-3 inset-box" style="background-color: #555; color: #fff; min-height: 100vh; border-radius: 10px;">
+        <div class="col-md-2 p-3 inset-box" style="background-color: #555; color: #fff; min-height: 100vh; border-radius: 10px;">
             <h4>Deal Information</h4>
             <ul class="list-unstyled">
                 <li><strong>Deal Name:</strong> {{ deal.name }}</li>
@@ -21,7 +21,7 @@
         </div>
 
         <!-- Middle Column: Revisions and Line Items (Inset Box) -->
-        <div class="col-md-6 p-3 inset-box" style="background-color: #444; color: #fff; min-height: 100vh; border-radius: 10px;">
+        <div class="col-md-8 p-3 inset-box" style="background-color: #444; color: #fff; min-height: 100vh; border-radius: 10px;">
             <!-- Revision Tabs -->
             <div class="mb-3">
                 <button class="btn btn-primary">Rev 0.0</button>
@@ -32,66 +32,65 @@
                 <button class="btn btn-secondary ml-2" onclick="addNewRevision()">+</button>
             </div>
 
-            <!-- Nested Inset Box for Line Items and Actions -->
-            <div class="p-3 inset-box" style="background-color: #555; border-radius: 10px;">
-                <!-- Another Inset Box for Actions and Table -->
-                <div class="p-3 inset-box" style="background-color: #666; border-radius: 10px;">
-                    <!-- Table for Line Items -->
-                    <div class="bg-light text-dark p-3 mb-3" style="border-radius: 5px;">
-                        <h5>Line Items</h5>
-                        <table class="table table-bordered table-striped">
-                            <thead>
+            <!-- Line Items Table -->
+            <div class="bg-light text-dark p-3 mb-3" style="border-radius: 5px;">
+                <h5>Line Items</h5>
+                <table id="line-items-table" class="table table-bordered table-striped" style="color: black;">
+                    <thead>
+                        <tr>
+                            <th>Pump Name</th>
+                            <th>Flow (L/s)</th>
+                            <th>Head</th>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if line_items %}
+                            {% for item in line_items %}
                                 <tr>
-                                    <th>Description</th>
-                                    <th>Amount</th>
+                                    <td style="color: black;">{{ item.pump_name }}</td>
+                                    <td style="color: black;">{{ item.flow }}</td>
+                                    <td style="color: black;">{{ item.head }}</td>
+                                    <td>
+                                        <input type="text" class="form-control" name="description_{{ item.id }}" placeholder="Description" style="color: black;">
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control" name="qty_{{ item.id }}" value="1" min="1" style="color: black;">
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control" name="price_{{ item.id }}" placeholder="Price" style="color: black;">
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {% if revisions %}
-                                    {% for revision in revisions %}
-                                        {% if revision.line_items %}
-                                            {% for item in revision.line_items %}
-                                                <tr>
-                                                    <td>{{ item.description }}</td>
-                                                    <td>{{ item.amount }}</td>
-                                                </tr>
-                                            {% endfor %}
-                                        {% else %}
-                                            <tr>
-                                                <td colspan="2" class="text-center">No line items found for this revision.</td>
-                                            </tr>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    <tr>
-                                        <td colspan="2" class="text-center">No revisions found for this deal.</td>
-                                    </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center" style="color: black;">No line items found for this deal.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
 
-                    <!-- Buttons for Adding Items and Save -->
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <button class="btn btn-primary">Add Pumps</button>
-                            <button class="btn btn-primary ml-2">Add Line Item</button>
-                        </div>
-                        <button class="btn btn-primary">Save Changes</button>
-                    </div>
-                </div>
+
+
+            <!-- Add Pumps Button -->
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-primary" onclick="window.location.href='{{ url_for('pumps.search_pumps', deal_id=deal.id) }}'">
+                    Add Pumps
+                </button>
+                <button class="btn btn-primary">Save Changes</button>
             </div>
         </div>
 
         <!-- Right Column: Contacts and Actions -->
-        <div class="col-md-3">
+        <div class="col-md-2">
             <!-- Contacts Section (Inset Box) -->
             <div class="p-3 inset-box mb-4" style="background-color: #444; color: #fff; border-radius: 10px;">
                 <div class="d-flex justify-content-between">
                     <h5>Contacts</h5>
-                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addContactCompanyModal">
-                        + Add
-                    </button>
+                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addContactCompanyModal">+ Add</button>
                 </div>
                 <button class="btn btn-primary btn-block mt-2">{{ deal.contact_name }}</button>
             </div>

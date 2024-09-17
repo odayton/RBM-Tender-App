@@ -7,7 +7,7 @@
 {% block content %}
 <div class="container-fluid" style="max-width: 100%;">
     <h2 class="text-center mb-4">Search Pumps</h2>
-    <form method="POST" action="{{ url_for('pumps.search_pumps') }}">
+    <form method="POST" action="{{ url_for('pumps.search_pumps', deal_id=deal_id) }}">
         {{ form.hidden_tag() }}
         <div class="form-row align-items-end">
             <div class="form-group col-md-2">
@@ -58,24 +58,25 @@
             </thead>
             <tbody>
                 {% for result in results %}
-                <tr>
-                    <td>{{ result['sku'] }}</td>
-                    <td>{{ result['name'] }}</td>
-                    <td>{{ result['flow'] }}</td>
-                    <td>{{ result['head'] }}</td>
-                    <td>{{ result['poles'] }}</td>
-                    <td>{{ result['kw'] }}</td>
-                    <td>{{ result['efficiency'] }}</td>
-                    <td>{{ result['absorbed_power'] }}</td>
-                    <td>{{ result['npsh'] }}</td>
-                    <td><a href="{{ result['image_path'] }}">Link</a></td>
-                    <td>{{ result['cost'] }}</td>
-                    <td>
-                        <form action="{{ url_for('pumps.add_historic_pump', sku=result['sku']) }}" method="get" style="display:inline;">
-                            <button type="submit" class="btn btn-primary btn-sm">Add</button>
-                        </form>
-                    </td>
-                </tr>
+                    <tr>
+                        <td>{{ result['sku'] }}</td>
+                        <td>{{ result['name'] }}</td>
+                        <td>{{ result['flow'] }}</td>
+                        <td>{{ result['head'] }}</td>
+                        <td>{{ result['poles'] }}</td>
+                        <td>{{ result['kw'] }}</td>
+                        <td>{{ result['efficiency'] }}</td>
+                        <td>{{ result['absorbed_power'] }}</td>
+                        <td>{{ result['npsh'] }}</td>
+                        <td><a href="{{ result['image_path'] }}">Link</a></td>
+                        <td>{{ result['cost'] }}</td>
+                        <td>
+                            <!-- Pass the flow and head entered by the user -->
+                            <a href="{{ url_for('quotes.add_pump_to_deal', deal_id=deal_id, sku=result['sku'], flow=form.flow.data, head=form.head.data) }}" class="btn btn-primary">
+                                Add to Deal
+                            </a>
+                        </td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>

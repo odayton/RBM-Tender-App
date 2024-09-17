@@ -49,19 +49,40 @@ def line_item_exists(item_id):
     return exists
 
 def create_line_items_table():
-    """Create the LineItems table if it does not exist."""
+    """
+    Create the LineItems table if it does not exist.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
+
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS LineItems (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        quote_id INTEGER,
-        product_name TEXT,
-        quantity INTEGER,
-        price REAL,
-        FOREIGN KEY (quote_id) REFERENCES Quotes(id)
+        deal_id INTEGER,
+        entity_type TEXT,
+        entity_id TEXT,
+        pump_name TEXT,  -- Add this field
+        flow REAL,
+        head REAL,
+        description TEXT,
+        amount REAL,
+        created_at TEXT,
+        updated_at TEXT,
+        FOREIGN KEY (deal_id) REFERENCES Deals(id)
     )
     ''')
+
     conn.commit()
     cursor.close()
     conn.close()
+
+
+def fetch_line_items_by_deal_id(deal_id):
+    """Fetch line items by deal ID."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM LineItems WHERE deal_id = ?", (deal_id,))
+    line_items = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return [dict(item) for item in line_items]

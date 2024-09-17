@@ -6,7 +6,8 @@ import zipfile
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from werkzeug.utils import secure_filename
 from app.utils.extract_pdf import extract_blank_nbg_tech_data, extract_historic_nbg_tech_data
-from app.utils.db_utils.db_connection import insert_into_db, get_db_connection, record_exists  # Updated import
+from app.utils.db_utils.db_connection import insert_into_db, get_db_connection, record_exists
+from app.utils.db_utils.db_pumps import fetch_all_general_pumps, fetch_historic_pump_data
 from app.utils.view_utils import fetch_historic_with_general
 from app.blueprints.forms import ManualUpdateForm, BlankTechDataUploadForm, HistoricTechDataUploadForm, SearchPumpsForm, CSRFForm
 
@@ -60,10 +61,13 @@ def manual_update_page():
         return redirect(url_for('pumps.manual_update_page'))
     return render_template('pumps/manual_update.html', form=form)
 
+#region "Search Pumps"
 @pumps_bp.route('/pumps/search-pumps', methods=['GET', 'POST'])
 def search_pumps():
     form = SearchPumpsForm()
     results = []
+    deal_id = request.args.get('deal_id')  # Get deal_id from the URL
+
     if form.validate_on_submit():
         flow = form.flow.data
         head = form.head.data
@@ -79,6 +83,7 @@ def search_pumps():
         """
         params = []
 
+        # Add filters based on the search inputs
         if flow is not None:
             flow_min = flow * 0.95
             flow_max = flow * 1.05
@@ -108,7 +113,9 @@ def search_pumps():
 
         results = [dict(row) for row in results]
 
-    return render_template('pumps/search_pumps.html', form=form, results=results)
+    # Make sure deal_id is passed to the template
+    return render_template('pumps/search_pumps.html', form=form, results=results, deal_id=deal_id)
+#endregion
 
 @pumps_bp.route('/pumps/tech-data-upload', methods=['GET', 'POST'])
 def tech_data_upload():
@@ -191,19 +198,13 @@ def add_historic_pump(sku):
 def get_table_data(table_name):
     # Assuming there’s a new specific fetch function, update accordingly:
     if table_name == "GeneralPumpDetails":
-        data = fetch_general_pump_details()  # This should be defined in `db_pumps.py`
+        data = fetch_all_general_pumps()  # This should be defined in `db_pumps.py`
     elif table_name == "HistoricPumpData":
         data = fetch_historic_pump_data()  # This should be defined in `db_pumps.py`
     else:
         data = []
 
     return jsonify(data)
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pdf'}
-
-def allowed_zip_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'zip'
 
 def process_and_store_pdf(pdf_path, extraction_function, output_folder, is_historic=False):
     try:
@@ -228,3 +229,10 @@ def extract_and_process_zip(zip_path, extraction_function, output_folder, is_his
                             extracted_data.append((text, images))
                             insert_into_db('HistoricPumpData' if is_historic else 'GeneralPumpDetails', text)
     return extracted_data
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pdf'}
+
+def allowed_zip_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'zip'
