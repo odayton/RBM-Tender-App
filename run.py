@@ -1,6 +1,11 @@
+# run.py
+import os
 from app import create_app
 
-app = create_app('default')
+os.environ['FLASK_ENV'] = 'development'
+app = create_app('development')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    print("Starting the application...")
+    print("URL: http://127.0.0.1:5000")
+    app.run(debug=True, use_reloader=False)

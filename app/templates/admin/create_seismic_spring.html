@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Manage Seismic Springs{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>Manage Seismic Springs</h2>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="manual-tab" data-toggle="tab" href="#manual" role="tab" aria-controls="manual" aria-selected="true">Manual Input</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="file-tab" data-toggle="tab" href="#file" role="tab" aria-controls="file" aria-selected="false">File Upload</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="manual" role="tabpanel" aria-labelledby="manual-tab">
+            <form method="POST" action="{{ url_for('admin.create_seismic_springs') }}">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.part_number.label }}
+                    {{ form.part_number(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.name.label }}
+                    {{ form.name(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.max_load_kg.label }}
+                    {{ form.max_load_kg(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.static_deflection.label }}
+                    {{ form.static_deflection(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.spring_constant_kg_mm.label }}
+                    {{ form.spring_constant_kg_mm(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.stripe1.label }}
+                    {{ form.stripe1(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.stripe2.label }}
+                    {{ form.stripe2(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.cost.label }}
+                    {{ form.cost(class="form-control") }}
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="file" role="tabpanel" aria-labelledby="file-tab">
+            <form method="POST" action="{{ url_for('admin.upload_seismic_springs') }}" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.file.label }}
+                    {{ form.file(class="form-control-file") }}
+                </div>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

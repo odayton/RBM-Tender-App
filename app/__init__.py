@@ -2,14 +2,18 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
-from app.config import config
+from .config import config
+from .models import db
 import os
+from app.utils.db_utils.create_db import create_database, create_all_tables
 
 db = SQLAlchemy()
 csrf = CSRFProtect()
 
-def create_app(config_name):
+def create_app(config_name='default'):
     app = Flask(__name__)
+    
+    # Use the config_name to get the appropriate configuration
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
@@ -19,6 +23,11 @@ def create_app(config_name):
 
     db.init_app(app)
     csrf.init_app(app)  # Initialize CSRF protection
+
+    with app.app_context():
+        # Create the database and tables
+        create_database()
+        create_all_tables()
 
     # Register blueprints
     from app.blueprints.pumps import pumps_bp
@@ -38,7 +47,3 @@ def create_app(config_name):
         return render_template('home.html', page_id='home')
 
     return app
-
-if __name__ == '__main__':
-    app = create_app('default')  # Use 'default', 'development', or 'production' as needed
-    app.run(debug=True)

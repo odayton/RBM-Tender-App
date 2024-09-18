@@ -1,5 +1,4 @@
-# app/blueprints/pumps.py
-
+import logging
 import os
 import tempfile
 import zipfile
@@ -10,6 +9,9 @@ from app.utils.db_utils.db_connection import insert_into_db, get_db_connection, 
 from app.utils.db_utils.db_pumps import fetch_all_general_pumps, fetch_historic_pump_data
 from app.utils.view_utils import fetch_historic_with_general
 from app.blueprints.forms import ManualUpdateForm, BlankTechDataUploadForm, HistoricTechDataUploadForm, SearchPumpsForm, CSRFForm
+
+# Set up logging
+logging.basicConfig(filename='pump_upload.log', level=logging.DEBUG)
 
 pumps_bp = Blueprint('pumps', __name__)
 
@@ -61,12 +63,11 @@ def manual_update_page():
         return redirect(url_for('pumps.manual_update_page'))
     return render_template('pumps/manual_update.html', form=form)
 
-#region "Search Pumps"
 @pumps_bp.route('/pumps/search-pumps', methods=['GET', 'POST'])
 def search_pumps():
     form = SearchPumpsForm()
     results = []
-    deal_id = request.args.get('deal_id')  # Get deal_id from the URL
+    deal_id = request.args.get('deal_id')
 
     if form.validate_on_submit():
         flow = form.flow.data
@@ -83,15 +84,12 @@ def search_pumps():
         """
         params = []
 
-        # Add filters based on the search inputs
         if flow is not None:
-            flow_min = flow * 0.95
-            flow_max = flow * 1.05
+            flow_min, flow_max = flow * 0.95, flow * 1.05
             query += " AND h.flow BETWEEN ? AND ?"
             params.extend([flow_min, flow_max])
         if head is not None:
-            head_min = head * 0.95
-            head_max = head * 1.05
+            head_min, head_max = head * 0.95, head * 1.05
             query += " AND h.head BETWEEN ? AND ?"
             params.extend([head_min, head_max])
         if head_unit:
@@ -113,9 +111,7 @@ def search_pumps():
 
         results = [dict(row) for row in results]
 
-    # Make sure deal_id is passed to the template
     return render_template('pumps/search_pumps.html', form=form, results=results, deal_id=deal_id)
-#endregion
 
 @pumps_bp.route('/pumps/tech-data-upload', methods=['GET', 'POST'])
 def tech_data_upload():
@@ -127,54 +123,25 @@ def tech_data_upload():
         if not files and not zip_file:
             form.file.errors.append('At least one file or ZIP archive is required.')
         else:
-            all_extracted_data = []
+            processed_files = set()
 
             if files:
                 for file in files:
                     if file and allowed_file(file.filename):
-                        filename = secure_filename(file.filename)
-                        temp_path = os.path.join(tempfile.gettempdir(), filename)
-                        file.save(temp_path)
-                        extracted_text, extracted_images = process_and_store_pdf(temp_path, extract_historic_nbg_tech_data, "extracted_historic_graphs", is_historic=True)
-                        if not record_exists('HistoricPumpData', extracted_text['sku'], extracted_text['flow'], extracted_text['head']):
-                            all_extracted_data.append((extracted_text, extracted_images))
-                            insert_into_db('HistoricPumpData', extracted_text)
-                            for img_path in extracted_images:
-                                print(f"Saved Image: {img_path}")
-                        else:
-                            flash(f'Duty with SKU {extracted_text["sku"]}, Flow {extracted_text["flow"]}, and Head {extracted_text["head"]} already exists.')
+                        process_single_file(file, processed_files)
 
             if zip_file and allowed_zip_file(zip_file.filename):
-                zip_filename = secure_filename(zip_file.filename)
-                temp_path = os.path.join(tempfile.gettempdir(), zip_filename)
-                zip_file.save(temp_path)
-                extracted_data = extract_and_process_zip(temp_path, extract_historic_nbg_tech_data, "extracted_historic_graphs", is_historic=True)
-                for text, images in extracted_data:
-                    if not record_exists('HistoricPumpData', text['sku'], text['flow'], text['head']):
-                        all_extracted_data.append((text, images))
-                        insert_into_db('HistoricPumpData', text)
-                        for img_path in images:
-                            print(f"Saved Image: {img_path}")
-                    else:
-                        flash(f'Duty with SKU {text["sku"]}, Flow {text["flow"]}, and Head {text["head"]} already exists.')
+                process_zip_file(zip_file, processed_files)
 
-            for text, images in all_extracted_data:
-                print(f"Extracted Text: {text}")
-                for img_path in images:
-                    print(f"Saved Image: {img_path}")
-
-            if not all_extracted_data:
-                flash('No new data was uploaded. All duties already exist.')
-            else:
-                flash('Historic tech data uploaded successfully.')
-
+            flash(f'Processed {len(processed_files)} files.')
             return redirect(url_for('pumps.tech_data_upload'))
+
     return render_template('pumps/tech_data_upload.html', form=form)
 
 @pumps_bp.route('/pumps/view-historic-pumps', methods=['GET', 'POST'])
 def view_historic_pumps():
     form = CSRFForm()
-    data = fetch_historic_with_general()  # Ensure this function fetches the appropriate data from your DB
+    data = fetch_historic_with_general()
     return render_template('pumps/view_historic_pumps.html', form=form, data=data)
 
 @pumps_bp.route('/pumps/remove-historic-pump/<sku>', methods=['POST'])
@@ -196,40 +163,80 @@ def add_historic_pump(sku):
 
 @pumps_bp.route('/pumps/get-table-data/<table_name>')
 def get_table_data(table_name):
-    # Assuming there’s a new specific fetch function, update accordingly:
     if table_name == "GeneralPumpDetails":
-        data = fetch_all_general_pumps()  # This should be defined in `db_pumps.py`
+        data = fetch_all_general_pumps()
     elif table_name == "HistoricPumpData":
-        data = fetch_historic_pump_data()  # This should be defined in `db_pumps.py`
+        data = fetch_historic_pump_data()
     else:
         data = []
 
     return jsonify(data)
 
+def process_single_file(file, processed_files):
+    filename = secure_filename(file.filename)
+    if filename in processed_files:
+        logging.info(f"Skipping already processed file: {filename}")
+        return
+
+    temp_path = os.path.join(tempfile.gettempdir(), filename)
+    file.save(temp_path)
+
+    extracted_text, _ = process_and_store_pdf(
+        temp_path, extract_historic_nbg_tech_data, "extracted_historic_graphs", is_historic=True
+    )
+
+    if extracted_text:
+        logging.info(f"Extracted data from {filename}: {extracted_text}")
+        insert_if_not_exists(extracted_text)
+        processed_files.add(filename)
+
+def process_zip_file(zip_file, processed_files):
+    zip_filename = secure_filename(zip_file.filename)
+    temp_path = os.path.join(tempfile.gettempdir(), zip_filename)
+    zip_file.save(temp_path)
+
+    with zipfile.ZipFile(temp_path, 'r') as zip_ref:
+        for file_info in zip_ref.infolist():
+            if allowed_file(file_info.filename):
+                extracted_filename = secure_filename(file_info.filename)
+                if extracted_filename in processed_files:
+                    logging.info(f"Skipping already processed file from ZIP: {extracted_filename}")
+                    continue
+
+                with zip_ref.open(file_info) as file:
+                    temp_file_path = os.path.join(tempfile.gettempdir(), extracted_filename)
+                    with open(temp_file_path, 'wb') as temp_file:
+                        temp_file.write(file.read())
+
+                    extracted_text, _ = process_and_store_pdf(
+                        temp_file_path, extract_historic_nbg_tech_data, "extracted_historic_graphs", is_historic=True
+                    )
+
+                    if extracted_text:
+                        logging.info(f"Extracted data from ZIP file {extracted_filename}: {extracted_text}")
+                        insert_if_not_exists(extracted_text)
+                        processed_files.add(extracted_filename)
+
+def insert_if_not_exists(extracted_text):
+    conditions = {
+        'sku': extracted_text['sku'],
+        'flow': extracted_text['flow'],
+        'head': extracted_text['head']
+    }
+    logging.info(f"Checking if record exists: {conditions}")
+    if not record_exists('HistoricPumpData', conditions):
+        logging.info(f"Inserting new record: {extracted_text}")
+        insert_into_db('HistoricPumpData', extracted_text)
+    else:
+        logging.info(f"Record already exists, skipping insertion: {extracted_text}")
+
 def process_and_store_pdf(pdf_path, extraction_function, output_folder, is_historic=False):
     try:
         extracted_text, extracted_images = extraction_function(pdf_path, image_output_folder=output_folder)
-        print(f"Extracted Text from {pdf_path}:\n{extracted_text}")
         return extracted_text, extracted_images
     except Exception as e:
-        print(f"Error processing PDF {pdf_path}: {e}")
+        logging.error(f"Error processing PDF {pdf_path}: {e}")
         return None, None
-
-def extract_and_process_zip(zip_path, extraction_function, output_folder, is_historic=False):
-    extracted_data = []
-    with tempfile.TemporaryDirectory() as temp_dir:
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(temp_dir)
-            for root, dirs, files in os.walk(temp_dir):
-                for file in files:
-                    if allowed_file(file):
-                        file_path = os.path.join(root, file)
-                        text, images = process_and_store_pdf(file_path, extraction_function, output_folder, is_historic)
-                        if text is not None and images is not None:
-                            extracted_data.append((text, images))
-                            insert_into_db('HistoricPumpData' if is_historic else 'GeneralPumpDetails', text)
-    return extracted_data
-
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pdf'}

@@ -22,7 +22,6 @@ def extract_text_pymupdf(pdf_path):
         
         pdf_document.close()
 
-        print(text)
         return text
     except Exception as e:
         return f"Error processing PDF with PyMuPDF: {e}"

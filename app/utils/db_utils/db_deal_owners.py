@@ -2,6 +2,26 @@
 
 from app.utils.db_utils.db_connection import get_db_connection
 
+def create_deal_owners_table():
+    """
+    Creates the DealOwners table in the database.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS DealOwners (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        owner_name TEXT NOT NULL,
+        email TEXT,
+        phone_number TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    ''')
+
+    conn.commit()
+    conn.close()
+
 def insert_deal_owner(owner_data):
     """
     Inserts a new deal owner record into the DealOwners table.
@@ -15,7 +35,6 @@ def insert_deal_owner(owner_data):
     cursor.execute(sql, tuple(owner_data.values()))
 
     conn.commit()
-    cursor.close()
     conn.close()
 
 def fetch_all_deal_owners():

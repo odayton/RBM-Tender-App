@@ -1,20 +1,12 @@
-# db_connection.py
-
 import sqlite3
+import logging
 
 def get_db_connection():
-    """
-    Establishes and returns a database connection.
-    Sets the row factory to sqlite3.Row for dict-like access to columns.
-    """
     conn = sqlite3.connect('instance/RBM_Product.db')
     conn.row_factory = sqlite3.Row
     return conn
 
 def fetch_all_from_table(table_name):
-    """
-    Fetches all records from a given table.
-    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(f"SELECT * FROM {table_name}")
@@ -24,9 +16,6 @@ def fetch_all_from_table(table_name):
     return data
 
 def insert_into_db(table_name, data):
-    """
-    Inserts a new record into a specified table.
-    """
     conn = get_db_connection()
     cursor = conn.cursor()
     columns = ', '.join(data.keys())
@@ -37,25 +26,22 @@ def insert_into_db(table_name, data):
     last_id = cursor.lastrowid
     cursor.close()
     conn.close()
+    logging.info(f"Inserted into {table_name}: {data}")
     return last_id
 
-def record_exists(table_name, column, value):
-    """
-    Checks if a record exists in the specified table based on column and value.
-    """
+def record_exists(table_name, conditions):
     conn = get_db_connection()
     cursor = conn.cursor()
-    sql = f'SELECT 1 FROM {table_name} WHERE {column} = ? LIMIT 1'
-    cursor.execute(sql, (value,))
-    exists = cursor.fetchone() is not None
+    conditions_str = ' AND '.join([f"{col} = ?" for col in conditions.keys()])
+    sql = f'SELECT COUNT(*) FROM {table_name} WHERE {conditions_str}'
+    cursor.execute(sql, tuple(conditions.values()))
+    count = cursor.fetchone()[0]
     cursor.close()
     conn.close()
-    return exists
+    logging.info(f"Checked existence in {table_name}: {conditions}, Result: {count > 0}")
+    return count > 0
 
 def create_table(sql):
-    """
-    General purpose function to create a table based on provided SQL.
-    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(sql)

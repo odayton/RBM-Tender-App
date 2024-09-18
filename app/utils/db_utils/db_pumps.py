@@ -49,15 +49,29 @@ def create_pump_tables():
 
 def insert_general_pump_details(pump_data):
     """
-    Inserts a new pump record into the GeneralPumpDetails table.
+    Inserts a new pump record into the GeneralPumpDetails table or updates if SKU already exists.
     """
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    columns = ', '.join(pump_data.keys())
-    placeholders = ', '.join(['?'] * len(pump_data))
-    sql = f'INSERT INTO GeneralPumpDetails ({columns}) VALUES ({placeholders})'
-    cursor.execute(sql, tuple(pump_data.values()))
+    # Check if a pump with this SKU already exists
+    cursor.execute("SELECT * FROM GeneralPumpDetails WHERE sku = ?", (pump_data['sku'],))
+    existing_pump = cursor.fetchone()
+
+    if existing_pump:
+        # Update existing pump
+        columns = ', '.join([f"{col} = ?" for col in pump_data.keys() if col != 'sku'])
+        values = tuple(pump_data[col] for col in pump_data.keys() if col != 'sku')
+        sql = f'UPDATE GeneralPumpDetails SET {columns} WHERE sku = ?'
+        cursor.execute(sql, values + (pump_data['sku'],))
+        print(f"Updated pump with SKU: {pump_data['sku']}")
+    else:
+        # Insert new pump
+        columns = ', '.join(pump_data.keys())
+        placeholders = ', '.join(['?'] * len(pump_data))
+        sql = f'INSERT INTO GeneralPumpDetails ({columns}) VALUES ({placeholders})'
+        cursor.execute(sql, tuple(pump_data.values()))
+        print(f"Inserted new pump with SKU: {pump_data['sku']}")
 
     conn.commit()
     cursor.close()

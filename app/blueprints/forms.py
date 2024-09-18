@@ -1,5 +1,6 @@
 # app/forms.py
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import StringField, FloatField, FileField, SelectField, IntegerField, DateField, SubmitField, SelectMultipleField
 from wtforms.validators import DataRequired, Optional, Email, NumberRange
 
@@ -102,3 +103,44 @@ class HistoricTechDataUploadForm(FlaskForm):
 
 class CSRFForm(FlaskForm):  # Add this class
     submit = SubmitField('Submit')
+
+class InertiaBaseForm(FlaskForm):
+    part_number = StringField('Part Number', validators=[DataRequired()])
+    length = FloatField('Length', validators=[DataRequired()])
+    width = FloatField('Width', validators=[DataRequired()])
+    height = FloatField('Height', validators=[DataRequired()])
+    spring_mount_height = FloatField('Spring Mount Height', validators=[DataRequired()])
+    weight = FloatField('Weight', validators=[DataRequired()])
+    spring_amount = IntegerField('Spring Amount', validators=[DataRequired()])
+    cost = FloatField('Cost', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+class RubberMountForm(FlaskForm):
+    part_number = StringField('Part Number', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
+    weight = FloatField('Weight', validators=[DataRequired()])
+    cost = FloatField('Cost', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+class SeismicSpringForm(FlaskForm):
+    part_number = StringField('Part Number', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
+    max_load_kg = FloatField('Max Load (kg)', validators=[DataRequired()])
+    static_deflection = FloatField('Static Deflection', validators=[DataRequired()])
+    spring_constant_kg_mm = FloatField('Spring Constant (kg/mm)', validators=[DataRequired()])
+    stripe1 = StringField('Stripe 1', validators=[Optional()])
+    stripe2 = StringField('Stripe 2', validators=[Optional()])
+    cost = FloatField('Cost', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+class AdditionalPriceAdderForm(FlaskForm):
+    ip_adder = FloatField('IP Adder', validators=[DataRequired()])
+    drip_tray_adder = FloatField('Drip Tray Adder', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+class FileUploadForm(FlaskForm):
+    file = FileField('Excel File', validators=[
+        FileRequired(),
+        FileAllowed(['xlsx', 'xls'], 'Excel files only!')
+    ])
+    submit = SubmitField('Upload')

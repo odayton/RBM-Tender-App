@@ -90,59 +90,99 @@ body {
 
 /* Table Styles */
 /* ---------------------------------------- */
-/* Style for table text */
-.table td, .table th {
-    color: white !important;
+.table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-/* Style for table borders */
-.table {
-    border: 1px solid white !important;
+.table th, .table td {
+    padding: 8px;
+    border: 1px solid #dddddd;
+    vertical-align: middle;
+}
+
+#line-items-table th, #line-items-table td {
+    color: black !important;
+}
+
+#line-items-table thead th {
+    background-color: #37779e;
+    color: white !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#line-items-table .qty-column {
+    width: 60px;
+    max-width: 60px;
+}
+
+#line-items-table .qty-column input {
+    width: 100%;
+    padding: 2px;
+    text-align: center;
+}
+
+#line-items-table .price-column {
+    width: 100px;
+}
+
+#line-items-table .accessory-column {
+    width: 120px;
+}
+
+#line-items-table input[type="text"],
+#line-items-table input[type="number"] {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.accessory-toggle {
+    white-space: nowrap;
     width: 100%;
 }
 
-/* Add borders to table cells */
-.table td, .table th {
-    border: 1px solid #dddddd !important;
-    padding: 8px;
+.modal-content {
+    background-color: #2d2d2f;
+    color: white;
 }
 
-/* Sticky table headers */
-.table thead th {
-    position: -webkit-sticky; /* For Safari */
-    position: sticky;
-    top: 0;
-    background-color: #37779e;
-    z-index: 2;
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+.modal-header, .modal-footer {
+    border-color: #444;
 }
 
-/* Style for resizable table columns */
-.table-resizable th {
-    position: relative;
-    white-space: nowrap;
-    padding-right: 16px; /* Ensure space for the resizer */
+.modal-title {
+    color: white;
 }
 
-.table-resizable th .resizer {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 1px;
-    cursor: col-resize;
-    background-color: #ffffff; /* Optional: Add color to the resizer handle for visibility */
+.accessory-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* Add cursor style for resizing */
-.table-resizable th.resizing {
-    cursor: ew-resize;
+.form-check-label {
+    color: white;
+    margin-left: 5px;
 }
 
-/* Ensure table container scrolls */
-.table-container {
-    overflow-y: auto;
-    max-height: 70vh; /* Adjust the height as needed */
+.selected-accessories {
+    padding: 5px 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    color: #333;
+    font-size: 0.9em;
+}
+
+.accessory-row {
+    background-color: #f0f0f0;
+}
+
+.accessory-row td {
+    padding: 5px 10px;
 }
 
 /* Sidebar Toggle Button Styles */
