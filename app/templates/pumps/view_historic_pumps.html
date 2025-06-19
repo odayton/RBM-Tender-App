@@ -1,0 +1,53 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+    View Historic Pump Data
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Historic Pump Data</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-resizable">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Name</th>
+                    <th>Flow</th>
+                    <th>Head</th>
+                    <th>Poles</th>
+                    <th>KW</th>
+                    <th>Efficiency</th>
+                    <th>Absorbed Power</th>
+                    <th>NPSH</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                <tr>
+                    <td>{{ row.sku }}</td>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.flow }} {{ row.flow_unit }}</td>
+                    <td>{{ row.head }} {{ row.head_unit }}</td>
+                    <td>{{ row.poles }}</td>
+                    <td>{{ row.kw }}</td>
+                    <td>{{ row.efficiency }}</td>
+                    <td>{{ row.absorbed_power }}</td>
+                    <td>{{ row.npsh }}</td>
+                    <td>
+                        <form action="{{ url_for('pumps.remove_historic_pump', sku=row.sku) }}" method="post" style="display:inline;">
+                            {{ form.hidden_tag() }}
+                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                        </form>
+                        <form action="{{ url_for('pumps.add_historic_pump', sku=row.sku) }}" method="get" style="display:inline;">
+                            <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

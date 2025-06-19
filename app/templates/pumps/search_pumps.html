@@ -1,0 +1,88 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+    Search Pumps
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 100%;">
+    <h2 class="text-center mb-4">Search Pumps</h2>
+    <form method="POST" action="{{ url_for('pumps.search_pumps', deal_id=deal_id) }}">
+        {{ form.hidden_tag() }}
+        <div class="form-row align-items-end">
+            <div class="form-group col-md-2">
+                <label for="flow">Flow (L/s)</label>
+                {{ form.flow(class="form-control", id="flow", placeholder="Flow") }}
+            </div>
+            <div class="form-group col-md-2">
+                <label for="head">Head</label>
+                {{ form.head(class="form-control", id="head", placeholder="Head") }}
+            </div>
+            <div class="form-group col-md-2">
+                <label for="head_unit">Head Unit</label>
+                {{ form.head_unit(class="form-control", id="head_unit") }}
+            </div>
+            <div class="form-group col-md-2">
+                <label for="poles">Poles</label>
+                {{ form.poles(class="form-control", id="poles") }}
+            </div>
+            <div class="form-group col-md-2">
+                <label for="model_type">Model Type</label>
+                {{ form.model_type(class="form-control", id="model_type") }}
+            </div>
+            <div class="form-group col-md-2">
+                <button type="submit" class="btn btn-success w-100">Search</button>
+            </div>
+        </div>
+    </form>
+
+    {% if results %}
+    <h4 class="text-center mt-4">Search Results</h4>
+    <div class="table-container" style="overflow-x: auto; width: 100%;">
+        <table class="table table-striped table-bordered" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Name</th>
+                    <th>Flow (L/s)</th>
+                    <th>Head (kPa)</th>
+                    <th>Poles</th>
+                    <th>kW</th>
+                    <th>Efficiency</th>
+                    <th>Absorbed Power</th>
+                    <th>NPSH</th>
+                    <th>Link</th>
+                    <th>Cost</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                    <tr>
+                        <td>{{ result['sku'] }}</td>
+                        <td>{{ result['name'] }}</td>
+                        <td>{{ result['flow'] }}</td>
+                        <td>{{ result['head'] }}</td>
+                        <td>{{ result['poles'] }}</td>
+                        <td>{{ result['kw'] }}</td>
+                        <td>{{ result['efficiency'] }}</td>
+                        <td>{{ result['absorbed_power'] }}</td>
+                        <td>{{ result['npsh'] }}</td>
+                        <td><a href="{{ result['image_path'] }}">Link</a></td>
+                        <td>{{ result['cost'] }}</td>
+                        <td>
+                            <!-- Pass the flow and head entered by the user -->
+                            <a href="{{ url_for('quotes.add_pump_to_deal', deal_id=deal_id, sku=result['sku'], flow=form.flow.data, head=form.head.data) }}" class="btn btn-primary">
+                                Add to Deal
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <h4 class="text-center mt-4">No results found.</h4>
+    {% endif %}
+</div>
+{% endblock %}

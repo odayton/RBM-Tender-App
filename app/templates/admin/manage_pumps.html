@@ -1,0 +1,53 @@
+{% extends "layouts/base.html" %}
+{% block title %}Manage Pumps{% endblock %}
+{% block content %}
+<div class="container admin-content">
+    <h2>Manage Pumps</h2>
+    
+    <div class="mb-4">
+        <h3>Upload Pump Data</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.file.label }}
+                {{ form.file(class="form-control-file") }}
+            </div>
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+
+    <div>
+        <h3>Existing Pumps</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Name</th>
+                    <th>Poles</th>
+                    <th>KW</th>
+                    <th>IE Class</th>
+                    <th>MEI</th>
+                    <th>Weight</th>
+                    <th>Dimensions (L x W x H)</th>
+                    <th>List Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pump in pumps %}
+                <tr>
+                    <td>{{ pump.sku }}</td>
+                    <td>{{ pump.name }}</td>
+                    <td>{{ pump.poles }}</td>
+                    <td>{{ pump.kw }}</td>
+                    <td>{{ pump.ie_class }}</td>
+                    <td>{{ pump.mei }}</td>
+                    <td>{{ pump.weight }}</td>
+                    <td>{{ pump.length }} x {{ pump.width }} x {{ pump.height }}</td>
+                    <td>{{ pump.list_price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

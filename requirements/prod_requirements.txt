@@ -1,0 +1,7 @@
+# requirements/prod_requirements.txt
+
+# First, install all base requirements
+-r base_requirements.txt
+
+# Add production-specific packages below
+gunicorn==21.2.0

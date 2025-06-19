@@ -1,0 +1,27 @@
+{% extends "layouts/base.html" %}
+{% block title %} Admin Dashboard {% endblock %}
+{% block content %}
+
+<div class="container">
+    <h2>Admin Dashboard</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Data Management</h3>
+            <ul class="list-group">
+                <li class="list-group-item"><a href="{{ url_for('admin.admin.blank_tech_data_upload') }}">Upload Blank Tech Data</a></li>
+                <li class="list-group-item"><a href="{{ url_for('admin.admin.view_blank_tech_data') }}">View Blank Tech Data</a></li>
+                <li class="list-group-item"><a href="{{ url_for('admin.admin.create_contact') }}">Create Contacts</a></li>
+                <li class="list-group-item"><a href="{{ url_for('admin.admin.create_deal_owner') }}">Create Deal Owners</a></li>
+                <li class="list-group-item"><a href="{{ url_for('admin.admin.create_company') }}">Create Companies</a></li>
+                <li class="list-group-item"><a href="{{ url_for('admin.admin.manage_inertia_bases') }}">Manage Inertia Bases</a></li>
+                <li class="list-group-item"><a href="{{ url_for('admin.admin.manage_rubber_mounts') }}">Manage Rubber Mounts</a></li>
+                <li class="list-group-item"><a href="{{ url_for('admin.admin.manage_seismic_springs') }}">Manage Seismic Springs</a></li>
+                <li class="list-group-item"><a href="{{ url_for('admin.admin.manage_additional_price_adders') }}">Manage Additional Price Adders</a></li>
+                <li class="list-group-item"><a href="{{ url_for('admin.admin.manage_pumps') }}">Manage Pumps</a></li>
+                <li class="list-group-item"><a href="{{ url_for('admin.admin.manage_bom') }}">Manage Bill of Materials</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

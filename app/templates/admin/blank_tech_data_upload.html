@@ -1,0 +1,19 @@
+{% extends "layouts/base.html" %}
+{% block title %}Upload Blank Tech Data{% endblock %}
+{% block content %}
+<div class="container admin-content">
+    <h2>Upload Blank Tech Data</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.file.label }}
+            {{ form.file(class="form-control-file", multiple=True) }}
+        </div>
+        <div class="form-group">
+            {{ form.zip_file.label }}
+            {{ form.zip_file(class="form-control-file") }}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+</div>
+{% endblock %}

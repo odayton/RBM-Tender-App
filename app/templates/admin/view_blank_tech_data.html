@@ -1,0 +1,40 @@
+{% extends "layouts/base.html" %}
+{% block title %}View Blank Tech Data{% endblock %}
+{% block content %}
+<div class="container admin-content">
+    <h2>Blank Tech Data</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Poles</th>
+                <th>KW</th>
+                <th>IE Class</th>
+                <th>MEI</th>
+                <th>Weight</th>
+                <th>Length</th>
+                <th>Width</th>
+                <th>Height</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                <td>{{ row.sku }}</td>
+                <td>{{ row.name }}</td>
+                <td>{{ row.poles }}</td>
+                <td>{{ row.kw }}</td>
+                <td>{{ row.ie_class }}</td>
+                <td>{{ row.mei }}</td>
+                <td>{{ row.weight }}</td>
+                <td>{{ row.length }}</td>
+                <td>{{ row.width }}</td>
+                <td>{{ row.height }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('admin.download_blank_tech_data') }}" class="btn btn-primary">Download as Excel</a>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "layouts/base.html" %}
+{% block title %}Manage {% block data_type %}{% endblock %}{% endblock %}
+{% block content %}
+<div class="container admin-content">
+    <h2>Manage {% block data_type_header %}{% endblock %}</h2>
+    
+    <div class="mb-4">
+        <h3>Upload {% block data_type_upload %}{% endblock %} Data</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.file.label }}
+                {{ form.file(class="form-control-file") }}
+            </div>
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+
+    <div>
+        <h3>Existing {% block data_type_list %}{% endblock %}</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    {% block table_headers %}{% endblock %}
+                </tr>
+            </thead>
+            <tbody>
+                {% block table_rows %}{% endblock %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

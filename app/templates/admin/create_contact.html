@@ -1,0 +1,36 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+    Create Contact
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Create Contact</h2>
+    <form method="POST" action="{{ url_for('admin.admin.create_contact') }}">
+        {{ form.hidden_tag() }}
+    
+        <div class="form-group">
+            <label for="representative_name">{{ form.representative_name.label }}</label>
+            {{ form.representative_name(class="form-control") }}
+        </div>
+    
+        <div class="form-group">
+            <label for="representative_email">{{ form.representative_email.label }}</label>
+            {{ form.representative_email(class="form-control") }}
+        </div>
+    
+        <div class="form-group">
+            <label for="phone_number">{{ form.phone_number.label }}</label>
+            {{ form.phone_number(class="form-control") }}
+        </div>
+    
+        <div class="form-group">
+            <label for="company_id">{{ form.company_id.label }}</label>
+            {{ form.company_id(class="form-control") }}
+        </div>
+    
+        <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+    </form>
+</div>
+{% endblock %}

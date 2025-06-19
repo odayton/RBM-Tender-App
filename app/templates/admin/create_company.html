@@ -1,0 +1,29 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+    Create Company
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Create Company</h2>
+    <form method="POST" action="{{ url_for('admin.admin.create_company') }}">
+        {{ form.hidden_tag() }}
+        
+        <!-- Company Name -->
+        <div class="form-group">
+            <label for="company_name">Company Name</label>
+            {{ form.company_name(class="form-control") }}
+        </div>
+
+        <!-- Address -->
+        <div class="form-group">
+            <label for="address">Address</label>
+            {{ form.address(class="form-control") }}
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">Create Company</button>
+    </form>
+</div>
+{% endblock %}

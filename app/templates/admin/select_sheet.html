@@ -1,0 +1,20 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container">
+    <h2>Select Sheet</h2>
+    <form method="POST" action="{{ process_url }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="selected_sheet">Select Sheet:</label>
+            <select name="selected_sheet" id="selected_sheet" class="form-control" required>
+                {% for sheet in sheets %}
+                <option value="{{ sheet }}">{{ sheet }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="hidden" name="filename" value="{{ filename }}">
+        <input type="hidden" name="process_url" value="{{ process_url }}">
+        <button type="submit" class="btn btn-primary mt-3">Process Selected Sheet</button>
+    </form>
+</div>
+{% endblock %}

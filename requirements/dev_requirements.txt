@@ -1,0 +1,18 @@
+# requirements/dev_requirements.txt
+
+# First, install all base requirements
+-r base_requirements.txt
+
+# Add development and testing packages below
+pytest==7.4.2
+black==23.7.0
+flake8==6.1.0
+mypy==1.5.1
+
+# Documentation tools
+Sphinx==7.2.4
+sphinx-rtd-theme==1.2.2
+
+# Optional developer tools
+ipython==8.15.0
+jupyter==1.0.0

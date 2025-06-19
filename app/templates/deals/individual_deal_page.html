@@ -1,0 +1,182 @@
+{% extends "layouts/base.html" %}
+{% block title %}Deal Details{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 p-3 inset-box" style="background-color: #555; color: #fff; min-height: 100vh; border-radius: 10px;">
+            <h4>Deal Information</h4>
+            <ul class="list-unstyled">
+                <li><strong>Deal Name:</strong> {{ deal.name }}</li>
+                <li><strong>Stage:</strong> {{ deal.stage }}</li>
+                <li><strong>Type:</strong> {{ deal.type }}</li>
+                <li><strong>Location:</strong> {{ deal.location }}</li>
+                <li><strong>Close Date:</strong> {{ deal.close_date }}</li>
+                <li><strong>Owner:</strong> {{ deal.owner }}</li>
+            </ul>
+        </div>
+        <div class="col-md-8 p-3 inset-box" style="background-color: #444; color: #fff; min-height: 100vh; border-radius: 10px;">
+            <div class="mb-3">
+                <button class="btn btn-primary">Rev 0.0</button>
+                {% for revision in revisions %}
+                    <button class="btn btn-primary ml-2">Rev {{ revision.version }}</button>
+                {% endfor %}
+                <button class="btn btn-success ml-2">+</button>
+            </div>
+            <div class="bg-light text-dark p-3 mb-3" style="border-radius: 5px;">
+                <h5>Line Items</h5>
+                <table id="line-items-table" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Pump Name</th>
+                            <th>Flow (L/s)</th>
+                            <th>Head</th>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Accessories</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if line_items %}
+                            {% for item in line_items %}
+                                <tr class="pump-row" data-pump-id="{{ item.id }}">
+                                    <td>{{ item.pump_name }}</td>
+                                    <td>{{ item.flow }}</td>
+                                    <td>{{ item.head }}</td>
+                                    <td>{{ item.description }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary accessory-toggle" data-toggle="modal" data-target="#accessoryModal" data-pump-id="{{ item.id }}">
+                                            Add Accessories
+                                        </button>
+                                    </td>
+                                    <td>{{ item.price }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7">No line items found for this deal.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-primary">Add Pumps</button>
+                <button class="btn btn-success">Save Changes</button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="p-3 inset-box mb-4" style="background-color: #444; color: #fff; border-radius: 10px;">
+                <div class="d-flex justify-content-between">
+                    <h5>Contacts</h5>
+                    <button class="btn btn-sm btn-success">+ Add</button>
+                </div>
+                <p>{{ deal.contact_name }}</p>
+            </div>
+            <div class="p-3 inset-box" style="background-color: #444; color: #fff; border-radius: 10px;">
+                <button class="btn btn-secondary mb-2 w-100">Save PDF</button>
+                <button class="btn btn-secondary mb-2 w-100">Save Excel</button>
+                <button class="btn btn-secondary w-100">Save Schedule</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Accessory Modal -->
+<div class="modal fade" id="accessoryModal" tabindex="-1" role="dialog" aria-labelledby="accessoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="accessoryModalLabel">Add Accessories</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="inertia_base" id="inertiaBaseCheck">
+                    <label class="form-check-label" for="inertiaBaseCheck">
+                        Inertia Base
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="seismic_springs" id="seismicSpringsCheck">
+                    <label class="form-check-label" for="seismicSpringsCheck">
+                        Seismic Springs
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="rubber_mounts" id="rubberMountsCheck">
+                    <label class="form-check-label" for="rubberMountsCheck">
+                        Rubber Mounts
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="drip_tray" id="dripTrayCheck">
+                    <label class="form-check-label" for="dripTrayCheck">
+                        Drip Tray
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="ip_upgrade" id="ipUpgradeCheck">
+                    <label class="form-check-label" for="ipUpgradeCheck">
+                        IP Upgrade
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveAccessories">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Contact/Company Modal -->
+<div class="modal fade" id="addContactCompanyModal" tabindex="-1" role="dialog" aria-labelledby="addContactCompanyModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addContactCompanyModalLabel">Add Contact/Company</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('quotes.add_contact_company', deal_id=deal.id) }}" method="POST">
+                    <div class="form-group">
+                        <label for="entityType">Select Contact/Company</label>
+                        <select class="form-control" id="entityType" name="entity_type">
+                            <option value="contact">Contact</option>
+                            <option value="company">Company</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="entityId">Select</label>
+                        <select class="form-control" id="entityId" name="entity_id">
+                            {% if all_contacts and all_contacts|length > 0 %}
+                                {% for contact in all_contacts %}
+                                    <option value="{{ contact.id }}">{{ contact.representative_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                            {% if all_companies and all_companies|length > 0 %}
+                                {% for company in all_companies %}
+                                    <option value="{{ company.id }}">{{ company.company_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add to Deal</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/checkboxes.js') }}"></script>
+{% endblock %}

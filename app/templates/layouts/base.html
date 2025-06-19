@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RBM Tender App{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main_styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body class="{{ page_id }}">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-secondary w-100">
+    <a class="navbar-brand" href="{{ url_for('main.home') }}">Pump Management</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Pumps</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Hydronics</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Hydraulic</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin.admin.dashboard') }}">Admin</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('quotes.list_deals') }}">Quotes</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<button id="sidebar-toggle" class="sidebar-toggle">
+    <img src="{{ url_for('static', filename='images/sidebar-toggle-icon.png') }}" alt="Toggle Sidebar" style="width: 25px; height: 30px;">
+</button>
+
+<div id="sidebar" class="sidebar">
+    </div>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12 main-content no-sidebar inset-box">
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">Search</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="modalSearchInput" class="form-control" placeholder="Type to search...">
+                <ul id="modalResultsList" class="list-group mt-3">
+                    </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/table.js') }}"></script>
+<script src="{{ url_for('static', filename='js/search_modal.js') }}"></script>
+</body>
+</html>

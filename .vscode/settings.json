@@ -1,0 +1,16 @@
+{
+}{
+    "files.exclude": {
+        // Hides the entire virtual environment folder
+        "**/.venv": true,
+
+        // Hides all Python bytecode cache folders
+        "**/__pycache__": true,
+
+        // Hides Git's internal folder
+        "**/.git": true,
+
+        // Hides pytest's cache folder
+        "**/.pytest_cache": true
+    }
+}

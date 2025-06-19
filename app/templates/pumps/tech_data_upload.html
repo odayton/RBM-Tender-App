@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Tech Data Upload
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Tech Data Upload</h2>
+    
+    {% if get_flashed_messages() %}
+    <div class="alert alert-warning">
+        {% for message in get_flashed_messages() %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if success_message %}
+    <div class="alert alert-success">
+        {{ success_message }}
+    </div>
+    {% endif %}
+    
+    <form method="post" action="{{ url_for('pumps.tech_data_upload') }}" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            <label for="file">Upload PDF File(s)</label>
+            {{ form.file(class="form-control", id="file", aria_describedby="fileHelp", multiple=True) }}
+            <small id="fileHelp" class="form-text text-muted">Please upload one or more PDF files containing the technical data.</small>
+        </div>
+        <div class="form-group">
+            <label for="zip_file">Upload Zip Folder</label>
+            {{ form.zip_file(class="form-control", id="zip_file", aria_describedby="zipFileHelp") }}
+            <small id="zipFileHelp" class="form-text text-muted">Or upload a zip folder containing multiple PDF files.</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+</div>
+{% endblock %}
