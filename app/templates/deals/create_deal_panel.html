@@ -1,5 +1,5 @@
 <div class="create-deal-form">
-    <form id="createDealForm" method="POST" action="{{ url_for('quotes.create_deal') }}">
+    <form id="createDealForm" method="POST" action="{{ url_for('deals.create_deal') }}">
         {{ form.hidden_tag() }}
         
         <div class="form-group">
@@ -25,7 +25,7 @@
         <div class="form-group">
             <label for="closeDate">Close Date</label>
             <input type="date" class="form-control" id="closeDate" name="created_date" 
-                   value="{{ default_valid_until.strftime('%Y-%m-%d') }}" required>
+                   value="{{ default_valid_until.strftime('%Y-%m-%d') if default_valid_until else '' }}" required>
         </div>
 
         <div class="form-group">

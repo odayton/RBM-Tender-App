@@ -1,121 +1,120 @@
-from typing import Dict, List, Any, Optional
-from io import BytesIO
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from app.core.core_database import DatabaseManager, DatabaseError
-from app.core.core_logging import logger # Use central app logger
+from flask import render_template, request, flash, redirect, url_for
+from flask_login import login_required
 
-class PDFExporter:
-    """Handles PDF export functionality for database data"""
+from . import admin_bp
+from .forms import (CompanyForm, ContactForm, DealOwnerForm,
+                    ManageInertiaBasesForm, ManageRubberMountsForm, ManageSeismicSpringsForm,
+                    AdditionalPriceAdderForm)
+from app.utils.db_utils.import.excel_import import ExcelImporter
+from app.models import (Company, Contact, User, InertiaBase,
+                        SeismicSpring)
+from app.utils.file_utils.file_validation import FileValidation
+from app.core.core_logging import logger
 
-    @staticmethod
-    def _create_pdf_styles() -> Dict[str, ParagraphStyle]:
-        """Creates a dictionary of standard paragraph styles for the PDF."""
-        styles = getSampleStyleSheet()
-        # Add a custom title style
-        styles.add(ParagraphStyle(
-            name='CustomTitle',
-            parent=styles['h1'],
-            fontSize=18,
-            leading=22,
-            spaceAfter=20,
-            alignment=1 # Center alignment
-        ))
-        styles.add(ParagraphStyle(
-            name='CustomHeading',
-            parent=styles['h2'],
-            fontSize=14,
-            leading=18,
-            spaceBefore=10,
-            spaceAfter=6
-        ))
-        return styles
+ITEM_TYPE_MAPPING = {
+    'company': {'model': Company, 'form': CompanyForm},
+    'contact': {'model': Contact, 'form': ContactForm},
+    'deal_owner': {'model': User, 'form': DealOwnerForm},
+    'inertia_base': {'model': InertiaBase, 'form': ManageInertiaBasesForm},
+    'seismic_springs': {'model': SeismicSpring, 'form': ManageSeismicSpringsForm},
+}
 
-    @staticmethod
-    def _create_table_style() -> TableStyle:
-        """Creates standard table styling."""
-        return TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4F81BD')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ])
 
-    @staticmethod
-    def export_deal_quote(deal_id: int) -> bytes:
-        """Export a deal quote as a PDF."""
-        logger.info(f"Generating PDF quote for deal ID: {deal_id}")
+@admin_bp.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('admin/dashboard.html')
+
+
+@admin_bp.route('/<item_type>/add', methods=['GET', 'POST'])
+@login_required
+def add_item(item_type):
+    if item_type not in ITEM_TYPE_MAPPING:
+        flash(f'Invalid item type: {item_type}', 'error')
+        return redirect(url_for('admin.dashboard'))
+    
+    form_class = ITEM_TYPE_MAPPING[item_type]['form']
+    model_class = ITEM_TYPE_MAPPING[item_type]['model']
+    form = form_class()
+    
+    if form.validate_on_submit():
         try:
-            # Fetch deal and line item data
-            deal_query = "SELECT d.*, c.representative_name as contact_name, c.representative_email as contact_email, c.phone_number as contact_phone, comp.company_name, comp.address as company_address FROM deals d LEFT JOIN contacts c ON d.contact_id = c.id LEFT JOIN companies comp ON d.company_id = comp.id WHERE d.id = %s"
-            deal_data = DatabaseManager.execute_query(deal_query, (deal_id,))
-            if not deal_data:
-                raise DatabaseError(f"Deal {deal_id} not found")
-            deal = deal_data[0]
-
-            items_query = "SELECT * FROM line_items WHERE deal_id = %s ORDER BY created_at"
-            line_items = DatabaseManager.execute_query(items_query, (deal_id,))
+            new_item = model_class()
+            form.populate_obj(new_item)
+            new_item.save()
             
-            # Setup PDF document
-            buffer = BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=72, bottomMargin=72, leftMargin=72, rightMargin=72)
-            styles = PDFExporter._create_pdf_styles()
-            elements = []
-
-            # Add Title
-            elements.append(Paragraph(f"Quotation: {deal.get('name', 'N/A')}", styles['CustomTitle']))
-
-            # Add Company and Contact Info
-            elements.append(Paragraph("Client Information", styles['CustomHeading']))
-            company_info = [
-                f"<b>Company:</b> {deal.get('company_name', 'N/A')}",
-                f"<b>Address:</b> {deal.get('company_address', 'N/A')}",
-                f"<b>Contact:</b> {deal.get('contact_name', 'N/A')}",
-                f"<b>Email:</b> {deal.get('contact_email', 'N/A')}",
-                f"<b>Phone:</b> {deal.get('contact_phone', 'N/A')}"
-            ]
-            for info in company_info:
-                elements.append(Paragraph(info, styles['Normal']))
-            elements.append(Spacer(1, 24))
-
-            # Add Line Items Table
-            elements.append(Paragraph("Line Items", styles['CustomHeading']))
-            if line_items:
-                data = [['Description', 'Qty', 'Unit Price', 'Total']]
-                for item in line_items:
-                    # Assuming quantity is 1 if not specified
-                    quantity = item.get('quantity', 1) 
-                    unit_price = item.get('amount', 0)
-                    total_price = quantity * unit_price
-                    data.append([
-                        item.get('description', 'N/A'),
-                        str(quantity),
-                        f"${unit_price:,.2f}",
-                        f"${total_price:,.2f}"
-                    ])
-                
-                table = Table(data, colWidths=[250, 50, 80, 80])
-                table.setStyle(PDFExporter._create_table_style())
-                elements.append(table)
-                elements.append(Spacer(1, 24))
-
-            # Add Grand Total
-            elements.append(Paragraph(f"Grand Total: ${deal.get('amount', 0):,.2f}", styles['CustomHeading']))
-            
-            # Build the PDF
-            doc.build(elements)
-            
-            pdf_bytes = buffer.getvalue()
-            buffer.close()
-            
-            logger.info(f"Successfully generated PDF of {len(pdf_bytes)} bytes for deal ID: {deal_id}")
-            return pdf_bytes
-
+            flash(f'{item_type.replace("_", " ").title()} added successfully!', 'success')
+            return redirect(url_for('admin.manage_items', item_type=item_type))
         except Exception as e:
-            logger.error(f"Error creating quote PDF for deal ID {deal_id}: {e}", exc_info=True)
-            raise DatabaseError(f"Failed to create quote PDF: {e}")
+            logger.error(f"--- DATABASE ERROR when adding {item_type}: {e} ---")
+            flash(f'Error adding {item_type.replace("_", " ").title()}.', 'error')
+            
+    return render_template('admin/create_generic.html', form=form, item_type=item_type)
+
+
+@admin_bp.route('/<item_type>/manage')
+@login_required
+def manage_items(item_type):
+    if item_type not in ITEM_TYPE_MAPPING:
+        flash(f'Invalid item type: {item_type}', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+    page = request.args.get('page', 1, type=int)
+    model = ITEM_TYPE_MAPPING[item_type]['model']
+    
+    pagination = model.query.paginate(page=page, per_page=10, error_out=False)
+    items = pagination.items
+    
+    return render_template('admin/manage_base.html', items=items, item_type=item_type, pagination=pagination)
+
+
+@admin_bp.route('/<item_type>/<int:item_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_item(item_type, item_id):
+    if item_type not in ITEM_TYPE_MAPPING:
+        flash(f'Invalid item type: {item_type}', 'error')
+        return redirect(url_for('admin.manage_items', item_type=item_type))
+    
+    model_class = ITEM_TYPE_MAPPING[item_type]['model']
+    item = model_class.get_by_id(item_id)
+    if not item:
+        flash(f'{item_type.replace("_", " ").title()} not found.', 'error')
+        return redirect(url_for('admin.manage_items', item_type=item_type))
+
+    form_class = ITEM_TYPE_MAPPING[item_type]['form']
+    form = form_class(obj=item)
+    
+    if form.validate_on_submit():
+        try:
+            form.populate_obj(item)
+            item.save()
+            flash(f'{item_type.replace("_", " ").title()} updated successfully!', 'success')
+            return redirect(url_for('admin.manage_items', item_type=item_type))
+        except Exception as e:
+            logger.error(f"--- DATABASE ERROR when editing {item_type}: {e} ---")
+            flash(f'Error updating {item_type.replace("_", " ").title()}.', 'error')
+            
+    return render_template('admin/create_generic.html', form=form, item_type=item_type, item_id=item_id)
+
+
+@admin_bp.route('/<item_type>/<int:item_id>/delete', methods=['POST'])
+@login_required
+def delete_item(item_type, item_id):
+    if item_type not in ITEM_TYPE_MAPPING:
+        flash(f'Invalid item type: {item_type}', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+    model_class = ITEM_TYPE_MAPPING[item_type]['model']
+    item = model_class.get_by_id(item_id)
+    
+    if item:
+        try:
+            item.delete()
+            flash(f'{item_type.replace("_", " ").title()} deleted successfully!', 'success')
+        except Exception as e:
+            logger.error(f"--- DATABASE ERROR when deleting {item_type}: {e} ---")
+            flash(f'Error deleting {item_type.replace("_", " ").title()}.', 'error')
+    else:
+        flash(f'{item_type.replace("_", " ").title()} not found.', 'error')
+        
+    return redirect(url_for('admin.manage_items', item_type=item_type))

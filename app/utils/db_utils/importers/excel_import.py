@@ -2,9 +2,12 @@ from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 import pandas as pd
 from pathlib import Path
-from app.core.core_database import DatabaseManager, DatabaseError
+
+# Corrected imports
+from app.core.core_database import DatabaseManager
+from app.core.core_errors import DatabaseError
 from .data_validator import DataValidator
-from app.core.core_logging import logger # Use central app logger
+from app.core.core_logging import logger
 
 class ExcelImporter:
     """Handles Excel file imports with validation and error handling."""
@@ -124,7 +127,6 @@ class ExcelImporter:
             error_df = pd.DataFrame(error_data)
             
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            # Use pathlib for robust path construction
             error_filepath = Path(destination_dir) / f'import_errors_{timestamp}.xlsx'
             
             error_df.to_excel(error_filepath, index=False)

@@ -1,9 +1,9 @@
 from typing import Dict, Any
 from datetime import datetime
 from sqlalchemy import Column, String, Boolean, DateTime, Enum
-# Import relationship from sqlalchemy.orm
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin  # <-- 1. IMPORT UserMixin
 import enum
 
 from app.models.base_model import BaseModel
@@ -16,7 +16,8 @@ class UserRole(enum.Enum):
     MANAGER = "Manager"
     VIEWER = "Viewer"
 
-class User(BaseModel):
+# 2. INHERIT from UserMixin alongside BaseModel
+class User(BaseModel, UserMixin):
     """Model for user accounts"""
     __tablename__ = 'users'
     
@@ -35,10 +36,8 @@ class User(BaseModel):
     is_active = Column(Boolean, default=True)
     last_login = Column(DateTime)
     
-    # --- START OF THE FIX ---
-    # Add the missing relationship to link back to the Deal model
+    # Relationship to the Deal model
     deals = relationship('Deal', back_populates='owner')
-    # --- END OF THE FIX ---
 
     @property
     def full_name(self):

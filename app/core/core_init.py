@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from pathlib import Path
 
-# Import the application config dictionary
+# Import the application config dictionary with its correct name
 from .core_config import config_dict
 
 # Import the singleton instances of our core components
@@ -30,11 +30,12 @@ class CoreInitializer:
         self.init_security()
         self.init_cache()
         self.init_events()
-        self.init_error_handlers() # Register handlers last
+        self.init_error_handlers()
 
     def init_config(self):
         """Initialize configuration from environment."""
         config_name = os.getenv('FLASK_CONFIG', 'development')
+        # Use the correct variable name 'config_dict'
         self.app.config.from_object(config_dict[config_name])
         # Allow config class to perform post-load actions, like loading YAML
         config_dict[config_name].init_app(self.app)
@@ -48,13 +49,11 @@ class CoreInitializer:
         """Initialize database components and Flask-Migrate."""
         self.db.init_app(self.app)
         self.migrate.init_app(self.app, self.db)
-        # The old DatabaseManager no longer needs an init_app call.
         core_logger.app_logger.info("Database and Migrations Initialized.")
 
     def init_security(self):
         """Initialize security components."""
         security_manager.init_app(self.app)
-        self.login_manager.init_app(self.app)
         core_logger.app_logger.info("Security Initialized.")
         
     def init_cache(self):
@@ -74,7 +73,6 @@ class CoreInitializer:
 
     def _create_directories(self):
         """Create necessary instance folders for logs, uploads, etc."""
-        # This method is now the single source of truth for directory creation.
         required_paths = [
             self.app.instance_path,
             self.app.config.get('LOG_DIR'),

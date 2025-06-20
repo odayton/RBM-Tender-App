@@ -1,181 +1,112 @@
-from typing import Optional, Dict, Any, List, Callable, Set
+import time
 from datetime import datetime, timedelta
-from functools import wraps
-from flask import request, current_app, abort, session, g, Flask
-import jwt
+from flask import request, abort, current_app, g
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import current_user, UserMixin
+import jwt
+from flask_login import LoginManager, current_user
+from functools import wraps
+import secrets
 
-from .core_errors import AuthenticationError, AuthorizationError
-from .core_logging import logger # Use central app logger
-from app.models import User # Import the User model
-from app.extensions import db # Import the db session
+from app.models import User
+from app.core.core_logging import logger
+
+login_manager = LoginManager()
 
 class SecurityManager:
-    """Manages application security, authentication, and authorization."""
-    
     def __init__(self):
-        self.app: Optional[Flask] = None
-        self._blocked_ips: Dict[str, datetime] = {}
-        self._login_attempts: Dict[str, int] = {}
-        self._jwt_blacklist: Set[str] = set()
+        self.app = None
+        self.login_manager = login_manager
+        self.failed_logins = {}
+        self.blocked_ips = {}
 
-    def init_app(self, app: Flask) -> None:
-        """Initialize security components with the Flask application."""
+    def init_app(self, app):
         self.app = app
-        self._setup_security_headers()
-        self._setup_request_handlers()
+        self.login_manager.init_app(app)
+        self.login_manager.login_view = 'main.home' 
+
+        # This function tells Flask-Login how to load a user from an ID.
+        # It is essential for session management.
+        @self.login_manager.user_loader
+        def load_user(user_id):
+            return User.query.get(int(user_id))
+            
+        app.before_request(self.security_checks)
+        
         logger.info("SecurityManager initialized.")
 
-    def _setup_security_headers(self) -> None:
-        """Configure security headers for all responses."""
-        @self.app.after_request
-        def add_security_headers(response):
-            # These headers help protect against common web vulnerabilities.
-            response.headers['X-Content-Type-Options'] = 'nosniff'
-            response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-            response.headers['X-XSS-Protection'] = '1; mode=block'
-            # Force HTTPS
-            if not self.app.debug:
-                 response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-            return response
+    def _track_failed_login(self, ip_address):
+        """Track failed login attempts for an IP address."""
+        now = time.time()
+        if ip_address not in self.failed_logins:
+            self.failed_logins[ip_address] = []
+        
+        block_duration = self.app.config.get('SECURITY_BLOCK_DURATION_MINUTES', 15) * 60
+        self.failed_logins[ip_address] = [t for t in self.failed_logins[ip_address] if now - t < block_duration]
+        
+        self.failed_logins[ip_address].append(now)
 
-    def _setup_request_handlers(self) -> None:
-        """Set up security checks to run before each request."""
-        @self.app.before_request
-        def security_checks():
-            # IP-based rate limiting check
-            if self._is_ip_blocked(request.remote_addr):
-                logger.app_logger.warning(f"Request denied from blocked IP: {request.remote_addr}")
-                abort(403, "Your IP has been temporarily blocked due to suspicious activity.")
-            
-            # NOTE: CSRF protection is now expected to be handled by Flask-WTF on a per-form basis.
-            # The global check has been removed as it's less flexible and secure.
-            
-            # Clean up expired IP blocks periodically
-            self._cleanup_blocked_ips()
+    def security_checks(self):
+        """Perform security checks on each request."""
+        ip_address = request.remote_addr
+        
+        if ip_address in self.blocked_ips and time.time() < self.blocked_ips[ip_address]:
+            abort(429)
 
-    def authenticate(self, email: str, password: str) -> Optional[User]:
-        """
-        Authenticates user credentials against the database.
-        Returns the User object on success, None on failure.
-        """
-        try:
-            user = self._get_user_by_email(email)
-            if not user or not self.verify_password(user.password, password):
-                self._record_failed_attempt(email)
-                logger.app_logger.warning(f"Failed login attempt for email: {email}")
-                return None
-
-            self._reset_failed_attempts(email)
-            self._update_last_login(user)
-            return user
-        except Exception as e:
-            logger.app_logger.error(f"Error during authentication for {email}: {e}", exc_info=True)
-            return None
-
-    def generate_token(self, user_id: int, expires_in_seconds: int = 3600) -> str:
-        """Generates a JWT for a given user ID."""
-        try:
-            payload = {
-                'exp': datetime.utcnow() + timedelta(seconds=expires_in_seconds),
-                'iat': datetime.utcnow(),
-                'sub': user_id
-            }
-            return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
-        except Exception as e:
-            logger.app_logger.error(f"Error generating JWT: {e}", exc_info=True)
-            raise AuthenticationError("Failed to generate authentication token.")
-
-    def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
-        """Verifies a JWT. Returns payload on success, None on failure."""
-        try:
-            if token in self._jwt_blacklist:
-                raise AuthenticationError("Token has been revoked.")
-            
-            return jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            logger.app_logger.info("Attempted to use an expired token.")
-            return None
-        except jwt.InvalidTokenError as e:
-            logger.app_logger.warning(f"Invalid token used: {e}")
-            return None
-
-    @staticmethod
-    def hash_password(password: str) -> str:
-        """Hashes a password using a secure algorithm."""
-        return generate_password_hash(password)
-
-    @staticmethod
-    def verify_password(password_hash: str, password: str) -> bool:
-        """Verifies a password against a stored hash."""
-        return check_password_hash(password_hash, password)
-
-    # --- Internal Helper Methods ---
-
-    def _get_user_by_email(self, email: str) -> Optional[User]:
-        return User.query.filter_by(email=email).first()
-
-    def _update_last_login(self, user: User) -> None:
-        try:
-            user.last_login_at = datetime.utcnow()
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            logger.app_logger.error(f"Failed to update last login time for user {user.id}: {e}", exc_info=True)
-
-    def _record_failed_attempt(self, identifier: str):
-        """Records a failed login attempt and blocks IP if threshold is exceeded."""
-        with self._lock:
-            self._login_attempts[identifier] = self._login_attempts.get(identifier, 0) + 1
-            if self._login_attempts[identifier] >= self.app.config.get('MAX_LOGIN_ATTEMPTS', 5):
-                self._block_ip(request.remote_addr)
-
-    def _reset_failed_attempts(self, identifier: str):
-        with self._lock:
-            self._login_attempts.pop(identifier, None)
-
-    def _block_ip(self, ip: str):
-        block_duration = self.app.config.get('IP_BLOCK_DURATION_SECONDS', 3600)
-        self._blocked_ips[ip] = datetime.utcnow() + timedelta(seconds=block_duration)
-        logger.app_logger.critical(f"IP address blocked due to excessive failed logins: {ip}")
-
-    def _is_ip_blocked(self, ip: str) -> bool:
-        """Checks if an IP is currently blocked."""
-        if expiry := self._blocked_ips.get(ip):
-            if datetime.utcnow() < expiry:
-                return True
-            # Block has expired, remove it
-            del self._blocked_ips[ip]
-        return False
+        self._cleanup_blocked_ips()
 
     def _cleanup_blocked_ips(self):
-        """Periodically cleans up the expired IP block dictionary."""
-        # A simple implementation; a real-world scenario might use a scheduled job.
-        if secrets.randbelow(100) == 1: # Run roughly 1% of the time
-            now = datetime.utcnow()
-            with self._lock:
-                expired_ips = [ip for ip, expiry in self._blocked_ips.items() if expiry < now]
-                for ip in expired_ips:
-                    del self._blocked_ips[ip]
+        """Periodically cleans up the blocked IPs dictionary."""
+        if secrets.randbelow(100) == 1:
+            now = time.time()
+            self.blocked_ips = {ip: expiry for ip, expiry in self.blocked_ips.items() if expiry > now}
 
-# --- Authorization Decorators ---
+    def check_rate_limit(self, ip_address):
+        """Check if an IP has exceeded the login attempt limit."""
+        max_attempts = self.app.config.get('SECURITY_MAX_LOGIN_ATTEMPTS', 10)
+        if len(self.failed_logins.get(ip_address, [])) >= max_attempts:
+            block_duration = self.app.config.get('SECURITY_BLOCK_DURATION_MINUTES', 15) * 60
+            self.blocked_ips[ip_address] = time.time() + block_duration
+            logger.warning(f"IP address {ip_address} has been blocked for {block_duration/60} minutes.")
+            return True
+        return False
 
-def roles_required(*roles: str):
-    """Decorator to require specific roles for a route."""
-    def decorator(f: Callable):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated:
-                abort(401)
-            # Assumes current_user has a 'roles' attribute which is a list/set of role names
-            user_roles = {role.name for role in getattr(current_user, 'roles', [])}
-            if not set(roles).issubset(user_roles):
-                logger.app_logger.warning(f"User {current_user.id} denied access to {request.path}. Required roles: {roles}, User roles: {user_roles}")
-                abort(403)
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
+    def generate_jwt(self, user_id, **kwargs):
+        """Generate a JSON Web Token."""
+        payload = {
+            'iat': datetime.utcnow(),
+            'exp': datetime.utcnow() + timedelta(days=1),
+            'sub': user_id,
+        }
+        payload.update(kwargs)
+        return jwt.encode(payload, self.app.config['SECRET_KEY'], algorithm='HS256')
 
-# --- Global Instance ---
+    def verify_jwt(self, token):
+        """Verify a JSON Web Token."""
+        try:
+            payload = jwt.decode(token, self.app.config['SECRET_KEY'], algorithms=['HS256'])
+            return payload
+        except jwt.ExpiredSignatureError:
+            return None
+        except jwt.InvalidTokenError:
+            return None
+
+    def set_security_headers(self, response):
+        """Add security headers to the response."""
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        return response
+
+    @staticmethod
+    def roles_required(*roles):
+        """Decorator to enforce role-based access control."""
+        def wrapper(fn):
+            @wraps(fn)
+            def decorator(*args, **kwargs):
+                if not current_user.is_authenticated or current_user.role.value not in roles:
+                    abort(403)
+                return fn(*args, **kwargs)
+            return decorator
+        return wrapper
+
 security_manager = SecurityManager()

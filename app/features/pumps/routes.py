@@ -1,151 +1,75 @@
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask_login import login_required
+from app.models import Pump
+from .forms import PumpForm, PumpSearchForm
+from app.core.core_logging import logger
 
-# Import the blueprint object and forms from the local package
+# Import the correct blueprint from this feature's __init__.py
 from . import pumps_bp
-from .forms import PumpSearchForm, TechDataUploadForm, PumpManualUpdateForm
 
-# Import the new manager to handle database logic
-from app.managers.pump_manager import PumpManager
-from app.core.core_errors import ValidationError
+# Correct the import path for the manager class and use an alias
+from app.utils.db_utils.pump.db_pumps import PumpDatabaseManager as PumpManager
 
-
-@pumps_bp.route('/pumps')
-def index():
-    """Renders the main pumps landing page which contains the search form."""
-    form = PumpSearchForm()
-    return render_template('pumps/pumps.html', form=form)
-
-
-@pumps_bp.route('/pumps/search', methods=['GET', 'POST'])
-def search_pumps():
-    """Handles the pump search form and displays results."""
-    form = PumpSearchForm()
-    pumps = []
-    if form.validate_on_submit():
-        try:
-            # Use the manager to find pumps matching the criteria
-            pumps = PumpManager.search_pumps(
-                flow_rate=form.flow_rate.data,
-                head=form.head.data
-            )
-            if not pumps:
-                flash('No pumps found matching the specified criteria.', 'info')
-        except ValidationError as e:
-            flash(str(e), 'danger')
+@pumps_bp.route('/', methods=['GET', 'POST'])
+#@login_required
+def pumps_list():
+    """Display a list of all pumps."""
+    search_form = PumpSearchForm()
+    pumps = Pump.query.order_by(Pump.part_number).all() # Use ORM
     
-    # Renders the search page, including the list of found pumps
-    return render_template('pumps/search_pumps.html', form=form, pumps=pumps)
-
-
-@pumps_bp.route('/pumps/tech-data/upload', methods=['GET', 'POST'])
-def upload_tech_data():
-    """Handles the form for uploading pump technical data sheets."""
-    form = TechDataUploadForm()
-    if form.validate_on_submit():
-        try:
-            # In a real implementation, you would get the file from the form:
-            # file = form.file.data
-            # And process it using a helper/manager class.
-            flash('Technical data uploaded successfully (logic to be implemented).', 'success')
-            return redirect(url_for('pumps.index'))
-        except ValidationError as e:
-            flash(str(e), 'danger')
+    if search_form.validate_on_submit():
+        search_term = search_form.search.data
+        pumps = Pump.query.filter(Pump.part_number.ilike(f'%{search_term}%')).all()
     
-    return render_template('pumps/tech_data_upload.html', form=form)
+    return render_template('pumps/pumps.html', pumps=pumps, search_form=search_form)
 
-
-@pumps_bp.route('/pumps/historic')
-def view_historic_pumps():
-    """Displays a list of all pumps that have been used in past assemblies."""
-    # Use the manager to get the list of historic pumps
-    historic_pumps = PumpManager.get_historic_pumps()
-    return render_template('pumps/view_historic_pumps.html', pumps=historic_pumps)
-
-
-@pumps_bp.route('/pumps/<int:pump_id>')
-def view_pump(pump_id):
-    """Displays a detailed page for a single pump."""
-    # Use the manager to get a specific pump by its ID
-    pump = PumpManager.get_pump_by_id(pump_id)
-    if not pump:
-        flash('Pump not found.', 'danger')
-        return redirect(url_for('pumps.index'))
-        
-    return render_template('pumps/view_pump.html', pump=pump)
-
-
-@pumps_bp.route('/pumps/<int:pump_id>/tech-data')
-def view_pump_tech_data(pump_id):
-    """Displays the technical data associated with a specific pump."""
-    pump = PumpManager.get_pump_by_id(pump_id)
-    if not pump:
-        flash('Pump not found.', 'danger')
-        return redirect(url_for('pumps.index'))
-        
-    return render_template('pumps/view_tech_data.html', pump=pump)
-
-
-@pumps_bp.route('/pumps/manual-update', methods=['GET', 'POST'])
-def manual_update():
-    """Allows for manually updating pump information via a form."""
-    form = PumpManualUpdateForm()
+@pumps_bp.route('/add', methods=['GET', 'POST'])
+#@login_required
+def add_pump():
+    """Add a new pump to the database."""
+    form = PumpForm()
     if form.validate_on_submit():
         try:
-            # Note: Using SKU from the form to find the pump to update
-            pump_to_update = PumpManager.get_pump_by_id(form.sku.data) 
-            if pump_to_update:
-                # Use the manager to update the pump with form data
-                PumpManager.update_pump(pump_to_update, form.data)
-                flash('Pump updated successfully.', 'success')
-                return redirect(url_for('pumps.view_pump', pump_id=pump_to_update.id))
-            else:
-                flash('Pump with specified SKU not found.', 'danger')
-        except ValidationError as e:
-            flash(str(e), 'danger')
+            new_pump = Pump()
+            form.populate_obj(new_pump)
+            new_pump.save()
+            flash('Pump added successfully!', 'success')
+            return redirect(url_for('pumps.pumps_list'))
+        except Exception as e:
+            logger.error(f"Error adding pump: {e}")
+            flash('An error occurred while adding the pump.', 'error')
             
-    return render_template('pumps/manual_update.html', form=form)
+    return render_template('pumps/add_pump.html', form=form)
 
+@pumps_bp.route('/<int:pump_id>/edit', methods=['GET', 'POST'])
+#@login_required
+def edit_pump(pump_id):
+    """Edit an existing pump."""
+    pump = Pump.query.get_or_404(pump_id)
+    form = PumpForm(obj=pump)
+    
+    if form.validate_on_submit():
+        try:
+            form.populate_obj(pump)
+            pump.save()
+            flash('Pump updated successfully!', 'success')
+            return redirect(url_for('pumps.pumps_list'))
+        except Exception as e:
+            logger.error(f"Error updating pump {pump_id}: {e}")
+            flash('An error occurred while updating the pump.', 'error')
+            
+    return render_template('pumps/edit_pump.html', form=form, pump=pump)
 
-@pumps_bp.route('/api/pumps/search', methods=['POST'])
-def api_search_pumps():
-    """
-    API endpoint for an AJAX pump search, expecting JSON.
-    Returns pump data in JSON format.
-    """
+@pumps_bp.route('/<int:pump_id>/delete', methods=['POST'])
+#@login_required
+def delete_pump(pump_id):
+    """Delete a pump."""
+    pump = Pump.query.get_or_404(pump_id)
     try:
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'Invalid JSON payload.'}), 400
-
-        flow_rate = data.get('flow_rate')
-        head = data.get('head')
-        
-        if not flow_rate or not head:
-            raise ValidationError("Flow rate and head are required parameters.")
-        
-        # Use the manager to perform the search
-        pumps = PumpManager.search_pumps(float(flow_rate), float(head))
-        
-        # Serialize the pump objects into dictionaries for the JSON response
-        return jsonify([pump.to_dict() for pump in pumps])
-        
-    except ValidationError as e:
-        return jsonify({'error': str(e)}), 400
+        pump.delete()
+        flash('Pump deleted successfully!', 'success')
     except Exception as e:
-        # Log the full error for debugging
-        # logger.error(f"API Pump Search Error: {e}") 
-        return jsonify({'error': 'An internal server error occurred.'}), 500
-
-
-@pumps_bp.route('/api/pumps/<int:pump_id>', methods=['GET'])
-def api_get_pump(pump_id):
-    """API endpoint to get details for a single pump."""
-    try:
-        pump = PumpManager.get_pump_by_id(pump_id)
-        if pump:
-            return jsonify(pump.to_dict())
-        else:
-            return jsonify({'error': 'Pump not found.'}), 404
-    except Exception as e:
-        # logger.error(f"API Get Pump Error: {e}")
-        return jsonify({'error': 'An internal server error occurred.'}), 500
+        logger.error(f"Error deleting pump {pump_id}: {e}")
+        flash('An error occurred while deleting the pump.', 'error')
+        
+    return redirect(url_for('pumps.pumps_list'))

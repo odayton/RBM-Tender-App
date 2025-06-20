@@ -1,14 +1,13 @@
 {% extends "layouts/base.html" %}
 
 {% block title %}
-Quotes
+Deals
 {% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2>Quotes</h2>
+    <h2>Deals</h2>
 
-    <!-- Summary Statistics -->
     <div class="inset-box mb-4">
         <div class="row text-center mb-4">
             <div class="col">
@@ -34,7 +33,6 @@ Quotes
         </div>
     </div>
 
-    <!-- Deal Stages and Search/Actions -->
     <div class="inset-box">
         <div class="search-actions-container">
             <input type="text" class="form-control" placeholder="Search name or description">
@@ -46,17 +44,16 @@ Quotes
         </div>
         
         <div class="row text-center mb-4 no-gutters">
-            <!-- Sales Lead Stage -->
+            {% for stage in deal_stages %}
             <div class="col deal-column">
-                <h4>Sales Lead</h4>
-                <div class="inset-box stage-container" id="sales-lead-stage">
-                    {% if deals_by_stage['Sales Lead'] %}
-                        {% for deal in deals_by_stage['Sales Lead'] %}
-                            <a href="{{ url_for('quotes.view_deal', deal_id=deal.id) }}" class="deal-card" draggable="true" data-deal-id="{{ deal.id }}">
-                                <strong>{{ deal.name | truncate(20) }}</strong><br>
-                                {{ deal.type }}<br>
-                                AU$ {{ deal.amount or 'N/A' }}<br>
-                                Created: {{ deal.created_at }}<br>
+                <h4>{{ stage }}</h4>
+                <div class="inset-box stage-container" id="{{ stage.replace(' ', '-').lower() }}-stage">
+                    {% if deals_by_stage[stage] %}
+                        {% for deal in deals_by_stage[stage] %}
+                            <a href="{{ url_for('deals.deal_details', deal_id=deal.id) }}" class="deal-card" draggable="true" data-deal-id="{{ deal.id }}">
+                                <strong>{{ deal.project_name | truncate(20) }}</strong><br>
+                                {{ deal.deal_type.value }}<br> AU$ {{ deal.total_amount or 'N/A' }}<br>
+                                Created: {{ deal.created_at.strftime('%Y-%m-%d') }}<br>
                             </a>
                         {% endfor %}
                     {% else %}
@@ -64,125 +61,11 @@ Quotes
                     {% endif %}
                 </div>
             </div>
-
-            <!-- Tender Stage -->
-            <div class="col deal-column">
-                <h4>Tender</h4>
-                <div class="inset-box stage-container" id="tender-stage">
-                    {% if deals_by_stage['Tender'] %}  <!-- Updated key -->
-                        {% for deal in deals_by_stage['Tender'] %}  <!-- Updated key -->
-                            <a href="{{ url_for('quotes.view_deal', deal_id=deal.id) }}" class="deal-card" draggable="true" data-deal-id="{{ deal.id }}">
-                                <strong>{{ deal.name | truncate(20) }}</strong><br>
-                                {{ deal.type }}<br>
-                                AU$ {{ deal.amount or 'N/A' }}<br>
-                                Created: {{ deal.created_at }}<br>
-                            </a>
-                        {% endfor %}
-                    {% else %}
-                        <p>No deals in this stage.</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Proposal Stage -->
-            <div class="col deal-column">
-                <h4>Proposal</h4>
-                <div class="inset-box stage-container" id="proposal-stage">
-                    {% if deals_by_stage['Proposal'] %}
-                        {% for deal in deals_by_stage['Proposal'] %}
-                            <a href="{{ url_for('quotes.view_deal', deal_id=deal.id) }}" class="deal-card" draggable="true" data-deal-id="{{ deal.id }}">
-                                <strong>{{ deal.name | truncate(20) }}</strong><br>
-                                {{ deal.type }}<br>
-                                AU$ {{ deal.amount or 'N/A' }}<br>
-                                Created: {{ deal.created_at }}<br>
-                            </a>
-                        {% endfor %}
-                    {% else %}
-                        <p>No deals in this stage.</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Negotiation Stage -->
-            <div class="col deal-column">
-                <h4>Negotiation</h4>
-                <div class="inset-box stage-container" id="negotiation-stage">
-                    {% if deals_by_stage['Negotiation'] %}
-                        {% for deal in deals_by_stage['Negotiation'] %}
-                            <a href="{{ url_for('quotes.view_deal', deal_id=deal.id) }}" class="deal-card" draggable="true" data-deal-id="{{ deal.id }}">
-                                <strong>{{ deal.name | truncate(20) }}</strong><br>
-                                {{ deal.type }}<br>
-                                AU$ {{ deal.amount or 'N/A' }}<br>
-                                Created: {{ deal.created_at }}<br>
-                            </a>
-                        {% endfor %}
-                    {% else %}
-                        <p>No deals in this stage.</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Closed Won Stage -->
-            <div class="col deal-column">
-                <h4>Closed Won</h4>
-                <div class="inset-box stage-container" id="closed-won-stage">
-                    {% if deals_by_stage['Closed Won'] %}
-                        {% for deal in deals_by_stage['Closed Won'] %}
-                            <a href="{{ url_for('quotes.view_deal', deal_id=deal.id) }}" class="deal-card" draggable="true" data-deal-id="{{ deal.id }}">
-                                <strong>{{ deal.name | truncate(20) }}</strong><br>
-                                {{ deal.type }}<br>
-                                AU$ {{ deal.amount or 'N/A' }}<br>
-                                Created: {{ deal.created_at }}<br>
-                            </a>
-                        {% endfor %}
-                    {% else %}
-                        <p>No deals in this stage.</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Closed Lost Stage -->
-            <div class="col deal-column">
-                <h4>Closed Lost</h4>
-                <div class="inset-box stage-container" id="closed-lost-stage">
-                    {% if deals_by_stage['Closed Lost'] %}
-                        {% for deal in deals_by_stage['Closed Lost'] %}
-                            <a href="{{ url_for('quotes.view_deal', deal_id=deal.id) }}" class="deal-card" draggable="true" data-deal-id="{{ deal.id }}">
-                                <strong>{{ deal.name | truncate(20) }}</strong><br>
-                                {{ deal.type }}<br>
-                                AU$ {{ deal.amount or 'N/A' }}<br>
-                                Created: {{ deal.created_at }}<br>
-                            </a>
-                        {% endfor %}
-                    {% else %}
-                        <p>No deals in this stage.</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Abandoned Stage -->
-            <div class="col deal-column">
-                <h4>Abandoned</h4>
-                <div class="inset-box stage-container" id="abandoned-stage">
-                    {% if deals_by_stage['Abandoned'] %}
-                        {% for deal in deals_by_stage['Abandoned'] %}
-                            <a href="{{ url_for('quotes.view_deal', deal_id=deal.id) }}" class="deal-card" draggable="true" data-deal-id="{{ deal.id }}">
-                                <strong>{{ deal.name | truncate(20) }}</strong><br>
-                                {{ deal.type }}<br>
-                                AU$ {{ deal.amount or 'N/A' }}<br>
-                                Created: {{ deal.created_at }}<br>
-                            </a>
-                        {% endfor %}
-                    {% else %}
-                        <p>No deals in this stage.</p>
-                    {% endif %}
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
 
-<!-- Create Deal Modal -->
 <div class="modal fade" id="createDealModal" tabindex="-1" role="dialog" aria-labelledby="createDealModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -193,14 +76,16 @@ Quotes
                 </button>
             </div>
             <div class="modal-body">
-                {% include 'quote/create_deal_panel.html' %}
+                {% include 'deals/create_deal_panel.html' %}
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
+{% block scripts %}
 <script src="{{ url_for('static', filename='js/deal_cards.js') }}"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% endblock %}

@@ -22,19 +22,19 @@
                 <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Pumps</a>
+                <a class="nav-link" href="{{ url_for('pumps.pumps_list') }}">Pumps</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Hydronics</a>
+                <a class="nav-link" href="{{ url_for('hydronics.hydronics') }}">Hydronics</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Hydraulic</a>
+                <a class="nav-link" href="{{ url_for('hydraulic.hydraulic') }}">Hydraulic</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('admin.admin.dashboard') }}">Admin</a>
+                <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('quotes.list_deals') }}">Quotes</a>
+                <a class="nav-link" href="{{ url_for('deals.list_deals') }}">Deals</a>
             </li>
         </ul>
     </div>

@@ -35,15 +35,14 @@ class CoreLogger:
         self.app = app
         log_dir = Path(app.config.get('LOG_DIR', 'instance/logs'))
         
-        # Load logging configuration from dictConfig for a more robust setup
+        log_dir.mkdir(parents=True, exist_ok=True)
+        
         logging_config = self._get_logging_config(log_dir)
         logging.config.dictConfig(logging_config)
 
-        # Get references to the configured loggers
         for logger_name in logging_config.get('loggers', {}):
             self.loggers[logger_name] = logging.getLogger(logger_name)
         
-        # Set up request logging hooks
         self._setup_request_logging()
         self.app_logger.info("CoreLogger initialized successfully.")
 
@@ -73,7 +72,7 @@ class CoreLogger:
                     'class': 'logging.handlers.RotatingFileHandler',
                     'formatter': 'detailed',
                     'filename': log_dir / 'app.log',
-                    'maxBytes': 10 * 1024 * 1024, # 10MB
+                    'maxBytes': 10 * 1024 * 1024,
                     'backupCount': 10
                 },
                 'error_file': {
@@ -112,7 +111,6 @@ class CoreLogger:
         }
 
     def _setup_request_logging(self):
-        """Set up Flask request logging using before/after request hooks."""
         @self.app.before_request
         def before_request():
             request.start_time = time.time()
@@ -124,6 +122,25 @@ class CoreLogger:
                 self.request_logger.info(f"{response.status} | {duration_ms:.2f}ms")
             return response
 
+    def debug(self, msg, *args, **kwargs):
+        self.app_logger.debug(msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        self.app_logger.info(msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        self.app_logger.warning(msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        self.app_logger.error(msg, *args, **kwargs)
+        
+    def exception(self, msg, *args, **kwargs):
+        self.app_logger.exception(msg, *args, **kwargs)
+    
+    # Add the missing 'critical' method
+    def critical(self, msg, *args, **kwargs):
+        self.app_logger.critical(msg, *args, **kwargs)
+
     @property
     def app_logger(self) -> logging.Logger:
         return self.loggers.get('app', logging.getLogger('app'))
@@ -132,7 +149,4 @@ class CoreLogger:
     def request_logger(self) -> logging.Logger:
         return self.loggers.get('request', logging.getLogger('request'))
 
-# --- Global Instance ---
-# Create a single instance to be imported and initialized in the app factory.
-# All other files will `from .core_logging import logger`
 logger = CoreLogger()
