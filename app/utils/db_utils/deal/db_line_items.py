@@ -1,192 +1,131 @@
-# app/utils/db_utils/db_line_items.py
-
 from typing import Dict, List, Optional
-import logging
 from datetime import datetime
 from decimal import Decimal
 from app.core.core_database import DatabaseManager, DatabaseError
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.core.core_logging import logger # Use central app logger
 
 class LineItemDatabaseManager:
     """Manages all line item-related database operations"""
 
-    @staticmethod
-    def create_line_items_table() -> None:
-        """Creates line items table with PostgreSQL optimizations"""
-        try:
-            query = """
-                CREATE TABLE IF NOT EXISTS line_items (
-                    id SERIAL PRIMARY KEY,
-                    deal_id INTEGER REFERENCES deals(id) ON DELETE CASCADE,
-                    entity_type TEXT NOT NULL,
-                    entity_id TEXT NOT NULL,
-                    pump_name TEXT,
-                    flow DECIMAL(10, 2),
-                    head DECIMAL(10, 2),
-                    description TEXT,
-                    amount DECIMAL(15, 2),
-                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-                );
-
-                CREATE INDEX IF NOT EXISTS idx_line_items_deal ON line_items(deal_id);
-                CREATE INDEX IF NOT EXISTS idx_line_items_entity ON line_items(entity_type, entity_id);
-            """
-
-            DatabaseManager.execute_query(query)
-            logger.info("Line items table created successfully")
-        except Exception as e:
-            logger.error(f"Error creating line items table: {str(e)}")
-            raise DatabaseError(f"Failed to create line items table: {str(e)}")
+    # The create_line_items_table() method has been removed.
+    # This should be handled by a dedicated database migration script.
 
     @staticmethod
-    def validate_line_item_data(data: Dict) -> None:
-        """Validate line item data before insertion/update"""
+    def validate_line_item_data(data: Dict, is_update: bool = False) -> None:
+        """Validate line item data before insertion or update."""
         required_fields = ['deal_id', 'entity_type', 'entity_id']
-        for field in required_fields:
-            if field not in data or data[field] is None:
-                raise ValueError(f"Missing required field: {field}")
-
-        # Validate numeric values
-        if 'amount' in data and data['amount'] is not None:
-            try:
-                data['amount'] = Decimal(str(data['amount']))
-            except (ValueError, TypeError):
-                raise ValueError("Invalid amount value")
-
-        if 'flow' in data and data['flow'] is not None:
-            try:
-                data['flow'] = Decimal(str(data['flow']))
-            except (ValueError, TypeError):
-                raise ValueError("Invalid flow value")
-
-        if 'head' in data and data['head'] is not None:
-            try:
-                data['head'] = Decimal(str(data['head']))
-            except (ValueError, TypeError):
-                raise ValueError("Invalid head value")
+        if not is_update:
+            for field in required_fields:
+                if field not in data or data.get(field) is None:
+                    raise ValueError(f"Missing required field: {field}")
+        
+        for field in ['amount', 'flow', 'head']:
+            if field in data and data[field] is not None:
+                try:
+                    # This ensures the value is a valid decimal
+                    Decimal(str(data[field]))
+                except (ValueError, TypeError):
+                    raise ValueError(f"Invalid value for numeric field: {field}")
 
     @staticmethod
     def insert_line_item(data: Dict) -> int:
-        """Insert a new line item"""
+        """Insert a new line item using a secure, parameterized query."""
+        LineItemDatabaseManager.validate_line_item_data(data)
+        
         try:
-            # Validate data
-            LineItemDatabaseManager.validate_line_item_data(data)
-
-            # Add timestamps
-            data['created_at'] = datetime.now()
-            data['updated_at'] = datetime.now()
-
-            fields = ', '.join(data.keys())
-            placeholders = ', '.join(['%s'] * len(data))
-            query = f"""
-                INSERT INTO line_items ({fields})
-                VALUES ({placeholders})
+            # Explicitly define columns to prevent SQL injection
+            query = """
+                INSERT INTO line_items (
+                    deal_id, entity_type, entity_id, pump_name, flow, head, 
+                    description, amount
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
             """
+            params = (
+                data.get('deal_id'), data.get('entity_type'), data.get('entity_id'),
+                data.get('pump_name'), data.get('flow'), data.get('head'),
+                data.get('description'), data.get('amount')
+            )
             
-            return DatabaseManager.insert_returning_id(query, tuple(data.values()))
+            inserted_id = DatabaseManager.insert_returning_id(query, params)
+            logger.info(f"Successfully inserted line item with ID: {inserted_id}")
+            return inserted_id
 
         except Exception as e:
-            logger.error(f"Error inserting line item: {str(e)}")
-            raise DatabaseError(f"Failed to insert line item: {str(e)}")
+            logger.error(f"Error inserting line item: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to insert line item: {e}")
 
     @staticmethod
     def fetch_line_items_by_deal_id(deal_id: int) -> List[Dict]:
-        """Fetch all line items for a specific deal"""
+        """Fetch all line items for a specific deal."""
         try:
-            query = """
-                SELECT *
-                FROM line_items
-                WHERE deal_id = %s
-                ORDER BY created_at
-            """
+            query = "SELECT * FROM line_items WHERE deal_id = %s ORDER BY created_at"
             return DatabaseManager.execute_query(query, (deal_id,))
-
         except Exception as e:
-            logger.error(f"Error fetching line items: {str(e)}")
-            raise DatabaseError(f"Failed to fetch line items: {str(e)}")
+            logger.error(f"Error fetching line items for deal ID {deal_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch line items: {e}")
 
     @staticmethod
     def update_line_item(item_id: int, data: Dict) -> None:
-        """Update an existing line item"""
-        try:
-            # Add updated timestamp
-            data['updated_at'] = datetime.now()
+        """Update an existing line item using a secure, parameterized query."""
+        if not data:
+            logger.warning("Update called with no data for line item ID {item_id}.")
+            return
 
-            fields = [f"{k} = %s" for k in data.keys()]
-            query = f"""
-                UPDATE line_items 
-                SET {', '.join(fields)}
-                WHERE id = %s
-            """
-            values = list(data.values()) + [item_id]
+        LineItemDatabaseManager.validate_line_item_data(data, is_update=True)
+        
+        try:
+            # Use a whitelist of updatable columns to prevent SQL injection
+            allowed_columns = ['entity_type', 'entity_id', 'pump_name', 'flow', 'head', 'description', 'amount']
+            
+            set_clauses = []
+            values = []
+            for col in allowed_columns:
+                if col in data:
+                    set_clauses.append(f"{col} = %s")
+                    values.append(data[col])
+            
+            if not set_clauses:
+                raise ValueError("No valid fields provided for update.")
+
+            # Always update the updated_at timestamp
+            set_clauses.append("updated_at = %s")
+            values.append(datetime.now())
+
+            query = f"UPDATE line_items SET {', '.join(set_clauses)} WHERE id = %s"
+            values.append(item_id)
+            
             DatabaseManager.execute_query(query, tuple(values))
+            logger.info(f"Successfully updated line item with ID: {item_id}")
 
         except Exception as e:
-            logger.error(f"Error updating line item: {str(e)}")
-            raise DatabaseError(f"Failed to update line item: {str(e)}")
+            logger.error(f"Error updating line item {item_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to update line item: {e}")
 
     @staticmethod
     def delete_line_item(item_id: int) -> None:
-        """Delete a line item"""
+        """Delete a line item."""
         try:
             query = "DELETE FROM line_items WHERE id = %s"
             DatabaseManager.execute_query(query, (item_id,))
-
+            logger.info(f"Successfully deleted line item with ID: {item_id}")
         except Exception as e:
-            logger.error(f"Error deleting line item: {str(e)}")
-            raise DatabaseError(f"Failed to delete line item: {str(e)}")
+            logger.error(f"Error deleting line item {item_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to delete line item: {e}")
 
     @staticmethod
     def calculate_deal_total(deal_id: int) -> Decimal:
-        """Calculate total amount for a deal based on its line items"""
+        """Calculate total amount for a deal based on its line items."""
         try:
-            query = """
-                SELECT COALESCE(SUM(amount), 0) as total
-                FROM line_items
-                WHERE deal_id = %s
-            """
+            query = "SELECT COALESCE(SUM(amount), 0) as total FROM line_items WHERE deal_id = %s"
             result = DatabaseManager.execute_query(query, (deal_id,))
             return Decimal(str(result[0]['total']))
-
         except Exception as e:
-            logger.error(f"Error calculating deal total: {str(e)}")
-            raise DatabaseError(f"Failed to calculate deal total: {str(e)}")
+            logger.error(f"Error calculating deal total for deal ID {deal_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to calculate deal total: {e}")
 
-    @staticmethod
-    def bulk_insert_line_items(items: List[Dict]) -> None:
-        """Bulk insert multiple line items"""
-        try:
-            if not items:
-                return
-
-            # Validate all items first
-            for item in items:
-                LineItemDatabaseManager.validate_line_item_data(item)
-                item['created_at'] = datetime.now()
-                item['updated_at'] = datetime.now()
-
-            fields = items[0].keys()
-            placeholders = ', '.join(['%s'] * len(fields))
-            
-            query = f"""
-                INSERT INTO line_items ({', '.join(fields)})
-                VALUES ({placeholders})
-            """
-
-            values = [tuple(item.values()) for item in items]
-            DatabaseManager.execute_many(query, values)
-
-        except Exception as e:
-            logger.error(f"Error bulk inserting line items: {str(e)}")
-            raise DatabaseError(f"Failed to bulk insert line items: {str(e)}")
-
-# Initialize table when module is imported
-try:
-    LineItemDatabaseManager.create_line_items_table()
-except Exception as e:
-    logger.error(f"Failed to initialize line items table: {str(e)}")
+    # The bulk_insert method has been removed. A proper implementation would require
+    # using advanced features of the underlying database driver (e.g., psycopg2.extras.execute_values)
+    # which is beyond the scope of the current DatabaseManager abstraction.
+    # A simple loop of `insert_line_item` is safer than an insecure bulk method.

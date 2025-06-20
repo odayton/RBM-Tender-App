@@ -1,174 +1,141 @@
-# app/utils/db_utils/db_revisions.py
-
 from typing import Dict, List, Optional
-import logging
 from datetime import datetime
 from app.core.core_database import DatabaseManager, DatabaseError
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.core.core_logging import logger # Use central app logger
 
 class RevisionDatabaseManager:
     """Manages all revision-related database operations"""
 
-    @staticmethod
-    def create_revisions_table() -> None:
-        """Creates revisions table with PostgreSQL optimizations"""
-        try:
-            query = """
-                CREATE TABLE IF NOT EXISTS revisions (
-                    id SERIAL PRIMARY KEY,
-                    deal_id INTEGER NOT NULL REFERENCES deals(id) ON DELETE CASCADE,
-                    version TEXT NOT NULL,
-                    description TEXT,
-                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    UNIQUE(deal_id, version)
-                );
-
-                CREATE INDEX IF NOT EXISTS idx_revisions_deal ON revisions(deal_id);
-                CREATE INDEX IF NOT EXISTS idx_revisions_version ON revisions(version);
-            """
-
-            DatabaseManager.execute_query(query)
-            logger.info("Revisions table created successfully")
-        except Exception as e:
-            logger.error(f"Error creating revisions table: {str(e)}")
-            raise DatabaseError(f"Failed to create revisions table: {str(e)}")
+    # The create_revisions_table() method has been removed.
+    # This should be handled by a dedicated database migration script.
 
     @staticmethod
     def validate_revision_data(data: Dict) -> None:
         """Validate revision data before insertion/update"""
         required_fields = ['deal_id', 'version']
         for field in required_fields:
-            if field not in data or data[field] is None:
+            if field not in data or data.get(field) is None:
                 raise ValueError(f"Missing required field: {field}")
 
-        # Validate version format (e.g., "1.0", "2.1")
         version = str(data['version'])
-        if not version.replace('.', '').isdigit():
-            raise ValueError("Invalid version format. Expected format: X.Y")
+        parts = version.split('.')
+        if len(parts) != 2 or not all(part.isdigit() for part in parts):
+            raise ValueError("Invalid version format. Expected format: X.Y (e.g., '1.0')")
 
     @staticmethod
     def insert_revision(data: Dict) -> int:
-        """Insert a new revision"""
+        """Insert a new revision using a secure, parameterized query."""
+        RevisionDatabaseManager.validate_revision_data(data)
+        
         try:
-            # Validate data
-            RevisionDatabaseManager.validate_revision_data(data)
-
-            # Add timestamps
-            data['created_at'] = datetime.now()
-            data['updated_at'] = datetime.now()
-
-            fields = ', '.join(data.keys())
-            placeholders = ', '.join(['%s'] * len(data))
-            query = f"""
-                INSERT INTO revisions ({fields})
-                VALUES ({placeholders})
+            query = """
+                INSERT INTO revisions (deal_id, version, description, created_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s)
                 RETURNING id
             """
+            now = datetime.now()
+            params = (
+                data.get('deal_id'),
+                data.get('version'),
+                data.get('description'),
+                now,
+                now
+            )
             
-            return DatabaseManager.insert_returning_id(query, tuple(data.values()))
+            inserted_id = DatabaseManager.insert_returning_id(query, params)
+            logger.info(f"Successfully inserted revision {data.get('version')} for deal ID {data.get('deal_id')}. New revision ID: {inserted_id}")
+            return inserted_id
 
         except Exception as e:
-            logger.error(f"Error inserting revision: {str(e)}")
-            raise DatabaseError(f"Failed to insert revision: {str(e)}")
+            logger.error(f"Error inserting revision: {e}", exc_info=True)
+            # Check for unique constraint violation
+            if 'unique constraint' in str(e).lower():
+                raise DatabaseError(f"Version '{data.get('version')}' already exists for this deal.")
+            raise DatabaseError(f"Failed to insert revision: {e}")
 
     @staticmethod
     def fetch_revisions_by_deal_id(deal_id: int) -> List[Dict]:
-        """Fetch all revisions for a specific deal"""
+        """Fetch all revisions for a specific deal, sorted naturally by version number."""
         try:
+            # Casting version parts to integer ensures correct sorting (e.g., 1.10 after 1.9)
             query = """
-                SELECT *
-                FROM revisions
-                WHERE deal_id = %s
-                ORDER BY 
-                    CAST(SPLIT_PART(version, '.', 1) AS INTEGER),
-                    CAST(SPLIT_PART(version, '.', 2) AS INTEGER)
-            """
-            return DatabaseManager.execute_query(query, (deal_id,))
-
-        except Exception as e:
-            logger.error(f"Error fetching revisions: {str(e)}")
-            raise DatabaseError(f"Failed to fetch revisions: {str(e)}")
-
-    @staticmethod
-    def get_latest_revision(deal_id: int) -> Optional[Dict]:
-        """Get the latest revision for a deal"""
-        try:
-            query = """
-                SELECT *
-                FROM revisions
+                SELECT * FROM revisions
                 WHERE deal_id = %s
                 ORDER BY 
                     CAST(SPLIT_PART(version, '.', 1) AS INTEGER) DESC,
                     CAST(SPLIT_PART(version, '.', 2) AS INTEGER) DESC
-                LIMIT 1
             """
-            results = DatabaseManager.execute_query(query, (deal_id,))
-            return results[0] if results else None
-
+            return DatabaseManager.execute_query(query, (deal_id,))
         except Exception as e:
-            logger.error(f"Error fetching latest revision: {str(e)}")
-            raise DatabaseError(f"Failed to fetch latest revision: {str(e)}")
+            logger.error(f"Error fetching revisions for deal ID {deal_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch revisions: {e}")
+
+    @staticmethod
+    def get_latest_revision(deal_id: int) -> Optional[Dict]:
+        """Get the latest revision for a deal using natural version sorting."""
+        try:
+            revisions = RevisionDatabaseManager.fetch_revisions_by_deal_id(deal_id)
+            return revisions[0] if revisions else None
+        except Exception as e:
+            logger.error(f"Error fetching latest revision for deal ID {deal_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch latest revision: {e}")
 
     @staticmethod
     def generate_next_version(deal_id: int) -> str:
-        """Generate the next version number for a deal"""
+        """Generate the next minor version number for a deal (e.g., 1.0 -> 1.1)."""
         try:
             latest_revision = RevisionDatabaseManager.get_latest_revision(deal_id)
-            
             if not latest_revision:
                 return "1.0"
-                
+            
             current_version = latest_revision['version']
             major, minor = map(int, current_version.split('.'))
-            
             return f"{major}.{minor + 1}"
-
         except Exception as e:
-            logger.error(f"Error generating next version: {str(e)}")
-            raise DatabaseError(f"Failed to generate next version: {str(e)}")
+            logger.error(f"Error generating next version for deal ID {deal_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to generate next version: {e}")
 
     @staticmethod
     def update_revision(revision_id: int, data: Dict) -> None:
-        """Update an existing revision"""
-        try:
-            # Add updated timestamp
-            data['updated_at'] = datetime.now()
+        """Update an existing revision using a secure, parameterized query."""
+        if not data:
+            logger.warning(f"Update called with no data for revision ID {revision_id}.")
+            return
 
-            fields = [f"{k} = %s" for k in data.keys()]
-            query = f"""
-                UPDATE revisions 
-                SET {', '.join(fields)}
-                WHERE id = %s
-            """
-            values = list(data.values()) + [revision_id]
+        try:
+            # Use a whitelist of updatable columns to prevent SQL injection
+            allowed_columns = ['version', 'description']
+            
+            set_clauses = []
+            values = []
+            for col in allowed_columns:
+                if col in data:
+                    set_clauses.append(f"{col} = %s")
+                    values.append(data[col])
+            
+            if not set_clauses:
+                raise ValueError("No valid fields provided for update.")
+
+            set_clauses.append("updated_at = %s")
+            values.append(datetime.now())
+
+            query = f"UPDATE revisions SET {', '.join(set_clauses)} WHERE id = %s"
+            values.append(revision_id)
+            
             DatabaseManager.execute_query(query, tuple(values))
+            logger.info(f"Successfully updated revision with ID: {revision_id}")
 
         except Exception as e:
-            logger.error(f"Error updating revision: {str(e)}")
-            raise DatabaseError(f"Failed to update revision: {str(e)}")
+            logger.error(f"Error updating revision {revision_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to update revision: {e}")
 
     @staticmethod
     def fetch_revision_by_id(revision_id: int) -> Optional[Dict]:
-        """Fetch a specific revision by ID"""
+        """Fetch a specific revision by ID."""
         try:
-            query = """
-                SELECT * 
-                FROM revisions 
-                WHERE id = %s
-            """
+            query = "SELECT * FROM revisions WHERE id = %s"
             results = DatabaseManager.execute_query(query, (revision_id,))
             return results[0] if results else None
-
         except Exception as e:
-            logger.error(f"Error fetching revision: {str(e)}")
-            raise DatabaseError(f"Failed to fetch revision: {str(e)}")
-
-# Initialize table when module is imported
-try:
-    RevisionDatabaseManager.create_revisions_table()
-except Exception as e:
-    logger.error(f"Failed to initialize revisions table: {str(e)}")
+            logger.error(f"Error fetching revision ID {revision_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch revision: {e}")

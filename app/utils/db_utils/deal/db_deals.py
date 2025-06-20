@@ -1,12 +1,8 @@
-# app/utils/db_utils/deal/db_deals.py
-
 from typing import Dict, List, Optional
-import logging
-from app.app_extensions import db
+from app.extensions import db # Corrected Import
 from app.models import Deal, Quote, QuoteLineItem, DealStage
 from app.core.core_errors import DatabaseError
-
-logger = logging.getLogger(__name__)
+from app.core.core_logging import logger
 
 class DealDatabaseManager:
     """Manages all deal-related database operations using the SQLAlchemy ORM."""
@@ -24,11 +20,11 @@ class DealDatabaseManager:
             new_deal = Deal(**data)
             db.session.add(new_deal)
             db.session.commit()
-            logger.info(f"Successfully created deal: {new_deal.project_name}")
+            logger.info(f"Successfully created deal: {new_deal.project_name} (ID: {new_deal.id})")
             return new_deal
         except Exception as e:
             db.session.rollback()
-            logger.error(f"Error creating deal: {e}")
+            logger.error(f"Error creating deal: {e}", exc_info=True)
             raise DatabaseError(f"Failed to create deal: {e}")
 
     @staticmethod
@@ -43,7 +39,7 @@ class DealDatabaseManager:
         try:
             return Deal.query.get(deal_id)
         except Exception as e:
-            logger.error(f"Error fetching deal with id {deal_id}: {e}")
+            logger.error(f"Error fetching deal with id {deal_id}: {e}", exc_info=True)
             raise DatabaseError(f"Failed to fetch deal: {e}")
 
     @staticmethod
@@ -56,7 +52,7 @@ class DealDatabaseManager:
         try:
             return Deal.query.order_by(Deal.created_date.desc()).all()
         except Exception as e:
-            logger.error(f"Error fetching all deals: {e}")
+            logger.error(f"Error fetching all deals: {e}", exc_info=True)
             raise DatabaseError(f"Failed to fetch deals: {e}")
 
     @staticmethod
@@ -76,14 +72,13 @@ class DealDatabaseManager:
                 db.session.commit()
                 logger.info(f"Successfully updated stage for deal {deal_id} to {new_stage.value}")
                 return deal
+            logger.warning(f"Attempted to update stage for non-existent deal with ID {deal_id}")
             return None
         except Exception as e:
             db.session.rollback()
-            logger.error(f"Error updating deal stage for deal {deal_id}: {e}")
+            logger.error(f"Error updating deal stage for deal {deal_id}: {e}", exc_info=True)
             raise DatabaseError(f"Failed to update deal stage: {e}")
 
-    # You would continue this pattern for other methods like creating quotes,
-    # adding line items, etc. For example:
     @staticmethod
     def create_quote_for_deal(deal_id: int, quote_data: Dict) -> Quote:
         """Creates a new Quote and associates it with a Deal."""
@@ -96,5 +91,5 @@ class DealDatabaseManager:
             return new_quote
         except Exception as e:
             db.session.rollback()
-            logger.error(f"Error creating quote for deal {deal_id}: {e}")
+            logger.error(f"Error creating quote for deal {deal_id}: {e}", exc_info=True)
             raise DatabaseError(f"Failed to create quote: {e}")

@@ -4,10 +4,19 @@ from wtforms import (
     FloatField,
     SelectField,
     FileField,
-    TextAreaField
+    TextAreaField,
+    SubmitField
 )
 from wtforms.validators import DataRequired, Optional, NumberRange
 from flask_wtf.file import FileRequired, FileAllowed
+
+class PumpForm(FlaskForm):
+    """
+    Form for adding or editing a pump model.
+    """
+    pump_model = StringField('Pump Model', validators=[DataRequired()])
+    manufacturer = StringField('Manufacturer', validators=[DataRequired()])
+    submit = SubmitField('Add Pump')
 
 class PumpSearchForm(FlaskForm):
     """Form for searching pumps"""

@@ -1,167 +1,87 @@
-from typing import Optional, Dict, Any
-from flask import Flask, current_app, request
-import logging
 import os
-from datetime import datetime
+from flask import Flask
+from pathlib import Path
 
-print("--- LOADING LATEST VERSION OF core_init.py ---")
+# Import the application config dictionary
+from .core_config import config_dict
 
-from ..app_extensions import db, csrf, session
-from ..app_logging import app_logger
-
-logger = logging.getLogger(__name__)
+# Import the singleton instances of our core components
+from .core_logging import logger as core_logger
+from .core_security import security_manager
+from .core_errors import register_error_handlers
+from .core_events import event_manager
+from .core_cache import cache_manager
 
 class CoreInitializer:
-    """Handles core application initialization and setup"""
+    """Initializes the core components and extensions of the application."""
     
-    def __init__(self, app: Optional[Flask] = None):
+    def __init__(self, app: Flask, db, login_manager, migrate):
         self.app = app
-        if app is not None:
-            self.init_app(app)
+        self.db = db
+        self.login_manager = login_manager
+        self.migrate = migrate
 
-    def init_app(self, app: Flask) -> None:
-        """
-        Initialize core application components
+    def init_app(self):
+        """Run all initialization methods in the correct order."""
+        self.init_config()
+        self._create_directories()
+        self.init_logging()
+        self.init_database()
+        self.init_security()
+        self.init_cache()
+        self.init_events()
+        self.init_error_handlers() # Register handlers last
+
+    def init_config(self):
+        """Initialize configuration from environment."""
+        config_name = os.getenv('FLASK_CONFIG', 'development')
+        self.app.config.from_object(config_dict[config_name])
+        # Allow config class to perform post-load actions, like loading YAML
+        config_dict[config_name].init_app(self.app)
+
+    def init_logging(self):
+        """Initialize application logging."""
+        core_logger.init_app(self.app)
+        core_logger.app_logger.info("Logging Initialized.")
+
+    def init_database(self):
+        """Initialize database components and Flask-Migrate."""
+        self.db.init_app(self.app)
+        self.migrate.init_app(self.app, self.db)
+        # The old DatabaseManager no longer needs an init_app call.
+        core_logger.app_logger.info("Database and Migrations Initialized.")
+
+    def init_security(self):
+        """Initialize security components."""
+        security_manager.init_app(self.app)
+        self.login_manager.init_app(self.app)
+        core_logger.app_logger.info("Security Initialized.")
         
-        Args:
-            app: Flask application instance
-        """
-        self.app = app
-        self._init_directories()
-        self._init_database()
-        self._init_logging()
-        self._register_error_handlers()
-        self._register_before_request()
-        self._register_after_request()
-        self._register_teardown()
-        
-        logger.info("Core initialization completed successfully")
+    def init_cache(self):
+        """Initialize the cache manager."""
+        cache_manager.init_app(self.app)
+        core_logger.app_logger.info("Cache System Initialized.")
 
-    def _init_directories(self) -> None:
-        """Create necessary application directories"""
-        try:
-            directories = [
-                self.app.config['INSTANCE_PATH'],
-                self.app.config['UPLOAD_FOLDER'],
-                self.app.config['TECH_DATA_FOLDER'],
-                self.app.config['EXPORTS_FOLDER'],
-                self.app.config['LOGS_FOLDER'],
-                self.app.config['SESSION_FILE_DIR']
-            ]
-            
-            for directory in directories:
-                os.makedirs(directory, exist_ok=True)
-                logger.debug(f"Ensured directory exists: {directory}")
-                
-        except KeyError as e:
-            logger.error(f"Failed to create directories: Configuration key not found - {str(e)}")
-            raise
-        except Exception as e:
-            logger.error(f"Failed to create directories: {str(e)}")
-            raise
+    def init_events(self):
+        """Initialize the event manager and load listeners."""
+        event_manager.init_app(self.app)
+        core_logger.app_logger.info("Event System Initialized.")
 
-    def _init_database(self) -> None:
-        """Initialize database connection and tables"""
-        try:
-            db.init_app(self.app)
-            with self.app.app_context():
-                db.create_all()
-            logger.info("Database initialized successfully")
-        except Exception as e:
-            logger.error(f"Database initialization failed: {str(e)}")
-            raise
+    def init_error_handlers(self):
+        """Register application-wide error handlers."""
+        register_error_handlers(self.app)
+        core_logger.app_logger.info("Error Handlers Registered.")
 
-    def _init_logging(self) -> None:
-        """Configure application logging"""
-        logger.info("Logging initialized successfully")
-
-    def _register_error_handlers(self) -> None:
-        """Register application error handlers"""
-        
-        @self.app.errorhandler(404)
-        def not_found_error(error):
-            app_logger.log_error(error, {'path': request.path})
-            return 'Not Found', 404
-
-        @self.app.errorhandler(500)
-        def internal_error(error):
-            app_logger.log_error(error, {'path': request.path})
-            return 'Internal Server Error', 500
-
-        @self.app.errorhandler(403)
-        def forbidden_error(error):
-            app_logger.log_error(error, {'path': request.path})
-            return 'Forbidden', 403
-
-    def _register_before_request(self) -> None:
-        """Register functions to run before each request"""
-        
-        @self.app.before_request
-        def before_request():
-            if self.app.config.get('MAINTENANCE_MODE', False):
-                return 'Site is under maintenance', 503
-                
-            setattr(current_app, 'request_start_time', datetime.now())
-
-    def _register_after_request(self) -> None:
-        """Register functions to run after each request"""
-        
-        @self.app.after_request
-        def after_request(response):
-            start_time = getattr(current_app, 'request_start_time', None)
-            if start_time:
-                duration = (datetime.now() - start_time).total_seconds() * 1000
-                app_logger.log_access(
-                    endpoint=request.endpoint,
-                    method=request.method,
-                    ip=request.remote_addr,
-                    duration=duration
-                )
-            
-            return response
-
-    def _register_teardown(self) -> None:
-        """Register application teardown functions"""
-        
-        @self.app.teardown_appcontext
-        def shutdown_session(exception=None):
-            db.session.remove()
-
-    def check_system_health(self) -> Dict[str, Any]:
-        """
-        Check health status of core components
-        
-        Returns:
-            Dict containing health status of various components
-        """
-        health_status = {
-            'database': True,
-            'file_system': True,
-            'logging': True
-        }
-        
-        try:
-            with self.app.app_context():
-                db.session.execute('SELECT 1')
-        except Exception as e:
-            health_status['database'] = False
-            logger.error(f"Database health check failed: {str(e)}")
-        
-        try:
-            test_file = os.path.join(self.app.config['LOGS_FOLDER'], 'health_check_test.txt')
-            with open(test_file, 'w') as f:
-                f.write('test')
-            os.remove(test_file)
-        except Exception as e:
-            health_status['file_system'] = False
-            logger.error(f"File system health check failed: {str(e)}")
-        
-        try:
-            logger.info("Health check test log")
-        except Exception as e:
-            health_status['logging'] = False
-            logger.error(f"Logging health check failed: {str(e)}")
-        
-        return health_status
-
-core_initializer = CoreInitializer()
+    def _create_directories(self):
+        """Create necessary instance folders for logs, uploads, etc."""
+        # This method is now the single source of truth for directory creation.
+        required_paths = [
+            self.app.instance_path,
+            self.app.config.get('LOG_DIR'),
+            self.app.config.get('UPLOAD_DIR'),
+            self.app.config.get('EXPORT_DIR'),
+            self.app.config.get('SESSION_FILE_DIR')
+        ]
+        for path in required_paths:
+            if path:
+                Path(path).mkdir(parents=True, exist_ok=True)

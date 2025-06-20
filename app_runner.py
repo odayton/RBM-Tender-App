@@ -1,27 +1,9 @@
 from app import create_app
-import os
 
-# Create application instance
-app = create_app(os.getenv('FLASK_CONFIG') or 'development')
-
-# Ensure required directories exist
-required_dirs = [
-    'uploads',
-    'uploads/tech-data',
-    'uploads/others',
-    'extracted_historic_graphs',
-    'extracted_blank_graphs',
-    'instance',
-    'logs'
-]
-
-for directory in required_dirs:
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+# Create the application instance using the modern factory
+app = create_app()
 
 if __name__ == '__main__':
-    app.run(
-        host='0.0.0.0',
-        port=5000,
-        debug=True
-    )
+    # Set host to '0.0.0.0' to make it accessible from the network
+    # Debug mode should ideally be loaded from the config, but this is fine for local dev
+    app.run(host='0.0.0.0', port=5000, debug=True)

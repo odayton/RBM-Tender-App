@@ -1,10 +1,11 @@
-from typing import Dict, Any, Optional
-from datetime import datetime
+from typing import Any, Dict, Optional
+from datetime import datetime, date
 from sqlalchemy import Column, Integer, DateTime
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import Session
+from decimal import Decimal
+
+from app.extensions import db # Corrected import
 from app.core.core_errors import ValidationError, DatabaseError
-from app.app_extensions import db
 
 class BaseModel(db.Model):
     """
@@ -22,33 +23,36 @@ class BaseModel(db.Model):
     
     @declared_attr
     def __tablename__(cls) -> str:
-        """Generate default tablename from class name"""
-        return cls.__name__.lower()
+        """Generate a default table name from the class name."""
+        # Converts "UserModel" to "user_model"
+        import re
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', cls.__name__)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
     def save(self) -> None:
         """
-        Save instance to database.
+        Save the current instance to the database.
         Raises:
-            DatabaseError: If save operation fails
+            DatabaseError: If the save operation fails.
         """
         try:
             db.session.add(self)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise DatabaseError("save", str(e))
+            raise DatabaseError(f"Failed to save {self.__class__.__name__}: {e}")
 
-    def update(self, data: Dict[str, Any]) -> None:
+    def update(self, **kwargs) -> None:
         """
-        Update instance with provided data
+        Update the instance with provided data from keyword arguments.
         Args:
-            data: Dictionary of attributes to update
+            **kwargs: Keyword arguments corresponding to model attributes.
         Raises:
-            ValidationError: If validation fails
-            DatabaseError: If update operation fails
+            ValidationError: If validation fails.
+            DatabaseError: If the update operation fails.
         """
         try:
-            for key, value in data.items():
+            for key, value in kwargs.items():
                 if hasattr(self, key):
                     setattr(self, key, value)
             
@@ -59,51 +63,51 @@ class BaseModel(db.Model):
             raise
         except Exception as e:
             db.session.rollback()
-            raise DatabaseError("update", str(e))
+            raise DatabaseError(f"Failed to update {self.__class__.__name__}: {e}")
 
     def delete(self) -> None:
         """
-        Delete instance from database
+        Delete the instance from the database.
         Raises:
-            DatabaseError: If delete operation fails
+            DatabaseError: If the delete operation fails.
         """
         try:
             db.session.delete(self)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise DatabaseError("delete", str(e))
+            raise DatabaseError(f"Failed to delete {self.__class__.__name__}: {e}")
 
     @classmethod
-    def get_by_id(cls, id: int) -> Optional['BaseModel']:
-        """Get model instance by ID"""
-        return cls.query.get(id)
+    def get_by_id(cls, record_id: int) -> Optional['BaseModel']:
+        """Get a model instance by its primary key."""
+        return cls.query.get(record_id)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert model to dictionary"""
+        """Convert the model instance to a dictionary."""
         result = {}
         for column in self.__table__.columns:
             value = getattr(self, column.name)
             
-            # Format datetime objects
-            if isinstance(value, datetime):
+            if isinstance(value, (datetime, date)):
                 value = value.isoformat()
+            elif isinstance(value, Decimal):
+                value = str(value)
                 
             result[column.name] = value
-            
         return result
 
     def validate(self) -> None:
         """
-        Basic validation of required fields.
-        Override in subclasses for model-specific validation.
+        Basic validation. Override in subclasses for model-specific validation.
         Raises:
-            ValidationError: If validation fails
+            ValidationError: If validation fails.
         """
         for column in self.__table__.columns:
             if not column.nullable and getattr(self, column.name) is None:
-                raise ValidationError(f"Field '{column.name}' cannot be null")
+                if not column.primary_key: # Primary keys are often generated on commit
+                    raise ValidationError(f"Field '{column.name}' cannot be null.")
 
     def __repr__(self) -> str:
-        """String representation of model instance"""
+        """String representation of the model instance."""
         return f"<{self.__class__.__name__}(id={self.id})>"

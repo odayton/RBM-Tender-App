@@ -1,17 +1,16 @@
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional
 from enum import Enum
-import logging
 import threading
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from functools import wraps
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-
-logger = logging.getLogger(__name__)
+from flask import Flask
+from .core_logging import logger # Use central app logger
 
 class EventPriority(Enum):
-    """Priority levels for event handlers"""
+    """Priority levels for event handlers."""
     LOW = 0
     NORMAL = 1
     HIGH = 2
@@ -19,169 +18,118 @@ class EventPriority(Enum):
 
 @dataclass
 class Event:
-    """Base event class containing common event data"""
+    """Base event class containing common event data."""
     name: str
     data: Dict[str, Any]
-    timestamp: datetime = datetime.utcnow()
+    timestamp: datetime = field(default_factory=datetime.utcnow)
     source: Optional[str] = None
     priority: EventPriority = EventPriority.NORMAL
 
 class EventHandler:
-    """Handler for managing event subscriptions and dispatching"""
+    """Manages event subscriptions and dispatching using a thread pool."""
     
     def __init__(self):
         self._handlers: Dict[str, List[tuple[Callable, EventPriority]]] = {}
         self._async_handlers: Dict[str, List[tuple[Callable, EventPriority]]] = {}
         self._lock = threading.Lock()
-        self._executor = ThreadPoolExecutor()
-        self._max_retries = 3
-        
-    def subscribe(self, event_name: str, handler: Callable, 
-                 priority: EventPriority = EventPriority.NORMAL,
-                 is_async: bool = False) -> None:
+        self._executor: Optional[ThreadPoolExecutor] = None
+        self.app: Optional[Flask] = None
+
+    def init_app(self, app: Flask):
+        """Initialize the event handler with the Flask app."""
+        self.app = app
+        # Create a thread pool executor with a name for easier debugging
+        self._executor = ThreadPoolExecutor(max_workers=5, thread_name_prefix='EventHandler')
+        logger.info("EventHandler initialized with ThreadPoolExecutor.")
+
+    def subscribe(self, event_name: str, handler: Callable, priority: EventPriority = EventPriority.NORMAL):
         """
-        Subscribe a handler to an event
-        Args:
-            event_name: Name of the event to subscribe to
-            handler: Callback function to handle the event
-            priority: Priority level for the handler
-            is_async: Whether the handler is async
+        Subscribe a handler to an event. Determines if handler is async automatically.
         """
+        is_async = asyncio.iscoroutinefunction(handler)
         with self._lock:
             handlers_dict = self._async_handlers if is_async else self._handlers
             if event_name not in handlers_dict:
                 handlers_dict[event_name] = []
+            
+            # Avoid duplicate subscriptions
+            if any(h == handler for h, p in handlers_dict[event_name]):
+                logger.warning(f"Handler {handler.__name__} is already subscribed to event {event_name}.")
+                return
+
             handlers_dict[event_name].append((handler, priority))
             # Sort handlers by priority (highest first)
             handlers_dict[event_name].sort(key=lambda x: x[1].value, reverse=True)
-    
-    def unsubscribe(self, event_name: str, handler: Callable) -> None:
-        """
-        Unsubscribe a handler from an event
-        Args:
-            event_name: Name of the event
-            handler: Handler to unsubscribe
-        """
-        with self._lock:
-            for handlers_dict in [self._handlers, self._async_handlers]:
-                if event_name in handlers_dict:
-                    handlers_dict[event_name] = [
-                        (h, p) for h, p in handlers_dict[event_name] 
-                        if h != handler
-                    ]
-    
-    async def dispatch_async(self, event: Event) -> None:
-        """
-        Dispatch an event to all async handlers
-        Args:
-            event: Event to dispatch
-        """
-        if event.name in self._async_handlers:
-            for handler, _ in self._async_handlers[event.name]:
-                try:
-                    await handler(event)
-                except Exception as e:
-                    logger.error(
-                        f"Error in async handler for event {event.name}: {str(e)}",
-                        exc_info=True
-                    )
+            logger.info(f"Handler '{handler.__name__}' subscribed to event '{event_name}' with priority {priority.name}.")
 
-    def dispatch(self, event: Event) -> None:
-        """
-        Dispatch an event to all synchronous handlers
-        Args:
-            event: Event to dispatch
-        """
+    def dispatch(self, event: Event):
+        """Dispatch an event to all subscribed handlers."""
+        logger.debug(f"Dispatching event '{event.name}' with data: {event.data}")
+        # Dispatch to sync handlers in the thread pool
         if event.name in self._handlers:
             for handler, _ in self._handlers[event.name]:
-                try:
-                    self._executor.submit(self._execute_handler, handler, event)
-                except Exception as e:
-                    logger.error(
-                        f"Error dispatching event {event.name}: {str(e)}",
-                        exc_info=True
-                    )
-    
-    def _execute_handler(self, handler: Callable, event: Event, 
-                        retry_count: int = 0) -> None:
-        """
-        Execute a handler with retry logic
-        Args:
-            handler: Handler to execute
-            event: Event to handle
-            retry_count: Current retry attempt
-        """
-        try:
-            handler(event)
-        except Exception as e:
-            if retry_count < self._max_retries:
-                logger.warning(
-                    f"Retrying handler for event {event.name} "
-                    f"(attempt {retry_count + 1})"
-                )
-                self._execute_handler(handler, event, retry_count + 1)
-            else:
-                logger.error(
-                    f"Handler failed after {self._max_retries} retries "
-                    f"for event {event.name}: {str(e)}",
-                    exc_info=True
-                )
+                if self._executor:
+                    self._executor.submit(handler, event)
+        
+        # Dispatch to async handlers in the event loop
+        if event.name in self._async_handlers:
+            async def run_async_handlers():
+                tasks = [handler(event) for handler, _ in self._async_handlers[event.name]]
+                await asyncio.gather(*tasks, return_exceptions=True)
 
-# Global event handler instance
-event_handler = EventHandler()
+            # Fire and forget
+            asyncio.ensure_future(run_async_handlers())
+
+# --- Global Instance and Decorators ---
+
+# Create a single instance to be imported and initialized in the app factory.
+event_manager = EventHandler()
 
 def event_publisher(event_name: str, priority: EventPriority = EventPriority.NORMAL):
-    """
-    Decorator for publishing events from methods
-    Args:
-        event_name: Name of the event to publish
-        priority: Priority level for the event
-    """
+    """Decorator for automatically publishing an event after a function call."""
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
-            # Create and dispatch event
             event = Event(
                 name=event_name,
                 data={'result': result, 'args': args, 'kwargs': kwargs},
-                priority=priority
+                priority=priority,
+                source=func.__name__
             )
-            event_handler.dispatch(event)
+            event_manager.dispatch(event)
             return result
         return wrapper
     return decorator
 
-# Specific Event Classes for the application
+# --- Specific Event Classes ---
 
-class PumpEvent(Event):
-    """Event class for pump-related events"""
-    def __init__(self, pump_id: str, action: str, data: Dict[str, Any],
-                 priority: EventPriority = EventPriority.NORMAL):
+class UserEvent(Event):
+    """Event class for user-related events (e.g., login, logout)."""
+    def __init__(self, user_id: Any, action: str, data: Optional[Dict] = None, priority: EventPriority = EventPriority.NORMAL):
         super().__init__(
-            name=f"pump.{action}",
-            data={'pump_id': pump_id, **data},
-            source="pump_module",
+            name=f"user.{action}",
+            data={'user_id': user_id, **(data or {})},
+            source="user_module",
             priority=priority
         )
 
-class QuoteEvent(Event):
-    """Event class for quote-related events"""
-    def __init__(self, quote_id: str, action: str, data: Dict[str, Any],
-                 priority: EventPriority = EventPriority.NORMAL):
+class DealEvent(Event):
+    """Event class for deal-related events."""
+    def __init__(self, deal_id: Any, action: str, data: Optional[Dict] = None, priority: EventPriority = EventPriority.NORMAL):
         super().__init__(
-            name=f"quote.{action}",
-            data={'quote_id': quote_id, **data},
-            source="quote_module",
+            name=f"deal.{action}",
+            data={'deal_id': deal_id, **(data or {})},
+            source="deal_module",
             priority=priority
         )
 
-class AuditEvent(Event):
-    """Event class for audit logging"""
-    def __init__(self, user_id: str, action: str, data: Dict[str, Any]):
+class SystemEvent(Event):
+    """Event class for system-level events (e.g., startup, shutdown)."""
+    def __init__(self, action: str, data: Optional[Dict] = None, priority: EventPriority = EventPriority.CRITICAL):
         super().__init__(
-            name="audit.log",
-            data={'user_id': user_id, 'action': action, **data},
-            source="audit_module",
-            priority=EventPriority.HIGH
+            name=f"system.{action}",
+            data=data or {},
+            source="system",
+            priority=priority
         )

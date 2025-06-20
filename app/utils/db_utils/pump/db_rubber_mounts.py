@@ -1,120 +1,88 @@
-# app/utils/db_utils/db_rubber_mounts.py
-
 from typing import Dict, List, Optional
-import logging
 from decimal import Decimal
-from app.core.core_database import DatabaseManager, DatabaseError
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.extensions import db
+from app.models import RubberMounts # Assuming this is your model name
+from app.core.core_errors import DatabaseError
+from app.core.core_logging import logger # Use central app logger
 
 class RubberMountDatabaseManager:
-    """Manages all rubber mount-related database operations"""
-
-    @staticmethod
-    def create_rubber_mounts_table() -> None:
-        """Creates rubber mounts table with PostgreSQL optimizations"""
-        try:
-            query = """
-                CREATE TABLE IF NOT EXISTS rubber_mounts (
-                    part_number TEXT PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    weight DECIMAL(10, 2) NOT NULL,
-                    cost DECIMAL(10, 2) NOT NULL,
-                    CONSTRAINT positive_weight CHECK (weight > 0),
-                    CONSTRAINT positive_cost CHECK (cost > 0)
-                );
-
-                CREATE INDEX IF NOT EXISTS idx_rubber_mounts_weight 
-                ON rubber_mounts(weight);
-            """
-
-            DatabaseManager.execute_query(query)
-            logger.info("Rubber mounts table created successfully")
-        except Exception as e:
-            logger.error(f"Error creating rubber mounts table: {str(e)}")
-            raise DatabaseError(f"Failed to create rubber mounts table: {str(e)}")
+    """Manages all rubber mount-related database operations using the SQLAlchemy ORM."""
 
     @staticmethod
     def validate_rubber_mount_data(data: Dict) -> None:
-        """Validate rubber mount data before insertion/update"""
+        """Validate rubber mount data before insertion/update."""
         required_fields = ['part_number', 'name', 'weight', 'cost']
-        
         for field in required_fields:
-            if field not in data or data[field] is None:
+            if field not in data or data.get(field) is None:
                 raise ValueError(f"Missing required field: {field}")
-
-        # Validate numeric values
-        numeric_fields = ['weight', 'cost']
-        for field in numeric_fields:
-            if field in data:
-                try:
-                    data[field] = Decimal(str(data[field]))
-                    if data[field] <= 0:
-                        raise ValueError(f"{field} must be positive")
-                except (ValueError, TypeError):
-                    raise ValueError(f"Invalid numeric value for {field}")
+        
+        for field in ['weight', 'cost']:
+            try:
+                value = Decimal(str(data[field]))
+                if value <= 0:
+                    raise ValueError(f"{field} must be positive.")
+            except (ValueError, TypeError):
+                raise ValueError(f"Invalid numeric value for {field}.")
 
     @staticmethod
-    def insert_rubber_mount(data: Dict) -> str:
-        """Insert a new rubber mount with validation"""
+    def insert_rubber_mount(data: Dict) -> RubberMounts:
+        """Insert a new rubber mount using the ORM."""
         try:
-            # Validate data
             RubberMountDatabaseManager.validate_rubber_mount_data(data)
-
-            # Check for existing part number
-            if DatabaseManager.record_exists('rubber_mounts', {'part_number': data['part_number']}):
-                raise DatabaseError(f"Rubber mount with part number {data['part_number']} already exists")
-
-            fields = ', '.join(data.keys())
-            placeholders = ', '.join(['%s'] * len(data))
-            query = f"""
-                INSERT INTO rubber_mounts ({fields})
-                VALUES ({placeholders})
-                RETURNING part_number
-            """
             
-            result = DatabaseManager.execute_query(query, tuple(data.values()))
-            return result[0]['part_number']
-
+            new_mount = RubberMounts(**data)
+            db.session.add(new_mount)
+            db.session.commit()
+            
+            logger.info(f"Successfully inserted rubber mount with part number: {new_mount.part_number}")
+            return new_mount
         except Exception as e:
-            logger.error(f"Error inserting rubber mount: {str(e)}")
-            raise DatabaseError(f"Failed to insert rubber mount: {str(e)}")
+            db.session.rollback()
+            logger.error(f"Error inserting rubber mount: {e}", exc_info=True)
+            if 'unique constraint' in str(e).lower() or 'already exists' in str(e).lower():
+                raise DatabaseError(f"Rubber mount with part number {data.get('part_number')} already exists.")
+            raise DatabaseError(f"Failed to insert rubber mount: {e}")
 
     @staticmethod
-    def fetch_all_rubber_mounts() -> List[Dict]:
-        """Fetch all rubber mounts"""
+    def fetch_all_rubber_mounts() -> List[RubberMounts]:
+        """Fetch all rubber mounts."""
         try:
-            query = """
-                SELECT *
-                FROM rubber_mounts
-                ORDER BY part_number
-            """
-            return DatabaseManager.execute_query(query)
-
+            return RubberMounts.query.order_by(RubberMounts.part_number).all()
         except Exception as e:
-            logger.error(f"Error fetching rubber mounts: {str(e)}")
-            raise DatabaseError(f"Failed to fetch rubber mounts: {str(e)}")
+            logger.error(f"Error fetching all rubber mounts: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch all rubber mounts: {e}")
 
     @staticmethod
-    def fetch_rubber_mount_by_part_number(part_number: str) -> Optional[Dict]:
-        """Fetch a specific rubber mount by part number"""
+    def fetch_rubber_mount_by_part_number(part_number: str) -> Optional[RubberMounts]:
+        """Fetch a specific rubber mount by its part number."""
         try:
-            query = """
-                SELECT * 
-                FROM rubber_mounts 
-                WHERE part_number = %s
-            """
-            results = DatabaseManager.execute_query(query, (part_number,))
-            return results[0] if results else None
-
+            return RubberMounts.query.filter_by(part_number=part_number).first()
         except Exception as e:
-            logger.error(f"Error fetching rubber mount: {str(e)}")
-            raise DatabaseError(f"Failed to fetch rubber mount: {str(e)}")
+            logger.error(f"Error fetching rubber mount '{part_number}': {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch rubber mount: {e}")
 
-# Initialize table when module is imported
-try:
-    RubberMountDatabaseManager.create_rubber_mounts_table()
-except Exception as e:
-    logger.error(f"Failed to initialize rubber mounts table: {str(e)}")
+    @staticmethod
+    def update_rubber_mount(part_number: str, data: Dict) -> Optional[RubberMounts]:
+        """Update an existing rubber mount."""
+        try:
+            mount = RubberMounts.query.filter_by(part_number=part_number).first()
+            if not mount:
+                logger.warning(f"Attempted to update non-existent rubber mount with part number {part_number}.")
+                return None
+
+            # Create a merged dictionary to validate the final state
+            merged_data = mount.to_dict() # Assumes a to_dict() method on the model
+            merged_data.update(data)
+            RubberMountDatabaseManager.validate_rubber_mount_data(merged_data)
+            
+            for key, value in data.items():
+                if hasattr(mount, key):
+                    setattr(mount, key, value)
+            
+            db.session.commit()
+            logger.info(f"Successfully updated rubber mount with part number: {part_number}")
+            return mount
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error updating rubber mount {part_number}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to update rubber mount: {e}")

@@ -1,170 +1,101 @@
 from typing import Dict, List, Optional
-import logging
-from datetime import datetime
-from app.core.core_database import DatabaseManager
+from app.extensions import db
+from app.models import Pump, HistoricPumpData # Assuming these are your model names
 from app.core.core_errors import DatabaseError
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.core.core_logging import logger # Use central app logger
 
 class PumpDatabaseManager:
-    """Handles all pump-related database operations"""
+    """Handles all pump-related database operations using the SQLAlchemy ORM."""
 
     @staticmethod
-    def create_pump_tables() -> None:
-        """Creates tables related to pump details with PostgreSQL optimizations"""
+    def upsert_pump_details(pump_data: Dict) -> Pump:
+        """Insert or update general pump details using the ORM."""
         try:
-            queries = [
-                # General Pump Details table
-                """
-                CREATE TABLE IF NOT EXISTS general_pump_details (
-                    sku TEXT PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    poles INTEGER,
-                    kw DECIMAL(10, 2),
-                    ie_class TEXT,
-                    mei DECIMAL(10, 3),
-                    weight DECIMAL(10, 2),
-                    length DECIMAL(10, 2),
-                    width DECIMAL(10, 2),
-                    height DECIMAL(10, 2),
-                    image_path TEXT,
-                    list_price DECIMAL(10, 2)
-                );
-                
-                CREATE INDEX IF NOT EXISTS idx_pump_name ON general_pump_details (name);
-                CREATE INDEX IF NOT EXISTS idx_pump_kw ON general_pump_details (kw);
-                """,
-                
-                # Historic Pump Data table
-                """
-                CREATE TABLE IF NOT EXISTS historic_pump_data (
-                    sku TEXT NOT NULL REFERENCES general_pump_details(sku) ON DELETE CASCADE,
-                    name TEXT NOT NULL,
-                    flow DECIMAL(10, 2),
-                    flow_unit TEXT,
-                    head DECIMAL(10, 2),
-                    head_unit TEXT,
-                    efficiency TEXT,
-                    absorbed_power TEXT,
-                    npsh TEXT,
-                    image_path TEXT,
-                    CONSTRAINT unique_historic_data UNIQUE (sku, flow, head)
-                );
-                
-                CREATE INDEX IF NOT EXISTS idx_historic_sku ON historic_pump_data (sku);
-                CREATE INDEX IF NOT EXISTS idx_historic_flow_head ON historic_pump_data (flow, head);
-                """
-            ]
-            
-            for query in queries:
-                DatabaseManager.execute_query(query)
-            
-            logger.info("Pump tables created successfully")
-        except Exception as e:
-            logger.error(f"Error creating pump tables: {str(e)}")
-            raise DatabaseError(f"Failed to create pump tables: {str(e)}")
+            sku = pump_data.get('sku')
+            if not sku:
+                raise ValueError("SKU is required to upsert pump details.")
 
-    @staticmethod
-    def insert_general_pump_details(pump_data: Dict) -> None:
-        """Insert or update general pump details"""
-        try:
             # Check if pump exists
-            existing_pump = PumpDatabaseManager.fetch_pump_by_sku(pump_data['sku'])
+            pump = Pump.query.filter_by(sku=sku).first()
             
-            if existing_pump:
+            if pump:
                 # Update existing pump
-                fields = [f"{k} = %s" for k in pump_data.keys()]
-                query = f"""
-                    UPDATE general_pump_details 
-                    SET {', '.join(fields)}
-                    WHERE sku = %s
-                """
-                values = list(pump_data.values()) + [pump_data['sku']]
-                DatabaseManager.execute_query(query, tuple(values))
-                logger.info(f"Updated pump with SKU: {pump_data['sku']}")
+                for key, value in pump_data.items():
+                    if hasattr(pump, key):
+                        setattr(pump, key, value)
+                logger.info(f"Updating pump with SKU: {sku}")
             else:
                 # Insert new pump
-                fields = ', '.join(pump_data.keys())
-                placeholders = ', '.join(['%s'] * len(pump_data))
-                query = f"""
-                    INSERT INTO general_pump_details ({fields})
-                    VALUES ({placeholders})
-                """
-                DatabaseManager.execute_query(query, tuple(pump_data.values()))
-                logger.info(f"Inserted new pump with SKU: {pump_data['sku']}")
+                pump = Pump(**pump_data)
+                db.session.add(pump)
+                logger.info(f"Inserting new pump with SKU: {sku}")
+            
+            db.session.commit()
+            return pump
 
         except Exception as e:
-            logger.error(f"Error inserting/updating pump details: {str(e)}")
-            raise DatabaseError(f"Failed to insert/update pump: {str(e)}")
+            db.session.rollback()
+            logger.error(f"Error upserting pump details for SKU '{pump_data.get('sku')}': {e}", exc_info=True)
+            raise DatabaseError(f"Failed to upsert pump details: {e}")
 
     @staticmethod
-    def fetch_all_general_pumps() -> List[Dict]:
-        """Fetch all records from general_pump_details"""
+    def fetch_all_pumps() -> List[Pump]:
+        """Fetch all records from general_pump_details."""
         try:
-            query = """
-                SELECT * FROM general_pump_details
-                ORDER BY sku
-            """
-            return DatabaseManager.execute_query(query)
+            return Pump.query.order_by(Pump.sku).all()
         except Exception as e:
-            logger.error(f"Error fetching all pumps: {str(e)}")
-            raise DatabaseError(f"Failed to fetch pumps: {str(e)}")
+            logger.error(f"Error fetching all pumps: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch all pumps: {e}")
 
     @staticmethod
-    def fetch_pump_by_sku(sku: str) -> Optional[Dict]:
-        """Fetch a specific pump by SKU"""
+    def fetch_pump_by_sku(sku: str) -> Optional[Pump]:
+        """Fetch a specific pump by SKU."""
         try:
-            query = "SELECT * FROM general_pump_details WHERE sku = %s"
-            results = DatabaseManager.execute_query(query, (sku,))
-            return results[0] if results else None
+            return Pump.query.filter_by(sku=sku).first()
         except Exception as e:
-            logger.error(f"Error fetching pump by SKU: {str(e)}")
-            raise DatabaseError(f"Failed to fetch pump: {str(e)}")
+            logger.error(f"Error fetching pump by SKU '{sku}': {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch pump by SKU: {e}")
 
     @staticmethod
-    def fetch_historic_pump_data() -> List[Dict]:
-        """Fetch all historic pump data"""
+    def fetch_all_historic_data() -> List[HistoricPumpData]:
+        """Fetch all historic pump data, joined with general details."""
         try:
-            query = """
-                SELECT h.*, g.poles, g.kw
-                FROM historic_pump_data h
-                LEFT JOIN general_pump_details g ON h.sku = g.sku
-                ORDER BY h.sku
-            """
-            return DatabaseManager.execute_query(query)
+            return HistoricPumpData.query.options(
+                db.joinedload(HistoricPumpData.pump) # Eager load the pump details
+            ).order_by(HistoricPumpData.sku).all()
         except Exception as e:
-            logger.error(f"Error fetching historic pump data: {str(e)}")
-            raise DatabaseError(f"Failed to fetch historic data: {str(e)}")
+            logger.error(f"Error fetching all historic pump data: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch historic data: {e}")
 
     @staticmethod
-    def insert_historic_pump_data(data: Dict) -> None:
-        """Insert historic pump data"""
+    def upsert_historic_pump_data(data: Dict) -> HistoricPumpData:
+        """Insert or update historic pump data using the ORM."""
         try:
-            fields = ', '.join(data.keys())
-            placeholders = ', '.join(['%s'] * len(data))
-            query = f"""
-                INSERT INTO historic_pump_data ({fields})
-                VALUES ({placeholders})
-                ON CONFLICT (sku, flow, head) 
-                DO UPDATE SET 
-                    name = EXCLUDED.name,
-                    flow_unit = EXCLUDED.flow_unit,
-                    head_unit = EXCLUDED.head_unit,
-                    efficiency = EXCLUDED.efficiency,
-                    absorbed_power = EXCLUDED.absorbed_power,
-                    npsh = EXCLUDED.npsh,
-                    image_path = EXCLUDED.image_path
-            """
-            DatabaseManager.execute_query(query, tuple(data.values()))
-            logger.info(f"Inserted/Updated historic data for SKU: {data['sku']}")
-        except Exception as e:
-            logger.error(f"Error inserting historic pump data: {str(e)}")
-            raise DatabaseError(f"Failed to insert historic data: {str(e)}")
+            sku = data.get('sku')
+            flow = data.get('flow')
+            head = data.get('head')
+            if not all([sku, flow, head]):
+                raise ValueError("SKU, flow, and head are required to upsert historic data.")
 
-# Initialize tables when module is imported
-try:
-    PumpDatabaseManager.create_pump_tables()
-except Exception as e:
-    logger.error(f"Failed to initialize pump tables: {str(e)}")
+            # Check if historic record exists
+            historic_data = HistoricPumpData.query.filter_by(sku=sku, flow=flow, head=head).first()
+            
+            if historic_data:
+                # Update existing record
+                for key, value in data.items():
+                    if hasattr(historic_data, key):
+                        setattr(historic_data, key, value)
+                logger.info(f"Updating historic data for SKU: {sku}")
+            else:
+                # Insert new record
+                historic_data = HistoricPumpData(**data)
+                db.session.add(historic_data)
+                logger.info(f"Inserting new historic data for SKU: {sku}")
+
+            db.session.commit()
+            return historic_data
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error upserting historic pump data for SKU '{data.get('sku')}': {e}", exc_info=True)
+            raise DatabaseError(f"Failed to upsert historic data: {e}")

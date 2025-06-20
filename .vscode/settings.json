@@ -1,5 +1,4 @@
 {
-}{
     "files.exclude": {
         // Hides the entire virtual environment folder
         "**/.venv": true,
@@ -12,5 +11,9 @@
 
         // Hides pytest's cache folder
         "**/.pytest_cache": true
-    }
+    },
+    // Add this setting to help the linter find your 'app' module
+    "python.analysis.extraPaths": [
+        "./"
+    ]
 }

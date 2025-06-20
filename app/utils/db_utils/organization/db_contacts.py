@@ -1,196 +1,112 @@
-# app/utils/db_utils/db_contacts.py
-
 from typing import Dict, List, Optional
-import logging
 import re
-from app.core.core_database import DatabaseManager, DatabaseError
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.extensions import db
+from app.models import Contact, Company, DealContact # Assuming these are your model names
+from app.core.core_errors import DatabaseError
+from app.core.core_logging import logger # Use central app logger
 
 class ContactDatabaseManager:
-    """Handles all contact-related database operations"""
-
-    @staticmethod
-    def create_contact_tables() -> None:
-        """Creates contact-related tables with PostgreSQL optimizations"""
-        try:
-            queries = [
-                # Contacts table
-                """
-                CREATE TABLE IF NOT EXISTS contacts (
-                    id SERIAL PRIMARY KEY,
-                    representative_name TEXT NOT NULL,
-                    representative_email TEXT NOT NULL,
-                    phone_number TEXT,
-                    company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL,
-                    CONSTRAINT unique_email_per_company UNIQUE (representative_email, company_id)
-                );
-
-                CREATE INDEX IF NOT EXISTS idx_contacts_company ON contacts(company_id);
-                CREATE INDEX IF NOT EXISTS idx_contacts_email ON contacts(representative_email);
-                """,
-
-                # Deal Contacts junction table
-                """
-                CREATE TABLE IF NOT EXISTS deal_contacts (
-                    id SERIAL PRIMARY KEY,
-                    deal_id INTEGER REFERENCES deals(id) ON DELETE CASCADE,
-                    contact_id INTEGER REFERENCES contacts(id) ON DELETE CASCADE,
-                    UNIQUE (deal_id, contact_id)
-                );
-
-                CREATE INDEX IF NOT EXISTS idx_deal_contacts ON deal_contacts(deal_id, contact_id);
-                """
-            ]
-
-            for query in queries:
-                DatabaseManager.execute_query(query)
-
-            logger.info("Contact tables created successfully")
-        except Exception as e:
-            logger.error(f"Error creating contact tables: {str(e)}")
-            raise DatabaseError(f"Failed to create contact tables: {str(e)}")
+    """Handles all contact-related database operations using the SQLAlchemy ORM."""
 
     @staticmethod
     def validate_contact_data(contact_data: Dict) -> None:
-        """Validate contact data before insertion/update"""
+        """Validate contact data before insertion/update."""
         if not contact_data.get('representative_name'):
-            raise ValueError("Representative name is required")
+            raise ValueError("Representative name is required.")
         
         email = contact_data.get('representative_email')
         if not email:
-            raise ValueError("Email is required")
+            raise ValueError("Email is required.")
         
-        # Basic email validation
         email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_pattern, email):
-            raise ValueError("Invalid email format")
-        
-        # Phone number validation (if provided)
-        phone = contact_data.get('phone_number')
-        if phone:
-            # Remove common separators for standardization
-            phone = re.sub(r'[\s\-\(\)]', '', phone)
-            if not phone.isdigit():
-                raise ValueError("Invalid phone number format")
-            contact_data['phone_number'] = phone
+            raise ValueError("Invalid email format.")
 
     @staticmethod
-    def insert_contact(contact_data: Dict) -> int:
-        """Insert a new contact with validation"""
+    def insert_contact(contact_data: Dict) -> Contact:
+        """Insert a new contact using the ORM."""
         try:
-            # Validate contact data
             ContactDatabaseManager.validate_contact_data(contact_data)
-
-            # Check for existing contact with same email in same company
-            if DatabaseManager.record_exists(
-                'contacts', 
-                {
-                    'representative_email': contact_data['representative_email'],
-                    'company_id': contact_data.get('company_id')
-                }
-            ):
-                raise DatabaseError("Contact with this email already exists for this company")
-
-            fields = ', '.join(contact_data.keys())
-            placeholders = ', '.join(['%s'] * len(contact_data))
-            query = f"""
-                INSERT INTO contacts ({fields})
-                VALUES ({placeholders})
-                RETURNING id
-            """
             
-            return DatabaseManager.insert_returning_id(query, tuple(contact_data.values()))
-
+            new_contact = Contact(**contact_data)
+            db.session.add(new_contact)
+            db.session.commit()
+            
+            logger.info(f"Successfully inserted contact '{new_contact.representative_name}' with ID: {new_contact.id}")
+            return new_contact
         except Exception as e:
-            logger.error(f"Error inserting contact: {str(e)}")
-            raise DatabaseError(f"Failed to insert contact: {str(e)}")
+            db.session.rollback()
+            logger.error(f"Error inserting contact: {e}", exc_info=True)
+            if 'unique constraint' in str(e).lower():
+                raise DatabaseError("A contact with this email may already exist for this company.")
+            raise DatabaseError(f"Failed to insert contact: {e}")
 
     @staticmethod
-    def fetch_all_contacts() -> List[Dict]:
-        """Fetch all contacts with company information"""
+    def fetch_all_contacts() -> List[Contact]:
+        """Fetch all contacts with their company information."""
         try:
-            query = """
-                SELECT 
-                    c.*,
-                    comp.company_name
-                FROM contacts c
-                LEFT JOIN companies comp ON c.company_id = comp.id
-                ORDER BY c.representative_name
-            """
-            return DatabaseManager.execute_query(query)
-
+            # Eagerly load the related Company object to avoid N+1 query problems
+            return Contact.query.options(db.joinedload(Contact.company)).order_by(Contact.representative_name).all()
         except Exception as e:
-            logger.error(f"Error fetching contacts: {str(e)}")
-            raise DatabaseError(f"Failed to fetch contacts: {str(e)}")
+            logger.error(f"Error fetching all contacts: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch contacts: {e}")
 
     @staticmethod
-    def add_contact_to_deal(deal_id: int, contact_id: int) -> None:
-        """Add a contact to a deal"""
+    def add_contact_to_deal(deal_id: int, contact_id: int) -> Optional[DealContact]:
+        """Add a contact to a deal, preventing duplicates."""
         try:
-            query = """
-                INSERT INTO deal_contacts (deal_id, contact_id)
-                VALUES (%s, %s)
-                ON CONFLICT (deal_id, contact_id) DO NOTHING
-            """
-            DatabaseManager.execute_query(query, (deal_id, contact_id))
+            existing = DealContact.query.filter_by(deal_id=deal_id, contact_id=contact_id).first()
+            if existing:
+                logger.warning(f"Contact {contact_id} is already associated with deal {deal_id}.")
+                return existing
 
+            new_association = DealContact(deal_id=deal_id, contact_id=contact_id)
+            db.session.add(new_association)
+            db.session.commit()
+            
+            logger.info(f"Successfully added contact {contact_id} to deal {deal_id}.")
+            return new_association
         except Exception as e:
-            logger.error(f"Error adding contact to deal: {str(e)}")
-            raise DatabaseError(f"Failed to add contact to deal: {str(e)}")
+            db.session.rollback()
+            logger.error(f"Error adding contact {contact_id} to deal {deal_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to add contact to deal: {e}")
 
     @staticmethod
-    def update_contact(contact_id: int, updated_data: Dict) -> None:
-        """Update contact information with validation"""
+    def update_contact(contact_id: int, updated_data: Dict) -> Optional[Contact]:
+        """Update contact information."""
         try:
-            # Get existing contact data
-            existing_contact = ContactDatabaseManager.fetch_contact_by_id(contact_id)
-            if not existing_contact:
-                raise DatabaseError(f"Contact {contact_id} not found")
+            contact = Contact.query.get(contact_id)
+            if not contact:
+                logger.warning(f"Attempted to update non-existent contact with ID {contact_id}.")
+                return None
 
-            # Validate updated data
-            if 'representative_email' in updated_data or 'phone_number' in updated_data:
-                ContactDatabaseManager.validate_contact_data({
-                    **existing_contact,
-                    **updated_data
-                })
+            # Validate before updating
+            # Create a merged dictionary to validate the final state
+            merged_data = {
+                'representative_name': contact.representative_name,
+                'representative_email': contact.representative_email,
+                **updated_data
+            }
+            ContactDatabaseManager.validate_contact_data(merged_data)
 
-            fields = [f"{k} = %s" for k in updated_data.keys()]
-            query = f"""
-                UPDATE contacts 
-                SET {', '.join(fields)}
-                WHERE id = %s
-            """
-            values = list(updated_data.values()) + [contact_id]
-            DatabaseManager.execute_query(query, tuple(values))
-
+            for key, value in updated_data.items():
+                if hasattr(contact, key):
+                    setattr(contact, key, value)
+            
+            db.session.commit()
+            logger.info(f"Successfully updated contact with ID: {contact_id}")
+            return contact
         except Exception as e:
-            logger.error(f"Error updating contact: {str(e)}")
-            raise DatabaseError(f"Failed to update contact: {str(e)}")
+            db.session.rollback()
+            logger.error(f"Error updating contact {contact_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to update contact: {e}")
 
     @staticmethod
-    def fetch_contact_by_id(contact_id: int) -> Optional[Dict]:
-        """Fetch a specific contact with company information"""
+    def fetch_contact_by_id(contact_id: int) -> Optional[Contact]:
+        """Fetch a specific contact by its ID."""
         try:
-            query = """
-                SELECT 
-                    c.*,
-                    comp.company_name
-                FROM contacts c
-                LEFT JOIN companies comp ON c.company_id = comp.id
-                WHERE c.id = %s
-            """
-            results = DatabaseManager.execute_query(query, (contact_id,))
-            return results[0] if results else None
-
+            # Eagerly load the related Company object
+            return Contact.query.options(db.joinedload(Contact.company)).get(contact_id)
         except Exception as e:
-            logger.error(f"Error fetching contact: {str(e)}")
-            raise DatabaseError(f"Failed to fetch contact: {str(e)}")
-
-# Initialize tables when module is imported
-try:
-    ContactDatabaseManager.create_contact_tables()
-except Exception as e:
-    logger.error(f"Failed to initialize contact tables: {str(e)}")
+            logger.error(f"Error fetching contact by ID {contact_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch contact: {e}")

@@ -1,162 +1,113 @@
-# app/utils/db_utils/db_companies.py
-
 from typing import Dict, List, Optional
-import logging
-from app.core.core_database import DatabaseManager, DatabaseError
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from sqlalchemy import func
+from app.extensions import db
+from app.models import Company, Contact, DealCompany  # Assuming DealCompany is your junction model
+from app.core.core_errors import DatabaseError
+from app.core.core_logging import logger
 
 class CompanyDatabaseManager:
-    """Handles all company-related database operations"""
-
-    @staticmethod
-    def create_company_tables() -> None:
-        """Creates company-related tables with PostgreSQL optimizations"""
-        try:
-            queries = [
-                # Companies table
-                """
-                CREATE TABLE IF NOT EXISTS companies (
-                    id SERIAL PRIMARY KEY,
-                    company_name TEXT NOT NULL,
-                    address TEXT,
-                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-                );
-
-                CREATE INDEX IF NOT EXISTS idx_companies_name ON companies(company_name);
-                """,
-
-                # Deal Companies junction table
-                """
-                CREATE TABLE IF NOT EXISTS deal_companies (
-                    id SERIAL PRIMARY KEY,
-                    deal_id INTEGER REFERENCES deals(id) ON DELETE CASCADE,
-                    company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE,
-                    UNIQUE (deal_id, company_id)
-                );
-
-                CREATE INDEX IF NOT EXISTS idx_deal_companies ON deal_companies(deal_id, company_id);
-                """
-            ]
-
-            for query in queries:
-                DatabaseManager.execute_query(query)
-
-            logger.info("Company tables created successfully")
-        except Exception as e:
-            logger.error(f"Error creating company tables: {str(e)}")
-            raise DatabaseError(f"Failed to create company tables: {str(e)}")
+    """Handles all company-related database operations using the SQLAlchemy ORM."""
 
     @staticmethod
     def validate_company_data(company_data: Dict) -> None:
-        """Validate company data before insertion/update"""
+        """Validate company data before insertion/update."""
         if not company_data.get('company_name'):
-            raise ValueError("Company name is required")
+            raise ValueError("Company name is required.")
 
     @staticmethod
-    def insert_company(company_data: Dict) -> int:
-        """Insert a new company"""
+    def insert_company(company_data: Dict) -> Company:
+        """Insert a new company using the ORM."""
         try:
-            # Validate company data
             CompanyDatabaseManager.validate_company_data(company_data)
-
-            fields = ', '.join(company_data.keys())
-            placeholders = ', '.join(['%s'] * len(company_data))
-            query = f"""
-                INSERT INTO companies ({fields})
-                VALUES ({placeholders})
-                RETURNING id
-            """
             
-            return DatabaseManager.insert_returning_id(query, tuple(company_data.values()))
-
+            new_company = Company(**company_data)
+            db.session.add(new_company)
+            db.session.commit()
+            
+            logger.info(f"Successfully inserted company '{new_company.company_name}' with ID: {new_company.id}")
+            return new_company
         except Exception as e:
-            logger.error(f"Error inserting company: {str(e)}")
-            raise DatabaseError(f"Failed to insert company: {str(e)}")
+            db.session.rollback()
+            logger.error(f"Error inserting company: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to insert company: {e}")
 
     @staticmethod
-    def fetch_all_companies() -> List[Dict]:
-        """Fetch all companies with basic information"""
+    def fetch_all_companies_with_counts() -> List[Company]:
+        """Fetch all companies with contact and deal counts."""
         try:
-            query = """
-                SELECT c.*,
-                    (SELECT COUNT(*) FROM contacts WHERE company_id = c.id) as contacts_count,
-                    (SELECT COUNT(*) FROM deal_companies WHERE company_id = c.id) as deals_count
-                FROM companies c
-                ORDER BY c.company_name
-            """
-            return DatabaseManager.execute_query(query)
+            # Subquery for contact counts
+            contact_count_sub = db.session.query(
+                Contact.company_id, func.count(Contact.id).label('contacts_count')
+            ).group_by(Contact.company_id).subquery()
+
+            # Subquery for deal counts
+            deal_count_sub = db.session.query(
+                DealCompany.company_id, func.count(DealCompany.deal_id).label('deals_count')
+            ).group_by(DealCompany.company_id).subquery()
+
+            # Main query joining the counts
+            return db.session.query(
+                Company, 
+                contact_count_sub.c.contacts_count, 
+                deal_count_sub.c.deals_count
+            ).outerjoin(
+                contact_count_sub, Company.id == contact_count_sub.c.company_id
+            ).outerjoin(
+                deal_count_sub, Company.id == deal_count_sub.c.company_id
+            ).order_by(Company.company_name).all()
 
         except Exception as e:
-            logger.error(f"Error fetching companies: {str(e)}")
-            raise DatabaseError(f"Failed to fetch companies: {str(e)}")
+            logger.error(f"Error fetching all companies with counts: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch companies: {e}")
 
     @staticmethod
-    def add_company_to_deal(deal_id: int, company_id: int) -> None:
-        """Add a company to a deal"""
+    def add_company_to_deal(deal_id: int, company_id: int) -> Optional[DealCompany]:
+        """Add a company to a deal, preventing duplicates."""
         try:
-            query = """
-                INSERT INTO deal_companies (deal_id, company_id)
-                VALUES (%s, %s)
-                ON CONFLICT (deal_id, company_id) DO NOTHING
-            """
-            DatabaseManager.execute_query(query, (deal_id, company_id))
+            # Check if the association already exists
+            existing = DealCompany.query.filter_by(deal_id=deal_id, company_id=company_id).first()
+            if existing:
+                logger.warning(f"Company {company_id} is already associated with deal {deal_id}.")
+                return existing
 
+            new_association = DealCompany(deal_id=deal_id, company_id=company_id)
+            db.session.add(new_association)
+            db.session.commit()
+            
+            logger.info(f"Successfully added company {company_id} to deal {deal_id}.")
+            return new_association
         except Exception as e:
-            logger.error(f"Error adding company to deal: {str(e)}")
-            raise DatabaseError(f"Failed to add company to deal: {str(e)}")
+            db.session.rollback()
+            logger.error(f"Error adding company {company_id} to deal {deal_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to add company to deal: {e}")
 
     @staticmethod
-    def update_company(company_id: int, updated_data: Dict) -> None:
-        """Update company information"""
+    def update_company(company_id: int, updated_data: Dict) -> Optional[Company]:
+        """Update company information."""
         try:
-            # Get existing company data
-            existing_company = CompanyDatabaseManager.fetch_company_by_id(company_id)
-            if not existing_company:
-                raise DatabaseError(f"Company {company_id} not found")
+            company = Company.query.get(company_id)
+            if not company:
+                logger.warning(f"Attempted to update non-existent company with ID {company_id}.")
+                return None
 
-            # Validate updated data
-            CompanyDatabaseManager.validate_company_data({
-                **existing_company,
-                **updated_data
-            })
-
-            fields = [f"{k} = %s" for k in updated_data.keys()]
-            query = f"""
-                UPDATE companies 
-                SET {', '.join(fields)}
-                WHERE id = %s
-            """
-            values = list(updated_data.values()) + [company_id]
-            DatabaseManager.execute_query(query, tuple(values))
-
+            # Update fields from the dictionary
+            for key, value in updated_data.items():
+                if hasattr(company, key):
+                    setattr(company, key, value)
+            
+            db.session.commit()
+            logger.info(f"Successfully updated company with ID: {company_id}")
+            return company
         except Exception as e:
-            logger.error(f"Error updating company: {str(e)}")
-            raise DatabaseError(f"Failed to update company: {str(e)}")
+            db.session.rollback()
+            logger.error(f"Error updating company {company_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to update company: {e}")
 
     @staticmethod
-    def fetch_company_by_id(company_id: int) -> Optional[Dict]:
-        """Fetch a specific company"""
+    def fetch_company_by_id(company_id: int) -> Optional[Company]:
+        """Fetch a specific company by its ID."""
         try:
-            query = """
-                SELECT c.*,
-                    (SELECT COUNT(*) FROM contacts WHERE company_id = c.id) as contacts_count,
-                    (SELECT COUNT(*) FROM deal_companies WHERE company_id = c.id) as deals_count
-                FROM companies c
-                WHERE c.id = %s
-            """
-            results = DatabaseManager.execute_query(query, (company_id,))
-            return results[0] if results else None
-
+            return Company.query.get(company_id)
         except Exception as e:
-            logger.error(f"Error fetching company: {str(e)}")
-            raise DatabaseError(f"Failed to fetch company: {str(e)}")
-
-# Initialize tables when module is imported
-try:
-    CompanyDatabaseManager.create_company_tables()
-except Exception as e:
-    logger.error(f"Failed to initialize company tables: {str(e)}")
+            logger.error(f"Error fetching company by ID {company_id}: {e}", exc_info=True)
+            raise DatabaseError(f"Failed to fetch company: {e}")

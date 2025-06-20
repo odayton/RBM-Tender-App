@@ -1,84 +1,18 @@
-# app/utils/db_utils/audit/db_audit.py
-
 from typing import Dict, List, Any, Optional, Union
-import logging
-from datetime import datetime
 import json
 from app.core.core_database import DatabaseManager
 from app.core.core_errors import DatabaseError
-from app.app_logging import app_logger
+from app.core.core_logging import logger # Use central app logger
 
-logger = logging.getLogger(__name__)
-
-class DatabaseAudit:
+class DatabaseAuditor:
     """
-    Centralized database audit system that combines functionality from multiple audit implementations.
-    Handles all database audit logging, tracking, and reporting.
+    Handles the manual logging of database change events.
+    The automatic tracking is handled by the ChangeTracker decorator.
+    The reporting is handled by the AuditReporter.
     """
 
-    def __init__(self):
-        self._initialize_audit_tables()
-        self.logger = app_logger
-
-    def _initialize_audit_tables(self) -> None:
-        """Initialize all required audit tables"""
-        try:
-            queries = [
-                # Main audit log table
-                """
-                CREATE TABLE IF NOT EXISTS audit_log (
-                    id SERIAL PRIMARY KEY,
-                    table_name TEXT NOT NULL,
-                    record_id TEXT NOT NULL,
-                    action TEXT NOT NULL,
-                    old_data JSONB,
-                    new_data JSONB,
-                    changed_fields TEXT[],
-                    user_id TEXT,
-                    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    client_ip TEXT,
-                    application_context JSONB
-                );
-
-                CREATE INDEX IF NOT EXISTS idx_audit_table_action 
-                ON audit_log(table_name, action);
-                
-                CREATE INDEX IF NOT EXISTS idx_audit_timestamp 
-                ON audit_log(timestamp);
-                """,
-
-                # Audit configuration table
-                """
-                CREATE TABLE IF NOT EXISTS audit_configuration (
-                    table_name TEXT PRIMARY KEY,
-                    enabled BOOLEAN DEFAULT true,
-                    track_changes BOOLEAN DEFAULT true,
-                    excluded_fields TEXT[],
-                    retention_days INTEGER DEFAULT 365,
-                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-                );
-                """,
-
-                # Audit metrics table
-                """
-                CREATE TABLE IF NOT EXISTS audit_metrics (
-                    id SERIAL PRIMARY KEY,
-                    table_name TEXT NOT NULL,
-                    action TEXT NOT NULL,
-                    record_count INTEGER NOT NULL,
-                    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    details JSONB
-                );
-                """
-            ]
-
-            for query in queries:
-                DatabaseManager.execute_query(query)
-            logger.info("Audit tables initialized successfully")
-
-        except Exception as e:
-            logger.error(f"Error initializing audit tables: {str(e)}")
-            raise DatabaseError(f"Failed to initialize audit tables: {str(e)}")
+    # The __init__ and _initialize_audit_tables methods are removed.
+    # Table creation should be handled by migration scripts.
 
     def log_change(
         self, 
@@ -91,14 +25,23 @@ class DatabaseAudit:
         client_ip: Optional[str] = None,
         context: Optional[Dict] = None
     ) -> None:
-        """Log a database change with comprehensive tracking"""
+        """
+        Manually logs a database change. Fails silently to prevent crashing
+        the main application functionality if auditing has an issue.
+        """
         try:
             if not self._is_auditing_enabled(table_name):
+                logger.debug(f"Auditing is disabled for table '{table_name}'. Skipping log.")
                 return
 
             changed_fields = self._calculate_changed_fields(
                 table_name, old_data, new_data
             )
+
+            # Do not log an UPDATE if nothing actually changed.
+            if action.upper() == 'UPDATE' and not changed_fields:
+                logger.debug(f"No fields changed for {table_name}:{record_id}. Skipping audit log.")
+                return
 
             audit_data = {
                 'table_name': table_name,
@@ -124,142 +67,69 @@ class DatabaseAudit:
                 )
             """
             DatabaseManager.execute_query(query, audit_data)
+            logger.info(f"Successfully logged audit event: {action} on {table_name}:{record_id}")
 
             # Update metrics
             self._update_metrics(table_name, action)
 
         except Exception as e:
-            logger.error(f"Error logging audit record: {str(e)}")
-            # Don't raise - auditing should not break main functionality
-            logger.exception("Audit logging failed but operation continues")
+            logger.error(f"Error logging audit record: {e}", exc_info=True)
+            # NOTE: This exception is intentionally not re-raised.
+            # Auditing failures should not break main application functionality.
 
     def _is_auditing_enabled(self, table_name: str) -> bool:
-        """Check if auditing is enabled for a table"""
-        query = """
-            SELECT enabled 
-            FROM audit_configuration 
-            WHERE table_name = %s
-        """
-        result = DatabaseManager.execute_query(query, (table_name,))
-        return result[0]['enabled'] if result else True
+        """Checks if auditing is enabled for a table. Defaults to True if not configured."""
+        try:
+            query = "SELECT enabled FROM audit_configuration WHERE table_name = %s"
+            result = DatabaseManager.execute_query(query, (table_name,))
+            # If no config exists, assume it is enabled.
+            return result[0]['enabled'] if result else True
+        except Exception as e:
+            logger.error(f"Could not check audit configuration for '{table_name}'. Defaulting to enabled. Error: {e}", exc_info=True)
+            return True
+
 
     def _calculate_changed_fields(
-        self,
-        table_name: str,
-        old_data: Optional[Dict],
-        new_data: Optional[Dict]
+        self, table_name: str, old_data: Optional[Dict], new_data: Optional[Dict]
     ) -> List[str]:
-        """Calculate which fields changed between versions"""
-        if not old_data or not new_data:
-            return []
+        """Calculate which fields changed between versions, respecting exclusions."""
+        if not new_data: return []
+        if not old_data: return list(new_data.keys())
 
-        query = """
-            SELECT excluded_fields 
-            FROM audit_configuration 
-            WHERE table_name = %s
-        """
-        result = DatabaseManager.execute_query(query, (table_name,))
-        excluded_fields = result[0]['excluded_fields'] if result else []
+        try:
+            query = "SELECT excluded_fields FROM audit_configuration WHERE table_name = %s"
+            result = DatabaseManager.execute_query(query, (table_name,))
+            excluded_fields = set(result[0]['excluded_fields']) if result and result[0]['excluded_fields'] else set()
+        except Exception as e:
+            logger.error(f"Could not retrieve excluded fields for '{table_name}'. Proceeding without exclusions. Error: {e}", exc_info=True)
+            excluded_fields = set()
 
         changed_fields = []
         for field in set(old_data.keys()) | set(new_data.keys()):
             if field in excluded_fields:
                 continue
-
-            old_value = old_data.get(field)
-            new_value = new_data.get(field)
-
-            if old_value != new_value:
+            
+            if old_data.get(field) != new_data.get(field):
                 changed_fields.append(field)
 
         return changed_fields
 
+
     def _update_metrics(self, table_name: str, action: str) -> None:
-        """Update audit metrics"""
+        """Update audit metrics. This is a fire-and-forget operation."""
         try:
+            # This query uses ON CONFLICT which is PostgreSQL-specific.
+            # It atomically increments the count for a given table/action/day.
             query = """
-                INSERT INTO audit_metrics (
-                    table_name, action, record_count, details
-                )
-                VALUES (
-                    %s, %s, 1, 
-                    jsonb_build_object('timestamp', CURRENT_TIMESTAMP)
-                )
-                ON CONFLICT (table_name, action, DATE(timestamp))
+                INSERT INTO audit_metrics (table_name, action, record_count, metric_date)
+                VALUES (%s, %s, 1, CURRENT_DATE)
+                ON CONFLICT (table_name, action, metric_date)
                 DO UPDATE SET record_count = audit_metrics.record_count + 1
             """
             DatabaseManager.execute_query(query, (table_name, action))
         except Exception as e:
-            logger.error(f"Error updating audit metrics: {str(e)}")
+            logger.error(f"Error updating audit metrics: {e}", exc_info=True)
 
-    def get_changes(
-        self,
-        table_name: Optional[str] = None,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        limit: int = 1000
-    ) -> List[Dict[str, Any]]:
-        """Get audit history with filters"""
-        try:
-            query = "SELECT * FROM audit_log WHERE 1=1"
-            params = []
 
-            if table_name:
-                query += " AND table_name = %s"
-                params.append(table_name)
-
-            if start_date:
-                query += " AND timestamp >= %s"
-                params.append(start_date)
-
-            if end_date:
-                query += " AND timestamp <= %s"
-                params.append(end_date)
-
-            query += " ORDER BY timestamp DESC LIMIT %s"
-            params.append(limit)
-
-            return DatabaseManager.execute_query(query, tuple(params))
-
-        except Exception as e:
-            logger.error(f"Error retrieving audit history: {str(e)}")
-            raise DatabaseError(f"Failed to retrieve audit history: {str(e)}")
-
-    def get_metrics(
-        self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        """Get audit metrics"""
-        try:
-            query = """
-                SELECT 
-                    table_name,
-                    action,
-                    SUM(record_count) as total_records,
-                    COUNT(*) as operation_count,
-                    MIN(timestamp) as first_operation,
-                    MAX(timestamp) as last_operation
-                FROM audit_metrics
-                WHERE 1=1
-            """
-            params = []
-
-            if start_date:
-                query += " AND timestamp >= %s"
-                params.append(start_date)
-
-            if end_date:
-                query += " AND timestamp <= %s"
-                params.append(end_date)
-
-            query += " GROUP BY table_name, action"
-
-            return DatabaseManager.execute_query(query, tuple(params))
-
-        except Exception as e:
-            logger.error(f"Error retrieving audit metrics: {str(e)}")
-            raise DatabaseError(f"Failed to retrieve audit metrics: {str(e)}")
-
-# Create global audit instance
-db_audit = DatabaseAudit()
+# Create a single, importable instance for use throughout the application
+db_auditor = DatabaseAuditor()

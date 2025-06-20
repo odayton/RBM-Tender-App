@@ -1,222 +1,138 @@
-from flask import (
-    Blueprint, 
-    render_template, 
-    request, 
-    redirect, 
-    url_for, 
-    flash, 
-    jsonify
-)
-from app.models.pumps.pump_model import Pump
-from app.models.deals.deal_quote_model import Deal, DealStage
-from app.app_extensions import db
-from app.models.user_model import User, UserRole
-from app.core.core_errors import ValidationError
-from .forms import (
-    PumpUploadForm,
-    TechDataUploadForm,
-    ManageInertiaBasesForm,
-    ManageSeismicSpringsForm,
-    ManageRubberMountsForm,
-    ContactForm,
-    DealOwnerForm,
-    CompanyForm # Import the new form
-)
+from flask import render_template, request, flash, redirect, url_for
+from flask_login import login_required
 
-import secrets
+# Import the correct blueprint from the __init__.py file in this directory
+from . import admin_bp
+from .forms import (CompanyForm, ContactForm, DealOwnerForm,
+                    InertiaBaseForm, RubberMountsForm, SeismicSpringsForm,
+                    AdditionalPriceAddersForm)
+from .helpers import (add_new_generic, get_all_generic, get_generic_by_id,
+                      update_generic, delete_generic, get_all_paginated)
+from app.models import (Company, Contact, DealOwner, InertiaBase,
+                        RubberMounts, SeismicSprings, AdditionalPriceAdders)
+from app.utils.db_utils.import_export import ExcelDataImportManager
+from app.utils.file_utils.file_validation import FileValidation
+from app.core.core_logging import logger
 
-routes = Blueprint('admin', __name__)
+# A dictionary to map item types to their respective classes and forms
+ITEM_TYPE_MAPPING = {
+    'company': {'model': Company, 'form': CompanyForm},
+    'contact': {'model': Contact, 'form': ContactForm},
+    'deal_owner': {'model': DealOwner, 'form': DealOwnerForm},
+    'inertia_base': {'model': InertiaBase, 'form': InertiaBaseForm},
+    'rubber_mounts': {'model': RubberMounts, 'form': RubberMountsForm},
+    'seismic_springs': {'model': SeismicSprings, 'form': SeismicSpringsForm},
+    'price_adders': {'model': AdditionalPriceAdders, 'form': AdditionalPriceAddersForm},
+}
 
-@routes.route('/dashboard')
+
+@admin_bp.route('/dashboard')
+@login_required
 def dashboard():
-    """Admin dashboard view"""
-    deals = Deal.query.all()
-    deal_stats = {
-        'total': len(deals),
-        'won': len([d for d in deals if d.stage == DealStage.WON]),
-        'active': len([d for d in deals if d.stage not in [DealStage.WON, DealStage.LOST, DealStage.ABANDONED]])
-    }
+    return render_template('admin/dashboard.html')
+
+
+@admin_bp.route('/<item_type>/add', methods=['GET', 'POST'])
+@login_required
+def add_item(item_type):
+    if item_type not in ITEM_TYPE_MAPPING:
+        flash(f'Invalid item type: {item_type}', 'error')
+        return redirect(url_for('admin.dashboard'))
     
-    return render_template(
-        'admin/dashboard.html',
-        deal_stats=deal_stats
-    )
-
-@routes.route('/create-contact', methods=['GET', 'POST'])
-def create_contact():
-    """Create a new contact"""
-    form = ContactForm()
-    if form.validate_on_submit():
-        flash('Contact created successfully!', 'success')
-        return redirect(url_for('admin.admin.dashboard'))
-        
-    return render_template(
-        'admin/create_contact.html',
-        form=form
-    )
-
-@routes.route('/create-deal-owner', methods=['GET', 'POST'])
-def create_deal_owner():
-    """Create a new deal owner"""
-    form = DealOwnerForm()
+    form = ITEM_TYPE_MAPPING[item_type]['form']()
+    model = ITEM_TYPE_MAPPING[item_type]['model']
+    
     if form.validate_on_submit():
         try:
-            # Create a new User object, satisfying all required fields
-            new_owner = User(
-                username=form.email.data,
-                email=form.email.data,
-                password=secrets.token_hex(16),
-                # --- START OF THE FIX ---
-                # Explicitly set the required 'role' field
-                role=UserRole.SALES 
-                # --- END OF THE FIX ---
-            )
-
-            # Safely set other attributes
-            if hasattr(new_owner, 'first_name'):
-                new_owner.first_name = form.name.data
-            
-            if hasattr(new_owner, 'phone_number'):
-                new_owner.phone_number = form.phone_number.data
-            
-            db.session.add(new_owner)
-            db.session.commit()
-            
-            flash('Deal Owner created successfully!', 'success')
-            # Use the correct endpoint name we fixed before
-            return redirect(url_for('admin.admin.dashboard')) 
-            
+            add_new_generic(model, form)
+            flash(f'{item_type.replace("_", " ").title()} added successfully!', 'success')
+            return redirect(url_for('admin.manage_items', item_type=item_type))
         except Exception as e:
-            db.session.rollback()
-            # We are keeping this print statement just in case
-            print(f"--- DATABASE ERROR: {e} ---")
-            flash(f'Error creating deal owner: {e}', 'danger')
-
-    elif request.method == 'POST':
-        print(f"--- FORM VALIDATION FAILED: {form.errors} ---")
-    
-    return render_template(
-        'admin/create_deal_owner.html',
-        form=form
-    )
-
-@routes.route('/create-company', methods=['GET', 'POST'])
-def create_company():
-    """Create a new company"""
-    form = CompanyForm()
-    if form.validate_on_submit():
-        flash('Company created successfully!', 'success')
-        return redirect(url_for('admin.admin.dashboard'))
-        
-    return render_template(
-        'admin/create_company.html',
-        form=form
-    )
-
-@routes.route('/pumps', methods=['GET'])
-def manage_pumps():
-    """Pump management view"""
-    pumps = Pump.query.all()
-    return render_template(
-        'admin/manage_pumps.html',
-        pumps=pumps
-    )
-
-@routes.route('/tech-data/upload', methods=['GET', 'POST'])
-def upload_tech_data():
-    """Technical data upload view"""
-    form = TechDataUploadForm()
-    
-    if form.validate_on_submit():
-        try:
-            file = form.file.data
-            flash('Technical data uploaded successfully', 'success')
-            return redirect(url_for('admin.manage_pumps'))
-        except ValidationError as e:
-            flash(str(e), 'error')
-    
-    return render_template(
-        'admin/tech_data_upload.html',
-        form=form
-    )
-
-@routes.route('/inertia-bases', methods=['GET', 'POST'])
-def manage_inertia_bases():
-    """Inertia bases management view"""
-    form = ManageInertiaBasesForm()
-    
-    return render_template(
-        'admin/manage_inertia_bases.html',
-        form=form
-    )
-
-@routes.route('/seismic-springs', methods=['GET', 'POST'])
-def manage_seismic_springs():
-    """Seismic springs management view"""
-    form = ManageSeismicSpringsForm()
-    
-    return render_template(
-        'admin/manage_seismic_springs.html',
-        form=form
-    )
-
-@routes.route('/rubber-mounts', methods=['GET', 'POST'])
-def manage_rubber_mounts():
-    """Rubber mounts management view"""
-    form = ManageRubberMountsForm()
-    
-    return render_template(
-        'admin/manage_rubber_mounts.html',
-        form=form
-    )
-
-@routes.route('/blank-tech-data/upload', methods=['GET', 'POST'])
-def blank_tech_data_upload():
-    """Blank technical data upload view"""
-    form = PumpUploadForm()
-    
-    if form.validate_on_submit():
-        try:
-            file = form.file.data
-            flash('Blank technical data uploaded successfully', 'success')
-            return redirect(url_for('admin.view_blank_tech_data'))
-        except ValidationError as e:
-            flash(str(e), 'error')
-    
-    return render_template(
-        'admin/blank_tech_data_upload.html',
-        form=form
-    )
-
-@routes.route('/blank-tech-data/view')
-def view_blank_tech_data():
-    """View blank technical data"""
-    return render_template(
-        'admin/view_blank_tech_data.html'
-    )
-
-@routes.route('/bom', methods=['GET'])
-def manage_bom():
-    """Bill of materials management view"""
-    return render_template(
-        'admin/manage_bom.html'
-    )
-
-@routes.route('/additional-price-adders', methods=['GET'])
-def manage_additional_price_adders():
-    """Additional price adders management view"""
-    return render_template(
-        'admin/manage_additional_price_adders.html'
-    )
-
-@routes.route('/select-sheet', methods=['GET', 'POST'])
-def select_sheet():
-    """Sheet selection view"""
-    if request.method == 'POST':
-        sheet_name = request.form.get('sheet_name')
-        if sheet_name:
-            return redirect(url_for('admin.dashboard'))
+            logger.error(f"--- DATABASE ERROR when adding {item_type}: {e} ---")
+            flash(f'Error adding {item_type.replace("_", " ").title()}.', 'error')
             
-    return render_template(
-        'admin/select_sheet.html'
-    )
+    return render_template('admin/create_generic.html', form=form, item_type=item_type)
+
+
+@admin_bp.route('/<item_type>/manage')
+@login_required
+def manage_items(item_type):
+    if item_type not in ITEM_TYPE_MAPPING:
+        flash(f'Invalid item type: {item_type}', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+    page = request.args.get('page', 1, type=int)
+    model = ITEM_TYPE_MAPPING[item_type]['model']
+    items, pagination = get_all_paginated(model, page)
+    
+    return render_template('admin/manage_base.html', items=items, item_type=item_type, pagination=pagination)
+
+
+@admin_bp.route('/<item_type>/<int:item_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_item(item_type, item_id):
+    if item_type not in ITEM_TYPE_MAPPING:
+        flash(f'Invalid item type: {item_type}', 'error')
+        return redirect(url_for('admin.dashboard'))
+    
+    model = ITEM_TYPE_MAPPING[item_type]['model']
+    item = get_generic_by_id(model, item_id)
+    if not item:
+        flash(f'{item_type.replace("_", " ").title()} not found.', 'error')
+        return redirect(url_for('admin.manage_items', item_type=item_type))
+
+    form = ITEM_TYPE_MAPPING[item_type]['form'](obj=item)
+    
+    if form.validate_on_submit():
+        try:
+            update_generic(item, form)
+            flash(f'{item_type.replace("_", " ").title()} updated successfully!', 'success')
+            return redirect(url_for('admin.manage_items', item_type=item_type))
+        except Exception as e:
+            logger.error(f"--- DATABASE ERROR when editing {item_type}: {e} ---")
+            flash(f'Error updating {item_type.replace("_", " ").title()}.', 'error')
+            
+    return render_template('admin/create_generic.html', form=form, item_type=item_type, item_id=item_id)
+
+
+@admin_bp.route('/<item_type>/<int:item_id>/delete', methods=['POST'])
+@login_required
+def delete_item(item_type, item_id):
+    if item_type not in ITEM_TYPE_MAPPING:
+        flash(f'Invalid item type: {item_type}', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+    model = ITEM_TYPE_MAPPING[item_type]['model']
+    
+    try:
+        delete_generic(model, item_id)
+        flash(f'{item_type.replace("_", " ").title()} deleted successfully!', 'success')
+    except Exception as e:
+        logger.error(f"--- DATABASE ERROR when deleting {item_type}: {e} ---")
+        flash(f'Error deleting {item_type.replace("_", " ").title()}.', 'error')
+        
+    return redirect(url_for('admin.manage_items', item_type=item_type))
+
+
+@admin_bp.route('/upload_excel', methods=['POST'])
+@login_required
+def upload_excel():
+    file = request.files.get('excel_file')
+    if not file:
+        flash('No file selected.', 'error')
+        return redirect(url_for('admin.dashboard'))
+    
+    is_valid, message = FileValidation.is_allowed(file.filename)
+    if not is_valid:
+        flash(message, 'error')
+        return redirect(url_for('admin.dashboard'))
+
+    try:
+        importer = ExcelDataImportManager()
+        importer.import_data(file)
+        flash('Excel file imported successfully!', 'success')
+    except Exception as e:
+        logger.error(f"--- EXCEL IMPORT ERROR: {e} ---")
+        flash(f'An error occurred during import: {e}', 'error')
+        
+    return redirect(url_for('admin.dashboard'))
