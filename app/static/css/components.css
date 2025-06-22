@@ -1,0 +1,83 @@
+/* /static/css/components.css */
+
+/* Box and Inset Styles */
+.inset-box {
+    background-color: #2d2d2f !important;
+    border-radius: 10px !important;
+    padding: 20px !important;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Button Styles */
+.btn {
+    height: 40px;
+    padding: 0 15px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    display: inline-block;
+    vertical-align: middle;
+    color: #fff !important;
+    font-weight: bold;
+    box-shadow: none;
+    outline: none;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.btn-primary { background-color: #007bff !important; }
+.btn-primary:hover { background-color: #0056b3 !important; }
+.btn-success { background-color: #28a745 !important; }
+.btn-success:hover { background-color: #218838 !important; }
+
+/* Table Styles */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 8px;
+    border: 1px solid #dddddd;
+    vertical-align: middle;
+}
+
+/* Modal Styles */
+.modal-content {
+    background-color: #2d2d2f !important;
+    color: white !important;
+    border-radius: 10px !important;
+    z-index: 1050;
+}
+
+.modal-header, .modal-footer {
+    border-color: #444 !important;
+    color: white !important;
+}
+
+.modal-title {
+    color: white !important;
+}
+
+.modal-header .close {
+    color: white !important;
+    opacity: 0.8;
+}
+.modal-header .close:hover { opacity: 1; }
+
+.modal-body {
+    padding: 20px !important;
+}
+
+.modal-body .form-control, .modal-body select {
+    background-color: #3a3a3c !important;
+    border: 1px solid #555 !important;
+    color: white !important;
+}
+
+.modal-body label {
+    color: white !important;
+}
+
+.modal-backdrop {
+    z-index: 1040 !important;
+}

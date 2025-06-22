@@ -1,0 +1,85 @@
+/* /static/css/pages.css */
+
+/* Deal Page Specific Styles */
+.search-actions-container {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.search-actions-container .form-control {
+    width: 100%;
+    max-width: 600px;
+}
+
+.actions-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    gap: 10px;
+    align-items: center;
+}
+
+.deal-card {
+    display: block;
+    background-color: #ffffff;
+    color: #000000;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border-left: 5px solid #007bff;
+    width: 200px;
+    height: auto;
+    text-align: left;
+    text-decoration: none;
+}
+
+.deal-card strong, .deal-card p {
+    color: #000000;
+    margin: 0;
+}
+
+.deal-card:hover {
+    background-color: #f0f0f0;
+}
+
+.stage-container {
+    background-color: #2d2d2f;
+    padding: 10px;
+    border-radius: 8px;
+    min-height: 500px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.deal-column {
+    padding: 0;
+}
+
+/* Individual Deal Page / Line Items Table */
+#line-items-table th, #line-items-table td { color: black !important; }
+#line-items-table thead th {
+    background-color: #37779e;
+    color: white !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+#line-items-table input { color: black !important; }
+#line-items-table input.form-control { background-color: white !important; }
+
+/* Admin Section Styles */
+.admin-content h2, .admin-content h3 { color: white; }
+.admin-content table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.admin-content th, .admin-content td { border: 1px solid #555; padding: 8px; text-align: left; }
+.admin-content th { background-color: #2c2c2e; color: white; }
+.admin-content td { color: white; }
+.admin-content tr:nth-child(even) { background-color: #3a3a3c; }
+.admin-content tr:nth-child(odd) { background-color: #333335; }
+.admin-content tr:hover { background-color: #4a4a4c; }

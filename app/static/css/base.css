@@ -1,0 +1,33 @@
+/* /static/css/base.css */
+
+/* General Styles */
+body {
+    background-color: #3a3a3c !important;
+    color: white !important;
+    margin: 0;
+    font-family: 'Roboto', Arial, sans-serif;
+}
+
+h2, h4 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    color: #ffffff !important;
+}
+
+.container {
+    max-width: 90%;
+    margin: auto;
+}
+
+/* Remove spinner controls from number inputs */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    appearance: none; 
+    margin: 0; 
+}
+
+input[type=number] { 
+    -moz-appearance: textfield; 
+    appearance: textfield; 
+}

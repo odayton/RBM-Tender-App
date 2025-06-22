@@ -3,7 +3,8 @@ from .customers.company_model import Company
 from .customers.customer_model import Contact
 from .deals.deal_models import Deal, Quote, QuoteLineItem
 from .deals.deal_types import DealStage, DealType, AustralianState
-from .user_model import User
+# Import both User and UserRole from the user_model
+from .user_model import User, UserRole
 
 from .pumps.pump_model import (
     Pump, 
@@ -29,6 +30,8 @@ __all__ = [
     'DealType',
     'AustralianState',
     'User',
+    # Add UserRole to the export list
+    'UserRole',
     'Pump',
     'InertiaBase',
     'SeismicSpring',
