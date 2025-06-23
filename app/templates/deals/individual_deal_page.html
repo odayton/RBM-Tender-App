@@ -1,97 +1,137 @@
 {% extends "layouts/base.html" %}
-{% block title %}Deal Details{% endblock %}
-{% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-2 p-3 inset-box deal-page-sidebar">
-            <h4>Deal Information</h4>
-            <ul class="list-unstyled">
-                <li><strong>Deal Name:</strong> {{ deal.name }}</li>
-                <li><strong>Stage:</strong> {{ deal.stage }}</li>
-                <li><strong>Type:</strong> {{ deal.type }}</li>
-                <li><strong>Location:</strong> {{ deal.location }}</li>
-                <li><strong>Close Date:</strong> {{ deal.close_date }}</li>
-                <li><strong>Owner:</strong> {{ deal.owner }}</li>
-            </ul>
+
+{% block title %}Deal: {{ deal.project_name }}{% endblock %}
+
+{% block page_content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-0 d-inline-block">{{ deal.project_name }}</h1>
+            <span class="deal-stage-badge ml-2">{{ deal.stage.value }}</span>
         </div>
-        <div class="col-md-8 p-3 inset-box deal-page-main-content">
-            <div class="mb-3">
-                <button class="btn btn-primary">Rev 0.0</button>
-                {% for revision in revisions %}
-                    <button class="btn btn-primary ml-2">Rev {{ revision.version }}</button>
-                {% endfor %}
-                <button class="btn btn-success ml-2">+</button>
-            </div>
-            <div class="line-items-wrapper">
-                <h5>Line Items</h5>
-                <table id="line-items-table" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Pump Name</th>
-                            <th>Flow (L/s)</th>
-                            <th>Head</th>
-                            <th>Description</th>
-                            <th>Qty</th>
-                            <th>Accessories</th>
-                            <th>Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if line_items %}
-                            {% for item in line_items %}
-                                <tr class="pump-row" data-pump-id="{{ item.id }}">
-                                    <td>{{ item.pump_name }}</td>
-                                    <td>{{ item.flow }}</td>
-                                    <td>{{ item.head }}</td>
-                                    <td>{{ item.description }}</td>
-                                    <td>{{ item.quantity }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary accessory-toggle" data-toggle="modal" data-target="#accessoryModal" data-pump-id="{{ item.id }}">
-                                            Add Accessories
-                                        </button>
-                                    </td>
-                                    <td>{{ item.price }}</td>
-                                </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="7">No line items found for this deal.</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="d-flex justify-content-between">
-                <button class="btn btn-primary">Add Pumps</button>
-                <button class="btn btn-success">Save Changes</button>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="p-3 inset-box deal-page-main-content mb-4">
-                <div class="d-flex justify-content-between">
-                    <h5>Contacts</h5>
-                    <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#addContactCompanyModal">+ Add</button>
+        <div class="actions">
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-cog"></i> Actions
+                </button>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#">Edit Deal</a>
+                    <a class="dropdown-item" href="#">Create New Quote</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Export as PDF</a>
+                    <a class="dropdown-item" href="#">Export as Excel</a>
                 </div>
-                <p>{{ deal.contact_name }}</p>
-            </div>
-            <div class="p-3 inset-box deal-page-main-content">
-                <button class="btn btn-secondary mb-2 w-100">Save PDF</button>
-                <button class="btn btn-secondary mb-2 w-100">Save Excel</button>
-                <button class="btn btn-secondary w-100">Save Schedule</button>
             </div>
         </div>
     </div>
-</div>
 
-{# Include reusable modal partials, passing context where necessary #}
-{% include 'partials/accessory_modal.html' %}
-{% with deal=deal, all_contacts=all_contacts, all_companies=all_companies %}
-    {% include 'partials/add_contact_company_modal.html' %}
-{% endwith %}
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4>Key Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Category:</strong><p class="text-light">{{ deal.deal_type.value }}</p>
+                            <strong>State:</strong><p class="text-light">{{ deal.state.value }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Owner:</strong><p class="text-light">{{ deal.owner.username if deal.owner else 'N/A' }}</p>
+                            <strong>Total Value:</strong><p class="text-light">$ {{ '{:,.2f}'.format(deal.total_amount or 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between">
+                    <h4>Parties Involved</h4>
+                    <button class="btn btn-sm btn-outline-secondary">Manage</button>
+                </div>
+                <div class="card-body">
+                    <strong>Companies:</strong>
+                    <ul class="list-unstyled">
+                    {% for company in deal.companies %}
+                        <li><i class="fas fa-building mr-2 text-secondary"></i>{{ company.company_name }}</li>
+                    {% else %}
+                        <li class="text-secondary">No companies associated.</li>
+                    {% endfor %}
+                    </ul>
+                    <hr>
+                    <strong>Contacts:</strong>
+                    <ul class="list-unstyled">
+                    {% for contact in deal.contacts %}
+                        <li><i class="fas fa-user mr-2 text-secondary"></i>{{ contact.name }} ({{ contact.company.company_name }})</li>
+                    {% else %}
+                        <li class="text-secondary">No contacts associated.</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
-<script src="{{ url_for('static', filename='js/checkboxes.js') }}"></script>
+    <div class="mt-4">
+        <ul class="nav nav-tabs" id="dealTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="quotes-tab" data-toggle="tab" href="#quotes" role="tab" aria-controls="quotes" aria-selected="true">Quotes & Line Items</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="notes-tab" data-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">Notes</a>
+            </li>
+        </ul>
+        <div class="tab-content card" id="dealTabContent" style="border-top-left-radius: 0;">
+            <div class="tab-pane fade show active" id="quotes" role="tabpanel" aria-labelledby="quotes-tab">
+                <div class="card-body">
+                    {% if active_quote %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Showing Quote Revision #{{ active_quote.revision }}</h5>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary">Switch Revision</button>
+                                <button class="btn btn-sm btn-primary ml-2"><i class="fas fa-plus"></i> Add Line Item</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="thead-light" style="color: var(--text-dark);">
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th class="text-right">Total Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in line_items %}
+                                    <tr>
+                                        <td>{{ item.description }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>$ {{ '{:,.2f}'.format(item.unit_price or 0) }}</td>
+                                        <td class="text-right">$ {{ '{:,.2f}'.format(item.total_price or 0) }}</td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-secondary">This quote has no line items.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center p-5">
+                            <p class="text-secondary">There are no quotes for this deal yet.</p>
+                            <button class="btn btn-primary">Create First Quote</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+                <div class="card-body">
+                    <p>Notes functionality will be implemented here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

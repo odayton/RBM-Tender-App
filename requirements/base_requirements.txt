@@ -29,3 +29,5 @@ scipy
 matplotlib
 
 Flask-Security-Too==5.6.2
+PyJWT==2.8.0
+WTForms-SQLAlchemy==0.3

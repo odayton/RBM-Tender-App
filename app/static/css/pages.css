@@ -174,3 +174,26 @@
     color: var(--text-light);
     font-weight: 600;
 }
+
+/* --- Individual Deal Page Styles --- */
+.deal-stage-badge {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.4em 0.8em;
+    border-radius: 50px;
+    color: var(--text-light);
+    background-color: #6c757d; /* A neutral grey for all stages as requested */
+    vertical-align: middle;
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+    background-color: transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--text-light);
+    background-color: var(--bg-dark-inset);
+    border-bottom-color: var(--bg-dark-inset);
+}

@@ -74,13 +74,17 @@ class DevelopmentConfig(Config):
     """Development-specific configuration."""
     DEBUG = True
     LOG_LEVEL = 'DEBUG'
+    
+    # --- TEMPORARILY CHANGE THIS LINE ---
+    # We are changing 'dev.db' to 'new_dev.db' to force a fresh start
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DEV_DATABASE_URL', 
-        f"sqlite:///{Config.INSTANCE_PATH / 'dev.db'}"
+        f"sqlite:///{Config.INSTANCE_PATH / 'new_dev.db'}"
     )
+    # ------------------------------------
+
     # Use a simpler cache for development
     CACHE_TYPE = 'SimpleCache'
-
 
 class ProductionConfig(Config):
     """Production-specific configuration."""
