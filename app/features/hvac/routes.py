@@ -1,29 +1,30 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import render_template, request, flash, redirect, url_for
 from flask_login import login_required
 from app.models import Pump
 from .forms import PumpForm, PumpSearchForm
 from app.core.core_logging import logger
 
 # Import the correct blueprint from this feature's __init__.py
-from . import pumps_bp
+from . import hvac_bp
 
-# Correct the import path for the manager class and use an alias
+# The PumpManager can stay as is, since it works with the Pump model
 from app.utils.db_utils.pump.db_pumps import PumpDatabaseManager as PumpManager
 
-@pumps_bp.route('/', methods=['GET', 'POST'])
+@hvac_bp.route('/', methods=['GET', 'POST'])
 #@login_required
 def pumps_list():
     """Display a list of all pumps."""
     search_form = PumpSearchForm()
-    pumps = Pump.query.order_by(Pump.part_number).all() # Use ORM
+    pumps = Pump.query.order_by(Pump.part_number).all()
     
     if search_form.validate_on_submit():
         search_term = search_form.search.data
         pumps = Pump.query.filter(Pump.part_number.ilike(f'%{search_term}%')).all()
     
-    return render_template('pumps/pumps.html', pumps=pumps, search_form=search_form)
+    # Render the template from the 'hvac' template folder
+    return render_template('hvac/pumps.html', pumps=pumps, search_form=search_form)
 
-@pumps_bp.route('/add', methods=['GET', 'POST'])
+@hvac_bp.route('/add', methods=['GET', 'POST'])
 #@login_required
 def add_pump():
     """Add a new pump to the database."""
@@ -34,14 +35,15 @@ def add_pump():
             form.populate_obj(new_pump)
             new_pump.save()
             flash('Pump added successfully!', 'success')
-            return redirect(url_for('pumps.pumps_list'))
+            return redirect(url_for('hvac.pumps_list'))
         except Exception as e:
             logger.error(f"Error adding pump: {e}")
             flash('An error occurred while adding the pump.', 'error')
             
-    return render_template('pumps/add_pump.html', form=form)
+    # Render the template from the 'hvac' template folder
+    return render_template('hvac/add_pump.html', form=form)
 
-@pumps_bp.route('/<int:pump_id>/edit', methods=['GET', 'POST'])
+@hvac_bp.route('/<int:pump_id>/edit', methods=['GET', 'POST'])
 #@login_required
 def edit_pump(pump_id):
     """Edit an existing pump."""
@@ -53,14 +55,15 @@ def edit_pump(pump_id):
             form.populate_obj(pump)
             pump.save()
             flash('Pump updated successfully!', 'success')
-            return redirect(url_for('pumps.pumps_list'))
+            return redirect(url_for('hvac.pumps_list'))
         except Exception as e:
             logger.error(f"Error updating pump {pump_id}: {e}")
             flash('An error occurred while updating the pump.', 'error')
             
-    return render_template('pumps/edit_pump.html', form=form, pump=pump)
+    # The 'edit_pump.html' template may not exist yet, we can create it if needed
+    return render_template('hvac/edit_pump.html', form=form, pump=pump)
 
-@pumps_bp.route('/<int:pump_id>/delete', methods=['POST'])
+@hvac_bp.route('/<int:pump_id>/delete', methods=['POST'])
 #@login_required
 def delete_pump(pump_id):
     """Delete a pump."""
@@ -72,4 +75,4 @@ def delete_pump(pump_id):
         logger.error(f"Error deleting pump {pump_id}: {e}")
         flash('An error occurred while deleting the pump.', 'error')
         
-    return redirect(url_for('pumps.pumps_list'))
+    return redirect(url_for('hvac.pumps_list'))

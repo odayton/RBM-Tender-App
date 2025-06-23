@@ -1,85 +1,176 @@
 /* /static/css/pages.css */
 
-/* Deal Page Specific Styles */
-.search-actions-container {
-    display: grid;
-    grid-template-columns: 1fr auto;
+/* --- Deals Page (Kanban Board) Styles --- */
+.deals-page-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    padding: 10px 0;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-.search-actions-container .form-control {
-    width: 100%;
-    max-width: 600px;
+.kanban-board-container {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
 }
 
-.actions-buttons {
-    display: grid;
-    grid-template-columns: repeat(3, auto);
-    gap: 10px;
-    align-items: center;
-}
-
-.deal-card {
-    display: block;
-    background-color: #ffffff;
-    color: #000000;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    border-left: 5px solid #007bff;
-    width: 200px;
-    height: auto;
-    text-align: left;
-    text-decoration: none;
-}
-
-.deal-card strong, .deal-card p {
-    color: #000000;
-    margin: 0;
-}
-
-.deal-card:hover {
-    background-color: #f0f0f0;
-}
-
-.stage-container {
-    background-color: #2d2d2f;
-    padding: 10px;
-    border-radius: 8px;
-    min-height: 500px;
-    overflow-y: auto;
-    margin-bottom: 20px;
+.kanban-column {
+    flex: 0 0 320px;
+    max-width: 320px;
+    background-color: var(--bg-dark-inset);
+    border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
+}
+
+.kanban-column-header {
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
     align-items: center;
 }
 
-.deal-column {
+.kanban-column-title {
+    color: var(--text-light);
+}
+
+.kanban-deal-count {
+    font-size: 0.9rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    padding: 0.1rem 0.5rem;
+    border-radius: 50px;
+}
+
+.kanban-cards-container {
+    flex-grow: 1;
+    padding: 0.75rem;
+    overflow-y: auto;
+    min-height: 400px;
+    max-height: 70vh;
+}
+
+/* --- Deal Card Styles (Inside Kanban) --- */
+.deal-card {
+    display: block;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    cursor: grab;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    position: relative;
+    border-left: 5px solid var(--border-color); /* Default to grey */
+}
+.deal-card--hvac {
+    border-left-color: var(--deal-type-hvac);
+}
+.deal-card--plumbing {
+    border-left-color: var(--deal-type-plumbing);
+}
+.deal-card--hydronic-heating {
+    border-left-color: var(--deal-type-heating);
+}
+
+
+.deal-card:hover {
+    background-color: #4a4a4c;
+    border-color: #666;
+}
+
+.deal-card:active {
+    cursor: grabbing;
+}
+
+.deal-card-title {
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 0.25rem;
+}
+
+.deal-card-company {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.deal-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.deal-card-amount {
+    font-weight: 600;
+    color: var(--success-color);
+}
+
+.deal-card-owner-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* --- Create Deal Form / Smart Search Styles --- */
+.search-container {
+    position: relative;
+}
+
+.search-results-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050; /* Needs to be higher than the modal z-index */
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-dark);
+    list-style: none;
     padding: 0;
+    margin-top: 2px;
+    border-radius: var(--border-radius);
+    max-height: 200px;
+    overflow-y: auto;
 }
 
-/* Individual Deal Page / Line Items Table */
-#line-items-table th, #line-items-table td { color: black !important; }
-#line-items-table thead th {
-    background-color: #37779e;
-    color: white !important;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+.search-results-list li {
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
 }
-#line-items-table input { color: black !important; }
-#line-items-table input.form-control { background-color: white !important; }
 
-/* Admin Section Styles */
-.admin-content h2, .admin-content h3 { color: white; }
-.admin-content table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-.admin-content th, .admin-content td { border: 1px solid #555; padding: 8px; text-align: left; }
-.admin-content th { background-color: #2c2c2e; color: white; }
-.admin-content td { color: white; }
-.admin-content tr:nth-child(even) { background-color: #3a3a3c; }
-.admin-content tr:nth-child(odd) { background-color: #333335; }
-.admin-content tr:hover { background-color: #4a4a4c; }
+.search-results-list li:last-child {
+    border-bottom: none;
+}
+
+.search-results-list li:hover {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+}
+
+.search-results-list .no-results {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    cursor: default;
+}
+
+.search-results-list .create-new-button {
+    background-color: var(--success-color);
+    color: var(--text-light);
+    font-weight: 600;
+}

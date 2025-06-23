@@ -2,25 +2,33 @@
 
 {% block title %}Admin Dashboard{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
+{% block page_content %}
     <h1>Admin Dashboard</h1>
     <p>Welcome to the admin area. From here you can manage various aspects of the application.</p>
     
-    <div class="list-group">
-        <a href="{{ url_for('admin.manage_items', item_type='company') }}" class="list-group-item list-group-item-action">Manage Companies</a>
-        <a href="{{ url_for('admin.manage_items', item_type='contact') }}" class="list-group-item list-group-item-action">Manage Contacts</a>
-        <a href="{{ url_for('admin.manage_items', item_type='deal_owner') }}" class="list-group-item list-group-item-action">Manage Deal Owners (Users)</a>
-        <a href="{{ url_for('admin.manage_items', item_type='inertia_base') }}" class="list-group-item list-group-item-action">Manage Inertia Bases</a>
-        <a href="{{ url_for('admin.manage_items', item_type='seismic_springs') }}" class="list-group-item list-group-item-action">Manage Seismic Springs</a>
-        <a href="{{ url_for('admin.manage_items', item_type='rubber_mounts') }}" class="list-group-item list-group-item-action">Manage Rubber Mounts</a>
-        <a href="{{ url_for('admin.manage_items', item_type='price_adders') }}" class="list-group-item list-group-item-action">Manage Price Adders</a>
+    <div class="card">
+        <div class="card-header">
+            <h3>Content Management</h3>
+        </div>
+        <div class="list-group list-group-flush">
+            {% for key, config in management_items.items() %}
+                <a href="{{ url_for('admin.manage_items', item_type=key) }}" class="list-group-item list-group-item-action">
+                    Manage {{ config.display_name }}
+                </a>
+            {% else %}
+                <div class="list-group-item">No manageable items configured.</div>
+            {% endfor %}
+        </div>
     </div>
 
-    <h2 class="mt-5">Data Management</h2>
-    <div class="list-group">
-        <a href="{{ url_for('admin.manage_items', item_type='bom') }}" class="list-group-item list-group-item-action">Manage BOMs</a>
-        <a href="{{ url_for('admin.manage_items', item_type='pump') }}" class="list-group-item list-group-item-action">Manage Pumps</a>
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3>Data Management</h3>
+        </div>
+        <div class="list-group list-group-flush">
+             {# You can create another mapping for these or hard-code them if they are special cases #}
+            <a href="#" class="list-group-item list-group-item-action disabled">Manage BOMs (Future)</a>
+            <a href="#" class="list-group-item list-group-item-action disabled">Manage Pumps (Future)</a>
+        </div>
     </div>
-</div>
 {% endblock %}

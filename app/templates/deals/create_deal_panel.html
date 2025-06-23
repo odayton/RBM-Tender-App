@@ -1,69 +1,53 @@
-<div class="create-deal-form">
-    <form id="createDealForm" method="POST" action="{{ url_for('deals.create_deal') }}">
-        {{ form.hidden_tag() }}
-        
-        <div class="form-group">
-            {{ form.project_name.label(class="form-control-label") }}
-            {{ form.project_name(class="form-control", required=True) }}
-        </div>
+{# /app/templates/deals/create_deal_panel.html #}
+<form id="createDealForm" method="POST" action="{{ url_for('deals.create_deal') }}" novalidate>
+    {{ form.hidden_tag() }}
 
-        <div class="form-group">
-            {{ form.stage.label(class="form-control-label") }}
-            {{ form.stage(class="form-control", required=True) }}
-        </div>
+    {# Row 1: Deal Name #}
+    <div class="form-group">
+        {{ form.project_name.label(class="form-control-label") }}
+        {{ form.project_name(class="form-control", required=True, placeholder="e.g., Central Tower HVAC Upgrade") }}
+    </div>
 
-        <div class="form-group">
+    {# Row 2: Category & State #}
+    <div class="form-row">
+        <div class="form-group col-md-6">
             {{ form.deal_type.label(class="form-control-label") }}
             {{ form.deal_type(class="form-control", required=True) }}
         </div>
-
-        <div class="form-group">
+        <div class="form-group col-md-6">
             {{ form.state.label(class="form-control-label") }}
             {{ form.state(class="form-control", required=True) }}
         </div>
-
-        <div class="form-group">
-            <label for="closeDate">Close Date</label>
-            <input type="date" class="form-control" id="closeDate" name="created_date" 
-                   value="{{ default_valid_until.strftime('%Y-%m-%d') if default_valid_until else '' }}" required>
+    </div>
+    
+    <hr>
+    
+    {# Row 3: Smart Search for Contact (Visible by default) #}
+    <div id="contact-search-section">
+        <div class="form-group search-container">
+            <label for="contact-search-input">Contact</label>
+            <input type="text" id="contact-search-input" class="form-control" placeholder="Start typing a contact's name or email...">
+            {{ form.contact_id(type="hidden") }} {# Hidden field to store the selected ID #}
+            <ul id="contact-search-results" class="search-results-list d-none"></ul>
         </div>
+        <small><a href="#" id="toggle-search-mode">No specific contact? Link to a company directly.</a></small>
+    </div>
 
-        <div class="form-group">
-            <label for="deal_owner_name">Deal Owner</label>
-            <div class="input-group">
-                <input type="text" id="deal_owner_name" class="form-control" placeholder="Click Search to select..." readonly>
-                <input type="hidden" id="deal_owner_id" name="deal_owner_id">
-                <div class="input-group-append">
-                    <button type="button" class="btn btn-outline-secondary" onclick="openSearchModal('deal_owner')">Search</button>
-                </div>
-            </div>
+    {# Row 4: Search for Company (Hidden by default) #}
+    <div id="company-search-section" class="d-none">
+        <div class="form-group search-container">
+            <label for="company-search-input">Company</label>
+            <input type="text" id="company-search-input" class="form-control" placeholder="Start typing a company name...">
+            {{ form.company_id(type="hidden") }} {# Hidden field to store the selected ID #}
+            <ul id="company-search-results" class="search-results-list d-none"></ul>
         </div>
+        <small><a href="#" id="toggle-search-mode-2">Link to a specific contact instead.</a></small>
+    </div>
 
-        <div class="form-group">
-            <label for="contact_name">Contact</label>
-            <div class="input-group">
-                <input type="text" id="contact_name" class="form-control" placeholder="Click Search to select..." readonly>
-                <input type="hidden" id="contact_id" name="contact_id">
-                <div class="input-group-append">
-                    <button type="button" class="btn btn-outline-secondary" onclick="openSearchModal('contact')">Search</button>
-                </div>
-            </div>
-        </div>
 
-        <div class="form-group">
-            <label for="company_name">Company</label>
-            <div class="input-group">
-                <input type="text" id="company_name" class="form-control" placeholder="Click Search to select..." readonly>
-                <input type="hidden" id="company_id" name="company_id">
-                <div class="input-group-append">
-                    <button type="button" class="btn btn-outline-secondary" onclick="openSearchModal('company')">Search</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Save changes</button>
-        </div>
-    </form>
-</div>
+    {# Modal Footer with Submit Button #}
+    <div class="modal-footer mt-4">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Create Deal</button>
+    </div>
+</form>

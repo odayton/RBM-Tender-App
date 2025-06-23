@@ -1,8 +1,8 @@
 from flask import Blueprint
 
-# Defines the Blueprint object for the 'pumps' feature.
-pumps_bp = Blueprint(
-    'pumps', 
+# Defines the Blueprint for the 'hydronic_heating' feature
+hydronic_heating_bp = Blueprint(
+    'hydronic_heating', 
     __name__,
     template_folder='../templates'
 )

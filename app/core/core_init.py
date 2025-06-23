@@ -2,24 +2,24 @@ import os
 from flask import Flask
 from pathlib import Path
 
-# Import the application config dictionary with its correct name
 from .core_config import config_dict
-
-# Import the singleton instances of our core components
 from .core_logging import logger as core_logger
 from .core_security import security_manager
 from .core_errors import register_error_handlers
 from .core_events import event_manager
-from .core_cache import cache_manager
+# cache_manager is no longer used, so the import can be removed.
+# from .core_cache import cache_manager 
 
 class CoreInitializer:
     """Initializes the core components and extensions of the application."""
     
-    def __init__(self, app: Flask, db, login_manager, migrate):
+    # Removed 'cache' from the __init__ method signature
+    def __init__(self, app: Flask, db, login_manager, migrate, csrf):
         self.app = app
         self.db = db
         self.login_manager = login_manager
         self.migrate = migrate
+        self.csrf = csrf
 
     def init_app(self):
         """Run all initialization methods in the correct order."""
@@ -28,16 +28,15 @@ class CoreInitializer:
         self.init_logging()
         self.init_database()
         self.init_security()
-        self.init_cache()
+        self.init_csrf()
+        # self.init_cache() # Removed this call
         self.init_events()
         self.init_error_handlers()
 
     def init_config(self):
         """Initialize configuration from environment."""
         config_name = os.getenv('FLASK_CONFIG', 'development')
-        # Use the correct variable name 'config_dict'
         self.app.config.from_object(config_dict[config_name])
-        # Allow config class to perform post-load actions, like loading YAML
         config_dict[config_name].init_app(self.app)
 
     def init_logging(self):
@@ -55,11 +54,14 @@ class CoreInitializer:
         """Initialize security components."""
         security_manager.init_app(self.app)
         core_logger.app_logger.info("Security Initialized.")
+
+    def init_csrf(self):
+        """Initialize CSRF protection."""
+        self.csrf.init_app(self.app)
+        core_logger.app_logger.info("CSRF Protection Initialized.")
         
-    def init_cache(self):
-        """Initialize the cache manager."""
-        cache_manager.init_app(self.app)
-        core_logger.app_logger.info("Cache System Initialized.")
+    # The init_cache method is no longer needed.
+    # def init_cache(self): ...
 
     def init_events(self):
         """Initialize the event manager and load listeners."""

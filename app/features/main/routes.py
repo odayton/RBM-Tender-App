@@ -1,10 +1,10 @@
-from flask import redirect, url_for
+from flask import render_template
 from . import main_bp
 
-# Route for the root URL '/'
+# Route for the root URL /
 @main_bp.route('/')
 def home():
     """
-    Redirects the root URL directly to the main deals page for development.
+    Renders the main home page of the application.
     """
-    return redirect(url_for('deals.list_deals'))
+    return render_template('home.html')

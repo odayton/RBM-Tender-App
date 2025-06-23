@@ -1,102 +1,109 @@
-// This script controls the behavior of the searchable modal window.
+// /static/js/search_modal.js
 
-// A global variable to keep track of what we are currently searching for.
-// This will be set to 'company', 'contact', or 'deal_owner'.
-let currentSearchType = null;
-
-// A mapping of search types to their corresponding API endpoints.
-const searchEndpoints = {
-    company: '/quotes/api/search/companies',
-    contact: '/quotes/api/search/contacts',
-    deal_owner: '/quotes/api/search/deal_owners'
-};
-
-// This function is called by the "Search" buttons in the form.
-function openSearchModal(searchType) {
-    // Store the type of search we're performing.
-    currentSearchType = searchType;
-
-    // Set a descriptive title for the modal.
-    const modalTitle = document.getElementById('searchModalLabel');
-    modalTitle.textContent = `Search for a ${searchType.replace('_', ' ')}`;
-
-    // Clear any previous search results and input text.
-    document.getElementById('modalSearchInput').value = '';
-    document.getElementById('modalResultsList').innerHTML = '';
-
-    // Use jQuery (which is included in base.html) to show the Bootstrap modal.
-    $('#searchModal').modal('show');
-}
-
-// This function is called when an item is clicked in the search results.
-function selectItem(id, text) {
-    // Based on the current search type, update the correct fields on the main form.
-    if (currentSearchType) {
-        // Update the visible text input (which is read-only).
-        document.getElementById(`${currentSearchType}_name`).value = text;
-        // Update the hidden input that stores the ID for form submission.
-        document.getElementById(`${currentSearchType}_id`).value = id;
+document.addEventListener('DOMContentLoaded', () => {
+    const searchModal = document.getElementById('searchModal');
+    if (!searchModal) {
+        return; // Exit if the modal is not on the page
     }
 
-    // Hide the modal window.
-    $('#searchModal').modal('hide');
-}
+    let currentSearchType = 'company'; // Default search type
 
-// This function fetches results from the server as the user types.
-async function fetchResults(query) {
-    // Don't search if the query is too short.
-    if (query.length < 2) {
-        document.getElementById('modalResultsList').innerHTML = '';
-        return;
-    }
+    const companySearchBtn = document.getElementById('searchCompanyBtn');
+    const contactSearchBtn = document.getElementById('searchContactBtn');
+    const searchInput = document.getElementById('searchInput');
+    const searchResultsContainer = document.getElementById('searchResults');
+    const entityIdInput = document.getElementById('entityId'); // Hidden input in the create deal form
 
-    // Get the correct API endpoint for the current search type.
-    const endpoint = searchEndpoints[currentSearchType];
-    if (!endpoint) return;
+    function setupEventListeners() {
+        if(companySearchBtn) {
+            companySearchBtn.addEventListener('click', () => {
+                currentSearchType = 'company';
+                performSearch(searchInput.value);
+            });
+        }
 
-    try {
-        // Use the Fetch API to make a request to our backend.
-        const response = await fetch(`${endpoint}?q=${query}`);
-        const results = await response.json();
+        if(contactSearchBtn) {
+            contactSearchBtn.addEventListener('click', () => {
+                currentSearchType = 'contact';
+                performSearch(searchInput.value);
+            });
+        }
+        
+        // Use event delegation for dynamically added result items
+        searchResultsContainer.addEventListener('click', (event) => {
+            const target = event.target;
+            // Check if a result item or its child was clicked
+            const resultItem = target.closest('.search-result-item');
+            if (resultItem) {
+                const entityName = resultItem.textContent;
+                const entityId = resultItem.dataset.id;
+                
+                // Update the hidden form input with the selected ID
+                if(entityIdInput) {
+                    entityIdInput.value = entityId;
+                }
+                
+                // Update the visible input field to show the selection
+                const searchEntityInput = document.getElementById('searchEntityInput');
+                if(searchEntityInput) {
+                    searchEntityInput.value = entityName.trim();
+                }
 
-        // Pass the results to another function to display them.
-        displayResults(results);
-    } catch (error) {
-        console.error('Error fetching search results:', error);
-    }
-}
-
-// This function takes the JSON data from the server and builds the HTML list.
-function displayResults(results) {
-    const resultsList = document.getElementById('modalResultsList');
-    // Clear any old results.
-    resultsList.innerHTML = '';
-
-    if (results.length === 0) {
-        resultsList.innerHTML = '<li class="list-group-item">No results found.</li>';
-        return;
-    }
-
-    // Loop through each result and create a clickable list item.
-    results.forEach(result => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item list-group-item-action';
-        li.textContent = result.text;
-        // When clicked, it calls the selectItem function with its ID and text.
-        li.onclick = () => selectItem(result.id, result.text);
-        resultsList.appendChild(li);
-    });
-}
-
-// Wait for the whole document to be loaded before we attach event listeners.
-document.addEventListener('DOMContentLoaded', function() {
-    const modalSearchInput = document.getElementById('modalSearchInput');
-    
-    // Add an event listener to the search input field inside the modal.
-    // It will call fetchResults every time the user types a key.
-    if (modalSearchInput) {
-        modalSearchInput.addEventListener('keyup', (event) => {
-            fetchResults(event.target.value);
+                // Programmatically close the Bootstrap modal
+                const closeButton = searchModal.querySelector('[data-dismiss="modal"]');
+                if(closeButton) {
+                    closeButton.click();
+                }
+            }
         });
     }
+
+    function performSearch(query) {
+        if (!query || query.length < 2) {
+            searchResultsContainer.innerHTML = '<p>Please enter at least 2 characters.</p>';
+            return;
+        }
+
+        const url = `/search/${currentSearchType}?query=${encodeURIComponent(query)}`;
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayResults(data);
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                searchResultsContainer.innerHTML = '<p>Error fetching results. Please try again.</p>';
+            });
+    }
+
+    function displayResults(data) {
+        searchResultsContainer.innerHTML = ''; // Clear previous results
+
+        if (data.length === 0) {
+            searchResultsContainer.innerHTML = '<p>No results found.</p>';
+            return;
+        }
+
+        const list = document.createElement('ul');
+        list.className = 'list-group';
+
+        data.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item list-group-item-action search-result-item';
+            listItem.textContent = item.name;
+            listItem.dataset.id = item.id;
+            listItem.style.cursor = 'pointer';
+            list.appendChild(listItem);
+        });
+        
+        searchResultsContainer.appendChild(list);
+    }
+    
+    setupEventListeners();
 });

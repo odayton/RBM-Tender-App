@@ -1,88 +1,82 @@
-document.addEventListener("DOMContentLoaded", function () {
-    var tableHeaders = document.querySelectorAll(".table-resizable th");
-    var startX, startWidth;
+// /static/js/table.js
 
-    tableHeaders.forEach(function (th, index) {
-        // Create a div element for resizing handle
-        var resizer = document.createElement("div");
-        resizer.className = "resizer";
-        th.appendChild(resizer);
-        
-        resizer.addEventListener("mousedown", function (event) {
-            startX = event.pageX;
-            startWidth = th.offsetWidth;
+document.addEventListener('DOMContentLoaded', () => {
 
-            document.addEventListener("mousemove", resizeColumn);
-            document.addEventListener("mouseup", stopResize);
+    // --- Resizable Columns Logic ---
+    const resizableTables = document.querySelectorAll('table.resizable');
+    resizableTables.forEach(table => {
+        const headers = table.querySelectorAll('th');
+        headers.forEach(header => {
+            const grip = document.createElement('div');
+            grip.style.position = 'absolute';
+            grip.style.right = '0';
+            grip.style.top = '0';
+            grip.style.bottom = '0';
+            grip.style.width = '5px';
+            grip.style.cursor = 'col-resize';
+            grip.style.userSelect = 'none';
+            header.style.position = 'relative'; // Necessary for absolute positioning of grip
+            header.appendChild(grip);
+
+            grip.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                const startX = e.pageX;
+                const startWidth = header.offsetWidth;
+                
+                const onMouseMove = (moveEvent) => {
+                    const newWidth = startWidth + (moveEvent.pageX - startX);
+                    if (newWidth > 40) { // Set a minimum width
+                        header.style.width = `${newWidth}px`;
+                    }
+                };
+                
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                };
+                
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
         });
-
-        th.addEventListener("click", function () {
-            sortTable(index);
-        });
-
-        function resizeColumn(event) {
-            var newWidth = startWidth + (event.pageX - startX);
-            th.style.width = newWidth + "px";
-        }
-        
-        function stopResize() {
-            document.removeEventListener("mousemove", resizeColumn);
-            document.removeEventListener("mouseup", stopResize);
-        }
     });
 
-    // Store the current sort direction for each column
-    var sortDirections = Array(tableHeaders.length).fill(null);
+    // --- Sortable Rows Logic ---
+    let draggedRow = null;
+    const sortableTables = document.querySelectorAll('table.sortable-table tbody');
+    sortableTables.forEach(tbody => {
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(row => {
+            row.setAttribute('draggable', 'true');
+            
+            row.addEventListener('dragstart', (e) => {
+                draggedRow = row;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', row.innerHTML); // For Firefox compatibility
+                row.classList.add('dragging');
+            });
 
-    function sortTable(n) {
-        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-        table = document.querySelector(".table-resizable");
-        switching = true;
-        
-        // Toggle the sort direction for the clicked column
-        if (sortDirections[n] === "asc") {
-            dir = "desc";
-        } else {
-            dir = "asc";
-        }
-        sortDirections[n] = dir;
-        
-        // Remove sort indicators from all headers
-        tableHeaders.forEach(function (header) {
-            header.classList.remove("sort-asc", "sort-desc");
+            row.addEventListener('dragend', (e) => {
+                draggedRow.classList.remove('dragging');
+                draggedRow = null;
+            });
         });
-        // Add the sort indicator to the clicked header
-        tableHeaders[n].classList.add("sort-" + dir);
+        
+        tbody.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const targetRow = e.target.closest('tr');
+            if (targetRow && targetRow !== draggedRow) {
+                // Determine if dragging above or below the target row
+                const rect = targetRow.getBoundingClientRect();
+                const nextSibling = (e.clientY - rect.top) > (rect.height / 2) ? targetRow.nextSibling : targetRow;
+                tbody.insertBefore(draggedRow, nextSibling);
+            }
+        });
 
-        while (switching) {
-            switching = false;
-            rows = table.rows;
-            for (i = 1; i < (rows.length - 1); i++) {
-                shouldSwitch = false;
-                x = rows[i].getElementsByTagName("TD")[n];
-                y = rows[i + 1].getElementsByTagName("TD")[n];
-                if (dir == "asc") {
-                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                        shouldSwitch = true;
-                        break;
-                    }
-                } else if (dir == "desc") {
-                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                        shouldSwitch = true;
-                        break;
-                    }
-                }
-            }
-            if (shouldSwitch) {
-                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                switching = true;
-                switchcount ++; 
-            } else {
-                if (switchcount == 0 && dir == "asc") {
-                    dir = "desc";
-                    switching = true;
-                }
-            }
-        }
-    }
+        tbody.addEventListener('drop', (e) => {
+            e.preventDefault();
+            // The actual re-ordering happens in 'dragover', so drop is just for cleanup.
+            // You might add a server-side call here to save the new order.
+        });
+    });
 });
