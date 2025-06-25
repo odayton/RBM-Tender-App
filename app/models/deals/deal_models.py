@@ -1,61 +1,62 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, Numeric, Text
+from sqlalchemy import Column, String, Integer, ForeignKey, Numeric, Text, Enum
 from sqlalchemy.orm import relationship
-from ..base_model import BaseModel
-from .deal_associations import deal_contacts, deal_companies
+from app.models.base_model import BaseModel
+from app.models.deals.deal_associations import deal_contacts, deal_companies
+from app.models.deals.deal_types import DealStage, DealType, AustralianState
+from app.models.products.product_model import Product
 
 class Deal(BaseModel):
     __tablename__ = 'deals'
     project_name = Column(String(200), nullable=False, unique=True)
-    # ... other deal columns remain the same
-
+    stage = Column(Enum(DealStage), nullable=False, default=DealStage.SALES_LEAD)
+    deal_type = Column(Enum(DealType), nullable=False)
+    state = Column(Enum(AustralianState), nullable=False)
+    total_amount = Column(Numeric(10, 2), default=0.0)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship("User", back_populates="deals")
-    
-    # NEW: A Deal has many streams/recipients
     recipients = relationship("QuoteRecipient", back_populates="deal", cascade="all, delete-orphan")
-    
     contacts = relationship("Contact", secondary=deal_contacts, back_populates="deals")
     companies = relationship("Company", secondary=deal_companies, back_populates="deals")
 
 class QuoteRecipient(BaseModel):
-    """
-    Represents a 'quote stream' for a specific company on a specific deal.
-    This is the link that allows each company to have its own revision history.
-    """
     __tablename__ = 'quote_recipients'
     deal_id = Column(Integer, ForeignKey('deals.id'), nullable=False)
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=False)
-
     deal = relationship("Deal", back_populates="recipients")
     company = relationship("Company", back_populates="quote_streams")
     quotes = relationship("Quote", back_populates="recipient", cascade="all, delete-orphan")
 
 class Quote(BaseModel):
-    """Model for a single quote revision within a recipient's stream."""
     __tablename__ = 'quotes'
     recipient_id = Column(Integer, ForeignKey('quote_recipients.id'), nullable=False)
     revision = Column(Integer, nullable=False, default=1)
-    notes = Text()
-
+    notes = Column(Text)
     recipient = relationship("QuoteRecipient", back_populates="quotes")
-    # NEW: A Quote has many Options
     options = relationship("QuoteOption", back_populates="quote", cascade="all, delete-orphan")
 
 class QuoteOption(BaseModel):
-    """Represents a specific pricing option within a single quote revision."""
     __tablename__ = 'quote_options'
     quote_id = Column(Integer, ForeignKey('quotes.id'), nullable=False)
-    name = Column(String(120), nullable=False, default="Main Option") # e.g., "Pumps Only"
-
+    name = Column(String(120), nullable=False, default="Main Option")
     quote = relationship("Quote", back_populates="options")
     line_items = relationship("QuoteLineItem", back_populates="option", cascade="all, delete-orphan")
 
 class QuoteLineItem(BaseModel):
-    """Model for individual line items, now belonging to a QuoteOption."""
+    """Model for individual line items, now linked to a Product."""
     __tablename__ = 'quote_line_items'
+    
     option_id = Column(Integer, ForeignKey('quote_options.id'), nullable=False)
-    description = Column(String(255), nullable=False)
-    quantity = Column(Integer, nullable=False, default=1)
-    unit_price = Column(Numeric(10, 2), nullable=False)
+    product_id = Column(Integer, ForeignKey('products.id'), nullable=True) # Can be null for custom items
 
+    # Instance-specific fields
+    quantity = Column(Integer, nullable=False, default=1)
+    unit_price = Column(Numeric(10, 2), nullable=False) # Price for this specific instance
+    notes = Column(Text) # Optional description for this instance (e.g., "chwp")
+    
+    # Custom item fields (only used if product_id is NULL)
+    custom_sku = Column(String(80))
+    custom_name = Column(String(200))
+
+    # Relationships
     option = relationship("QuoteOption", back_populates="line_items")
+    product = relationship("Product")

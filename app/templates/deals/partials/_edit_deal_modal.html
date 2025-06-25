@@ -1,0 +1,38 @@
+<div class="modal fade" id="editDealModal" tabindex="-1" role="dialog" aria-labelledby="editDealModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <form action="{{ url_for('deals.update_deal', deal_id=deal.id) }}" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editDealModalLabel">Edit Deal Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          {{ update_deal_form.hidden_tag() }}
+          {{ render_field(update_deal_form.project_name) }}
+          <div class="row">
+            <div class="col-md-6">
+                {{ render_field(update_deal_form.deal_type) }}
+            </div>
+            <div class="col-md-6">
+                {{ render_field(update_deal_form.stage) }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+                {{ render_field(update_deal_form.state) }}
+            </div>
+            <div class="col-md-6">
+                {{ render_field(update_deal_form.owner_id) }}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          {{ update_deal_form.submit(class="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

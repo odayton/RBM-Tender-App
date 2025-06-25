@@ -1,52 +1,53 @@
 import random
-from datetime import datetime, timedelta
+import inspect
 from app import create_app
 from app.extensions import db
 from app.models import (
-    User, Company, Contact, Deal, Quote, QuoteLineItem,
-    DealStage, DealType, AustralianState
+    User, Company, Contact, Deal, QuoteRecipient, Quote, QuoteOption, QuoteLineItem,
+    DealStage, DealType, AustralianState, UserRole, Product
 )
-# Note: UserRole is part of User model, not a separate import usually
-from app.models.user_model import UserRole
-
 
 def seed_database():
-    """Seeds the database with more relevant sample data."""
+    """Seeds the database with data reflecting the new Product Catalog model."""
     app = create_app()
     with app.app_context():
-        print("Starting database seed...")
+
+        print("\n--- DEBUGGING QuoteLineItem ---")
+        print(f"File location: {inspect.getfile(QuoteLineItem)}")
+        print(f"Class attributes: {[attr for attr in dir(QuoteLineItem) if not attr.startswith('_')]}")
+        print("-----------------------------\n")
+
+
+        print("Starting database seed with new data model...")
 
         # Clear existing data in reverse order of dependencies
         print("Clearing old data...")
-        QuoteLineItem.query.delete()
-        # The new association tables will be cleared automatically by SQLAlchemy
-        # when the parent objects are deleted due to the cascade settings.
-        Quote.query.delete()
-        Deal.query.delete()
-        Contact.query.delete()
-        Company.query.delete()
-        User.query.delete()
+        db.session.query(QuoteLineItem).delete()
+        db.session.query(QuoteOption).delete()
+        db.session.query(Quote).delete()
+        db.session.query(QuoteRecipient).delete()
+        
+        # Manually delete from association tables before deleting parent tables
+        db.session.execute(db.text('DELETE FROM deal_companies'))
+        db.session.execute(db.text('DELETE FROM deal_contacts'))
+        
+        db.session.query(Deal).delete()
+        db.session.query(Contact).delete()
+        db.session.query(Company).delete()
+        db.session.query(User).delete()
+        db.session.query(Product).delete() # Clear products
         db.session.commit()
         print("Old data cleared.")
 
-        # --- Create Sample Users (Deal Owners) ---
+        # --- Create Sample Users ---
         print("Creating sample users...")
         users_data = [
-            {'username': 'Owen', 'email': 'owen@example.com', 'role': UserRole.ADMIN},
-            {'username': 'Jane Smith', 'email': 'jane.smith@example.com', 'role': UserRole.MANAGER},
-            {'username': 'John Doe', 'email': 'john.doe@example.com', 'role': UserRole.SALES},
+            {'username': 'Owen', 'email': 'owen@example.com', 'role': UserRole.ADMIN, 'password': 'password123'},
+            {'username': 'Jane Smith', 'email': 'jane.smith@example.com', 'role': UserRole.MANAGER, 'password': 'password123'},
+            {'username': 'John Doe', 'email': 'john.doe@example.com', 'role': UserRole.SALES, 'password': 'password123'}
         ]
-        users = []
-        for user_data in users_data:
-            user = User(username=user_data['username'], email=user_data['email'], role=user_data['role'])
-            
-            # --- THIS IS THE FIX ---
-            # Assign the password directly to the attribute
-            user.password = 'password123'
-            # ---------------------
-
-            users.append(user)
-            db.session.add(user)
+        users = [User(**data) for data in users_data]
+        db.session.add_all(users)
         db.session.commit()
         print(f"Created {len(users)} users.")
 
@@ -55,7 +56,7 @@ def seed_database():
         companies_data = [
             {'company_name': 'ACME Mechanical', 'address': '123 HVAC Way, Sydney, NSW'},
             {'company_name': 'Total Flow Plumbing', 'address': '456 Drainpipe Rd, Melbourne, VIC'},
-            {'company_name': 'Climate Control Solutions', 'address': '789 Celsius Ct, Brisbane, QLD'},
+            {'company_name': 'Climate Control Solutions', 'address': '789 Celsius Ct, Brisbane, QLD'}
         ]
         companies = [Company(**data) for data in companies_data]
         db.session.add_all(companies)
@@ -67,67 +68,85 @@ def seed_database():
         contacts_data = [
             {'name': 'Alice Innovate', 'email': 'alice@acme.com', 'company_id': companies[0].id},
             {'name': 'Bob Builder', 'email': 'bob@totalflow.com', 'company_id': companies[1].id},
-            {'name': 'Charlie Climate', 'email': 'charlie@climate.com', 'company_id': companies[2].id},
-            {'name': 'Diana Drake', 'email': 'diana@acme.com', 'company_id': companies[0].id},
+            {'name': 'Charlie Climate', 'email': 'charlie@climate.com', 'company_id': companies[2].id}
         ]
         contacts = [Contact(**data) for data in contacts_data]
         db.session.add_all(contacts)
         db.session.commit()
         print(f"Created {len(contacts)} contacts.")
-
-        # --- Create Sample Deals, Quotes, and Line Items ---
-        print("Creating sample deals and quotes...")
-        for i in range(15):
-            # 1. Create the Deal object first
-            deal_owner = random.choice(users)
-            deal = Deal(
-                project_name=f'{random.choice(["City Tower", "Westfield Mall", "St. Marys Hospital", "Metro Station"])} - {random.choice(["HVAC Upgrade", "Plumbing Fitout", "Data Center Cooling"])} {i+1}',
-                state=random.choice(list(AustralianState)),
-                deal_type=random.choice(list(DealType)),
-                stage=random.choice(list(DealStage)),
-                owner_id=deal_owner.id
-            )
-
-            # 2. Append companies and contacts using the many-to-many relationship
-            deal.companies.append(random.choice(companies))
-            deal.contacts.append(random.choice(contacts))
-            # Sometimes add a second contact
-            if i % 3 == 0:
-                deal.contacts.append(random.choice([c for c in contacts if c not in deal.contacts]))
-
-            db.session.add(deal)
-            db.session.flush() # Flush to get the deal ID for the quote
-
-            # 3. Create a Quote for the Deal
-            quote = Quote(
-                deal_id=deal.id,
-                revision=1
-            )
-            # Assign a specific contact from the deal to this quote revision
-            quote.contacts.append(random.choice(deal.contacts))
-            db.session.add(quote)
-            db.session.flush() # Flush to get the quote ID for line items
-
-            # 4. Create Line Items for the Quote
-            total_quote_amount = 0
-            for j in range(random.randint(1, 4)): # Add 1 to 4 line items
-                price = random.randint(500, 20000)
-                qty = random.randint(1, 3)
-                line_item = QuoteLineItem(
-                    quote_id=quote.id,
-                    description=f'Pump Model {random.choice(["A", "B", "C"])}-{random.randint(100,999)}',
-                    quantity=qty,
-                    unit_price=price
-                )
-                total_quote_amount += (price * qty)
-                db.session.add(line_item)
-            
-            # 5. Update the deal's total amount based on the quote
-            deal.total_amount = total_quote_amount
-
+        
+        # --- Create Sample Products ---
+        print("Creating sample products...")
+        products_data = [
+            {'sku': 'PMP-1001', 'name': 'Centrifugal Pump - Model A', 'description': 'Standard duty centrifugal pump.', 'unit_price': 1250.00},
+            {'sku': 'PMP-1002', 'name': 'Centrifugal Pump - Model B', 'description': 'Heavy duty centrifugal pump.', 'unit_price': 2500.00},
+            {'sku': 'SEP-2001', 'name': 'Air & Dirt Separator - 50mm', 'description': 'Standard separator.', 'unit_price': 350.00},
+            {'sku': 'VAL-3001', 'name': 'Butterfly Valve - 80mm', 'description': 'Standard butterfly valve.', 'unit_price': 120.00},
+            {'sku': 'CUSTOM', 'name': 'Custom Labour Charge', 'description': 'Hourly rate for custom work.', 'unit_price': 150.00}
+        ]
+        products = [Product(**data) for data in products_data]
+        db.session.add_all(products)
         db.session.commit()
-        print(f"Created 15 deals with associated quotes and line items.")
+        print(f"Created {len(products)} products.")
 
+        # --- Create Sample Deals and all child objects ---
+        print("Creating sample deals, quote streams, quotes, options, and line items...")
+        for i in range(10): # Create 10 deals
+            deal_owner = random.choice(users)
+            
+            # Use a set to automatically prevent duplicate company associations
+            deal_companies_set = set(random.sample(companies, k=random.randint(1, 2)))
+            selected_contact = random.choice(contacts)
+            # Add the selected contact's company to the set. Duplicates are ignored.
+            if selected_contact.company:
+                deal_companies_set.add(selected_contact.company)
+
+            deal = Deal(
+                project_name=f'Project Alpha-{i+1}',
+                owner_id=deal_owner.id,
+                stage=random.choice(list(DealStage)),
+                deal_type=random.choice(list(DealType)),
+                state=random.choice(list(AustralianState))
+            )
+            
+            # Associate the unique companies and the contact
+            deal.companies.extend(list(deal_companies_set))
+            deal.contacts.append(selected_contact)
+            
+            db.session.add(deal)
+            db.session.flush()
+
+            # For each company in the deal, create a QuoteRecipient stream
+            for company in deal.companies:
+                recipient = QuoteRecipient(deal_id=deal.id, company_id=company.id)
+                db.session.add(recipient)
+                db.session.flush()
+
+                # Create 1 to 3 quote revisions for this company's stream
+                for rev_num in range(1, random.randint(2, 4)):
+                    quote = Quote(recipient_id=recipient.id, revision=rev_num, notes=f"Notes for Rev {rev_num}")
+                    db.session.add(quote)
+                    db.session.flush()
+                    
+                    # Create 1 to 2 options within this quote revision
+                    for opt_num in range(1, random.randint(2, 3)):
+                        option = QuoteOption(quote_id=quote.id, name=f'Option {chr(65+opt_num-1)}')
+                        db.session.add(option)
+                        db.session.flush()
+
+                        # Create line items for this option linked to products
+                        for _ in range(random.randint(2, 5)):
+                            product = random.choice(products)
+                            line_item = QuoteLineItem(
+                                option_id=option.id,
+                                product_id=product.id,
+                                quantity=random.randint(1, 5),
+                                unit_price=product.unit_price, # Start with the default price
+                                notes="CHWP" if "Pump" in product.name else "General"
+                            )
+                            db.session.add(line_item)
+        
+        db.session.commit()
         print("Database seeding complete!")
 
 if __name__ == '__main__':

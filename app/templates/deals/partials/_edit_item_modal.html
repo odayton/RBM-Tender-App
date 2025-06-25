@@ -1,0 +1,22 @@
+<div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form id="editItemForm" method="POST">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editItemModalLabel">Edit Line Item</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body">
+            {{ edit_item_form.csrf_token }}
+            {{ render_field(edit_item_form.description, id="edit_description") }}
+            {{ render_field(edit_item_form.quantity, id="edit_quantity") }}
+            {{ render_field(edit_item_form.unit_price, id="edit_unit_price") }}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            {{ edit_item_form.submit(class="btn btn-primary") }}
+          </div>
+        </form>
+      </div>
+    </div>
+</div>

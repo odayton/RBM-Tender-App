@@ -1,21 +1,20 @@
 from .base_model import BaseModel
 from .customers.company_model import Company
 from .customers.customer_model import Contact
-from .deals.deal_models import Deal, Quote, QuoteLineItem
+from .deals.deal_models import Deal, QuoteRecipient, Quote, QuoteOption, QuoteLineItem
 from .deals.deal_types import DealStage, DealType, AustralianState
-# Import both User and UserRole from the user_model
 from .user_model import User, UserRole
 
-from .pumps.pump_model import (
-    Pump, 
-    InertiaBase, 
-    SeismicSpring, 
-    RubberMount,
-    PumpAssembly, 
-    AssemblySpringAssociation,
-    PumpIPRating
-)
+# --- NEW: Import the Product model ---
+from .products.product_model import Product
 
+from .pumps.pump_model import (
+    Pump,
+    InertiaBase,
+    SeismicSpring,
+    RubberMount,
+)
+from .pumps.pump_assembly import PumpAssembly
 from .pumps.pricing import PriceList, PriceListItem, DiscountRule, AdditionalPriceAdder
 
 
@@ -24,23 +23,24 @@ __all__ = [
     'Company',
     'Contact',
     'Deal',
+    'QuoteRecipient',
     'Quote',
+    'QuoteOption',
     'QuoteLineItem',
     'DealStage',
     'DealType',
     'AustralianState',
     'User',
-    # Add UserRole to the export list
     'UserRole',
     'Pump',
     'InertiaBase',
     'SeismicSpring',
     'RubberMount',
     'PumpAssembly',
-    'AssemblySpringAssociation',
-    'PumpIPRating',
     'PriceList',
     'PriceListItem',
     'DiscountRule',
-    'AdditionalPriceAdder'
+    'AdditionalPriceAdder',
+    # --- NEW: Export the Product model ---
+    'Product'
 ]

@@ -197,3 +197,67 @@
     background-color: var(--bg-dark-inset);
     border-bottom-color: var(--bg-dark-inset);
 }
+
+/* =================================== */
+/* Deal Details Page - Quote Streams  */
+/* =================================== */
+
+.quote-stream-panel .card-header {
+    background-color: var(--bg-dark-inset);
+}
+
+.quote-stream-panel .accordion .card {
+    background-color: #4a4a4c;
+    border: 1px solid var(--border-color);
+    margin-bottom: -1px;
+}
+
+.quote-stream-panel .accordion .card:first-of-type {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.quote-stream-panel .accordion .card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.quote-stream-panel .accordion .btn-link {
+    color: var(--text-light);
+    text-decoration: none;
+}
+
+.quote-stream-panel .accordion .btn-link:hover {
+    color: var(--primary-color);
+}
+
+.quote-stream-panel .accordion .collapse.show {
+    background-color: var(--bg-dark);
+}
+
+.quote-stream-panel .accordion .card-body {
+    padding: 1rem;
+}
+
+.quote-stream-panel .accordion h6 {
+    font-weight: bold;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Final fix for the table text color */
+.quote-stream-panel .table th,
+.quote-stream-panel .table td {
+    color: var(--text-light);
+}
+
+.quote-stream-panel .table .thead-light th {
+    background-color: #3e3e40;
+}
+
+.quote-stream-panel .table-hover tbody tr:hover {
+    color: var(--text-light);
+    background-color: #525254;
+}

@@ -1,66 +1,43 @@
-from typing import Dict, Any, List, Optional
-from app.core.core_database import DatabaseManager, session_scope
-from app.models import Pump  # Removed HistoricPumpData as it no longer exists
+from app.extensions import db
+from app.models import Pump
+from sqlalchemy.orm import joinedload
+from sqlalchemy import func
 
 class PumpDatabaseManager:
-    """
-    Manages database operations for pump data.
-    """
+    @staticmethod
+    def get_pump_by_id(pump_id):
+        """Retrieves a single pump by its ID, eagerly loading related data."""
+        return db.session.query(Pump).options(
+            joinedload(Pump.assemblies)
+        ).filter(Pump.id == pump_id).first()
 
     @staticmethod
-    def get_pump_by_sku(sku: str) -> Optional[Dict[str, Any]]:
-        """
-        Retrieves a single pump's details from the database by its SKU.
-        
-        Args:
-            sku (str): The SKU of the pump to retrieve.
-            
-        Returns:
-            Optional[Dict[str, Any]]: A dictionary of the pump's data or None if not found.
-        """
-        query = "SELECT * FROM general_pump_details WHERE sku = %(sku)s"
-        params = {'sku': sku}
-        
-        with session_scope() as session:
-            result = session.execute(query, params).fetchone()
-            return dict(result) if result else None
+    def get_all_pumps():
+        """Retrieves all pumps from the database."""
+        return db.session.query(Pump).all()
 
     @staticmethod
-    def get_all_pumps(limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    def search_pumps(search_query):
         """
-        Retrieves a list of all pumps with pagination.
-        
-        Args:
-            limit (int): The number of records to return.
-            offset (int): The starting point for the records.
+        Searches for pumps by model name.
+        The query is case-insensitive.
+        """
+        if not search_query:
+            return []
             
-        Returns:
-            List[Dict[str, Any]]: A list of dictionaries, each representing a pump.
-        """
-        query = "SELECT * FROM general_pump_details ORDER BY name LIMIT %(limit)s OFFSET %(offset)s"
-        params = {'limit': limit, 'offset': offset}
+        search_filter = func.lower(Pump.pump_model).contains(func.lower(search_query))
         
-        with session_scope() as session:
-            results = session.execute(query, params).fetchall()
-            return [dict(row) for row in results]
+        return db.session.query(Pump).filter(search_filter).all()
 
     @staticmethod
-    def search_pumps(search_term: str) -> List[Dict[str, Any]]:
+    def update_pump(pump_id, update_data):
         """
-        Searches for pumps by name or SKU.
-        
-        Args:
-            search_term (str): The term to search for.
-            
-        Returns:
-            List[Dict[str, Any]]: A list of matching pumps.
+        Updates a pump's details in the database.
         """
-        query = """
-            SELECT * FROM general_pump_details 
-            WHERE name ILIKE %(term)s OR sku ILIKE %(term)s
-        """
-        params = {'term': f'%{search_term}%'}
-        
-        with session_scope() as session:
-            results = session.execute(query, params).fetchall()
-            return [dict(row) for row in results]
+        pump = db.session.query(Pump).get(pump_id)
+        if pump:
+            for key, value in update_data.items():
+                setattr(pump, key, value)
+            db.session.commit()
+            return pump
+        return None

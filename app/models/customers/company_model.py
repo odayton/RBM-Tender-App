@@ -9,7 +9,6 @@ class Company(BaseModel):
 
     company_name = Column(String(120), unique=True, nullable=False, index=True)
     address = Column(Text)
-    # ... other columns
 
     contacts = relationship("Contact", back_populates="company", cascade="all, delete-orphan")
     deals = relationship("Deal", secondary=deal_companies, back_populates="companies")

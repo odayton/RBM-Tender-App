@@ -1,65 +1,74 @@
 from flask_wtf import FlaskForm
 from wtforms import (
-    StringField, 
-    SelectField, 
+    StringField,
+    SelectField,
     TextAreaField,
     IntegerField,
     SubmitField,
     DecimalField,
-    DateField
+    HiddenField
 )
-from wtforms.validators import DataRequired, Optional
-from .validators import unique_deal_name  # Import our new validator
+from wtforms.validators import DataRequired, Optional, NumberRange, Length
+from .validators import unique_deal_name
 
-from app.models import DealType, AustralianState, DealStage, User, Contact, Company
+from app.models import DealType, AustralianState, DealStage, User
 
-class DealForm(FlaskForm):
-    """Form for creating a new deal with the redesigned workflow."""
-    
+class UpdateDealForm(FlaskForm):
+    """Form for editing an existing deal's core details."""
+    id = HiddenField("Deal ID")
     project_name = StringField(
-        'Deal Name', 
-        validators=[
-            DataRequired(message="Deal name is required."),
-            unique_deal_name  # Use the custom validator
-        ]
+        'Project Name',
+        validators=[DataRequired(), unique_deal_name]
     )
-    
     deal_type = SelectField(
-        'Category',  # Relabeled from "Deal Type"
+        'Category',
         choices=[(t.name, t.value) for t in DealType],
-        validators=[DataRequired(message="Category is required.")]
+        validators=[DataRequired()]
     )
-    
+    stage = SelectField(
+        'Stage',
+        choices=[(s.name, s.value) for s in DealStage],
+        validators=[DataRequired()]
+    )
     state = SelectField(
         'State',
         choices=[(s.name, s.value) for s in AustralianState],
-        validators=[DataRequired(message="State is required.")]
+        validators=[DataRequired()]
     )
+    owner_id = SelectField('Deal Owner', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Save Changes')
 
-    # These fields will be populated by the new search UI, not directly by the user.
+    def __init__(self, *args, **kwargs):
+        super(UpdateDealForm, self).__init__(*args, **kwargs)
+        # Populate owner choices dynamically
+        self.owner_id.choices = [(u.id, u.username) for u in User.query.order_by('username').all()]
+
+
+class QuoteOptionForm(FlaskForm):
+    """Form for creating and editing a quote option's name."""
+    name = StringField('Option Name', validators=[
+        DataRequired(),
+        Length(min=3, max=120)
+    ])
+    submit = SubmitField('Save Option')
+
+
+class LineItemForm(FlaskForm):
+    """Form for creating and editing a quote line item."""
+    description = StringField('Description', validators=[DataRequired()])
+    quantity = IntegerField('Quantity', validators=[DataRequired(), NumberRange(min=1)])
+    unit_price = DecimalField('Unit Price', validators=[DataRequired(), NumberRange(min=0)])
+    submit = SubmitField('Save Item')
+
+
+class DealForm(FlaskForm):
+    """Form for creating a new deal."""
+    project_name = StringField(
+        'Deal Name',
+        validators=[DataRequired(), unique_deal_name]
+    )
+    deal_type = SelectField('Category', choices=[(t.name, t.value) for t in DealType])
+    state = SelectField('State', choices=[(s.name, s.value) for s in AustralianState])
     contact_id = IntegerField('Contact ID', validators=[Optional()])
     company_id = IntegerField('Company ID', validators=[Optional()])
-
     submit = SubmitField('Create Deal')
-
-
-# The other forms below remain unchanged for now.
-class QuoteForm(FlaskForm):
-    deal_id = IntegerField('Deal ID', validators=[DataRequired(message="Deal ID is required")])
-    revision_notes = TextAreaField('Revision Notes', validators=[Optional()])
-
-class QuoteLineItemForm(FlaskForm):
-    pump_assembly_id = IntegerField('Pump Assembly ID', validators=[DataRequired(message="Pump assembly is required")])
-    quantity = IntegerField('Quantity', validators=[DataRequired(message="Quantity is required")], default=1)
-    description = TextAreaField('Description', validators=[Optional()])
-    sell_price = DecimalField('Sell Price', validators=[DataRequired(message="Sell price is required")])
-    cost_price = DecimalField('Cost Price', validators=[DataRequired(message="Cost price is required")])
-
-class DealCustomerForm(FlaskForm):
-    customer_id = IntegerField('Customer ID', validators=[DataRequired(message="Customer ID is required")])
-
-class DealStageUpdateForm(FlaskForm):
-    stage = SelectField('Stage', choices=[(stage.name, stage.value) for stage in DealStage], validators=[DataRequired(message="Stage is required")])
-
-class QuoteRevisionForm(FlaskForm):
-    notes = TextAreaField('Revision Notes', validators=[DataRequired(message="Revision notes are required")])

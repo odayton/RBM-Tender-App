@@ -1,5 +1,7 @@
 {% extends "layouts/base.html" %}
 
+{% from "macros/_form_helpers.html" import render_field %}
+
 {% block title %}Deal: {{ deal.project_name }}{% endblock %}
 
 {% block page_content %}
@@ -14,22 +16,20 @@
                     <i class="fas fa-cog"></i> Actions
                 </button>
                 <div class="dropdown-menu dropdown-menu-right">
-                    <a class="dropdown-item" href="#">Edit Deal</a>
-                    <a class="dropdown-item" href="#">Create New Quote</a>
+                    <button class="dropdown-item" type="button" data-toggle="modal" data-target="#editDealModal">
+                        Edit Deal Details
+                    </button>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#">Export as PDF</a>
-                    <a class="dropdown-item" href="#">Export as Excel</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-7">
+    <div class="row mb-4">
+        <div class="col-lg-7">
             <div class="card h-100">
-                <div class="card-header">
-                    <h4>Key Details</h4>
-                </div>
+                <div class="card-header"><h4>Key Details</h4></div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -44,11 +44,11 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-5">
+        <div class="col-lg-5">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between">
                     <h4>Parties Involved</h4>
-                    <button class="btn btn-sm btn-outline-secondary">Manage</button>
+                    <button class="btn btn-sm btn-outline-secondary manage-parties-btn" data-toggle="modal" data-target="#managePartiesModal">Manage</button>
                 </div>
                 <div class="card-body">
                     <strong>Companies:</strong>
@@ -73,65 +73,128 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        <ul class="nav nav-tabs" id="dealTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <a class="nav-link active" id="quotes-tab" data-toggle="tab" href="#quotes" role="tab" aria-controls="quotes" aria-selected="true">Quotes & Line Items</a>
-            </li>
-            <li class="nav-item" role="presentation">
-                <a class="nav-link" id="notes-tab" data-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">Notes</a>
-            </li>
-        </ul>
-        <div class="tab-content card" id="dealTabContent" style="border-top-left-radius: 0;">
-            <div class="tab-pane fade show active" id="quotes" role="tabpanel" aria-labelledby="quotes-tab">
-                <div class="card-body">
-                    {% if active_quote %}
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0">Showing Quote Revision #{{ active_quote.revision }}</h5>
-                            <div>
-                                <button class="btn btn-sm btn-outline-secondary">Switch Revision</button>
-                                <button class="btn btn-sm btn-primary ml-2"><i class="fas fa-plus"></i> Add Line Item</button>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="thead-light" style="color: var(--text-dark);">
-                                    <tr>
-                                        <th>Description</th>
-                                        <th>Quantity</th>
-                                        <th>Unit Price</th>
-                                        <th class="text-right">Total Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in line_items %}
-                                    <tr>
-                                        <td>{{ item.description }}</td>
-                                        <td>{{ item.quantity }}</td>
-                                        <td>$ {{ '{:,.2f}'.format(item.unit_price or 0) }}</td>
-                                        <td class="text-right">$ {{ '{:,.2f}'.format(item.total_price or 0) }}</td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="4" class="text-center text-secondary">This quote has no line items.</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="text-center p-5">
-                            <p class="text-secondary">There are no quotes for this deal yet.</p>
-                            <button class="btn btn-primary">Create First Quote</button>
-                        </div>
-                    {% endif %}
-                </div>
+    <h4>Quote Streams</h4>
+    {% for recipient in deal.recipients %}
+        <div class="card mb-3 quote-stream-panel">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-file-invoice-dollar mr-2"></i>Quotes for: <strong>{{ recipient.company.company_name }}</strong></h5>
+                <button class="btn btn-sm btn-primary add-revision-btn" data-toggle="modal" data-target="#addRevisionModal" data-recipient-id="{{ recipient.id }}" data-recipient-name="{{ recipient.company.company_name }}">
+                    <i class="fas fa-plus"></i> Add New Revision
+                </button>
             </div>
-            <div class="tab-pane fade" id="notes" role="tabpanel" aria-labelledby="notes-tab">
-                <div class="card-body">
-                    <p>Notes functionality will be implemented here.</p>
-                </div>
+            <div class="card-body">
+                {% if recipient.quotes %}
+                    <ul class="nav nav-tabs" role="tablist">
+                        {% for quote in recipient.quotes|sort(attribute='revision') %}
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="rev-tab-{{quote.id}}" data-toggle="tab" href="#rev-pane-{{quote.id}}" role="tab" aria-controls="rev-pane-{{quote.id}}" aria-selected="false">
+                                    Revision #{{ quote.revision }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="tab-content pt-3">
+                        {% for quote in recipient.quotes|sort(attribute='revision') %}
+                            <div class="tab-pane fade" id="rev-pane-{{quote.id}}" role="tabpanel" aria-labelledby="rev-tab-{{quote.id}}">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0 text-muted">Created on {{ quote.created_at.strftime('%Y-%m-%d') }}</h5>
+                                    <div>
+                                        <button class="btn btn-sm btn-success add-option-btn" data-toggle="modal" data-target="#addOptionModal" data-quote-id="{{ quote.id }}"><i class="fas fa-plus-circle"></i> Add Option</button>
+                                        <form action="{{ url_for('deals.delete_revision', quote_id=quote.id) }}" method="POST" class="d-inline delete-revision-form">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Revision"><i class="fas fa-trash-alt"></i> Delete Revision</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                
+                                <div class="accordion" id="option-accordion-{{ quote.id }}">
+                                    {% for option in quote.options %}
+                                        <div class="card">
+                                            <div class="card-header" id="option-heading-{{option.id}}">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h2 class="mb-0 flex-grow-1">
+                                                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#option-collapse-{{option.id}}" aria-expanded="false" aria-controls="option-collapse-{{option.id}}">
+                                                            <strong>Option: {{ option.name }}</strong>
+                                                        </button>
+                                                    </h2>
+                                                    <div>
+                                                        <button class="btn btn-xs btn-link edit-option-btn" data-toggle="modal" data-target="#editOptionModal" data-option-id="{{ option.id }}" data-option-name="{{ option.name }}"><i class="fas fa-pencil-alt"></i></button>
+                                                        <form action="{{ url_for('deals.delete_quote_option', option_id=option.id) }}" method="POST" class="d-inline delete-option-form">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                            <button type="submit" class="btn btn-xs btn-link text-danger"><i class="fas fa-trash-alt"></i></button>
+                                                        </form>
+                                                        <button class="btn btn-xs btn-outline-primary add-item-btn ml-2" data-toggle="modal" data-target="#addItemModal" data-option-id="{{ option.id }}"><i class="fas fa-plus"></i> Add Item</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="option-collapse-{{option.id}}" class="collapse" aria-labelledby="option-heading-{{option.id}}" data-parent="#option-accordion-{{ quote.id }}">
+                                                <div class="card-body">
+                                                    {% if option.line_items %}
+                                                        <table class="table table-sm table-hover">
+                                                            <thead class="thead-light">
+                                                                <tr>
+                                                                    <th>Description</th>
+                                                                    <th class="text-center">Qty</th>
+                                                                    <th class="text-right">Unit Price</th>
+                                                                    <th class="text-right">Total Price</th>
+                                                                    <th class="text-right">Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {% for item in option.line_items %}
+                                                                <tr>
+                                                                    <td>{{ item.description }}</td>
+                                                                    <td class="text-center">{{ item.quantity }}</td>
+                                                                    <td class="text-right">$ {{ '{:,.2f}'.format(item.unit_price or 0) }}</td>
+                                                                    <td class="text-right">$ {{ '{:,.2f}'.format((item.unit_price * item.quantity) or 0) }}</td>
+                                                                    <td class="text-right">
+                                                                        <button class="btn btn-xs btn-secondary edit-item-btn" data-toggle="modal" data-target="#editItemModal" data-item-id="{{ item.id }}" data-item-description="{{ item.description }}" data-item-quantity="{{ item.quantity }}" data-item-unit-price="{{ item.unit_price }}"><i class="fas fa-pencil-alt"></i></button>
+                                                                        <form action="{{ url_for('deals.delete_line_item', item_id=item.id) }}" method="POST" class="d-inline delete-item-form">
+                                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                                            <button type="submit" class="btn btn-xs btn-danger"><i class="fas fa-trash-alt"></i></button>
+                                                                        </form>
+                                                                    </td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    {% else %}
+                                                        <p class="text-center text-secondary p-3">This option has no line items.</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <p class="text-center text-secondary p-3">This quote revision has no options.</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center p-4">
+                        <p class="text-secondary">No quotes have been created for this company yet.</p>
+                    </div>
+                {% endif %}
             </div>
         </div>
-    </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center text-secondary">There are no companies associated with this deal to create quotes for.</div>
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+
+    {% include 'deals/partials/_add_revision_modal.html' %}
+    {% include 'deals/partials/_add_item_modal.html' %}
+    {% include 'deals/partials/_edit_item_modal.html' %}
+    {% include 'deals/partials/_add_option_modal.html' %}
+    {% include 'deals/partials/_edit_option_modal.html' %}
+    {% include 'deals/partials/_edit_deal_modal.html' %}
+    {% include 'deals/partials/_manage_parties_modal.html' %}
+
+    <script src="{{ url_for('static', filename='js/pages/deal_details.js') }}"></script>
 {% endblock %}

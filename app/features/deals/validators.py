@@ -7,21 +7,24 @@ from app.core.core_errors import ValidationError as AppValidationError
 # This is the new WTForms-compatible validator
 def unique_deal_name(form, field):
     """
-    Checks if a deal name (project_name) is unique.
-    This is designed to be used directly in a WTForms validator list.
+    Checks if a deal name (project_name) is unique, allowing for edits.
     """
     try:
-        # Check for an existing deal_id on the form to handle edits vs. creates
+        # Check for an existing deal_id on the form
         deal_id = form.id.data if hasattr(form, 'id') else None
         validate_project_name_unique(field.data, deal_id=deal_id)
     except AppValidationError as e:
-        # Raise the WTForms-native ValidationError to display the message in the form
         raise ValidationError(str(e))
 
-
-# --------------------------------------------------------------------
-# Your existing helper functions remain unchanged.
-# --------------------------------------------------------------------
+def validate_project_name_unique(project_name: str, deal_id: int = None) -> bool:
+    """Helper function to check for project name uniqueness in the database."""
+    query = Deal.query.filter(Deal.project_name.ilike(project_name))
+    if deal_id:
+        # If we are editing a deal, exclude it from the uniqueness check
+        query = query.filter(Deal.id != deal_id)
+    if query.first():
+        raise AppValidationError(f"A deal with the name '{project_name}' already exists.")
+    return True
 
 def validate_deal_stage_transition(old_stage: DealStage, new_stage: DealStage) -> bool:
     allowed_transitions = {
