@@ -55,9 +55,11 @@ class QuoteOptionForm(FlaskForm):
 
 class LineItemForm(FlaskForm):
     """Form for creating and editing a quote line item."""
-    description = StringField('Description', validators=[DataRequired()])
-    quantity = IntegerField('Quantity', validators=[DataRequired(), NumberRange(min=1)])
-    unit_price = DecimalField('Unit Price', validators=[DataRequired(), NumberRange(min=0)])
+    product_id = HiddenField("Product ID", validators=[Optional()])
+    notes = TextAreaField('Custom Description', validators=[Optional(), Length(max=500)], render_kw={"rows": 3})
+    quantity = IntegerField('Quantity', default=1, validators=[DataRequired(), NumberRange(min=1)])
+    unit_price = DecimalField('Unit Price', places=2, validators=[DataRequired(), NumberRange(min=0)])
+    discount = DecimalField('Discount (%)', places=2, default=0.0, validators=[Optional(), NumberRange(min=0, max=100)])
     submit = SubmitField('Save Item')
 
 

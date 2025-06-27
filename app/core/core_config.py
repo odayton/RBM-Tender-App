@@ -75,11 +75,11 @@ class DevelopmentConfig(Config):
     DEBUG = True
     LOG_LEVEL = 'DEBUG'
     
-    # --- TEMPORARILY CHANGE THIS LINE ---
-    # We are changing 'dev.db' to 'new_dev.db' to force a fresh start
+    # --- THIS IS THE UPDATED LINE ---
+    # We are changing 'new_dev.db' to 'rbm_tender_app.db'
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DEV_DATABASE_URL', 
-        f"sqlite:///{Config.INSTANCE_PATH / 'new_dev.db'}"
+        f"sqlite:///{Config.INSTANCE_PATH / 'rbm_tender_app.db'}"
     )
     # ------------------------------------
 

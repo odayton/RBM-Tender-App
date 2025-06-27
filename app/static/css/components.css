@@ -148,3 +148,13 @@
 #createDealModal .form-control[readonly] {
     background-color: #2d2d2f; /* Even darker to indicate readonly */
 }
+
+#managePartiesModal .list-group-item {
+    background-color: var(--bg-dark-inset);
+    color: var(--text-light);
+    border-color: var(--border-color);
+}
+
+#managePartiesModal .list-group-item.text-secondary {
+    color: var(--text-secondary) !important;
+}

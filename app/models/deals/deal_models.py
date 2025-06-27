@@ -38,21 +38,25 @@ class QuoteOption(BaseModel):
     __tablename__ = 'quote_options'
     quote_id = Column(Integer, ForeignKey('quotes.id'), nullable=False)
     name = Column(String(120), nullable=False, default="Main Option")
+    freight_charge = Column(Numeric(10, 2), nullable=False, default=0.0)
+    
     quote = relationship("Quote", back_populates="options")
-    line_items = relationship("QuoteLineItem", back_populates="option", cascade="all, delete-orphan")
+    # Order line items by the new display_order column
+    line_items = relationship("QuoteLineItem", back_populates="option", cascade="all, delete-orphan", order_by="QuoteLineItem.display_order")
 
 class QuoteLineItem(BaseModel):
-    """Model for individual line items, now linked to a Product."""
+    """Model for individual line items, now with discount and ordering."""
     __tablename__ = 'quote_line_items'
     
     option_id = Column(Integer, ForeignKey('quote_options.id'), nullable=False)
-    product_id = Column(Integer, ForeignKey('products.id'), nullable=True) # Can be null for custom items
+    product_id = Column(Integer, ForeignKey('products.id'), nullable=True)
 
-    # Instance-specific fields
     quantity = Column(Integer, nullable=False, default=1)
-    unit_price = Column(Numeric(10, 2), nullable=False) # Price for this specific instance
-    notes = Column(Text) # Optional description for this instance (e.g., "chwp")
-    
+    unit_price = Column(Numeric(10, 2), nullable=False)
+    notes = Column(Text)
+    discount = Column(Numeric(5, 2), nullable=False, default=0.0) # Percentage
+    display_order = Column(Integer, nullable=False, default=0)
+
     # Custom item fields (only used if product_id is NULL)
     custom_sku = Column(String(80))
     custom_name = Column(String(200))

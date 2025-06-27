@@ -25,6 +25,9 @@ class PumpAssembly(BaseModel):
     
     # Many-to-Many relationship with SeismicSpring
     springs = relationship("SeismicSpring", secondary=assembly_springs, back_populates="pump_assemblies")
+    
+    # One-to-one relationship to the Product that represents this assembly
+    product = relationship("Product", back_populates="pump_assembly", uselist=False, cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<PumpAssembly(id={self.id}, name='{self.assembly_name}')>"

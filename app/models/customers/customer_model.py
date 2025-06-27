@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 
 from ..base_model import BaseModel
 from ...core.core_errors import ValidationError
+# We only need the deal_contacts association for this model now
 from ..deals.deal_associations import deal_contacts
 
 class Contact(BaseModel):
@@ -20,6 +21,9 @@ class Contact(BaseModel):
     
     # --- Relationships ---
     company = relationship("Company", back_populates="contacts")
+    
+    # --- REMOVED this obsolete relationship ---
+    # quotes = relationship("Quote", secondary=quote_contacts, back_populates="contacts")
     
     # This relationship allows a Contact to be associated with multiple Deals
     deals = relationship("Deal", secondary=deal_contacts, back_populates="contacts")

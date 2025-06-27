@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 from collections import defaultdict
 import datetime
+from decimal import Decimal
 
 from app.models import (
     Deal, User, Quote, QuoteLineItem, DealStage, AustralianState, DealType,
-    Company, Contact, QuoteRecipient, QuoteOption
+    Company, Contact, QuoteRecipient, QuoteOption, Product
 )
 from .forms import DealForm, LineItemForm, QuoteOptionForm, UpdateDealForm
 from app.extensions import db
@@ -25,7 +26,8 @@ def _clone_quote(source_quote, recipient, revision_number):
     for source_option in source_quote.options:
         new_option = QuoteOption(
             quote_id=new_quote.id,
-            name=source_option.name
+            name=source_option.name,
+            freight_charge=source_option.freight_charge
         )
         db.session.add(new_option)
         db.session.flush()
@@ -33,9 +35,14 @@ def _clone_quote(source_quote, recipient, revision_number):
         for source_item in source_option.line_items:
             new_item = QuoteLineItem(
                 option_id=new_option.id,
-                description=source_item.description,
+                product_id=source_item.product_id,
+                notes=source_item.notes,
                 quantity=source_item.quantity,
-                unit_price=source_item.unit_price
+                unit_price=source_item.unit_price,
+                discount=source_item.discount,
+                display_order=source_item.display_order,
+                custom_sku=source_item.custom_sku,
+                custom_name=source_item.custom_name
             )
             db.session.add(new_item)
     return new_quote
@@ -71,12 +78,16 @@ def deal_details(deal_id):
     deal = Deal.query.get_or_404(deal_id)
     all_quotes_in_deal = [q for r in deal.recipients for q in r.quotes]
 
+    # Use the renamed form field `notes` instead of `description`
+    add_item_form = LineItemForm(notes="") 
+    edit_item_form = LineItemForm()
+
     return render_template(
         'deals/individual_deal_page.html',
         deal=deal,
         all_quotes_in_deal=all_quotes_in_deal,
-        add_item_form=LineItemForm(),
-        edit_item_form=LineItemForm(),
+        add_item_form=add_item_form,
+        edit_item_form=edit_item_form,
         add_option_form=QuoteOptionForm(),
         edit_option_form=QuoteOptionForm(),
         update_deal_form=UpdateDealForm(obj=deal)
@@ -185,43 +196,37 @@ def add_quote_option(quote_id):
     return redirect(url_for('deals.deal_details', deal_id=quote.recipient.deal_id))
 
 
-@deals_bp.route('/quote_option/update/<int:option_id>', methods=['POST'])
-def update_quote_option(option_id):
-    option = QuoteOption.query.get_or_404(option_id); form = QuoteOptionForm()
-    if form.validate_on_submit():
-        option.name = form.name.data; db.session.commit(); flash('Option renamed.', 'success')
-    else: flash('Error renaming option.', 'error')
-    return redirect(url_for('deals.deal_details', deal_id=option.quote.recipient.deal_id))
-
-
 @deals_bp.route('/quote_option/delete/<int:option_id>', methods=['POST'])
 def delete_quote_option(option_id):
     option = QuoteOption.query.get_or_404(option_id); deal_id = option.quote.recipient.deal_id
-    if option.line_items: flash('Cannot delete option with items.', 'error')
-    else: db.session.delete(option); db.session.commit(); flash('Option deleted.', 'success')
+    db.session.delete(option); db.session.commit(); flash('Option deleted.', 'success')
     return redirect(url_for('deals.deal_details', deal_id=deal_id))
 
 
 @deals_bp.route('/line_item/add/<int:option_id>', methods=['POST'])
 def add_line_item(option_id):
-    form = LineItemForm(); option = QuoteOption.query.get_or_404(option_id)
+    form = LineItemForm()
+    option = QuoteOption.query.get_or_404(option_id)
     if form.validate_on_submit():
-        db.session.add(QuoteLineItem(option_id=option.id, description=form.description.data, quantity=form.quantity.data, unit_price=form.unit_price.data))
-        db.session.commit(); flash('Line item added!', 'success')
+        # Get the highest current display order and add 1
+        max_order = db.session.query(db.func.max(QuoteLineItem.display_order)).filter_by(option_id=option.id).scalar() or 0
+        new_item = QuoteLineItem(
+            option_id=option.id,
+            product_id=form.product_id.data or None,
+            notes=form.notes.data,
+            quantity=form.quantity.data,
+            unit_price=form.unit_price.data,
+            discount=form.discount.data,
+            display_order=max_order + 1
+        )
+        db.session.add(new_item)
+        db.session.commit()
+        flash('Line item added!', 'success')
     else:
-        for field, errors in form.errors.items(): [flash(f"Error in {field}: {e}", 'error') for e in errors]
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Error in {getattr(form, field).label.text}: {error}", 'error')
     return redirect(url_for('deals.deal_details', deal_id=option.quote.recipient.deal_id))
-
-
-@deals_bp.route('/line_item/update/<int:item_id>', methods=['POST'])
-def update_line_item(item_id):
-    item = QuoteLineItem.query.get_or_404(item_id); form = LineItemForm()
-    if form.validate_on_submit():
-        item.description = form.description.data; item.quantity = form.quantity.data; item.unit_price = form.unit_price.data
-        db.session.commit(); flash('Line item updated!', 'success')
-    else:
-        for field, errors in form.errors.items(): [flash(f"Error in {field}: {e}", 'error') for e in errors]
-    return redirect(url_for('deals.deal_details', deal_id=item.option.quote.recipient.deal_id))
 
 
 @deals_bp.route('/line_item/delete/<int:item_id>', methods=['POST'])
@@ -232,7 +237,6 @@ def delete_line_item(item_id):
 
 @deals_bp.route('/<int:deal_id>/add_party', methods=['POST'])
 def add_party_to_deal(deal_id):
-    """Associates a company or contact with a deal."""
     deal = Deal.query.get_or_404(deal_id)
     company_id = request.form.get('company_id', type=int)
     contact_id = request.form.get('contact_id', type=int)
@@ -241,7 +245,6 @@ def add_party_to_deal(deal_id):
         company = Company.query.get_or_404(company_id)
         if company not in deal.companies:
             deal.companies.append(company)
-            # When adding a company, also create a new quote stream for them
             recipient = QuoteRecipient(deal_id=deal.id, company_id=company.id)
             db.session.add(recipient)
             flash(f"Company '{company.company_name}' added to deal.", "success")
@@ -252,7 +255,6 @@ def add_party_to_deal(deal_id):
         contact = Contact.query.get_or_404(contact_id)
         if contact not in deal.contacts:
             deal.contacts.append(contact)
-            # Also add the contact's company if it's not already on the deal
             if contact.company and contact.company not in deal.companies:
                 deal.companies.append(contact.company)
                 recipient = QuoteRecipient(deal_id=deal.id, company_id=contact.company.id)
@@ -267,7 +269,6 @@ def add_party_to_deal(deal_id):
 
 @deals_bp.route('/<int:deal_id>/remove_party', methods=['POST'])
 def remove_party_from_deal(deal_id):
-    """Removes a company or contact association from a deal."""
     deal = Deal.query.get_or_404(deal_id)
     company_id = request.form.get('company_id', type=int)
     contact_id = request.form.get('contact_id', type=int)
@@ -275,7 +276,6 @@ def remove_party_from_deal(deal_id):
     if company_id:
         company = Company.query.get_or_404(company_id)
         if company in deal.companies:
-            # IMPORTANT: Also delete the corresponding quote stream
             QuoteRecipient.query.filter_by(deal_id=deal.id, company_id=company.id).delete()
             deal.companies.remove(company)
             flash(f"Company '{company.company_name}' and its quotes have been removed from this deal.", "success")
@@ -288,3 +288,106 @@ def remove_party_from_deal(deal_id):
             
     db.session.commit()
     return redirect(url_for('deals.deal_details', deal_id=deal_id))
+
+# --- API Routes ---
+
+@deals_bp.route('/api/products/search', methods=['GET'])
+def search_products():
+    search_term = request.args.get('q', '', type=str)
+    if not search_term or len(search_term) < 2:
+        return jsonify([])
+
+    products = Product.query.filter(
+        (Product.name.ilike(f'%{search_term}%')) |
+        (Product.sku.ilike(f'%{search_term}%'))
+    ).limit(10).all()
+
+    results = [
+        {'id': p.id, 'sku': p.sku, 'name': p.name, 'unit_price': str(p.unit_price) }
+        for p in products
+    ]
+    return jsonify(results)
+
+@deals_bp.route('/api/line-item/<int:item_id>/update-field', methods=['POST'])
+def update_line_item_field(item_id):
+    """API endpoint for inline editing of a line item field."""
+    item = QuoteLineItem.query.get_or_404(item_id)
+    data = request.get_json()
+    field = data.get('field')
+    value = data.get('value')
+
+    if not field or value is None:
+        return jsonify({'success': False, 'message': 'Missing field or value.'}), 400
+
+    # --- THIS IS THE FIX ---
+    # Add 'custom_name' to the list of editable fields
+    allowed_fields = ['notes', 'quantity', 'unit_price', 'discount', 'custom_name']
+    if field not in allowed_fields:
+        return jsonify({'success': False, 'message': f'Field "{field}" cannot be edited.'}), 400
+    
+    try:
+        # If the name is being edited, we detach it from the product catalog
+        if field == 'custom_name':
+            item.product_id = None
+            item.custom_sku = "CUSTOM" # Indicate it's now a custom item
+        
+        # Convert numeric fields
+        if field in ['quantity', 'unit_price', 'discount']:
+            value = Decimal(value)
+
+        setattr(item, field, value)
+        db.session.commit()
+        # Return the new state so the UI can update if needed (e.g., SKU change)
+        return jsonify({'success': True, 'message': 'Field updated.', 'newState': {'sku': item.custom_sku or item.product.sku}})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating line item {item_id}: {e}")
+        return jsonify({'success': False, 'message': 'An error occurred.'}), 500
+
+@deals_bp.route('/api/quote-option/<int:option_id>/update-field', methods=['POST'])
+def update_quote_option_field(option_id):
+    """API endpoint for inline editing of a quote option field."""
+    option = QuoteOption.query.get_or_404(option_id)
+    data = request.get_json()
+    field = data.get('field')
+    value = data.get('value')
+
+    if not field or value is None:
+        return jsonify({'success': False, 'message': 'Missing field or value.'}), 400
+
+    allowed_fields = ['name', 'freight_charge']
+    if field not in allowed_fields:
+        return jsonify({'success': False, 'message': f'Field "{field}" cannot be edited.'}), 400
+
+    try:
+        if field == 'freight_charge':
+            value = Decimal(value)
+        setattr(option, field, value)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Field updated.'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating quote option {option_id}: {e}")
+        return jsonify({'success': False, 'message': 'An error occurred.'}), 500
+
+@deals_bp.route('/api/quote-option/<int:option_id>/reorder-items', methods=['POST'])
+def reorder_line_items(option_id):
+    """API endpoint to save the new order of line items."""
+    option = QuoteOption.query.get_or_404(option_id)
+    data = request.get_json()
+    ordered_ids = data.get('ordered_ids') # Expect a list of line item IDs in the new order
+
+    if not ordered_ids:
+        return jsonify({'success': False, 'message': 'Missing order data.'}), 400
+
+    try:
+        for index, item_id in enumerate(ordered_ids):
+            item = QuoteLineItem.query.filter_by(id=item_id, option_id=option.id).first()
+            if item:
+                item.display_order = index
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Order updated.'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error reordering line items for option {option_id}: {e}")
+        return jsonify({'success': False, 'message': 'An error occurred.'}), 500

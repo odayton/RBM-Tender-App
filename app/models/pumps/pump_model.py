@@ -1,33 +1,35 @@
 from sqlalchemy import (
-    Column, String, Integer, ForeignKey, Numeric, Float, Text, Enum as PyEnum
+    Column, String, Integer, ForeignKey, Float, Text, Enum as PyEnum
 )
 from sqlalchemy.orm import relationship
 from ..base_model import BaseModel
 from enum import Enum
 
-# Note: The import for assembly_springs is removed from this file as it's no longer needed here.
-
 class PumpIPRating(Enum):
-    IP44 = "IP44"
-    IP55 = "IP55"
-    IP65 = "IP65"
-    IP66 = "IP66"
-    IP67 = "IP67"
-    IP68 = "IP68"
+    """Corrected IP Rating values."""
+    IP_55 = "IP-55"
+    IP_56 = "IP-56"
+    IP_66 = "IP-66"
 
 
 class Pump(BaseModel):
     __tablename__ = 'pumps'
     
     pump_model = Column(String(120), nullable=False)
+    
+    # Duty Point Information (stored in base units: L/s and kPa)
+    nominal_flow = Column(Float, nullable=True)
+    nominal_head = Column(Float, nullable=True)
+
     inlet_size = Column(Float)
     outlet_size = Column(Float)
     rpm = Column(Integer)
     material = Column(String(120))
     ip_rating = Column(PyEnum(PumpIPRating), nullable=True)
     notes = Column(Text, nullable=True)
+    manufacturer_url = Column(String(500), nullable=True)
     
-    # Relationship to its assemblies. This still works.
+    # Relationship to its assemblies
     assemblies = relationship("PumpAssembly", back_populates="pump", cascade="all, delete-orphan")
 
 

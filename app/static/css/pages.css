@@ -261,3 +261,68 @@
     color: var(--text-light);
     background-color: #525254;
 }
+
+/* --- NEW STYLES FOR UI IMPROVEMENTS --- */
+
+/* Fix for right-aligning the discount header */
+.table .discount-header {
+    text-align: right;
+}
+
+/* Style for the new, separate option cards */
+.option-card {
+    border: 1px solid #4a4a4c !important; 
+    background-color: var(--bg-dark-inset);
+}
+
+.option-card .card-header {
+    background-color: #3e3e40;
+}
+
+.option-card .card-body {
+    background-color: var(--bg-dark);
+}
+
+.option-card .card-footer {
+    background-color: var(--bg-dark-inset);
+    border-top: 1px solid #4a4a4c;
+}
+
+/* Zebra-striping for the line item table */
+.line-items-table tbody tr:nth-of-type(odd) {
+    background-color: #3a3a3c; 
+}
+
+.line-items-table tbody tr:hover {
+    background-color: #525254;
+}
+
+/* Style for the drag-and-drop handle */
+.drag-handle {
+    cursor: grab;
+    color: var(--text-secondary);
+    text-align: center;
+    vertical-align: middle;
+}
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Styles for the new totals section */
+.option-totals {
+    font-size: 1.1rem;
+}
+
+.option-totals strong {
+    color: var(--text-light);
+}
+
+.option-totals .freight-value {
+    color: var(--text-light);
+    cursor: pointer;
+    border-bottom: 1px dashed var(--text-secondary);
+}
+
+.option-totals .total-value {
+    color: var(--primary-color);
+}
