@@ -1,0 +1,328 @@
+/* /static/css/pages.css */
+
+/* --- Deals Page (Kanban Board) Styles --- */
+.deals-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.kanban-board-container {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+}
+
+.kanban-column {
+    flex: 0 0 320px;
+    max-width: 320px;
+    background-color: var(--bg-dark-inset);
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+}
+
+.kanban-column-header {
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kanban-column-title {
+    color: var(--text-light);
+}
+
+.kanban-deal-count {
+    font-size: 0.9rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    padding: 0.1rem 0.5rem;
+    border-radius: 50px;
+}
+
+.kanban-cards-container {
+    flex-grow: 1;
+    padding: 0.75rem;
+    overflow-y: auto;
+    min-height: 400px;
+    max-height: 70vh;
+}
+
+/* --- Deal Card Styles (Inside Kanban) --- */
+.deal-card {
+    display: block;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    cursor: grab;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    position: relative;
+    border-left: 5px solid var(--border-color); /* Default to grey */
+}
+.deal-card--hvac {
+    border-left-color: var(--deal-type-hvac);
+}
+.deal-card--plumbing {
+    border-left-color: var(--deal-type-plumbing);
+}
+.deal-card--hydronic-heating {
+    border-left-color: var(--deal-type-heating);
+}
+
+
+.deal-card:hover {
+    background-color: #4a4a4c;
+    border-color: #666;
+}
+
+.deal-card:active {
+    cursor: grabbing;
+}
+
+.deal-card-title {
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 0.25rem;
+}
+
+.deal-card-company {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.deal-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.deal-card-amount {
+    font-weight: 600;
+    color: var(--success-color);
+}
+
+.deal-card-owner-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* --- Create Deal Form / Smart Search Styles --- */
+.search-container {
+    position: relative;
+}
+
+.search-results-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050; /* Needs to be higher than the modal z-index */
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-dark);
+    list-style: none;
+    padding: 0;
+    margin-top: 2px;
+    border-radius: var(--border-radius);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.search-results-list li {
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-results-list li:last-child {
+    border-bottom: none;
+}
+
+.search-results-list li:hover {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+}
+
+.search-results-list .no-results {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    cursor: default;
+}
+
+.search-results-list .create-new-button {
+    background-color: var(--success-color);
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+/* --- Individual Deal Page Styles --- */
+.deal-stage-badge {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.4em 0.8em;
+    border-radius: 50px;
+    color: var(--text-light);
+    background-color: #6c757d; /* A neutral grey for all stages as requested */
+    vertical-align: middle;
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+    background-color: transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--text-light);
+    background-color: var(--bg-dark-inset);
+    border-bottom-color: var(--bg-dark-inset);
+}
+
+/* =================================== */
+/* Deal Details Page - Quote Streams  */
+/* =================================== */
+
+.quote-stream-panel .card-header {
+    background-color: var(--bg-dark-inset);
+}
+
+.quote-stream-panel .accordion .card {
+    background-color: #4a4a4c;
+    border: 1px solid var(--border-color);
+    margin-bottom: -1px;
+}
+
+.quote-stream-panel .accordion .card:first-of-type {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.quote-stream-panel .accordion .card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.quote-stream-panel .accordion .btn-link {
+    color: var(--text-light);
+    text-decoration: none;
+}
+
+.quote-stream-panel .accordion .btn-link:hover {
+    color: var(--primary-color);
+}
+
+.quote-stream-panel .accordion .collapse.show {
+    background-color: var(--bg-dark);
+}
+
+.quote-stream-panel .accordion .card-body {
+    padding: 1rem;
+}
+
+.quote-stream-panel .accordion h6 {
+    font-weight: bold;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Final fix for the table text color */
+.quote-stream-panel .table th,
+.quote-stream-panel .table td {
+    color: var(--text-light);
+}
+
+.quote-stream-panel .table .thead-light th {
+    background-color: #3e3e40;
+}
+
+.quote-stream-panel .table-hover tbody tr:hover {
+    color: var(--text-light);
+    background-color: #525254;
+}
+
+/* --- NEW STYLES FOR UI IMPROVEMENTS --- */
+
+/* Fix for right-aligning the discount header */
+.table .discount-header {
+    text-align: right;
+}
+
+/* Style for the new, separate option cards */
+.option-card {
+    border: 1px solid #4a4a4c !important; 
+    background-color: var(--bg-dark-inset);
+}
+
+.option-card .card-header {
+    background-color: #3e3e40;
+}
+
+.option-card .card-body {
+    background-color: var(--bg-dark);
+}
+
+.option-card .card-footer {
+    background-color: var(--bg-dark-inset);
+    border-top: 1px solid #4a4a4c;
+}
+
+/* Zebra-striping for the line item table */
+.line-items-table tbody tr:nth-of-type(odd) {
+    background-color: #3a3a3c; 
+}
+
+.line-items-table tbody tr:hover {
+    background-color: #525254;
+}
+
+/* Style for the drag-and-drop handle */
+.drag-handle {
+    cursor: grab;
+    color: var(--text-secondary);
+    text-align: center;
+    vertical-align: middle;
+}
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Styles for the new totals section */
+.option-totals {
+    font-size: 1.1rem;
+}
+
+.option-totals strong {
+    color: var(--text-light);
+}
+
+.option-totals .freight-value {
+    color: var(--text-light);
+    cursor: pointer;
+    border-bottom: 1px dashed var(--text-secondary);
+}
+
+.option-totals .total-value {
+    color: var(--primary-color);
+}

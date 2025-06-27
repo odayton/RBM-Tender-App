@@ -1,0 +1,66 @@
+/* /static/css/layout.css */
+
+.page-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-dark);
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    width: var(--sidebar-width);
+    /* --- FIX: Use the correct variable for the blue color --- */
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    flex-shrink: 0;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.sidebar-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Main Content --- */
+.main-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - var(--sidebar-width));
+    transition: width 0.3s ease-in-out;
+}
+
+.page-content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+/* --- Top Navbar in Main Content --- */
+.main-content-wrapper .navbar {
+    /* --- FIX: Use the correct variable for the blue color --- */
+    background-color: var(--primary-color) !important;
+}
+
+.main-content-wrapper .navbar .navbar-nav .nav-link {
+    color: var(--text-light) !important;
+}
+
+#sidebar-toggle {
+    margin-right: 1rem;
+    color: var(--text-light);
+    border-color: var(--text-light);
+}
+#sidebar-toggle:hover {
+    background-color: var(--link-hover);
+}
+
+
+/* --- Sidebar Toggling Behavior --- */
+.page-wrapper.sidebar-collapsed .sidebar {
+    margin-left: calc(-1 * var(--sidebar-width));
+}
+
+.page-wrapper.sidebar-collapsed .main-content-wrapper {
+    width: 100%;
+}

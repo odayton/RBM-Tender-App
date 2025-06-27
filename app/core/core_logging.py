@@ -99,7 +99,10 @@ class CoreLogger:
                     'propagate': False
                 },
                 'request': {
-                    'handlers': ['request_file'],
+                    # --- THIS IS THE FIX ---
+                    # In debug mode, log to console to avoid file lock errors on Windows.
+                    # In production, log to the rotating file.
+                    'handlers': ['console'] if self.app.debug else ['request_file'],
                     'level': 'INFO',
                     'propagate': False
                 }
@@ -137,7 +140,6 @@ class CoreLogger:
     def exception(self, msg, *args, **kwargs):
         self.app_logger.exception(msg, *args, **kwargs)
     
-    # Add the missing 'critical' method
     def critical(self, msg, *args, **kwargs):
         self.app_logger.critical(msg, *args, **kwargs)
 

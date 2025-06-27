@@ -1,8 +1,8 @@
-"""Initial migration after refactoring
+"""Initial migration from all current models
 
-Revision ID: 0aec5bb098ee
+Revision ID: ef99f237ce53
 Revises: 
-Create Date: 2025-06-20 12:53:14.827718
+Create Date: 2025-06-27 11:38:47.451018
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0aec5bb098ee'
+revision = 'ef99f237ce53'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -30,7 +30,7 @@ def upgrade():
     )
     op.create_table('companies',
     sa.Column('company_name', sa.String(length=120), nullable=False),
-    sa.Column('address', sa.String(length=255), nullable=True),
+    sa.Column('address', sa.Text(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
@@ -56,17 +56,16 @@ def upgrade():
         batch_op.create_index(batch_op.f('ix_discount_rules_component_type'), ['component_type'], unique=False)
 
     op.create_table('inertia_bases',
-    sa.Column('part_number', sa.String(length=50), nullable=False),
-    sa.Column('dimensions', sa.String(length=100), nullable=True),
-    sa.Column('weight_kg', sa.Numeric(precision=10, scale=2), nullable=True),
+    sa.Column('model', sa.String(length=120), nullable=False),
+    sa.Column('length', sa.Integer(), nullable=True),
+    sa.Column('width', sa.Integer(), nullable=True),
+    sa.Column('height', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('model')
     )
-    with op.batch_alter_table('inertia_bases', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_inertia_bases_part_number'), ['part_number'], unique=True)
-
     op.create_table('price_lists',
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('valid_from', sa.DateTime(), nullable=False),
@@ -80,46 +79,41 @@ def upgrade():
     sa.UniqueConstraint('name')
     )
     op.create_table('pumps',
-    sa.Column('part_number', sa.String(length=50), nullable=False),
-    sa.Column('series', sa.Enum('NBG', 'CR', 'TP', 'CM', 'MAGNA', 'UPS', 'CRE', 'TPE', 'NK', name='pumpseries'), nullable=False),
-    sa.Column('frame_size', sa.String(length=50), nullable=True),
-    sa.Column('poles', sa.Integer(), nullable=True),
-    sa.Column('power_kw', sa.Float(), nullable=True),
-    sa.Column('flow_rate', sa.Float(), nullable=True),
-    sa.Column('head', sa.Float(), nullable=True),
-    sa.Column('efficiency', sa.Float(), nullable=True),
+    sa.Column('pump_model', sa.String(length=120), nullable=False),
+    sa.Column('nominal_flow', sa.Float(), nullable=True),
+    sa.Column('nominal_head', sa.Float(), nullable=True),
+    sa.Column('inlet_size', sa.Float(), nullable=True),
+    sa.Column('outlet_size', sa.Float(), nullable=True),
+    sa.Column('rpm', sa.Integer(), nullable=True),
+    sa.Column('material', sa.String(length=120), nullable=True),
+    sa.Column('ip_rating', sa.Enum('IP_55', 'IP_56', 'IP_66', name='pumpiprating'), nullable=True),
+    sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('manufacturer_url', sa.String(length=500), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    with op.batch_alter_table('pumps', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_pumps_part_number'), ['part_number'], unique=True)
-
     op.create_table('rubber_mounts',
-    sa.Column('part_number', sa.String(length=50), nullable=False),
-    sa.Column('mount_type', sa.String(length=100), nullable=True),
-    sa.Column('load_capacity_kg', sa.Numeric(precision=10, scale=2), nullable=True),
+    sa.Column('model', sa.String(length=120), nullable=False),
+    sa.Column('rated_load', sa.Integer(), nullable=True),
+    sa.Column('deflection', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('model')
     )
-    with op.batch_alter_table('rubber_mounts', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_rubber_mounts_part_number'), ['part_number'], unique=True)
-
     op.create_table('seismic_springs',
-    sa.Column('part_number', sa.String(length=50), nullable=False),
-    sa.Column('spring_rate_k', sa.Float(), nullable=True),
-    sa.Column('max_deflection_mm', sa.Float(), nullable=True),
+    sa.Column('model', sa.String(length=120), nullable=False),
+    sa.Column('rated_load', sa.Integer(), nullable=True),
+    sa.Column('deflection', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('model')
     )
-    with op.batch_alter_table('seismic_springs', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_seismic_springs_part_number'), ['part_number'], unique=True)
-
     op.create_table('users',
     sa.Column('username', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=100), nullable=False),
@@ -155,18 +149,17 @@ def upgrade():
 
     op.create_table('deals',
     sa.Column('project_name', sa.String(length=200), nullable=False),
-    sa.Column('state', sa.Enum('NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'NT', 'ACT', name='australianstate'), nullable=False),
-    sa.Column('deal_type', sa.Enum('HVAC', 'HYDRAULIC', 'HYDRONIC', 'DATA_CENTRES', 'MERCHANT', 'WHOLESALER', 'OEM', name='dealtype'), nullable=False),
     sa.Column('stage', sa.Enum('SALES_LEAD', 'TENDER', 'PROPOSAL', 'NEGOTIATION', 'WON', 'LOST', 'ABANDONED', name='dealstage'), nullable=False),
-    sa.Column('total_amount', sa.Numeric(precision=10, scale=2), nullable=False),
-    sa.Column('company_id', sa.Integer(), nullable=False),
+    sa.Column('deal_type', sa.Enum('HVAC', 'HYDRAULIC', 'HYDRONIC', 'DATA_CENTRES', 'MERCHANT', 'WHOLESALER', 'OEM', name='dealtype'), nullable=False),
+    sa.Column('state', sa.Enum('NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'NT', 'ACT', name='australianstate'), nullable=False),
+    sa.Column('total_amount', sa.Numeric(precision=10, scale=2), nullable=True),
     sa.Column('owner_id', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ),
     sa.ForeignKeyConstraint(['owner_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('project_name')
     )
     op.create_table('price_list_items',
     sa.Column('price_list_id', sa.Integer(), nullable=False),
@@ -184,38 +177,33 @@ def upgrade():
         batch_op.create_index(batch_op.f('ix_price_list_items_component_type'), ['component_type'], unique=False)
 
     op.create_table('pump_assemblies',
-    sa.Column('assembly_number', sa.String(length=50), nullable=False),
     sa.Column('pump_id', sa.Integer(), nullable=False),
     sa.Column('inertia_base_id', sa.Integer(), nullable=True),
+    sa.Column('rubber_mount_id', sa.Integer(), nullable=True),
+    sa.Column('assembly_name', sa.String(length=120), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['inertia_base_id'], ['inertia_bases.id'], ),
     sa.ForeignKeyConstraint(['pump_id'], ['pumps.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    with op.batch_alter_table('pump_assemblies', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_pump_assemblies_assembly_number'), ['assembly_number'], unique=True)
-
-    op.create_table('pump_ip_ratings',
-    sa.Column('pump_id', sa.Integer(), nullable=False),
-    sa.Column('rating', sa.String(length=10), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['pump_id'], ['pumps.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.ForeignKeyConstraint(['rubber_mount_id'], ['rubber_mounts.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('assembly_name')
     )
     op.create_table('assembly_springs',
     sa.Column('assembly_id', sa.Integer(), nullable=False),
     sa.Column('spring_id', sa.Integer(), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['assembly_id'], ['pump_assemblies.id'], ),
     sa.ForeignKeyConstraint(['spring_id'], ['seismic_springs.id'], ),
-    sa.PrimaryKeyConstraint('assembly_id', 'spring_id', 'id')
+    sa.PrimaryKeyConstraint('assembly_id', 'spring_id')
+    )
+    op.create_table('deal_companies',
+    sa.Column('deal_id', sa.Integer(), nullable=False),
+    sa.Column('company_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ),
+    sa.ForeignKeyConstraint(['deal_id'], ['deals.id'], ),
+    sa.PrimaryKeyConstraint('deal_id', 'company_id')
     )
     op.create_table('deal_contacts',
     sa.Column('deal_id', sa.Integer(), nullable=False),
@@ -224,29 +212,68 @@ def upgrade():
     sa.ForeignKeyConstraint(['deal_id'], ['deals.id'], ),
     sa.PrimaryKeyConstraint('deal_id', 'contact_id')
     )
-    op.create_table('quotes',
-    sa.Column('deal_id', sa.Integer(), nullable=False),
-    sa.Column('quote_number', sa.String(length=50), nullable=False),
-    sa.Column('amount', sa.Numeric(precision=10, scale=2), nullable=False),
-    sa.Column('valid_until', sa.DateTime(), nullable=False),
-    sa.Column('contact_id', sa.Integer(), nullable=False),
+    op.create_table('products',
+    sa.Column('sku', sa.String(length=80), nullable=False),
+    sa.Column('name', sa.String(length=200), nullable=False),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('unit_price', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('pump_assembly_id', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['contact_id'], ['contacts.id'], ),
-    sa.ForeignKeyConstraint(['deal_id'], ['deals.id'], ),
+    sa.ForeignKeyConstraint(['pump_assembly_id'], ['pump_assemblies.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('quote_number')
+    sa.UniqueConstraint('pump_assembly_id', name='uq_product_pump_assembly_id')
     )
-    op.create_table('quote_line_items',
+    with op.batch_alter_table('products', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_products_name'), ['name'], unique=False)
+        batch_op.create_index(batch_op.f('ix_products_sku'), ['sku'], unique=True)
+
+    op.create_table('quote_recipients',
+    sa.Column('deal_id', sa.Integer(), nullable=False),
+    sa.Column('company_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ),
+    sa.ForeignKeyConstraint(['deal_id'], ['deals.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('quotes',
+    sa.Column('recipient_id', sa.Integer(), nullable=False),
+    sa.Column('revision', sa.Integer(), nullable=False),
+    sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['recipient_id'], ['quote_recipients.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('quote_options',
     sa.Column('quote_id', sa.Integer(), nullable=False),
-    sa.Column('description', sa.String(length=255), nullable=False),
-    sa.Column('quantity', sa.Integer(), nullable=False),
-    sa.Column('unit_price', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('name', sa.String(length=120), nullable=False),
+    sa.Column('freight_charge', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['quote_id'], ['quotes.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('quote_line_items',
+    sa.Column('option_id', sa.Integer(), nullable=False),
+    sa.Column('product_id', sa.Integer(), nullable=True),
+    sa.Column('quantity', sa.Integer(), nullable=False),
+    sa.Column('unit_price', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('discount', sa.Numeric(precision=5, scale=2), nullable=False),
+    sa.Column('display_order', sa.Integer(), nullable=False),
+    sa.Column('custom_sku', sa.String(length=80), nullable=True),
+    sa.Column('custom_name', sa.String(length=200), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['option_id'], ['quote_options.id'], ),
+    sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
@@ -255,13 +282,17 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('quote_line_items')
+    op.drop_table('quote_options')
     op.drop_table('quotes')
-    op.drop_table('deal_contacts')
-    op.drop_table('assembly_springs')
-    op.drop_table('pump_ip_ratings')
-    with op.batch_alter_table('pump_assemblies', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('ix_pump_assemblies_assembly_number'))
+    op.drop_table('quote_recipients')
+    with op.batch_alter_table('products', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_products_sku'))
+        batch_op.drop_index(batch_op.f('ix_products_name'))
 
+    op.drop_table('products')
+    op.drop_table('deal_contacts')
+    op.drop_table('deal_companies')
+    op.drop_table('assembly_springs')
     op.drop_table('pump_assemblies')
     with op.batch_alter_table('price_list_items', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_price_list_items_component_type'))
@@ -275,22 +306,10 @@ def downgrade():
 
     op.drop_table('contacts')
     op.drop_table('users')
-    with op.batch_alter_table('seismic_springs', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('ix_seismic_springs_part_number'))
-
     op.drop_table('seismic_springs')
-    with op.batch_alter_table('rubber_mounts', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('ix_rubber_mounts_part_number'))
-
     op.drop_table('rubber_mounts')
-    with op.batch_alter_table('pumps', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('ix_pumps_part_number'))
-
     op.drop_table('pumps')
     op.drop_table('price_lists')
-    with op.batch_alter_table('inertia_bases', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('ix_inertia_bases_part_number'))
-
     op.drop_table('inertia_bases')
     with op.batch_alter_table('discount_rules', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_discount_rules_component_type'))

@@ -1,0 +1,39 @@
+{# /app/templates/deals/partials/deal_card.html #}
+<div class="deal-card
+    {# --- NEW: Add a class based on the deal type --- #}
+    {% if deal.deal_type.value == 'HVAC' %}
+        deal-card--hvac
+    {% elif deal.deal_type.value == 'Plumbing' %}
+        deal-card--plumbing
+    {% elif deal.deal_type.value == 'Hydronic Heating' %}
+        deal-card--hydronic-heating
+    {% endif %}"
+    {# --------------------------------------------- #}
+    draggable="true" data-deal-id="{{ deal.id }}">
+    
+    <a href="{{ url_for('deals.deal_details', deal_id=deal.id) }}" class="stretched-link" title="{{ deal.project_name }}"></a>
+    
+    <div>
+        <p class="deal-card-title mb-1">{{ deal.project_name | truncate(40) }}</p>
+        {% if deal.company %}
+        <p class="deal-card-company">{{ deal.company.name }}</p>
+        {% endif %}
+    </div>
+
+    <div class="deal-card-footer mt-3">
+        <div>
+            <span class="deal-card-amount">$ {{ '{:,.0f}'.format(deal.total_amount or 0) }}</span>
+        </div>
+        <div class="d-flex align-items-center">
+            <span class="mr-2" title="Close Date: {{ deal.close_date.strftime('%Y-%m-%d') if deal.close_date else 'N/A' }}">
+                <i class="fas fa-calendar-alt mr-1"></i>
+                {% if deal.close_date %}{{ deal.close_date.strftime('%b %d') }}{% else %}N/A{% endif %}
+            </span>
+            {% if deal.owner %}
+            <div class="deal-card-owner-avatar" title="Owner: {{ deal.owner.username }}">
+                {{ deal.owner.username[0]|upper if deal.owner.username else '?' }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

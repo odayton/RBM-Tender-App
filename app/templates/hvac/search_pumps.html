@@ -1,0 +1,102 @@
+{% extends "layouts/base.html" %}
+{% from "macros/_form_helpers.html" import render_field %}
+
+{% block title %}Pump Assembly Search{% endblock %}
+
+{% block page_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-0 d-inline-block">Pump Assembly Search</h1>
+    </div>
+    {% if deal_id %}
+    <a href="{{ url_for('deals.deal_details', deal_id=deal_id) }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Deal
+    </a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h4>Search Criteria</h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('hvac.search_pumps', option_id=option_id) if option_id else url_for('hvac.search_pumps') }}">
+            {{ form.csrf_token }}
+            <div class="row">
+                <div class="col-md-3">
+                    {{ render_field(form.flow) }}
+                </div>
+                <div class="col-md-3">
+                    {{ render_field(form.flow_units) }}
+                </div>
+                <div class="col-md-3">
+                    {{ render_field(form.head) }}
+                </div>
+                <div class="col-md-3">
+                    {{ render_field(form.head_units) }}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ render_field(form.pump_models, class="form-control select2") }}
+            </div>
+            <div class="text-right">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if results is not none %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h4>Search Results</h4>
+    </div>
+    <div class="card-body">
+        {% if results %}
+        <table class="table table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th>Assembly Name</th>
+                    <th>Pump Model</th>
+                    <th>Nominal Duty</th>
+                    {% if option_id %}<th class="text-right">Actions</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for assembly in results %}
+                <tr>
+                    <td>{{ assembly.assembly_name }}</td>
+                    <td>{{ assembly.pump.pump_model }}</td>
+                    <td>{{ assembly.pump.nominal_flow }} L/s @ {{ assembly.pump.nominal_head }} kPa</td>
+                    {% if option_id %}
+                    <td class="text-right">
+                        <button class="btn btn-sm btn-success add-assembly-btn" 
+                                data-assembly-id="{{ assembly.id }}"
+                                data-option-id="{{ option_id }}">
+                            <i class="fas fa-plus"></i> Add to Option
+                        </button>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-secondary">No matching pump assemblies found. Try broadening your search criteria.</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/pages/hvac_search.js') }}"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.select2').select2();
+    });
+</script>
+{% endblock %}

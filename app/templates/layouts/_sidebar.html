@@ -1,0 +1,50 @@
+<div class="sidebar-container">
+    <div class="sidebar-header">
+        <a href="{{ url_for('main.home') }}" class="sidebar-brand">RBM Tender App</a>
+    </div>
+    <ul class="sidebar-nav">
+        <li class="nav-item">
+            <a href="{{ url_for('main.home') }}" class="nav-link">
+                <i class="nav-icon fas fa-home"></i>
+                Home
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('deals.list_deals') }}" class="nav-link">
+                <i class="nav-icon fas fa-clipboard-list"></i>
+                Deals
+            </a>
+        </li>
+        <li class="nav-item nav-item-group">
+            <span class="nav-group-title">Calculators & Tools</span>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('hvac.search_pumps') }}" class="nav-link">
+                <i class="nav-icon fas fa-wind"></i>
+                HVAC
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('plumbing.index') }}" class="nav-link">
+                <i class="nav-icon fas fa-faucet"></i>
+                Plumbing
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('hydronic_heating.index') }}" class="nav-link">
+                <i class="nav-icon fas fa-temperature-high"></i>
+                Hydronic Heating
+            </a>
+        </li>
+
+        <li class="nav-item nav-item-group">
+            <span class="nav-group-title">Admin</span>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('admin.dashboard') }}" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                Admin Dashboard
+            </a>
+        </li>
+    </ul>
+</div>

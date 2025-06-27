@@ -74,13 +74,17 @@ class DevelopmentConfig(Config):
     """Development-specific configuration."""
     DEBUG = True
     LOG_LEVEL = 'DEBUG'
+    
+    # --- THIS IS THE UPDATED LINE ---
+    # We are changing 'new_dev.db' to 'rbm_tender_app.db'
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DEV_DATABASE_URL', 
-        f"sqlite:///{Config.INSTANCE_PATH / 'dev.db'}"
+        f"sqlite:///{Config.INSTANCE_PATH / 'rbm_tender_app.db'}"
     )
+    # ------------------------------------
+
     # Use a simpler cache for development
     CACHE_TYPE = 'SimpleCache'
-
 
 class ProductionConfig(Config):
     """Production-specific configuration."""

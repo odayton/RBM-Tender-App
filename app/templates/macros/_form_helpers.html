@@ -1,0 +1,16 @@
+{# /app/templates/macros/_form_helpers.html #}
+
+{% macro render_field(field) %}
+  <div class="form-group">
+    {{ field.label(class="form-control-label") }}
+    {{ field(class="form-control", **kwargs) }}
+    
+    {% if field.errors %}
+      <div class="invalid-feedback d-block">
+        {% for error in field.errors %}
+          <span>{{ error }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% endmacro %}

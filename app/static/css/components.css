@@ -1,0 +1,160 @@
+/* /static/css/components.css */
+
+/* --- Sidebar Components --- */
+.sidebar-header {
+    padding: 1.15rem 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    background-color: rgba(0,0,0,0.1);
+}
+
+.sidebar-brand {
+    color: var(--text-light);
+}
+.sidebar-brand:hover {
+    color: var(--text-light);
+    text-decoration: none;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.sidebar-nav .nav-item {
+    display: block;
+}
+
+.sidebar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-light);
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-nav .nav-link:hover {
+    background-color: var(--link-hover);
+    color: var(--text-light);
+    text-decoration: none;
+}
+
+.sidebar-nav .nav-icon {
+    width: 20px;
+    margin-right: 1rem;
+    text-align: center;
+}
+
+.sidebar-nav .nav-item-group {
+    padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.sidebar-nav .nav-group-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-light);
+    opacity: 0.7;
+    text-transform: uppercase;
+}
+
+/* --- Cards / Inset Boxes --- */
+.card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--bg-dark-inset);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.card-title {
+    margin-bottom: 0.75rem;
+}
+
+/* --- Bootstrap Alert Overrides for Dark Theme --- */
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+.alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+
+/* --- NEW: Dark Theme Modal Styles --- */
+.modal-content {
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+}
+
+.modal-header .close {
+    color: var(--text-light);
+    text-shadow: none;
+    opacity: 0.8;
+}
+.modal-header .close:hover {
+    opacity: 1;
+}
+
+/* Style form elements inside the dark modal */
+#createDealModal .form-control {
+    background-color: var(--bg-dark-inset);
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
+}
+
+#createDealModal .form-control:focus {
+    background-color: var(--bg-dark-inset);
+    color: var(--text-light);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(55, 122, 158, 0.25);
+}
+
+/* Style the readonly inputs used for search results */
+#createDealModal .form-control[readonly] {
+    background-color: #2d2d2f; /* Even darker to indicate readonly */
+}
+
+#managePartiesModal .list-group-item {
+    background-color: var(--bg-dark-inset);
+    color: var(--text-light);
+    border-color: var(--border-color);
+}
+
+#managePartiesModal .list-group-item.text-secondary {
+    color: var(--text-secondary) !important;
+}
