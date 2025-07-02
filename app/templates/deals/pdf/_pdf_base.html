@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quote #{{ deal.id }} - Rev {{ revision.revision }}</title>
+    <style>
+      {{ css_content|safe }}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="company-details">
+                {% if logo_base64 %}
+                <img src="data:image/png;base64,{{ logo_base64 }}" alt="Company Logo" class="logo" style="width:150px;">
+                {% endif %}
+                <h1>RBM-Tender-App Solutions</h1>
+                <p>123 Industrial Ave<br>
+                    Hemmant, QLD 4174<br>
+                    Australia</p>
+            </div>
+            <div class="quote-details">
+                <h2>Quotation</h2>
+                <table>
+                    <tr>
+                        <th>Quote #</th>
+                        <td>{{ deal.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date</th>
+                        <td>{{ revision.created_at.strftime('%d-%m-%Y') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Revision</th>
+                        <td>{{ revision.revision }}</td>
+                    </tr>
+                    <tr>
+                        <th>Project</th>
+                        <td>{{ deal.project_name }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="customer-details">
+            <h3>To:</h3>
+            <p>
+                {% if revision.recipient.company %}
+                    {{ revision.recipient.company.name }}<br>
+                    {% if deal.contacts and deal.contacts[0] %}
+                      Attn: {{ deal.contacts[0].full_name }}<br>
+                    {% endif %}
+                    {{ revision.recipient.company.address or 'No address provided' }}
+                {% else %}
+                    No Company Assigned
+                {% endif %}
+            </p>
+        </div>
+
+        {% block quote_body %}
+        {% endblock %}
+
+        <div class="totals-section">
+            <table class="totals-table">
+                <tbody>
+                    <tr>
+                        <th>Subtotal:</th>
+                        <td>${{ "%.2f"|format(option.total_price) }}</td>
+                    </tr>
+                    <tr>
+                        <th>GST (10%):</th>
+                        <td>${{ "%.2f"|format(option.gst) }}</td>
+                    </tr>
+                    <tr class="grand-total">
+                        <th>Total (inc. GST):</th>
+                        <td>${{ "%.2f"|format(option.grand_total) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer>
+        <h3>Terms & Conditions</h3>
+        <p class="terms">
+            1. Prices are valid for 30 days.<br>
+            2. This quotation is based on the information and drawings provided. Any changes may result in price adjustments.<br>
+            3. All goods remain the property of RBM-Tender-App Solutions until paid in full.
+        </p>
+        <div class="footer-info">
+            RBM-Tender-App Solutions | ABN: 12 345 678 901 | sales@rbm-tender-app.com
+        </div>
+    </footer>
+
+</body>
+</html>

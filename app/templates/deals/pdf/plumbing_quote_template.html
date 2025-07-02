@@ -1,0 +1,35 @@
+{% extends "deals/pdf/_pdf_base.html" %}
+
+{% block quote_body %}
+<table class="line-items">
+    <thead>
+        <tr>
+            <th>Tag</th>
+            <th>System</th>
+            <th>Description</th>
+            <th>Material</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Total Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for option in revision.options %}
+            <tr class="option-header">
+                <td colspan="7">{{ option.name }}</td>
+            </tr>
+            {% for item in option.line_items %}
+            <tr>
+                <td>{{ item.tag or '-' }}</td>
+                <td>{{ item.pump_details.get('system_type', '-') if item.pump_details else '-' }}</td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.pump_details.get('material', '-') if item.pump_details else '-' }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ "%.2f"|format(item.unit_price) }}</td>
+                <td>${{ "%.2f"|format(item.total_price) }}</td>
+            </tr>
+            {% endfor %}
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

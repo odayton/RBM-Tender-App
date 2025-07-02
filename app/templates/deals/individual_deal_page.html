@@ -19,8 +19,6 @@
                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#editDealModal">
                         Edit Deal Details
                     </button>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Export as PDF</a>
                 </div>
             </div>
         </div>
@@ -124,7 +122,7 @@
                                                 <button class="btn btn-sm btn-warning delete-option-btn" data-toggle="modal" data-target="#deleteOptionModal" data-quote-id="{{ quote.id }}"><i class="fas fa-minus-circle"></i> Delete Option</button>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="accordion" id="option-accordion-{{ quote.id }}">
                                             {% for option in quote.options %}
                                                 <div class="card option-card mb-3">
@@ -142,8 +140,8 @@
                                                         </div>
                                                     </div>
                                                     <div id="option-collapse-{{option.id}}" class="collapse show" aria-labelledby="option-heading-{{option.id}}">
-                                                        <div class="card-body">
-                                                            <table class="table table-sm table-hover line-items-table resizable" data-option-id="{{ option.id }}">
+                                                        <div class="card-body p-0">
+                                                            <table class="table table-sm table-hover line-items-table resizable mb-0" data-option-id="{{ option.id }}">
                                                                 <thead class="thead-light">
                                                                     <tr>
                                                                         <th style="width: 20px;"></th>
@@ -195,6 +193,9 @@
                                                                         <strong>Total Price:</strong>
                                                                         <strong class="total-value">$0.00</strong>
                                                                     </div>
+                                                                    <a href="{{ url_for('deals.export_quote_pdf', option_id=option.id) }}" class="btn btn-success btn-block mt-3" target="_blank">
+                                                                        <i class="fas fa-file-pdf mr-1"></i> Create Quote for this Option
+                                                                    </a>
                                                                 </div>
                                                             </div>
                                                         </div>
