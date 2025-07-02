@@ -326,3 +326,47 @@
 .option-totals .total-value {
     color: var(--primary-color);
 }
+
+/* =============================================
+   Quote Revision Footer Styles
+   ============================================= */
+
+.quote-revision-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 15px;
+    margin-top: -1px; /* Overlap the border with the card's bottom */
+    background-color: #f7f9fc;
+    border-top: 1px solid #dee2e6;
+    border-radius: 0 0 5px 5px; /* Match card rounding */
+}
+
+.revision-total-summary {
+    text-align: right;
+}
+
+.revision-total-summary h4 {
+    margin: 0 0 10px 0;
+    color: #555;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.revision-total-summary p {
+    margin: 4px 0;
+    font-size: 1em;
+}
+
+.revision-total-summary .grand-total {
+    font-weight: bold;
+    font-size: 1.4em;
+    color: #28a745;
+    margin-top: 8px;
+}
+
+.revision-footer-actions .button {
+    font-size: 1.1em;
+    padding: 10px 25px;
+    font-weight: 600;
+}

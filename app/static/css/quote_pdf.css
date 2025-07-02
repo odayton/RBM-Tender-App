@@ -1,0 +1,161 @@
+/* /static/css/quote_pdf.css */
+/* Styles specifically for the generated PDF quote */
+
+/* --- Base & Typography --- */
+body {
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 1.5;
+    background-color: #ffffff; /* PDFs should have a white background */
+    color: #333333; /* Dark grey for main text is easier to read than pure black */
+    margin: 0;
+}
+
+h1, h2, h3, h4, th {
+    color: #000000;
+}
+
+h2 {
+    font-size: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+h3 {
+    font-size: 1.2em;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid #cccccc;
+    padding-bottom: 5px;
+}
+
+/* --- Header Section --- */
+header {
+    margin-bottom: 30px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.company-details h1 {
+    margin: 0;
+    font-size: 1.8em;
+    color: #000;
+}
+
+.company-details p {
+    margin: 0;
+    font-size: 1em;
+}
+
+.quote-details {
+    text-align: right;
+}
+
+.quote-details h2 {
+    margin: 0 0 10px 0;
+}
+
+.quote-details table {
+    width: auto;
+    border: none;
+}
+
+.quote-details th, .quote-details td {
+    text-align: right;
+    padding: 2px 0;
+    border: none;
+}
+
+.quote-details th {
+    padding-right: 15px;
+    color: #555;
+}
+
+/* --- Customer & Main Content --- */
+main {
+    padding: 0 5px; /* Add some slight padding */
+}
+
+.customer-details {
+    margin-bottom: 30px;
+}
+
+/* --- Line Items Table --- */
+.line-items, .line-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 11px; /* Slightly smaller for tables */
+}
+
+.line-items th, .line-items-table th,
+.line-items td, .line-items-table td {
+    border: 1px solid #cccccc;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.line-items thead th, .line-items-table thead th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #000;
+}
+
+/* For numeric columns */
+.line-items td:nth-child(3), .line-items td:nth-child(4), .line-items td:nth-child(5),
+.line-items td:nth-child(6), .line-items td:nth-child(7), .line-items td:nth-child(8) {
+    text-align: right;
+}
+
+.option-header td {
+    background-color: #e9ecef;
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #000;
+}
+
+/* --- Totals Section --- */
+.totals-section {
+    margin-top: 30px;
+    page-break-inside: avoid; /* Prevent this section from splitting across pages */
+}
+
+.totals-table {
+    width: 40%;
+    margin-left: 60%; /* Push to the right */
+    border: none;
+}
+
+.totals-table th, .totals-table td {
+    border: none;
+    padding: 5px;
+    text-align: right;
+}
+
+.totals-table .grand-total th,
+.totals-table .grand-total td {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #000;
+    border-top: 2px solid #000000;
+    padding-top: 8px;
+}
+
+/* --- Footer --- */
+footer {
+    border-top: 1px solid #cccccc;
+    padding: 10px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+footer .terms {
+    text-align: left;
+    font-size: 0.8em;
+    color: #555;
+    margin-bottom: 10px;
+}

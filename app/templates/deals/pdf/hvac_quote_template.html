@@ -1,0 +1,40 @@
+{# app/templates/deals/pdf/hvac_quote_template.html #}
+{% extends "deals/pdf/_pdf_base.html" %}
+
+{% block quote_body %}
+<table class="line-items">
+    <thead>
+        <tr>
+            <th>Tag</th>
+            <th>Description</th>
+            <th>Air Flow (l/s)</th>
+            <th>ESP (Pa)</th>
+            <th>Motor (kW)</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Total Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="option-header">
+            <td colspan="8">Option: {{ option.name }}</td>
+        </tr>
+        {% for item in option.line_items %}
+        <tr>
+            <td>{{ item.tag or '-' }}</td>
+            <td>{{ item.description }}</td>
+            <td>{{ item.pump_details.get('flow_rate', '-') if item.pump_details else '-' }}</td>
+            <td>{{ item.pump_details.get('head', '-') if item.pump_details else '-' }}</td>
+            <td>{{ item.pump_details.get('motor_power', '-') if item.pump_details else '-' }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ "%.2f"|format(item.unit_price) }}</td>
+            <td>${{ "%.2f"|format(item.total_price) }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="8" class="text-center" style="padding: 20px;">This option has no line items.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

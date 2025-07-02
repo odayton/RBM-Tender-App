@@ -158,3 +158,16 @@
 #managePartiesModal .list-group-item.text-secondary {
     color: var(--text-secondary) !important;
 }
+
+/* Style the left border (the "strip") based on the deal type */
+.deal-card--hvac {
+    border-left-color: var(--deal-type-hvac);
+}
+
+.deal-card--plumbing {
+    border-left-color: var(--deal-type-plumbing);
+}
+
+.deal-card--hydronic-heating {
+    border-left-color: var(--deal-type-heating);
+}
