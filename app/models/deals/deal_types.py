@@ -14,8 +14,8 @@ class AustralianState(enum.Enum):
 class DealType(enum.Enum):
     """Types of deals."""
     HVAC = "HVAC"
-    HYDRAULIC = "Hydraulic"
-    HYDRONIC = "Hydronic"
+    PLUMBING = "Plumbing"
+    HYDRONIC_HEATING = "Hydronic Heating"
     DATA_CENTRES = "Data Centres"
     MERCHANT = "Merchant"
     WHOLESALER = "Wholesaler"

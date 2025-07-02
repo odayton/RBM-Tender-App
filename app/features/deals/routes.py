@@ -94,16 +94,54 @@ def deal_details(deal_id):
         update_deal_form=UpdateDealForm(obj=deal)
     )
 
+@deals_bp.route('/search/modal', methods=['GET'])
+def search_for_modal():
+    """
+    Handles search requests from the deal creation modal for contacts and companies.
+    """
+    search_type = request.args.get('type')
+    query = request.args.get('q', '')
+    results = []
+
+    if not query or len(query) < 2:
+        return jsonify([])
+
+    if search_type == 'contact':
+        # Search for contacts by name or email
+        contacts = Contact.query.join(Company).filter(
+            db.or_(
+                Contact.name.ilike(f'%{query}%'),
+                Contact.email.ilike(f'%{query}%')
+            )
+        ).limit(10).all()
+        # Format results for the frontend, using the CORRECT attribute 'company_name'
+        results = [{'id': c.id, 'text': f"{c.name} ({c.company.company_name})"} for c in contacts]
+
+    elif search_type == 'company':
+        # Search for companies by name, using the CORRECT attribute 'company_name'
+        companies = Company.query.filter(
+            Company.company_name.ilike(f'%{query}%')
+        ).limit(10).all()
+        # Format results for the frontend, using the CORRECT attribute 'company_name'
+        results = [{'id': comp.id, 'text': comp.company_name} for comp in companies]
+
+    return jsonify(results)
+
 @deals_bp.route('/create', methods=['POST'])
 def create_deal():
     """Creates a new deal from the form on the main deals page."""
     form = DealForm()
     if form.validate_on_submit():
         try:
-            owner = User.query.filter_by(username="Owen").first()
+            # --- MODIFIED SECTION ---
+            # Don't rely on a hardcoded user. Just find the first user.
+            # A better long-term solution is to use the logged-in user.
+            owner = User.query.first()
             if not owner:
-                flash('Default owner "Owen" not found.', 'error')
+                # This will only fail if the users table is completely empty
+                flash('No users found in the database to assign as owner.', 'error')
                 return redirect(url_for('deals.list_deals'))
+            # --- END MODIFIED SECTION ---
 
             new_deal = Deal(
                 project_name=form.project_name.data,
@@ -114,6 +152,7 @@ def create_deal():
             )
             db.session.add(new_deal)
             
+            # This logic remains the same
             if form.company_id.data:
                 company = Company.query.get(form.company_id.data)
                 if company:
@@ -135,6 +174,7 @@ def create_deal():
 
             db.session.commit()
             flash('Deal created successfully!', 'success')
+            # On success, we go to the new deal's page
             return redirect(url_for('deals.deal_details', deal_id=new_deal.id))
 
         except Exception as e:
@@ -143,11 +183,13 @@ def create_deal():
             flash(f'An error occurred: {e}', 'error')
             return redirect(url_for('deals.list_deals'))
     else:
+        # If validation fails, show the specific errors
         for field, errors in form.errors.items():
             for error in errors:
-                flash(f"Error in {getattr(form, field).label.text}: {error}", 'error')
+                # Use getattr to get the field's label for a more user-friendly message
+                flash(f"Error in field '{getattr(form, field).label.text}': {error}", 'error')
         return redirect(url_for('deals.list_deals'))
-
+    
 @deals_bp.route('/update/<int:deal_id>', methods=['POST'])
 def update_deal(deal_id):
     """Updates the core details of an existing deal."""
@@ -195,7 +237,7 @@ def add_revision(deal_id):
             if not source_quote_id: flash('Must select a source quote.', 'error'); return redirect(url_for('deals.deal_details', deal_id=deal_id))
             _clone_quote(Quote.query.get_or_404(source_quote_id), recipient, next_rev)
         db.session.commit()
-        flash(f"Created Revision #{next_rev} for {recipient.company.name}.", 'success')
+        flash(f"Created Revision #{next_rev} for {recipient.company.company_name}.", 'success')
     except Exception as e:
         db.session.rollback(); logger.error(f"Error creating revision: {e}"); flash(f"An error occurred: {e}", "error")
     return redirect(url_for('deals.deal_details', deal_id=deal_id))
@@ -263,9 +305,9 @@ def add_party_to_deal(deal_id):
             deal.companies.append(company)
             recipient = QuoteRecipient(deal_id=deal.id, company_id=company.id)
             db.session.add(recipient)
-            flash(f"Company '{company.name}' added to deal.", "success")
+            flash(f"Company '{company.company_name}' added to deal.", "success")
         else:
-            flash(f"Company '{company.name}' is already associated with this deal.", "info")
+            flash(f"Company '{company.company_name}' is already associated with this deal.", "info")
     if contact_id:
         contact = Contact.query.get_or_404(contact_id)
         if contact not in deal.contacts:
@@ -292,7 +334,7 @@ def remove_party_from_deal(deal_id):
         if company in deal.companies:
             QuoteRecipient.query.filter_by(deal_id=deal.id, company_id=company.id).delete()
             deal.companies.remove(company)
-            flash(f"Company '{company.name}' and its quotes have been removed from this deal.", "success")
+            flash(f"Company '{company.company_name}' and its quotes have been removed from this deal.", "success")
     if contact_id:
         contact = Contact.query.get_or_404(contact_id)
         if contact in deal.contacts:
