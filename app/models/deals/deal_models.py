@@ -1,5 +1,6 @@
 # app/models/deals/deal_models.py
 
+
 from sqlalchemy import Column, String, Integer, ForeignKey, Numeric, Text, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -8,8 +9,15 @@ from decimal import Decimal
 from app.models.base_model import BaseModel
 from app.models.deals.deal_associations import deal_contacts, deal_companies
 from app.models.deals.deal_types import DealStage, DealType, AustralianState
-from app.models.products.product_model import Product
 from app.extensions import db
+
+class Discount(BaseModel):
+    __tablename__ = 'discounts'
+    # --- CHANGE THIS LINE ---
+    # The code should be unique, but not a primary key.
+    code = Column(String(10), unique=True, nullable=False)
+    percentage = Column(Numeric(5, 2), nullable=False)
+    products = relationship("Product", back_populates="discount")
 
 class Deal(BaseModel):
     __tablename__ = 'deals'
@@ -83,6 +91,8 @@ class QuoteOption(BaseModel):
     def grand_total(self):
         """Calculates the grand total for the option including GST."""
         return self.total_price + self.gst
+    
+
 
 class QuoteLineItem(BaseModel):
     """Model for individual line items, now with discount and ordering."""

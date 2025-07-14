@@ -1,40 +1,116 @@
 document.addEventListener('DOMContentLoaded', function() {
-
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
-    // --- UNIVERSAL INLINE EDITING LOGIC ---
+    // --- PRODUCT SEARCH LOGIC ---
+    const searchInput = document.getElementById('productSearchInput');
+    const searchResultsContainer = document.getElementById('productSearchResults');
+    const addItemForm = document.getElementById('addItemForm');
+    let searchTimeout;
+
+    if (searchInput && searchResultsContainer && addItemForm) {
+        searchInput.addEventListener('input', function () {
+            const query = this.value.trim();
+            clearTimeout(searchTimeout);
+
+            if (query.length < 2) {
+                searchResultsContainer.innerHTML = '';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/deals/api/products/search?q=${query}`)
+                    .then(response => response.json())
+                    .then(data => displaySearchResults(data))
+                    .catch(error => console.error('Error fetching products:', error));
+            }, 300);
+        });
+    }
+
+    function displaySearchResults(products) {
+        searchResultsContainer.innerHTML = '';
+        if (products.length === 0) {
+            searchResultsContainer.innerHTML = '<div class="search-result-item p-2 text-muted">No products found</div>';
+        } else {
+            products.forEach(product => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item p-2 border-bottom';
+                item.style.cursor = 'pointer';
+                item.textContent = `${product.sku} - ${product.name}`;
+                
+                item.dataset.productId = product.id;
+                item.dataset.sku = product.sku;
+                item.dataset.name = product.name;
+                item.dataset.unitPrice = product.unit_price;
+                item.dataset.discount = product.discount || '0';
+
+                item.addEventListener('click', function () {
+                    populateAddItemForm(this.dataset);
+                    searchResultsContainer.innerHTML = '';
+                    if (searchInput) searchInput.value = '';
+                });
+                searchResultsContainer.appendChild(item);
+            });
+        }
+    }
+
+    function populateAddItemForm(dataset) {
+        addItemForm.querySelector('#item_sku_display').value = dataset.sku;
+        addItemForm.querySelector('#item_name_display').value = dataset.name;
+        
+        addItemForm.querySelector('input[name="product_id"]').value = dataset.productId;
+        addItemForm.querySelector('textarea[name="notes"]').value = dataset.name;
+        addItemForm.querySelector('input[name="unit_price"]').value = dataset.unitPrice;
+        addItemForm.querySelector('input[name="discount"]').value = dataset.discount;
+        addItemForm.querySelector('input[name="quantity"]').value = 1;
+    }
+
+    document.addEventListener('click', function (e) {
+        if (searchResultsContainer && !searchResultsContainer.contains(e.target) && e.target !== searchInput) {
+            searchResultsContainer.innerHTML = '';
+        }
+    });
+
+    // --- MODAL & FORM HANDLING LOGIC ---
+    // This is the key fix: Set the form's action URL when the modal is opened.
+    $('#addItemModal').on('show.bs.modal', function(event) {
+        const button = $(event.relatedTarget);
+        const optionId = button.data('option-id');
+        const actionUrl = `/deals/line_item/add/${optionId}`;
+        $('#addItemForm').attr('action', actionUrl);
+
+        // Clear the form when opening the modal
+        $('#addItemForm')[0].reset();
+        $('#item_sku_display').val('');
+        $('#item_name_display').val('');
+        $('#productSearchResults').empty();
+    });
+
+    // --- YOUR EXISTING INLINE EDITING, DRAG-DROP, AND OTHER MODAL LOGIC ---
+    // (This part of your code is correct and should remain)
     function makeEditable(element) {
         if (element.querySelector('input')) return;
-
         const originalText = element.textContent.trim();
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'form-control form-control-sm';
         input.value = originalText;
-        
         element.innerHTML = '';
         element.appendChild(input);
         input.focus();
-
         function saveChanges() {
             const newValue = input.value;
             element.textContent = originalText;
-
             if (newValue === originalText) return;
-
             const model = element.dataset.model;
             const id = element.dataset.id;
             const field = element.dataset.field;
             let apiUrl = '';
-
             if (model === 'line_item') {
                 apiUrl = `/deals/api/line-item/${id}/update-field`;
             } else if (model === 'quote_option') {
                 apiUrl = `/deals/api/quote-option/${id}/update-field`;
             }
-
             if (!apiUrl) return;
-
             fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
@@ -44,22 +120,13 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     element.textContent = newValue;
-                    
-                    // --- THIS IS THE FIX ---
-                    // If a custom name was just edited, update the SKU cell in the UI
                     if (field === 'custom_name' && data.newState) {
                         const row = element.closest('tr');
                         const skuCell = row.querySelector('[data-field="sku"]');
-                        if (skuCell) {
-                            skuCell.textContent = data.newState.sku;
-                        }
+                        if (skuCell) skuCell.textContent = data.newState.sku;
                     }
-                    // --- END OF FIX ---
-
                     const optionCard = element.closest('.option-card');
-                    if(optionCard) {
-                        calculateTotalsForOption(optionCard);
-                    }
+                    if(optionCard) calculateTotalsForOption(optionCard);
                 } else {
                     alert('Error: ' + data.message);
                     element.textContent = originalText;
@@ -70,20 +137,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 element.textContent = originalText;
             });
         }
-
         input.addEventListener('blur', saveChanges);
         input.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') input.blur();
             if (e.key === 'Escape') element.textContent = originalText;
         });
     }
-
-    document.querySelectorAll('.editable').forEach(el => el.addEventListener('click', function(e) {
+    document.querySelectorAll('.editable').forEach(el => el.addEventListener('click', (e) => {
         e.stopPropagation();
-        makeEditable(this);
+        makeEditable(el);
     }));
 
-    // --- TOTALS & DRAG-DROP LOGIC ---
     function calculateTotalsForOption(optionCard) {
         let subtotal = 0;
         optionCard.querySelectorAll('.line-items-table tbody tr').forEach(row => {
@@ -117,23 +181,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- MODAL HANDLING ---
     $('#addRevisionModal').on('show.bs.modal', function(e) {
         const button = e.relatedTarget;
         $(this).find('#modalRecipientName').text(button.dataset.recipientName);
         $(this).find('#modalRecipientId').val(button.dataset.recipientId);
     });
-
     $('input[name="creation_method"]').on('change', function() {
         $('#cloneSourceWrapper').slideToggle(this.value === 'clone_other');
     });
-
     $('#addOptionModal').on('show.bs.modal', function(event) {
         const button = $(event.relatedTarget);
         const quoteId = button.data('quote-id');
         $('#addOptionForm').attr('action', `/deals/quote_option/add/${quoteId}`);
     });
-
     $('#deleteRevisionModal').on('show.bs.modal', function(e) {
         const recipientId = e.relatedTarget.dataset.recipientId;
         const select = $('#revision-to-delete-select');
@@ -143,11 +203,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         select.trigger('change');
     });
-
     $('#revision-to-delete-select').on('change', function() {
         $('#deleteRevisionForm').attr('action', `/deals/revision/delete/${this.value}`);
     });
-
     $('#deleteOptionModal').on('show.bs.modal', function(e) {
         const quoteId = e.relatedTarget.dataset.quoteId;
         const select = $('#option-to-delete-select');
@@ -159,22 +217,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         select.trigger('change');
     });
-    
     $('#option-to-delete-select').on('change', function() {
         $('#deleteOptionForm').attr('action', `/deals/quote_option/delete/${this.value}`);
     });
-
-    // --- GENERIC CONFIRMATION FOR DELETE FORMS ---
     $('.delete-item-form, #deleteRevisionForm, #deleteOptionForm').on('submit', function(e) {
         if (!confirm('Are you sure you want to permanently delete this?')) {
             e.preventDefault();
         }
     });
-
-    // --- MASTER EXPAND/COLLAPSE & TAB ACTIVATION ---
     $('#expand-all-btn').on('click', () => $('#quote-streams-accordion .collapse').collapse('show'));
     $('#collapse-all-btn').on('click', () => $('#quote-streams-accordion .collapse').collapse('hide'));
-    
     $('.quote-stream-panel').each(function() {
         $(this).find('.nav-tabs .nav-link').first().tab('show');
     });

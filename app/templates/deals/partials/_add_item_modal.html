@@ -1,7 +1,10 @@
+{# app/templates/deals/partials/_add_item_modal.html #}
+
 <div class="modal fade" id="addItemModal" tabindex="-1" role="dialog" aria-labelledby="addItemModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-      <form id="addItemForm" method="POST">
+      {# --- THIS FORM ID IS CRUCIAL --- #}
+      <form id="addItemForm" method="POST" action="">
         <div class="modal-header">
           <h5 class="modal-title" id="addItemModalLabel">Add New Line Item</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -13,24 +16,27 @@
 
           <div class="form-group">
               <label for="productSearchInput">Product Search</label>
+              {# This is the search input the JavaScript will use #}
               <input type="text" id="productSearchInput" class="form-control" placeholder="Start typing to search for a product...">
-              <div id="productSearchResults" class="mt-2"></div>
+              {# This is where the results will appear #}
+              <div id="productSearchResults" class="mt-2 border rounded"></div>
           </div>
           
           <hr>
 
+          {# These fields are for display only and will be populated by JavaScript #}
           <div class="row">
             <div class="col-md-4">
-                <div class="form-group">
-                    <label for="item_sku">SKU</label>
-                    <input type="text" id="item_sku" class="form-control" disabled>
-                </div>
+              <div class="form-group">
+                  <label for="item_sku_display">SKU</label>
+                  <input type="text" id="item_sku_display" class="form-control" disabled>
+              </div>
             </div>
             <div class="col-md-8">
-                <div class="form-group">
-                    <label for="item_name">Name</label>
-                    <input type="text" id="item_name" class="form-control" disabled>
-                </div>
+              <div class="form-group">
+                  <label for="item_name_display">Name</label>
+                  <input type="text" id="item_name_display" class="form-control" disabled>
+              </div>
             </div>
           </div>
           
@@ -38,13 +44,13 @@
 
           <div class="row">
             <div class="col-md-4">
-                {{ render_field(add_item_form.quantity) }}
+              {{ render_field(add_item_form.quantity) }}
             </div>
             <div class="col-md-4">
-                {{ render_field(add_item_form.unit_price) }}
+              {{ render_field(add_item_form.unit_price) }}
             </div>
             <div class="col-md-4">
-                {{ render_field(add_item_form.discount) }}
+              {{ render_field(add_item_form.discount) }}
             </div>
           </div>
 

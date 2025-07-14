@@ -1,3 +1,5 @@
+# app/features/deals/routes.py
+
 from flask import (
     Blueprint, render_template, request, jsonify, redirect, url_for, flash, make_response, current_app
 )
@@ -6,6 +8,7 @@ from decimal import Decimal
 import asyncio
 import os
 from pyppeteer import launch
+from sqlalchemy import or_
 
 from app.models import (
     Deal, User, Quote, QuoteLineItem, DealStage, AustralianState, DealType,
@@ -107,22 +110,18 @@ def search_for_modal():
         return jsonify([])
 
     if search_type == 'contact':
-        # Search for contacts by name or email
         contacts = Contact.query.join(Company).filter(
             db.or_(
                 Contact.name.ilike(f'%{query}%'),
                 Contact.email.ilike(f'%{query}%')
             )
         ).limit(10).all()
-        # Format results for the frontend, using the CORRECT attribute 'company_name'
         results = [{'id': c.id, 'text': f"{c.name} ({c.company.company_name})"} for c in contacts]
 
     elif search_type == 'company':
-        # Search for companies by name, using the CORRECT attribute 'company_name'
         companies = Company.query.filter(
             Company.company_name.ilike(f'%{query}%')
         ).limit(10).all()
-        # Format results for the frontend, using the CORRECT attribute 'company_name'
         results = [{'id': comp.id, 'text': comp.company_name} for comp in companies]
 
     return jsonify(results)
@@ -133,15 +132,10 @@ def create_deal():
     form = DealForm()
     if form.validate_on_submit():
         try:
-            # --- MODIFIED SECTION ---
-            # Don't rely on a hardcoded user. Just find the first user.
-            # A better long-term solution is to use the logged-in user.
             owner = User.query.first()
             if not owner:
-                # This will only fail if the users table is completely empty
                 flash('No users found in the database to assign as owner.', 'error')
                 return redirect(url_for('deals.list_deals'))
-            # --- END MODIFIED SECTION ---
 
             new_deal = Deal(
                 project_name=form.project_name.data,
@@ -152,7 +146,6 @@ def create_deal():
             )
             db.session.add(new_deal)
             
-            # This logic remains the same
             if form.company_id.data:
                 company = Company.query.get(form.company_id.data)
                 if company:
@@ -174,7 +167,6 @@ def create_deal():
 
             db.session.commit()
             flash('Deal created successfully!', 'success')
-            # On success, we go to the new deal's page
             return redirect(url_for('deals.deal_details', deal_id=new_deal.id))
 
         except Exception as e:
@@ -183,10 +175,8 @@ def create_deal():
             flash(f'An error occurred: {e}', 'error')
             return redirect(url_for('deals.list_deals'))
     else:
-        # If validation fails, show the specific errors
         for field, errors in form.errors.items():
             for error in errors:
-                # Use getattr to get the field's label for a more user-friendly message
                 flash(f"Error in field '{getattr(form, field).label.text}': {error}", 'error')
         return redirect(url_for('deals.list_deals'))
     
@@ -270,13 +260,19 @@ def add_line_item(option_id):
     option = QuoteOption.query.get_or_404(option_id)
     if form.validate_on_submit():
         max_order = db.session.query(db.func.max(QuoteLineItem.display_order)).filter_by(option_id=option.id).scalar() or 0
+        
+        product = Product.query.get(form.product_id.data) if form.product_id.data else None
+        discount_percentage = form.discount.data
+        if product and product.discount:
+            discount_percentage = product.discount.percentage
+
         new_item = QuoteLineItem(
             option_id=option.id,
             product_id=form.product_id.data or None,
             notes=form.notes.data,
             quantity=form.quantity.data,
             unit_price=form.unit_price.data,
-            discount=form.discount.data,
+            discount=discount_percentage,
             display_order=max_order + 1
         )
         db.session.add(new_item)
@@ -348,12 +344,22 @@ def search_products():
     search_term = request.args.get('q', '', type=str)
     if not search_term or len(search_term) < 2:
         return jsonify([])
+
     products = Product.query.filter(
-        (Product.name.ilike(f'%{search_term}%')) |
-        (Product.sku.ilike(f'%{search_term}%'))
+        or_(
+            Product.name.ilike(f'%{search_term}%'),
+            Product.sku.ilike(f'%{search_term}%')
+        )
     ).limit(10).all()
+    
     results = [
-        {'id': p.id, 'sku': p.sku, 'name': p.name, 'unit_price': str(p.unit_price) }
+        {
+            'id': p.id,
+            'sku': p.sku,
+            'name': p.name,
+            'unit_price': str(p.unit_price),
+            'discount': float(p.discount.percentage) if p.discount else 0.0
+        }
         for p in products
     ]
     return jsonify(results)
@@ -447,7 +453,6 @@ async def _generate_pdf(html_content):
 
     browser = await launch(**launch_options)
     page = await browser.newPage()
-    # --- CORRECTED LINE: Removed extra arguments ---
     await page.setContent(html_content)
     pdf_data = await page.pdf({
         'format': 'A4',
@@ -473,22 +478,20 @@ def export_quote_pdf(option_id):
     }
     template_name = category_templates.get(deal.deal_type.name, 'deals/pdf/hvac_quote_template.html')
 
-    # --- NEW: Read CSS file content to inline it ---
     try:
         css_file_path = os.path.join(current_app.static_folder, 'css', 'quote_pdf.css')
         with open(css_file_path) as f:
             css_content = f.read()
     except FileNotFoundError:
         logger.error("quote_pdf.css not found!")
-        css_content = "" # Fail gracefully
+        css_content = ""
 
-    # --- Pass the css_content to the template ---
     rendered_html = render_template(
         template_name, 
         deal=deal, 
         revision=quote, 
         option=option, 
-        css_content=css_content # Pass the string here
+        css_content=css_content
     )
     
     try:

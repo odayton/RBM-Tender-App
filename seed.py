@@ -1,120 +1,127 @@
 import logging
+import csv
+from sqlalchemy import text
 from app import create_app
 from app.extensions import db
 from app.models import (
     User, UserRole, Company, Contact, Product,
     Deal, DealStage, DealType, AustralianState,
     Quote, QuoteRecipient, QuoteOption, QuoteLineItem,
-    Pump, PumpAssembly, InertiaBase, SeismicSpring, RubberMount
+    Pump, PumpAssembly, InertiaBase, SeismicSpring, RubberMount,
+    Discount
 )
 
-# Use the configured logger from the application
 logger = logging.getLogger(__name__)
+
+def seed_discounts():
+    """Seeds the discounts table from a CSV file."""
+    logger.info("--- Starting discount seeding ---")
+    try:
+        with open('data/discounts.csv', mode='r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                disc_code = row.get('Disc Code')
+                if not disc_code: continue
+                amount_str = row.get('Amount', '0').strip().replace('%', '')
+                amount = float(amount_str)
+                if not Discount.query.filter_by(code=disc_code).first():
+                    db.session.add(Discount(code=disc_code, percentage=amount))
+        db.session.commit()
+        logger.info("--- Discounts seeded successfully ---")
+    except FileNotFoundError:
+        logger.error("[ERROR] 'data/discounts.csv' not found. Skipping discount seeding.")
+    except Exception as e:
+        logger.error(f"[ERROR] An error occurred during discount seeding: {e}")
+        db.session.rollback()
+
+def seed_products():
+    """Seeds the products table from the main price book CSV."""
+    logger.info("--- Starting product seeding ---")
+    products_added = 0
+    try:
+        with open('data/products.csv', mode='r', encoding='latin-1') as csvfile:
+            reader = csv.DictReader(csvfile)
+            rows = list(reader)
+            logger.info(f"Found {len(rows)} rows in the CSV file.")
+            
+            for i, row in enumerate(rows):
+                sku = row.get('Item No')
+                if not sku or not sku.strip():
+                    continue
+
+                try:
+                    price_str = row.get('2025 List Price', '0')
+                    # --- THE FINAL FIX: Clean the price string ---
+                    cleaned_price_str = price_str.replace('$', '').replace(',', '')
+                    price = float(cleaned_price_str if cleaned_price_str else 0)
+                except (ValueError, TypeError):
+                    logger.warning(f"Could not convert price '{price_str}' to a number for SKU '{sku}'. Defaulting to 0.")
+                    price = 0.0
+                
+                if not Product.query.filter_by(sku=sku).first():
+                    product = Product(
+                        sku=sku,
+                        name=row.get('Description'),
+                        unit_price=price,
+                        discount_code=row.get('Disc Code')
+                    )
+                    db.session.add(product)
+                    products_added += 1
+        
+        db.session.commit()
+        logger.info(f"--- Products seeded successfully: {products_added} new products added. ---")
+
+    except FileNotFoundError:
+        logger.error("[ERROR] 'data/products.csv' not found.")
+    except Exception as e:
+        logger.error(f"[ERROR] An error occurred during product seeding: {e}")
+        db.session.rollback()
+
 
 def seed_database():
     """Seeds the database with initial data in an idempotent way."""
-    logger.info("Starting database seeding process...")
+    logger.info(">>> Starting database seeding process <<<")
 
-    # --- Clear Data ---
     logger.info("Clearing existing data...")
     meta = db.metadata
     for table in reversed(meta.sorted_tables):
-        logger.info(f'Clearing table {table.name}')
+        if db.engine.name == 'sqlite':
+            db.session.execute(text('PRAGMA foreign_keys=OFF;'))
+        else:
+            db.session.execute(text('SET FOREIGN_KEY_CHECKS=0;'))
         db.session.execute(table.delete())
+        if db.engine.name == 'sqlite':
+            db.session.execute(text('PRAGMA foreign_keys=ON;'))
+        else:
+            db.session.execute(text('SET FOREIGN_KEY_CHECKS=1;'))
     db.session.commit()
     logger.info("Data cleared.")
 
-    # --- Seed Users ---
-    logger.info("Seeding users...")
+    seed_discounts()
+    seed_products() 
+
+    logger.info("Seeding sample users and deals...")
     admin_user = User(username='admin', email='admin@example.com', first_name='Admin', last_name='User', role=UserRole.ADMIN, is_active=True)
     admin_user.password = 'password'
     dev_user = User(username='devuser', email='dev@example.com', first_name='Dev', last_name='User', role=UserRole.SALES, is_active=True)
     dev_user.password = 'password'
     db.session.add_all([admin_user, dev_user])
     db.session.commit()
-    logger.info("Seeded users.")
-
-    # --- Seed Companies, Contacts, and other base data ---
-    logger.info("Seeding companies, contacts, and pump data...")
+    
     company1 = Company(company_name='ACME Mechanical', address='123 Industrial Way, Sydney NSW')
-    company2 = Company(company_name='Fluid Solutions Inc.', address='456 Pumping St, Melbourne VIC')
-    db.session.add_all([company1, company2])
+    db.session.add(company1)
     db.session.commit()
 
     contact1 = Contact(name='John Smith', email='john.s@acme.com', phone_number='0411222333', company_id=company1.id)
-    contact2 = Contact(name='Jane Doe', email='jane.d@fluidsolutions.com', phone_number='0422333444', company_id=company2.id)
-    db.session.add_all([contact1, contact2])
+    db.session.add(contact1)
     db.session.commit()
     
-    pump1 = Pump(pump_model='TestPump-A', nominal_flow=10.0, nominal_head=50.0)
-    db.session.add(pump1)
-    db.session.commit()
-    assembly1 = PumpAssembly(pump_id=pump1.id, assembly_name='PMP-TEST-001')
-    db.session.add(assembly1)
-    db.session.commit()
-    product1 = Product(sku=assembly1.assembly_name, name=f"Assembly for {assembly1.pump.pump_model}", unit_price=2500.00, pump_assembly_id=assembly1.id)
-    custom_product = Product(sku="LAB-01", name="Custom Labour Charge", unit_price=150.00)
-    db.session.add_all([product1, custom_product])
-    db.session.commit()
-    logger.info("Seeded base data.")
-
-    # --- Seed Deals ---
-    logger.info("Seeding deals...")
-    # Deal 1: The fully detailed deal
-    deal1 = Deal(project_name='City Hospital HVAC Upgrade', owner_id=dev_user.id, stage=DealStage.PROPOSAL, deal_type=DealType.HVAC, state=AustralianState.NSW)
-    deal1.companies.append(company1)
-    deal1.contacts.append(contact1)
+    deal1 = Deal(project_name='City Hospital HVAC Upgrade', owner_id=dev_user.id, stage=DealStage.PROPOSAL, deal_type=DealType.HVAC, state=AustralianState.NSW, companies=[company1], contacts=[contact1])
     db.session.add(deal1)
     db.session.commit()
 
-    # Other deals for variety
-    deal2 = Deal(project_name='Downtown Tower Plumbing', owner_id=dev_user.id, stage=DealStage.TENDER, deal_type=DealType.HYDRAULIC, state=AustralianState.VIC, companies=[company2], contacts=[contact2])
-    db.session.add(deal2)
-    db.session.commit()
-    
-    # --- Create the Quote Stream (Recipient) for Deal 1 ---
-    recipient1 = QuoteRecipient(deal_id=deal1.id, company_id=company1.id)
-    db.session.add(recipient1)
-    db.session.commit()
+    logger.info(">>> Database seeding process completed successfully. <<<")
 
-    # --- Create Revision 1 for Deal 1 ---
-    quote_rev1 = Quote(recipient_id=recipient1.id, revision=1, notes="Initial proposal based on preliminary drawings.")
-    db.session.add(quote_rev1)
-    db.session.commit()
-
-    # Option 1: Standard Offer
-    option1_1 = QuoteOption(quote_id=quote_rev1.id, name="Standard Offer", freight_charge=500.00)
-    db.session.add(option1_1)
-    db.session.commit()
-    line_item1_1_1 = QuoteLineItem(option_id=option1_1.id, product_id=product1.id, quantity=2, unit_price=2500.00, discount=5.0, display_order=1, notes="CHWP")
-    line_item1_1_2 = QuoteLineItem(option_id=option1_1.id, product_id=custom_product.id, quantity=8, unit_price=150.00, display_order=2, notes="Standard labour")
-    db.session.add_all([line_item1_1_1, line_item1_1_2])
-    
-    # Option 2: Premium Offer
-    option1_2 = QuoteOption(quote_id=quote_rev1.id, name="Premium Option (High Efficiency)", freight_charge=500.00)
-    db.session.add(option1_2)
-    db.session.commit()
-    line_item1_2_1 = QuoteLineItem(option_id=option1_2.id, product_id=product1.id, quantity=2, unit_price=3200.00, discount=0.0, display_order=1, notes="CHWP - High Eff. Motor")
-    line_item1_2_2 = QuoteLineItem(option_id=option1_2.id, product_id=custom_product.id, quantity=12, unit_price=150.00, display_order=2, notes="Premium labour")
-    db.session.add_all([line_item1_2_1, line_item1_2_2])
-    db.session.commit()
-    
-    # --- Create Revision 2 for Deal 1 ---
-    quote_rev2 = Quote(recipient_id=recipient1.id, revision=2, notes="Revised proposal with cost-saving measures.")
-    db.session.add(quote_rev2)
-    db.session.commit()
-
-    # Option 1: Revised Standard Offer
-    option2_1 = QuoteOption(quote_id=quote_rev2.id, name="Revised Standard Offer", freight_charge=450.00)
-    db.session.add(option2_1)
-    db.session.commit()
-    line_item2_1_1 = QuoteLineItem(option_id=option2_1.id, product_id=product1.id, quantity=2, unit_price=2400.00, discount=5.0, display_order=1, notes="CHWP")
-    db.session.add(line_item2_1_1)
-    db.session.commit()
-    
-    logger.info("Database seeding process completed successfully.")
-
-# This allows running the seed script standalone, but using the CLI command is preferred
 if __name__ == '__main__':
     app = create_app()
     with app.app_context():

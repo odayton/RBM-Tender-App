@@ -1,8 +1,8 @@
-"""Initial migration from all current models
+"""Initial schema
 
-Revision ID: ef99f237ce53
+Revision ID: 1e645907263d
 Revises: 
-Create Date: 2025-06-27 11:38:47.451018
+Create Date: 2025-07-11 15:32:13.534373
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ef99f237ce53'
+revision = '1e645907263d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -55,6 +55,15 @@ def upgrade():
     with op.batch_alter_table('discount_rules', schema=None) as batch_op:
         batch_op.create_index(batch_op.f('ix_discount_rules_component_type'), ['component_type'], unique=False)
 
+    op.create_table('discounts',
+    sa.Column('code', sa.String(length=10), nullable=False),
+    sa.Column('percentage', sa.Numeric(precision=5, scale=2), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('code')
+    )
     op.create_table('inertia_bases',
     sa.Column('model', sa.String(length=120), nullable=False),
     sa.Column('length', sa.Integer(), nullable=True),
@@ -150,7 +159,7 @@ def upgrade():
     op.create_table('deals',
     sa.Column('project_name', sa.String(length=200), nullable=False),
     sa.Column('stage', sa.Enum('SALES_LEAD', 'TENDER', 'PROPOSAL', 'NEGOTIATION', 'WON', 'LOST', 'ABANDONED', name='dealstage'), nullable=False),
-    sa.Column('deal_type', sa.Enum('HVAC', 'HYDRAULIC', 'HYDRONIC', 'DATA_CENTRES', 'MERCHANT', 'WHOLESALER', 'OEM', name='dealtype'), nullable=False),
+    sa.Column('deal_type', sa.Enum('HVAC', 'PLUMBING', 'HYDRONIC_HEATING', 'DATA_CENTRES', 'MERCHANT', 'WHOLESALER', 'OEM', name='dealtype'), nullable=False),
     sa.Column('state', sa.Enum('NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'NT', 'ACT', name='australianstate'), nullable=False),
     sa.Column('total_amount', sa.Numeric(precision=10, scale=2), nullable=True),
     sa.Column('owner_id', sa.Integer(), nullable=True),
@@ -217,10 +226,12 @@ def upgrade():
     sa.Column('name', sa.String(length=200), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('unit_price', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('discount_code', sa.String(length=10), nullable=True),
     sa.Column('pump_assembly_id', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['discount_code'], ['discounts.code'], ),
     sa.ForeignKeyConstraint(['pump_assembly_id'], ['pump_assemblies.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('pump_assembly_id', name='uq_product_pump_assembly_id')
@@ -243,8 +254,8 @@ def upgrade():
     sa.Column('recipient_id', sa.Integer(), nullable=False),
     sa.Column('revision', sa.Integer(), nullable=False),
     sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['recipient_id'], ['quote_recipients.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -311,6 +322,7 @@ def downgrade():
     op.drop_table('pumps')
     op.drop_table('price_lists')
     op.drop_table('inertia_bases')
+    op.drop_table('discounts')
     with op.batch_alter_table('discount_rules', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_discount_rules_component_type'))
 

@@ -1,7 +1,7 @@
 from .base_model import BaseModel
 from .customers.company_model import Company
 from .customers.customer_model import Contact
-from .deals.deal_models import Deal, QuoteRecipient, Quote, QuoteOption, QuoteLineItem
+from .deals.deal_models import Deal, QuoteRecipient, Quote, QuoteOption, QuoteLineItem, Discount
 from .deals.deal_types import DealStage, DealType, AustralianState
 from .user_model import User, UserRole
 
@@ -27,6 +27,7 @@ __all__ = [
     'Quote',
     'QuoteOption',
     'QuoteLineItem',
+    'Discount',
     'DealStage',
     'DealType',
     'AustralianState',
