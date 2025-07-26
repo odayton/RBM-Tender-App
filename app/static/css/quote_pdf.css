@@ -1,6 +1,11 @@
 /* /static/css/quote_pdf.css */
 /* Styles specifically for the generated PDF quote */
 
+/* --- Page Setup --- */
+@page {
+    margin: 0.5cm 2cm 0.5cm 2cm;
+}
+
 /* --- Base & Typography --- */
 body {
     font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
@@ -9,6 +14,9 @@ body {
     background-color: #ffffff; /* PDFs should have a white background */
     color: #333333; /* Dark grey for main text is easier to read than pure black */
     margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 h1, h2, h3, h4, th {
@@ -74,6 +82,12 @@ header {
     color: #555;
 }
 
+/* --- Content Wrapper --- */
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
 /* --- Customer & Main Content --- */
 main {
     padding: 0 5px; /* Add some slight padding */
@@ -89,6 +103,7 @@ main {
     border-collapse: collapse;
     margin-top: 20px;
     font-size: 11px; /* Slightly smaller for tables */
+    max-width: 1050px;
 }
 
 .line-items th, .line-items-table th,
@@ -118,6 +133,13 @@ main {
     color: #000;
 }
 
+/* --- Quote Body --- */
+.quote-body {
+    max-width: 1050px;
+    margin: 0 auto;
+    width: 100%;
+}
+
 /* --- Totals Section --- */
 .totals-section {
     margin-top: 30px;
@@ -128,24 +150,81 @@ main {
     width: 40%;
     margin-left: 60%; /* Push to the right */
     border: none;
+    border-collapse: collapse;
+    max-width: 1050px;
 }
 
-.totals-table th, .totals-table td {
+.totals-table th {
+    background-color: #f8f9fa;
+    color: #333;
+    padding: 8px;
+    font-size: 1.1em;
+    font-weight: bold;
+    text-align: right;
+    border: none;
+}
+
+.totals-table th:first-child {
+    border-top-left-radius: 4px;
+}
+
+.totals-table th:last-child {
+    border-top-right-radius: 4px;
+}
+
+.totals-table td {
     border: none;
     padding: 5px;
     text-align: right;
 }
 
-.totals-table .grand-total th,
+.totals-table tbody tr:nth-child(odd) {
+    background-color: #f2f2f2;
+}
+
+.totals-table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.totals-table tbody tr:nth-child(2) td {
+    border-top: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    font-size: 1.1em !important;
+}
+
 .totals-table .grand-total td {
+    background-color: #f8f9fa !important;
     font-weight: bold;
     font-size: 1.2em;
-    color: #000;
+    color: #333;
     border-top: 2px solid #000000;
     padding-top: 8px;
 }
 
 /* --- Footer --- */
+.footer-bottom {
+    margin-top: 50px;
+    padding: 20px 0;
+    border-top: 1px solid #cccccc;
+    text-align: center;
+    page-break-inside: avoid;
+    page-break-before: avoid;
+    background: white;
+}
+
+.company-info {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.terms-last-page {
+    text-align: left;
+    font-size: 0.8em;
+    color: #555;
+    margin-bottom: 10px;
+}
+
 footer {
     border-top: 1px solid #cccccc;
     padding: 10px;
