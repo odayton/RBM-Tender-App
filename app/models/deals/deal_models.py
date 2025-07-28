@@ -1,6 +1,6 @@
 # app/models/deals/deal_models.py
 
-
+from typing import Dict, Any
 from sqlalchemy import Column, String, Integer, ForeignKey, Numeric, Text, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -9,6 +9,7 @@ from decimal import Decimal
 from app.models.base_model import BaseModel
 from app.models.deals.deal_associations import deal_contacts, deal_companies
 from app.models.deals.deal_types import DealStage, DealType, AustralianState
+from app.core.core_errors import ValidationError
 from app.extensions import db
 
 class Discount(BaseModel):
@@ -31,6 +32,56 @@ class Deal(BaseModel):
     recipients = relationship("QuoteRecipient", back_populates="deal", cascade="all, delete-orphan")
     contacts = relationship("Contact", secondary=deal_contacts, back_populates="deals")
     companies = relationship("Company", secondary=deal_companies, back_populates="deals")
+
+    def validate(self) -> None:
+        """Custom validation for deal data."""
+        super().validate()
+        
+        if not self.project_name or len(self.project_name.strip()) < 3:
+            raise ValidationError("Project name must be at least 3 characters long.")
+        
+        if not self.owner_id:
+            raise ValidationError("Deal must have an owner assigned.")
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the deal instance to a dictionary."""
+        data = super().to_dict()
+        data['owner_name'] = self.owner.full_name if self.owner else None
+        data['contact_count'] = len(self.contacts)
+        data['company_count'] = len(self.companies)
+        data['recipient_count'] = len(self.recipients)
+        return data
+
+    def get_total_quotes_value(self) -> Decimal:
+        """Calculate total value of all quotes for this deal."""
+        total = Decimal('0.0')
+        for recipient in self.recipients:
+            for quote in recipient.quotes:
+                total += quote.total_price
+        return total
+
+    def get_latest_quote(self):
+        """Get the most recent quote for this deal."""
+        latest_quote = None
+        latest_date = None
+        
+        for recipient in self.recipients:
+            for quote in recipient.quotes:
+                if not latest_date or quote.created_at > latest_date:
+                    latest_date = quote.created_at
+                    latest_quote = quote
+        
+        return latest_quote
+
+    def can_be_edited_by(self, user) -> bool:
+        """Check if a user can edit this deal."""
+        if user.is_admin():
+            return True
+        if user.is_manager():
+            return True
+        if self.owner_id == user.id:
+            return True
+        return False
 
 class QuoteRecipient(BaseModel):
     __tablename__ = 'quote_recipients'
@@ -91,6 +142,12 @@ class QuoteOption(BaseModel):
     def grand_total(self):
         """Calculates the grand total for the option including GST."""
         return self.total_price + self.gst
+    
+    @property
+    def subtotal(self):
+        """Calculates the subtotal excluding freight."""
+        line_item_total = sum(item.total_price for item in self.line_items)
+        return line_item_total
     
 
 

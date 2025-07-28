@@ -15,6 +15,32 @@ def register_cli_commands(app: Flask):
             seed_database()
         logger.info("Database seeding completed from CLI.")
 
+def register_template_filters(app: Flask):
+    """Register custom template filters with the Flask app."""
+    from .utils.view_helpers.template_helper import TemplateHelper
+    from datetime import datetime
+    
+    @app.template_filter('format_date')
+    def format_date_filter(value, format_str='%Y-%m-%d'):
+        """Format date value for templates"""
+        if value is None:
+            return ''
+        if isinstance(value, str) and value == "now":
+            value = datetime.now()
+        return TemplateHelper.format_date(value, format_str)
+    
+    @app.template_filter('format_currency')
+    def format_currency_filter(value):
+        """Format currency value for templates"""
+        if value is None or hasattr(value, '__class__') and value.__class__.__name__ == 'Undefined':
+            return '$0.00'
+        return TemplateHelper.format_currency(value)
+    
+    @app.template_filter('format_datetime')
+    def format_datetime_filter(value, format_str='%Y-%m-%d %H:%M:%S'):
+        """Format datetime value for templates"""
+        return TemplateHelper.format_datetime(value, format_str)
+
 def create_app():
     """Create and configure an instance of the Flask application."""
     app = Flask(__name__, instance_relative_config=True)
@@ -25,26 +51,28 @@ def create_app():
 
     # --- Development-Only Auto-Login ---
     # This block will only be active when DEBUG is True (i.e., in development)
-    if app.config.get('DEBUG'):
-        @app.before_request
-        def dev_auto_login():
-            """
-            For development convenience, automatically log in a default user 
-            if no user is currently authenticated. This bypasses the need for a login page.
-            """
-            from flask_login import current_user, login_user
-            from app.models import User
-            
-            # The app context is automatically available in a before_request handler
-            if not current_user.is_authenticated:
-                # This user must exist in the database, created by the seed script.
-                dev_user = User.query.filter_by(email="dev@example.com").first()
-                if dev_user:
-                    login_user(dev_user, remember=True)
+    # Commented out for Phase 1 implementation - proper authentication is now required
+    # if app.config.get('DEBUG'):
+    #     @app.before_request
+    #     def dev_auto_login():
+    #         """
+    #         For development convenience, automatically log in a default user 
+    #         if no user is currently authenticated. This bypasses the need for a login page.
+    #         """
+    #         from flask_login import current_user, login_user
+    #         from app.models import User
+    #         
+    #         # The app context is automatically available in a before_request handler
+    #         if not current_user.is_authenticated:
+    #             # This user must exist in the database, created by the seed script.
+    #             dev_user = User.query.filter_by(email="dev@example.com").first()
+    #             if dev_user:
+    #                     login_user(dev_user, remember=True)
     # --- End of Auto-Login ---
 
     with app.app_context():
         # Import and register blueprints from the 'features' directory
+        from app.features.auth import auth_bp
         from app.features.admin import admin_bp
         from app.features.deals import deals_bp
         from app.features.hvac import hvac_bp
@@ -53,6 +81,7 @@ def create_app():
         from app.features.main import main_bp
         from app.features.static_server import static_server_bp
 
+        app.register_blueprint(auth_bp)
         app.register_blueprint(admin_bp, url_prefix='/admin')
         app.register_blueprint(deals_bp, url_prefix='/deals')
         app.register_blueprint(hvac_bp, url_prefix='/hvac')
@@ -60,6 +89,9 @@ def create_app():
         app.register_blueprint(hydronic_heating_bp, url_prefix='/hydronic-heating')
         app.register_blueprint(main_bp)
         app.register_blueprint(static_server_bp)
+
+        # Register template filters
+        register_template_filters(app)
 
     # Register the custom CLI commands with the app instance
     register_cli_commands(app)

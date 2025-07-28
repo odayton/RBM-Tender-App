@@ -41,7 +41,17 @@ class Contact(BaseModel):
         data = super().to_dict()
         if self.company:
             data['company_name'] = self.company.company_name
+        data['deal_count'] = len(self.deals)
         return data
+
+    def get_full_info(self) -> str:
+        """Get full contact information as a string."""
+        info_parts = [self.name]
+        if self.position:
+            info_parts.append(f"({self.position})")
+        if self.company:
+            info_parts.append(f"at {self.company.company_name}")
+        return " ".join(info_parts)
 
     def __repr__(self) -> str:
         return f"<Contact(id={self.id}, name='{self.name}')>"

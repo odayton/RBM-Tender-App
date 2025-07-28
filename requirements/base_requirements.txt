@@ -29,7 +29,7 @@ scipy
 matplotlib
 
 # PDF Generation
-pyppeteer
+playwright>=1.40.0
 
 Flask-Security-Too==5.6.2
 PyJWT==2.8.0

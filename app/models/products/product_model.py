@@ -1,8 +1,11 @@
 # app/models/products/product_model.py
 
+from typing import Dict, Any
 from sqlalchemy import Column, String, Text, Numeric, Integer, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
+from decimal import Decimal
 from app.models.base_model import BaseModel
+from app.core.core_errors import ValidationError
 
 class Product(BaseModel):
     """
@@ -26,6 +29,33 @@ class Product(BaseModel):
     __table_args__ = (
         UniqueConstraint('pump_assembly_id', name='uq_product_pump_assembly_id'),
     )
+
+    def validate(self) -> None:
+        """Custom validation for product data."""
+        super().validate()
+        
+        if not self.sku or len(self.sku.strip()) < 1:
+            raise ValidationError("SKU is required and cannot be empty.")
+        
+        if not self.name or len(self.name.strip()) < 2:
+            raise ValidationError("Product name must be at least 2 characters long.")
+        
+        if self.unit_price < 0:
+            raise ValidationError("Unit price cannot be negative.")
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the product instance to a dictionary."""
+        data = super().to_dict()
+        data['discount_percentage'] = self.discount.percentage if self.discount else 0
+        data['has_pump_assembly'] = bool(self.pump_assembly_id)
+        return data
+
+    def get_discounted_price(self) -> Decimal:
+        """Get the price after applying discount."""
+        if self.discount:
+            discount_amount = self.unit_price * (self.discount.percentage / Decimal('100'))
+            return self.unit_price - discount_amount
+        return self.unit_price
 
     def __repr__(self):
         return f"<Product(id={self.id}, sku='{self.sku}', name='{self.name}')>"

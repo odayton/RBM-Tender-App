@@ -1,35 +1,41 @@
 {% extends "deals/pdf/_pdf_base.html" %}
 
+{% block division_color_class %}plumbing-color{% endblock %}
+
 {% block quote_body %}
-<table class="line-items">
-    <thead>
-        <tr>
-            <th>Tag</th>
-            <th>System</th>
-            <th>Description</th>
-            <th>Material</th>
-            <th>Qty</th>
-            <th>Unit Price</th>
-            <th>Total Price</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for option in revision.options %}
-            <tr class="option-header">
-                <td colspan="7">{{ option.name }}</td>
+    {% block line_items_table %}
+    <table class="main-table" style="width: 100%;">
+        <thead>
+            <tr class="{{ division_color }}">
+                <th style="width: 45%;">Description</th>
+                <th style="width: auto; white-space: nowrap;" class="text-right">Qty</th>
+                <th style="width: auto; white-space: nowrap;" class="text-right">List Price</th>
+                <th style="width: auto; white-space: nowrap;" class="text-right">Discount</th>
+                <th style="width: auto; white-space: nowrap;" class="text-right">Nett Price</th>
+                <th style="width: auto; white-space: nowrap;" class="text-right">Total Price</th>
             </tr>
+        </thead>
+        <tbody>
             {% for item in option.line_items %}
             <tr>
-                <td>{{ item.tag or '-' }}</td>
-                <td>{{ item.pump_details.get('system_type', '-') if item.pump_details else '-' }}</td>
-                <td>{{ item.description }}</td>
-                <td>{{ item.pump_details.get('material', '-') if item.pump_details else '-' }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>${{ "%.2f"|format(item.unit_price) }}</td>
-                <td>${{ "%.2f"|format(item.total_price) }}</td>
+                <td>
+                    <strong>{{ item.product.name if item.product else item.custom_name }}</strong>
+                    {% if item.product and item.product.sku %}<br><small>SKU: {{ item.product.sku }}</small>{% endif %}
+                    {% if item.custom_sku and (not item.product or not item.product.sku) %}<br><small>SKU: {{ item.custom_sku }}</small>{% endif %}
+                    {% if item.notes and item.notes != (item.product.name if item.product else item.custom_name) %}<br><small>{{ item.notes }}</small>{% endif %}
+                </td>
+                <td class="text-right">{{ item.quantity }}</td>
+                <td class="text-right">{{ item.unit_price|format_currency }}</td>
+                <td class="text-right">{{ "%.2f"|format(item.discount) }}%</td>
+                <td class="text-right">{{ (item.unit_price * (1 - item.discount / 100))|format_currency }}</td>
+                <td class="text-right">{{ item.total_price|format_currency }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: #777;">No items in this option.</td>
             </tr>
             {% endfor %}
-        {% endfor %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
+    {% endblock %}
 {% endblock %}

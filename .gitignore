@@ -133,3 +133,55 @@ secrets.txt
 
 # Generated files
 generated_data/
+
+# Authentication and Security
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+session_files/
+sessions/
+
+# Database files (additional)
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment and configuration
+config.py
+settings.py
+.env.local
+.env.production
+.env.staging
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Cache directories
+.cache/
+cache/

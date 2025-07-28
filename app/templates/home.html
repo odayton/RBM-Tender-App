@@ -5,8 +5,77 @@
 {% block page_content %}
     <div class="text-center" style="margin-bottom: 2rem;">
         <h1>Welcome to the RBM Tender Application</h1>
-        <p class="lead text-light" style="opacity: 0.8;">Select a category below to get started.</p>
+        <p class="lead text-light" style="opacity: 0.8;">
+            Welcome back, {{ current_user.full_name or current_user.username }}! 
+            Select a category below to get started.
+        </p>
     </div>
+
+    <!-- Quick Stats for Admin/Manager Users -->
+    {% if current_user.can_view_admin_panel() %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ deals|length if deals else 0 }}</h4>
+                            <p class="card-text">Total Deals</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-handshake fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ companies|length if companies else 0 }}</h4>
+                            <p class="card-text">Companies</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-building fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ contacts|length if contacts else 0 }}</h4>
+                            <p class="card-text">Contacts</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ products|length if products else 0 }}</h4>
+                            <p class="card-text">Products</p>
+                        </div>
+                        <div>
+                            <i class="fas fa-box fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="row justify-content-center">
         <div class="col-lg-4 col-md-6 mb-4">

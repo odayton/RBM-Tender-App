@@ -22,7 +22,7 @@ class SecurityManager:
     def init_app(self, app):
         self.app = app
         self.login_manager.init_app(app)
-        self.login_manager.login_view = 'main.home' 
+        self.login_manager.login_view = 'auth.login' 
 
         # This function tells Flask-Login how to load a user from an ID.
         # It is essential for session management.

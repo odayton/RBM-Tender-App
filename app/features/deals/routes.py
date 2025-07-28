@@ -1,14 +1,15 @@
 # app/features/deals/routes.py
 
 from flask import (
-    Blueprint, render_template, request, jsonify, redirect, url_for, flash, make_response, current_app
+    Blueprint, render_template, request, jsonify, redirect, url_for, flash, make_response, current_app, send_file
 )
 from collections import defaultdict
 from decimal import Decimal
 import asyncio
 import os
-from pyppeteer import launch
+from playwright.async_api import async_playwright
 from sqlalchemy import or_
+from io import BytesIO
 
 from app.models import (
     Deal, User, Quote, QuoteLineItem, DealStage, AustralianState, DealType,
@@ -430,42 +431,35 @@ def reorder_line_items(option_id):
         logger.error(f"Error reordering line items for option {option_id}: {e}")
         return jsonify({'success': False, 'message': 'An error occurred.'}), 500
 
-async def _generate_pdf(html_content):
-    """Async helper function to launch browser and create PDF."""
-    possible_paths = [
-        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
-    ]
-    chrome_path = next((path for path in possible_paths if os.path.exists(path)), None)
+async def _generate_pdf(html_content, base_url=None):
+    """Async helper function to launch browser and create PDF using Playwright."""
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
+        
+        if base_url:
+            # If we have a base URL, use it for external resources
+            await page.set_content(html_content, base_url=base_url)
+            # Wait for external resources to load
+            await page.wait_for_load_state('networkidle')
+        else:
+            # Otherwise, use inline content only
+            await page.set_content(html_content)
+        
+        pdf_data = await page.pdf(
+            format='A4',
+            print_background=True,
+            margin={'top': '20px', 'right': '20px', 'bottom': '20px', 'left': '20px'}
+        )
+        await browser.close()
+        return pdf_data
 
-    launch_options = {
-        'handleSIGINT': False, 
-        'handleSIGTERM': False, 
-        'handleSIGHUP': False,
-        'args': ['--no-sandbox']
-    }
 
-    if chrome_path:
-        logger.info(f"Using local Google Chrome installation at: {chrome_path}")
-        launch_options['executablePath'] = chrome_path
-    else:
-        logger.error("Google Chrome not found. Attempting to use pyppeteer's downloaded Chromium.")
 
-    browser = await launch(**launch_options)
-    page = await browser.newPage()
-    await page.setContent(html_content)
-    pdf_data = await page.pdf({
-        'format': 'A4',
-        'printBackground': True,
-        'margin': {'top': '20px', 'right': '20px', 'bottom': '20px', 'left': '20px'}
-    })
-    await browser.close()
-    return pdf_data
-
-@deals_bp.route('/option/<int:option_id>/export/pdf', methods=['GET'])
-def export_quote_pdf(option_id):
+@deals_bp.route('/option/<int:option_id>/view/pdf', methods=['GET'])
+def view_quote_pdf(option_id):
     """
-    Generates and serves a PDF for a specific quote OPTION.
+    Generates the quote PDF and serves it inline in the browser with PDF controls.
     """
     option = QuoteOption.query.get_or_404(option_id)
     quote = option.quote
@@ -486,24 +480,53 @@ def export_quote_pdf(option_id):
         logger.error("quote_pdf.css not found!")
         css_content = ""
 
-    rendered_html = render_template(
-        template_name, 
-        deal=deal, 
-        revision=quote, 
-        option=option, 
-        css_content=css_content
+    # Convert logo to base64 for embedding in PDF
+    try:
+        logo_path = os.path.join(current_app.static_folder, 'images', 'rbm_logo.png')
+        with open(logo_path, 'rb') as f:
+            logo_data = f.read()
+        import base64
+        logo_base64 = base64.b64encode(logo_data).decode('utf-8')
+        logo_data_url = f"data:image/png;base64,{logo_base64}"
+    except FileNotFoundError:
+        logger.error("rbm_logo.png not found!")
+        logo_data_url = ""
+
+    html_content = render_template(
+        template_name,
+        deal=deal,
+        revision=quote,
+        option=option,
+        css_content=css_content,
+        logo_data_url=logo_data_url
     )
     
+    # Log some debugging info
+    logger.info(f"Generated HTML for PDF: deal_id={deal.id}, option_id={option.id}, line_items_count={len(option.line_items)}")
+    logger.info(f"CSS content length: {len(css_content)}")
+    logger.info(f"Logo data URL length: {len(logo_data_url) if logo_data_url else 0}")
+
+    # Generate PDF using Playwright
     try:
-        pdf_file = asyncio.run(_generate_pdf(rendered_html))
+        # Try with external CSS first (if Flask app is running)
+        base_url = request.host_url.rstrip('/')
+        pdf_data = asyncio.run(_generate_pdf(html_content, base_url=base_url))
     except Exception as e:
-        logger.error(f"PDF Generation Error: {e}")
-        flash('There was an error generating the PDF. Please check the logs.', 'error')
-        return redirect(url_for('deals.deal_details', deal_id=deal.id))
-
-    response = make_response(pdf_file)
+        logger.warning(f"Failed to generate PDF with external CSS: {e}")
+        try:
+            # Fall back to inline CSS only
+            pdf_data = asyncio.run(_generate_pdf(html_content, base_url=None))
+        except Exception as e2:
+            logger.error(f"Error generating PDF with inline CSS: {e2}")
+            flash('Error generating PDF. Please try again.', 'error')
+            return redirect(url_for('deals.deal_details', deal_id=deal.id))
+    
+    # Create response with proper headers to open in browser viewer
+    response = make_response(pdf_data)
     response.headers['Content-Type'] = 'application/pdf'
-    clean_option_name = "".join(c if c.isalnum() else "_" for c in option.name)
-    response.headers['Content-Disposition'] = f'attachment; filename="Quote_{deal.id}_Rev_{quote.revision}_{clean_option_name}.pdf"'
-
+    response.headers['Content-Disposition'] = 'inline; filename=quote.pdf'
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
     return response
