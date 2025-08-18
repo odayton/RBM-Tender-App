@@ -1,0 +1,223 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Log Call - CRM{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Log Call</h1>
+                <a href="{{ url_for('crm.activities_list') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Activities
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-phone"></i> Call Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <!-- Call Information -->
+                            <div class="col-md-12">
+                                <h6 class="text-primary mb-3">Call Information</h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.phone_number.label(class="form-label") }}
+                                    {{ form.phone_number(class="form-control" + (" is-invalid" if form.phone_number.errors else "")) }}
+                                    {% if form.phone_number.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.phone_number.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.direction.label(class="form-label") }}
+                                    {{ form.direction(class="form-select" + (" is-invalid" if form.direction.errors else "")) }}
+                                    {% if form.direction.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.direction.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.outcome.label(class="form-label") }}
+                                    {{ form.outcome(class="form-select" + (" is-invalid" if form.outcome.errors else "")) }}
+                                    {% if form.outcome.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.outcome.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.duration_seconds.label(class="form-label") }}
+                                    {{ form.duration_seconds(class="form-control" + (" is-invalid" if form.duration_seconds.errors else "")) }}
+                                    {% if form.duration_seconds.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.duration_seconds.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Call Notes -->
+                            <div class="col-md-12">
+                                <h6 class="text-primary mb-3">Call Notes</h6>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    {{ form.call_notes.label(class="form-label") }}
+                                    {{ form.call_notes(class="form-control", rows="4" + (" is-invalid" if form.call_notes.errors else "")) }}
+                                    {% if form.call_notes.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.call_notes.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Follow-up -->
+                            <div class="col-md-12">
+                                <h6 class="text-primary mb-3">Follow-up</h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.follow_up_required(class="form-check-input" + (" is-invalid" if form.follow_up_required.errors else "")) }}
+                                        {{ form.follow_up_required.label(class="form-check-label") }}
+                                        {% if form.follow_up_required.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.follow_up_required.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.follow_up_date.label(class="form-label") }}
+                                    {{ form.follow_up_date(class="form-control" + (" is-invalid" if form.follow_up_date.errors else "")) }}
+                                    {% if form.follow_up_date.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.follow_up_date.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    {{ form.call_recording_url.label(class="form-label") }}
+                                    {{ form.call_recording_url(class="form-control" + (" is-invalid" if form.call_recording_url.errors else "")) }}
+                                    {% if form.call_recording_url.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.call_recording_url.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('crm.activities_list') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Log Call
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar with Help -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-question-circle"></i> Help & Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Call Directions</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge bg-success me-2">Inbound</span> Call received from customer</li>
+                        <li><span class="badge bg-primary me-2">Outbound</span> Call made to customer</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h6>Call Outcomes</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge bg-success me-2">Successful</span> Call completed successfully</li>
+                        <li><span class="badge bg-warning me-2">No Answer</span> No one answered</li>
+                        <li><span class="badge bg-info me-2">Voicemail</span> Left voicemail</li>
+                        <li><span class="badge bg-danger me-2">Busy</span> Line was busy</li>
+                        <li><span class="badge bg-secondary me-2">Wrong Number</span> Wrong number dialed</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h6>Tips</h6>
+                    <ul class="small">
+                        <li>Always log important call details for future reference</li>
+                        <li>Set follow-up dates for calls that require action</li>
+                        <li>Include key points discussed in call notes</li>
+                        <li>Link calls to relevant companies, contacts, or deals</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

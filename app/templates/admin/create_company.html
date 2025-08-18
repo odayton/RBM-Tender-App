@@ -1,0 +1,180 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create Company{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">
+        <a href="{{ url_for('crm.customers_dashboard') }}">
+            <i class="fas fa-users mr-1"></i>Customers
+        </a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{{ url_for('crm.companies_list') }}">
+            <i class="fas fa-building mr-1"></i>Companies
+        </a>
+    </li>
+    <li class="breadcrumb-item active">Create Company</li>
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-5 mb-2">
+                <i class="fas fa-building text-primary mr-3"></i>Create New Company
+            </h1>
+            <p class="text-muted lead mb-0">Add a new company to your customer database</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('crm.companies_list') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-list mr-2"></i>View All Companies
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="card company-form-card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="header-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="header-content">
+                            <h4 class="mb-1">Company Information</h4>
+                            <p class="text-muted mb-0">Fill in the details below to create a new company</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.add_item', item_type='company') }}" class="needs-validation company-form" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Company Information Section -->
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-building text-primary mr-2"></i>Company Details
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-12 mb-4">
+                                    <label for="company_name" class="form-label fw-bold">
+                                        {{ form.company_name.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-building"></i>
+                                        </span>
+                                        {{ form.company_name(class="form-control", placeholder="Enter company name (e.g., ABC Corporation)") }}
+                                    </div>
+                                    {% if form.company_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.company_name.errors %}
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information Section -->
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-phone text-primary mr-2"></i>Contact Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="phone_number" class="form-label fw-bold">{{ form.phone_number.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-phone"></i>
+                                        </span>
+                                        {{ form.phone_number(class="form-control", placeholder="+61 2 1234 5678") }}
+                                    </div>
+                                    {% if form.phone_number.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.phone_number.errors %}
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="website" class="form-label fw-bold">{{ form.website.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-globe"></i>
+                                        </span>
+                                        {{ form.website(class="form-control", placeholder="https://www.example.com") }}
+                                    </div>
+                                    {% if form.website.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.website.errors %}
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email Domain Section -->
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-at text-primary mr-2"></i>Email Domain Configuration
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-12 mb-4">
+                                    <label for="domain" class="form-label fw-bold">{{ form.domain.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-at"></i>
+                                        </span>
+                                        {{ form.domain(class="form-control", placeholder="example.com") }}
+                                    </div>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle text-info mr-1"></i>
+                                        Contacts with this email domain will be automatically assigned to this company
+                                    </div>
+                                    {% if form.domain.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.domain.errors %}
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="form-actions">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ url_for('crm.companies_list') }}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-arrow-left mr-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save mr-2"></i>{{ form.submit.label }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_forms.css') }}">
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_forms.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_forms_enhanced.js') }}"></script>
+{% endblock %}
+{% endblock %}

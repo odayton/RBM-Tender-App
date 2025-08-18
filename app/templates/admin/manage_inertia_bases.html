@@ -1,0 +1,34 @@
+{% extends "admin/manage_base.html" %}
+
+{% block data_type %}Inertia Bases{% endblock %}
+{% block data_type_header %}Inertia Bases{% endblock %}
+{% block data_type_upload %}Inertia Base{% endblock %}
+{% block data_type_list %}Inertia Bases{% endblock %}
+
+{% block table_headers %}
+    <th>Part Number</th>
+    <th>Length</th>
+    <th>Width</th>
+    <th>Height</th>
+    <th>Spring Mount Height</th>
+    <th>Weight</th>
+    <th>Spring Amount</th>
+    <th>Spring Load</th>
+    <th>Cost</th>
+{% endblock %}
+
+{% block table_rows %}
+    {% for base in items %}
+    <tr>
+        <td>{{ base.PartNumber }}</td>
+        <td>{{ base.Length }}</td>
+        <td>{{ base.Width }}</td>
+        <td>{{ base.Height }}</td>
+        <td>{{ base.SpringMountHeight }}</td>
+        <td>{{ base.Weight }}</td>
+        <td>{{ base.SpringQty }}</td>
+        <td>{{ base.SpringLoad }}</td>
+        <td>{{ base.Cost }}</td>
+    </tr>
+    {% endfor %}
+{% endblock %}

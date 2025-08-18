@@ -1,0 +1,18 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Simple Test{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <h1>Simple Test Page</h1>
+    <p>This is a simple test to verify that the CRM templates are working.</p>
+    
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Test Content</h5>
+            <p class="card-text">If you can see this, the template is working correctly.</p>
+            <a href="{{ url_for('crm.customers_dashboard') }}" class="btn btn-primary">Go to Customers Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

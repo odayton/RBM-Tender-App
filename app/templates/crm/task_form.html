@@ -1,0 +1,293 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ title }} - CRM{% endblock %}
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/task-board.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/task-form.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-tasks text-primary"></i> {{ title }}
+                    </h1>
+                    <p class="text-muted mb-0">Create and manage your task</p>
+                </div>
+                <div class="quick-actions">
+                    <a href="{{ url_for('crm.tasks_list') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" form="taskForm" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Task
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" id="taskForm" class="needs-validation" novalidate>
+        {{ form.hidden_tag() }}
+        
+        <div class="row">
+            <!-- Main Task Details -->
+            <div class="col-lg-8">
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h6><i class="fas fa-info-circle text-primary"></i> Basic Information</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                {{ form.title.label(class="form-label fw-bold") }}
+                                {{ form.title(class="form-control form-control-lg" + (" is-invalid" if form.title.errors else ""), placeholder="Enter task title...") }}
+                                {% if form.title.errors %}
+                                    <div class="invalid-feedback">{{ form.title.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.task_type.label(class="form-label fw-bold") }}
+                                {{ form.task_type(class="form-select" + (" is-invalid" if form.task_type.errors else "")) }}
+                                {% if form.task_type.errors %}
+                                    <div class="invalid-feedback">{{ form.task_type.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label fw-bold") }}
+                        {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="4", placeholder="Describe what needs to be done...") }}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback">{{ form.description.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Task Management -->
+                <div class="form-section">
+                    <h6><i class="fas fa-cogs text-primary"></i> Task Management</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                {{ form.priority.label(class="form-label fw-bold") }}
+                                {{ form.priority(class="form-select" + (" is-invalid" if form.priority.errors else "")) }}
+                                {% if form.priority.errors %}
+                                    <div class="invalid-feedback">{{ form.priority.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                {{ form.status.label(class="form-label fw-bold") }}
+                                {{ form.status(class="form-select" + (" is-invalid" if form.status.errors else "")) }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback">{{ form.status.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.assigned_to_id.label(class="form-label fw-bold") }}
+                                {{ form.assigned_to_id(class="form-select" + (" is-invalid" if form.assigned_to_id.errors else "")) }}
+                                {% if form.assigned_to_id.errors %}
+                                    <div class="invalid-feedback">{{ form.assigned_to_id.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subtasks -->
+                <div class="form-section">
+                    <h6><i class="fas fa-list-check text-primary"></i> Subtasks</h6>
+                    
+                    <div id="subtasksContainer">
+                        <!-- Existing subtasks will be loaded here -->
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <input type="text" id="newSubtaskInput" class="form-control" placeholder="Add a subtask...">
+                        <button type="button" id="addSubtaskBtn" class="btn btn-outline-primary">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-section">
+                    <h6><i class="fas fa-sticky-note text-primary"></i> Notes & Tags</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                {{ form.notes.label(class="form-label fw-bold") }}
+                                {{ form.notes(class="form-control" + (" is-invalid" if form.notes.errors else ""), rows="3", placeholder="Add any additional notes...") }}
+                                {% if form.notes.errors %}
+                                    <div class="invalid-feedback">{{ form.notes.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.tags.label(class="form-label fw-bold") }}
+                                {{ form.tags(class="form-control" + (" is-invalid" if form.tags.errors else ""), placeholder="tag1, tag2, tag3") }}
+                                {% if form.tags.errors %}
+                                    <div class="invalid-feedback">{{ form.tags.errors[0] }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Separate tags with commas</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Timing -->
+                <div class="form-section">
+                    <h6><i class="fas fa-clock text-primary"></i> Timing</h6>
+                    
+                    <div class="mb-3">
+                        {{ form.due_date.label(class="form-label fw-bold") }}
+                        {{ form.due_date(class="form-control" + (" is-invalid" if form.due_date.errors else "")) }}
+                        {% if form.due_date.errors %}
+                            <div class="invalid-feedback">{{ form.due_date.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.start_date.label(class="form-label fw-bold") }}
+                        {{ form.start_date(class="form-control" + (" is-invalid" if form.start_date.errors else "")) }}
+                        {% if form.start_date.errors %}
+                            <div class="invalid-feedback">{{ form.start_date.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.estimated_hours.label(class="form-label fw-bold") }}
+                        {{ form.estimated_hours(class="form-control" + (" is-invalid" if form.estimated_hours.errors else ""), placeholder="1.5") }}
+                        {% if form.estimated_hours.errors %}
+                            <div class="invalid-feedback">{{ form.estimated_hours.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Related Entities -->
+                <div class="form-section">
+                    <h6><i class="fas fa-link text-primary"></i> Related Entities</h6>
+                    
+                    <div class="mb-3">
+                        {{ form.company_id.label(class="form-label fw-bold") }}
+                        {{ form.company_id(class="form-select" + (" is-invalid" if form.company_id.errors else "")) }}
+                        {% if form.company_id.errors %}
+                            <div class="invalid-feedback">{{ form.company_id.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.contact_id.label(class="form-label fw-bold") }}
+                        {{ form.contact_id(class="form-select" + (" is-invalid" if form.contact_id.errors else "")) }}
+                        {% if form.contact_id.errors %}
+                            <div class="invalid-feedback">{{ form.contact_id.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.deal_id.label(class="form-label fw-bold") }}
+                        {{ form.deal_id(class="form-select" + (" is-invalid" if form.deal_id.errors else "")) }}
+                        {% if form.deal_id.errors %}
+                            <div class="invalid-feedback">{{ form.deal_id.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recurring Settings -->
+                <div class="form-section">
+                    <h6><i class="fas fa-redo text-primary"></i> Recurring Settings</h6>
+                    
+                    <div class="form-check mb-3">
+                        {{ form.is_recurring(class="form-check-input" + (" is-invalid" if form.is_recurring.errors else "")) }}
+                        {{ form.is_recurring.label(class="form-check-label fw-bold") }}
+                        {% if form.is_recurring.errors %}
+                            <div class="invalid-feedback">{{ form.is_recurring.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div id="recurringOptions" style="display: none;">
+                        <div class="mb-3">
+                            {{ form.recurrence_pattern.label(class="form-label fw-bold") }}
+                            {{ form.recurrence_pattern(class="form-select" + (" is-invalid" if form.recurrence_pattern.errors else "")) }}
+                            {% if form.recurrence_pattern.errors %}
+                                <div class="invalid-feedback">{{ form.recurrence_pattern.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.recurrence_interval.label(class="form-label fw-bold") }}
+                            {{ form.recurrence_interval(class="form-control" + (" is-invalid" if form.recurrence_interval.errors else ""), placeholder="1") }}
+                            {% if form.recurrence_interval.errors %}
+                                <div class="invalid-feedback">{{ form.recurrence_interval.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Subtask Template -->
+<template id="subtaskTemplate">
+    <div class="subtask-item" data-subtask-id="">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center flex-grow-1">
+                <input type="checkbox" class="form-check-input me-3 subtask-checkbox">
+                <div class="flex-grow-1">
+                    <input type="text" class="form-control border-0 bg-transparent subtask-title" placeholder="Subtask title...">
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-subtask">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/task-board.js') }}"></script>
+<script src="{{ url_for('static', filename='js/task-form.js') }}"></script>
+<script>
+// Load existing subtasks if editing (template-specific logic)
+{% if task and task.subtasks %}
+    document.addEventListener('DOMContentLoaded', function() {
+        {% for subtask in task.subtasks %}
+            addSubtask('{{ subtask.title }}');
+            const lastSubtask = document.getElementById('subtasksContainer').lastElementChild;
+            if (lastSubtask) {
+                const checkbox = lastSubtask.querySelector('.subtask-checkbox');
+                const completedInput = lastSubtask.querySelector('input[name$="[completed]"]');
+                if ({{ 'true' if subtask.completed else 'false' }}) {
+                    checkbox.checked = true;
+                    lastSubtask.classList.add('completed');
+                    completedInput.value = 'true';
+                }
+            }
+        {% endfor %}
+    });
+{% endif %}
+</script>
+{% endblock %} 

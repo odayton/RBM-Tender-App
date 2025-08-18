@@ -1,0 +1,37 @@
+# Flask
+Flask>=2.2.0
+
+# Database
+Flask-SQLAlchemy>=3.0.0
+Flask-Migrate
+
+# Security and Authentication
+Flask-Login
+Flask-Security-Too
+email_validator
+
+# Forms
+Flask-WTF
+
+# Caching
+Flask-Caching
+redis
+
+# Utilities
+python-dotenv
+psycopg2-binary
+PyYAML
+openpyxl
+pandas
+XlsxWriter
+numpy
+scipy
+matplotlib
+
+# PDF Generation
+playwright>=1.40.0
+weasyprint>=60.0
+
+Flask-Security-Too==5.6.2
+PyJWT==2.8.0
+WTForms-SQLAlchemy==0.3

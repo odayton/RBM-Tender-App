@@ -1,0 +1,19 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+    Manual Update
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Manual Update</h2>
+    <form method="post" action="{{ url_for('pumps.manual_update') }}" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="file">Upload Excel File</label>
+            <input type="file" class="form-control" id="file" name="file">
+        </div>
+        <!-- Add other fields here -->
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock %}

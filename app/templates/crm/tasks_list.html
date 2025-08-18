@@ -1,0 +1,742 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Tasks - Kanban Board{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item active">Tasks</li>
+{% endblock %}
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/task-board.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/kanban-board.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <!-- Header with Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-tasks text-primary"></i> 
+                        Task Kanban Board
+                    </h1>
+                    <p class="text-muted mb-0">Visual task management with drag & drop</p>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#sortModal">
+                        <i class="fas fa-sort"></i> Sort
+                    </button>
+                    <a href="{{ url_for('crm.create_task') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Task
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ tasks.items|selectattr('status', 'equalto', 'pending')|list|length }}</h4>
+                            <p class="card-text">Not Started</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ tasks.items|selectattr('status', 'equalto', 'in_progress')|list|length }}</h4>
+                            <p class="card-text">In Progress</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-play fa-2x stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-success text-white stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ tasks.items|selectattr('status', 'equalto', 'completed')|list|length }}</h4>
+                            <p class="card-text">Completed</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-white stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ tasks.items|selectattr('status', 'equalto', 'deferred')|list|length }}</h4>
+                            <p class="card-text">Deferred</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-pause fa-2x stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ tasks.items|selectattr('status', 'equalto', 'cancelled')|list|length }}</h4>
+                            <p class="card-text">Cancelled</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-times-circle fa-2x stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-dark text-white stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ tasks.total }}</h4>
+                            <p class="card-text">Total</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tasks fa-2x stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kanban Board -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-columns"></i> Kanban Board
+                        </h5>
+                        <div class="btn-group btn-group-sm view-toggle">
+                            <button type="button" class="btn btn-outline-secondary active" id="kanbanView">
+                                <i class="fas fa-columns"></i> Kanban
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="listView">
+                                <i class="fas fa-list"></i> List
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Kanban View -->
+                    <div id="kanbanViewContent">
+                        <div class="kanban-board">
+                            <!-- Not Started Column -->
+                            <div class="kanban-column" data-status="pending">
+                                <div class="kanban-column-header bg-secondary text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-clock"></i> Not Started
+                                        <span class="badge bg-light text-dark ms-2">{{ tasks.items|selectattr('status', 'equalto', 'pending')|list|length }}</span>
+                                    </h6>
+                                </div>
+                                <div class="kanban-column-content" id="pending-tasks">
+                                    {% for task in tasks.items %}
+                                        {% if task.status.value == 'pending' %}
+                                        <div class="kanban-card" data-task-id="{{ task.id }}" draggable="true">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-body p-3">
+                                                    <!-- Task Header -->
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h6 class="card-title mb-0">{{ task.title }}</h6>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                                <i class="fas fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li><a class="dropdown-item" href="{{ url_for('crm.view_task', task_id=task.id) }}">
+                                                                    <i class="fas fa-eye"></i> View
+                                                                </a></li>
+                                                                <li><a class="dropdown-item" href="{{ url_for('crm.edit_task', task_id=task.id) }}">
+                                                                    <i class="fas fa-edit"></i> Edit
+                                                                </a></li>
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask({{ task.id }})">
+                                                                    <i class="fas fa-trash"></i> Delete
+                                                                </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Task Description -->
+                                                    <p class="text-muted small mb-2">{{ task.description[:100] }}{% if task.description|length > 100 %}...{% endif %}</p>
+                                                    
+                                                    <!-- Priority Badge -->
+                                                    <div class="mb-2">
+                                                        <span class="badge bg-{{ task.priority.value.lower() }}">
+                                                            {{ task.priority.value }}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <!-- Task Meta -->
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <!-- Owner Avatar -->
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-sm me-2">
+                                                                <img src="https://ui-avatars.com/api/?name={{ task.assigned_to.username }}&background=random" 
+                                                                     class="rounded-circle" width="24" height="24" alt="{{ task.assigned_to.username }}">
+                                                            </div>
+                                                            <small class="text-muted">{{ task.assigned_to.username }}</small>
+                                                        </div>
+                                                        
+                                                        <!-- Due Date -->
+                                                        <small class="text-muted">
+                                                            {% if task.due_date %}
+                                                                <i class="fas fa-calendar"></i> {{ task.due_date.strftime('%b %d') }}
+                                                            {% endif %}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- In Progress Column -->
+                            <div class="kanban-column" data-status="in_progress">
+                                <div class="kanban-column-header bg-info text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-play"></i> In Progress
+                                        <span class="badge bg-light text-dark ms-2">{{ tasks.items|selectattr('status', 'equalto', 'in_progress')|list|length }}</span>
+                                    </h6>
+                                </div>
+                                <div class="kanban-column-content" id="in-progress-tasks">
+                                    {% for task in tasks.items %}
+                                        {% if task.status.value == 'in_progress' %}
+                                        <div class="kanban-card" data-task-id="{{ task.id }}" draggable="true">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-body p-3">
+                                                    <!-- Task Header -->
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h6 class="card-title mb-0">{{ task.title }}</h6>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                                <i class="fas fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li><a class="dropdown-item" href="{{ url_for('crm.view_task', task_id=task.id) }}">
+                                                                    <i class="fas fa-eye"></i> View
+                                                                </a></li>
+                                                                <li><a class="dropdown-item" href="{{ url_for('crm.edit_task', task_id=task.id) }}">
+                                                                    <i class="fas fa-edit"></i> Edit
+                                                                </a></li>
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask({{ task.id }})">
+                                                                    <i class="fas fa-trash"></i> Delete
+                                                                </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Task Description -->
+                                                    <p class="text-muted small mb-2">{{ task.description[:100] }}{% if task.description|length > 100 %}...{% endif %}</p>
+                                                    
+                                                    <!-- Progress Bar -->
+                                                    <div class="progress mb-2" style="height: 6px;">
+                                                        <div class="progress-bar bg-info" style="width: {{ task.get_progress_percentage() }}%"></div>
+                                                    </div>
+                                                    
+                                                    <!-- Priority Badge -->
+                                                    <div class="mb-2">
+                                                        <span class="badge bg-{{ task.priority.value.lower() }}">
+                                                            {{ task.priority.value }}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <!-- Task Meta -->
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <!-- Owner Avatar -->
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-sm me-2">
+                                                                <img src="https://ui-avatars.com/api/?name={{ task.assigned_to.username }}&background=random" 
+                                                                     class="rounded-circle" width="24" height="24" alt="{{ task.assigned_to.username }}">
+                                                            </div>
+                                                            <small class="text-muted">{{ task.assigned_to.username }}</small>
+                                                        </div>
+                                                        
+                                                        <!-- Due Date -->
+                                                        <small class="text-muted">
+                                                            {% if task.due_date %}
+                                                                <i class="fas fa-calendar"></i> {{ task.due_date.strftime('%b %d') }}
+                                                            {% endif %}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Completed Column -->
+                            <div class="kanban-column" data-status="completed">
+                                <div class="kanban-column-header bg-success text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-check-circle"></i> Completed
+                                        <span class="badge bg-light text-dark ms-2">{{ tasks.items|selectattr('status', 'equalto', 'completed')|list|length }}</span>
+                                    </h6>
+                                </div>
+                                <div class="kanban-column-content" id="completed-tasks">
+                                    {% for task in tasks.items %}
+                                        {% if task.status.value == 'completed' %}
+                                        <div class="kanban-card" data-task-id="{{ task.id }}" draggable="true">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-body p-3">
+                                                    <!-- Task Header -->
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h6 class="card-title mb-0">{{ task.title }}</h6>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                                <i class="fas fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li><a class="dropdown-item" href="{{ url_for('crm.view_task', task_id=task.id) }}">
+                                                                    <i class="fas fa-eye"></i> View
+                                                                </a></li>
+                                                                <li><a class="dropdown-item" href="{{ url_for('crm.edit_task', task_id=task.id) }}">
+                                                                    <i class="fas fa-edit"></i> Edit
+                                                                </a></li>
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask({{ task.id }})">
+                                                                    <i class="fas fa-trash"></i> Delete
+                                                                </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Task Description -->
+                                                    <p class="text-muted small mb-2">{{ task.description[:100] }}{% if task.description|length > 100 %}...{% endif %}</p>
+                                                    
+                                                    <!-- Priority Badge -->
+                                                    <div class="mb-2">
+                                                        <span class="badge bg-{{ task.priority.value.lower() }}">
+                                                            {{ task.priority.value }}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <!-- Task Meta -->
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <!-- Owner Avatar -->
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-sm me-2">
+                                                                <img src="https://ui-avatars.com/api/?name={{ task.assigned_to.username }}&background=random" 
+                                                                     class="rounded-circle" width="24" height="24" alt="{{ task.assigned_to.username }}">
+                                                            </div>
+                                                            <small class="text-muted">{{ task.assigned_to.username }}</small>
+                                                        </div>
+                                                        
+                                                        <!-- Completion Date -->
+                                                        <small class="text-muted">
+                                                            {% if task.completed_date %}
+                                                                <i class="fas fa-check"></i> {{ task.completed_date.strftime('%b %d') }}
+                                                            {% endif %}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Deferred Column -->
+                            <div class="kanban-column" data-status="deferred">
+                                <div class="kanban-column-header bg-warning text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-pause"></i> Deferred
+                                        <span class="badge bg-light text-dark ms-2">{{ tasks.items|selectattr('status', 'equalto', 'deferred')|list|length }}</span>
+                                    </h6>
+                                </div>
+                                <div class="kanban-column-content" id="deferred-tasks">
+                                    {% for task in tasks.items %}
+                                        {% if task.status.value == 'deferred' %}
+                                        <div class="kanban-card" data-task-id="{{ task.id }}" draggable="true">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-body p-3">
+                                                    <!-- Task Header -->
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h6 class="card-title mb-0">{{ task.title }}</h6>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                                <i class="fas fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li><a class="dropdown-item" href="{{ url_for('crm.view_task', task_id=task.id) }}">
+                                                                    <i class="fas fa-eye"></i> View
+                                                                </a></li>
+                                                                <li><a class="dropdown-item" href="{{ url_for('crm.edit_task', task_id=task.id) }}">
+                                                                    <i class="fas fa-edit"></i> Edit
+                                                                </a></li>
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask({{ task.id }})">
+                                                                    <i class="fas fa-trash"></i> Delete
+                                                                </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Task Description -->
+                                                    <p class="text-muted small mb-2">{{ task.description[:100] }}{% if task.description|length > 100 %}...{% endif %}</p>
+                                                    
+                                                    <!-- Priority Badge -->
+                                                    <div class="mb-2">
+                                                        <span class="badge bg-{{ task.priority.value.lower() }}">
+                                                            {{ task.priority.value }}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <!-- Task Meta -->
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <!-- Owner Avatar -->
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-sm me-2">
+                                                                <img src="https://ui-avatars.com/api/?name={{ task.assigned_to.username }}&background=random" 
+                                                                     class="rounded-circle" width="24" height="24" alt="{{ task.assigned_to.username }}">
+                                                            </div>
+                                                            <small class="text-muted">{{ task.assigned_to.username }}</small>
+                                                        </div>
+                                                        
+                                                        <!-- Due Date -->
+                                                        <small class="text-muted">
+                                                            {% if task.due_date %}
+                                                                <i class="fas fa-calendar"></i> {{ task.due_date.strftime('%b %d') }}
+                                                            {% endif %}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Cancelled Column -->
+                            <div class="kanban-column" data-status="cancelled">
+                                <div class="kanban-column-header bg-danger text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-times-circle"></i> Cancelled
+                                        <span class="badge bg-light text-dark ms-2">{{ tasks.items|selectattr('status', 'equalto', 'cancelled')|list|length }}</span>
+                                    </h6>
+                                </div>
+                                <div class="kanban-column-content" id="cancelled-tasks">
+                                    {% for task in tasks.items %}
+                                        {% if task.status.value == 'cancelled' %}
+                                        <div class="kanban-card" data-task-id="{{ task.id }}" draggable="true">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-body p-3">
+                                                    <!-- Task Header -->
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h6 class="card-title mb-0">{{ task.title }}</h6>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                                <i class="fas fa-ellipsis-v"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li><a class="dropdown-item" href="{{ url_for('crm.view_task', task_id=task.id) }}">
+                                                                    <i class="fas fa-eye"></i> View
+                                                                </a></li>
+                                                                <li><a class="dropdown-item" href="{{ url_for('crm.edit_task', task_id=task.id) }}">
+                                                                    <i class="fas fa-edit"></i> Edit
+                                                                </a></li>
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask({{ task.id }})">
+                                                                    <i class="fas fa-trash"></i> Delete
+                                                                </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Task Description -->
+                                                    <p class="text-muted small mb-2">{{ task.description[:100] }}{% if task.description|length > 100 %}...{% endif %}</p>
+                                                    
+                                                    <!-- Priority Badge -->
+                                                    <div class="mb-2">
+                                                        <span class="badge bg-{{ task.priority.value.lower() }}">
+                                                            {{ task.priority.value }}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <!-- Task Meta -->
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <!-- Owner Avatar -->
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-sm me-2">
+                                                                <img src="https://ui-avatars.com/api/?name={{ task.assigned_to.username }}&background=random" 
+                                                                     class="rounded-circle" width="24" height="24" alt="{{ task.assigned_to.username }}">
+                                                            </div>
+                                                            <small class="text-muted">{{ task.assigned_to.username }}</small>
+                                                        </div>
+                                                        
+                                                        <!-- Cancellation Date -->
+                                                        <small class="text-muted">
+                                                            {% if task.completed_date %}
+                                                                <i class="fas fa-times"></i> {{ task.completed_date.strftime('%b %d') }}
+                                                            {% endif %}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- List View (Hidden by default) -->
+                    <div id="listViewContent" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Task</th>
+                                        <th>Assigned To</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Due Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for task in tasks.items %}
+                                    <tr class="{% if task.is_overdue() %}table-danger{% elif task.is_due_soon() %}table-warning{% endif %}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm me-3">
+                                                    <img src="https://ui-avatars.com/api/?name={{ task.assigned_to.username }}&background=random" 
+                                                         class="rounded-circle" width="32" height="32" alt="{{ task.assigned_to.username }}">
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ task.title }}</h6>
+                                                    <small class="text-muted">{{ task.description[:50] }}{% if task.description|length > 50 %}...{% endif %}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ task.assigned_to.username }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ task.status.value.lower() }}">
+                                                {{ task.status.value|replace('_', ' ')|title }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ task.priority.value.lower() }}">
+                                                {{ task.priority.value }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {% if task.due_date %}
+                                                    {{ task.due_date.strftime('%b %d, %Y') }}
+                                                {% else %}
+                                                    No due date
+                                                {% endif %}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ url_for('crm.view_task', task_id=task.id) }}" 
+                                                   class="btn btn-outline-primary" title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('crm.edit_task', task_id=task.id) }}" 
+                                                   class="btn btn-outline-secondary" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-outline-danger" title="Delete"
+                                                        onclick="deleteTask({{ task.id }})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if tasks.pages > 1 %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Tasks pagination">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if tasks.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('crm.tasks_list', page=tasks.prev_num) }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in tasks.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != tasks.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('crm.tasks_list', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if tasks.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('crm.tasks_list', page=tasks.next_num) }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Filter Tasks</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="GET" action="{{ url_for('crm.tasks_list') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Search</label>
+                            {{ form.search_term(class="form-control") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Task Type</label>
+                            {{ form.task_type(class="form-select") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Status</label>
+                            {{ form.status(class="form-select") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Priority</label>
+                            {{ form.priority(class="form-select") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Assigned To</label>
+                            {{ form.assigned_to_id(class="form-select") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Company</label>
+                            {{ form.company_id(class="form-select") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Contact</label>
+                            {{ form.contact_id(class="form-select") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Deal</label>
+                            {{ form.deal_id(class="form-select") }}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sort Modal -->
+<div class="modal fade" id="sortModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sort Tasks</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="GET" action="{{ url_for('crm.tasks_list') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Sort By</label>
+                        <select name="sort_by" class="form-select">
+                            <option value="title">Title</option>
+                            <option value="due_date">Due Date</option>
+                            <option value="priority">Priority</option>
+                            <option value="status">Status</option>
+                            <option value="assigned_to">Assigned To</option>
+                            <option value="created_date">Created Date</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sort Order</label>
+                        <select name="sort_order" class="form-select">
+                            <option value="asc">Ascending</option>
+                            <option value="desc">Descending</option>
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Apply Sorting</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/task-board.js') }}"></script>
+<script src="{{ url_for('static', filename='js/kanban-board.js') }}"></script>
+{% endblock %} 

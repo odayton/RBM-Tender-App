@@ -1,0 +1,178 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Edit Profile - RBM Tender App{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-edit mr-2"></i>
+                        Edit Profile
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.username.id }}" class="form-label fw-bold">
+                                    {{ form.username.label }}
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    {{ form.username(class="form-control", placeholder="Enter username") }}
+                                </div>
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.username.errors %}
+                                            <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email.id }}" class="form-label fw-bold">
+                                    {{ form.email.label }}
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                    {{ form.email(class="form-control", placeholder="Enter email address") }}
+                                </div>
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.email.errors %}
+                                            <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id }}" class="form-label fw-bold">
+                                    {{ form.first_name.label }}
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    {{ form.first_name(class="form-control", placeholder="Enter first name") }}
+                                </div>
+                                {% if form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.first_name.errors %}
+                                            <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id }}" class="form-label fw-bold">
+                                    {{ form.last_name.label }}
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    {{ form.last_name(class="form-control", placeholder="Enter last name") }}
+                                </div>
+                                {% if form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.last_name.errors %}
+                                            <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.phone_number.id }}" class="form-label fw-bold">
+                                    {{ form.phone_number.label }}
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-phone"></i>
+                                    </span>
+                                    {{ form.phone_number(class="form-control", placeholder="Enter phone number") }}
+                                </div>
+                                {% if form.phone_number.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.phone_number.errors %}
+                                            <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Current Role</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </span>
+                                    <input type="text" class="form-control" value="{{ user.get_role_display_name() }}" readonly>
+                                </div>
+                                <small class="text-muted">Role can only be changed by an administrator.</small>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left mr-2"></i>Back to Profile
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-2"></i>{{ form.submit.label }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Profile Update Help
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>What You Can Update:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success mr-2"></i>Username</li>
+                                <li><i class="fas fa-check text-success mr-2"></i>Email Address</li>
+                                <li><i class="fas fa-check text-success mr-2"></i>First Name</li>
+                                <li><i class="fas fa-check text-success mr-2"></i>Last Name</li>
+                                <li><i class="fas fa-check text-success mr-2"></i>Phone Number</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>What You Cannot Update:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-times text-danger mr-2"></i>Role (Admin only)</li>
+                                <li><i class="fas fa-times text-danger mr-2"></i>Password (Use Change Password)</li>
+                                <li><i class="fas fa-times text-danger mr-2"></i>Account Status</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

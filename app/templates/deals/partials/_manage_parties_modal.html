@@ -1,0 +1,72 @@
+<div class="modal fade" id="managePartiesModal" tabindex="-1" role="dialog" aria-labelledby="managePartiesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="managePartiesModalLabel">Manage Parties Involved</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        
+        <h6>Associated Companies</h6>
+        <ul class="list-group mb-3">
+          {% for company in deal.companies %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ company.company_name }}
+            <form action="{{ url_for('deals.remove_party_from_deal', deal_id=deal.id) }}" method="POST" class="d-inline remove-party-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" name="company_id" value="{{ company.id }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Company">&times;</button>
+            </form>
+          </li>
+          {% else %}
+          <li class="list-group-item text-secondary">No companies associated.</li>
+          {% endfor %}
+        </ul>
+
+        <h6>Associated Contacts</h6>
+        <ul class="list-group mb-4">
+            {% for contact in deal.contacts %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ contact.name }} ({{contact.company.company_name}})
+              <form action="{{ url_for('deals.remove_party_from_deal', deal_id=deal.id) }}" method="POST" class="d-inline remove-party-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" name="contact_id" value="{{ contact.id }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Contact">&times;</button>
+              </form>
+            </li>
+            {% else %}
+            <li class="list-group-item text-secondary">No contacts associated.</li>
+            {% endfor %}
+        </ul>
+        <hr>
+
+        <h5 class="mt-4">Add New Parties</h5>
+        
+        <form action="{{ url_for('deals.add_party_to_deal', deal_id=deal.id) }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="form-group">
+                <label for="addCompanySelect">Add a Company</label>
+                <select id="addCompanySelect" name="company_id" class="form-control" style="width: 100%;"></select>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Company</button>
+        </form>
+
+        <hr>
+
+        <form action="{{ url_for('deals.add_party_to_deal', deal_id=deal.id) }}" method="POST" class="mt-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="form-group">
+                <label for="addContactSelect">Add a Contact</label>
+                <select id="addContactSelect" name="contact_id" class="form-control" style="width: 100%;"></select>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Contact</button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

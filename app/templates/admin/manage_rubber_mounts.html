@@ -1,0 +1,24 @@
+{% extends "admin/manage_base.html" %}
+
+{% block data_type %}Rubber Mounts{% endblock %}
+{% block data_type_header %}Rubber Mounts{% endblock %}
+{% block data_type_upload %}Rubber Mount{% endblock %}
+{% block data_type_list %}Rubber Mounts{% endblock %}
+
+{% block table_headers %}
+    <th>Part Number</th>
+    <th>Name</th>
+    <th>Weight</th>
+    <th>Cost</th>
+{% endblock %}
+
+{% block table_rows %}
+    {% for mount in items %}
+    <tr>
+        <td>{{ mount.PartNumber }}</td>
+        <td>{{ mount.Name }}</td>
+        <td>{{ mount.Weight }}</td>
+        <td>{{ mount.Cost }}</td>
+    </tr>
+    {% endfor %}
+{% endblock %}

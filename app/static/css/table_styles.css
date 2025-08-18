@@ -1,0 +1,129 @@
+/* /static/css/table_styles.css */
+
+/* --- Table Styles for Dark Theme --- */
+
+/* Override Bootstrap's default table styles for dark theme */
+.table {
+    color: var(--text-light);
+    background-color: var(--bg-dark-inset);
+    border-color: var(--border-color);
+}
+
+.table th,
+.table td {
+    color: var(--text-light);
+    border-color: var(--border-color);
+    background-color: transparent;
+}
+
+.table thead th {
+    color: var(--text-light);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: var(--border-color);
+    font-weight: 600;
+}
+
+.table tbody tr {
+    color: var(--text-light);
+    background-color: transparent;
+}
+
+.table tbody tr:hover {
+    color: var(--text-light);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Table striped rows */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.table-striped tbody tr:nth-of-type(odd):hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Table hover effect */
+.table-hover tbody tr:hover {
+    color: var(--text-light);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Table responsive wrapper */
+.table-responsive {
+    background-color: var(--bg-dark-inset);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+/* Card body tables */
+.card-body .table {
+    margin-bottom: 0;
+}
+
+/* Specific overrides for manage users page */
+.card .table th,
+.card .table td {
+    color: var(--text-light);
+    border-color: var(--border-color);
+}
+
+.card .table thead th {
+    color: var(--text-light);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom: 2px solid var(--border-color);
+}
+
+/* Badge colors in tables */
+.table .badge {
+    color: var(--text-light);
+}
+
+.table .badge-success {
+    background-color: var(--success-color);
+}
+
+.table .badge-danger {
+    background-color: var(--danger-color);
+}
+
+.table .badge-warning {
+    background-color: var(--warning-color);
+    color: var(--text-dark);
+}
+
+.table .badge-info {
+    background-color: var(--primary-color);
+}
+
+.table .badge-secondary {
+    background-color: var(--text-secondary);
+    color: var(--text-dark);
+}
+
+/* Text muted in tables */
+.table .text-muted {
+    color: var(--text-secondary) !important;
+}
+
+/* Button groups in tables */
+.table .btn-group .btn {
+    color: var(--text-light);
+}
+
+/* Form elements in tables */
+.table input,
+.table select,
+.table textarea {
+    color: var(--text-light);
+    background-color: var(--bg-dark);
+    border-color: var(--border-color);
+}
+
+.table input:focus,
+.table select:focus,
+.table textarea:focus {
+    color: var(--text-light);
+    background-color: var(--bg-dark);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(55, 119, 158, 0.25);
+}

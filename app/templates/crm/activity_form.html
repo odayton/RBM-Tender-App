@@ -1,0 +1,263 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ title }} - CRM{% endblock %}
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/task-board.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/activity-form.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-calendar-check text-primary"></i> {{ title }}
+                    </h1>
+                    <p class="text-muted mb-0">Create and manage your activity</p>
+                </div>
+                <div class="quick-actions">
+                    <a href="{{ url_for('crm.activities_list') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" form="activityForm" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Activity
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" id="activityForm" class="needs-validation" novalidate>
+        {{ form.hidden_tag() }}
+        
+        <div class="row">
+            <!-- Main Activity Details -->
+            <div class="col-lg-8">
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h6><i class="fas fa-info-circle text-primary"></i> Basic Information</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                {{ form.title.label(class="form-label fw-bold") }}
+                                {{ form.title(class="form-control form-control-lg" + (" is-invalid" if form.title.errors else ""), placeholder="Enter activity title...") }}
+                                {% if form.title.errors %}
+                                    <div class="invalid-feedback">{{ form.title.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.activity_type.label(class="form-label fw-bold") }}
+                                {{ form.activity_type(class="form-select" + (" is-invalid" if form.activity_type.errors else "")) }}
+                                {% if form.activity_type.errors %}
+                                    <div class="invalid-feedback">{{ form.activity_type.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label fw-bold") }}
+                        {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="4", placeholder="Describe the activity...") }}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback">{{ form.description.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Timing -->
+                <div class="form-section">
+                    <h6><i class="fas fa-clock text-primary"></i> Timing</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.scheduled_date.label(class="form-label fw-bold") }}
+                                {{ form.scheduled_date(class="form-control" + (" is-invalid" if form.scheduled_date.errors else "")) }}
+                                {% if form.scheduled_date.errors %}
+                                    <div class="invalid-feedback">{{ form.scheduled_date.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.duration_minutes.label(class="form-label fw-bold") }}
+                                {{ form.duration_minutes(class="form-control" + (" is-invalid" if form.duration_minutes.errors else ""), placeholder="30") }}
+                                {% if form.duration_minutes.errors %}
+                                    <div class="invalid-feedback">{{ form.duration_minutes.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Entities -->
+                <div class="form-section">
+                    <h6><i class="fas fa-link text-primary"></i> Related Entities</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.company_id.label(class="form-label fw-bold") }}
+                                {{ form.company_id(class="form-select" + (" is-invalid" if form.company_id.errors else "")) }}
+                                {% if form.company_id.errors %}
+                                    <div class="invalid-feedback">{{ form.company_id.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.contact_id.label(class="form-label fw-bold") }}
+                                {{ form.contact_id(class="form-select" + (" is-invalid" if form.contact_id.errors else "")) }}
+                                {% if form.contact_id.errors %}
+                                    <div class="invalid-feedback">{{ form.contact_id.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.deal_id.label(class="form-label fw-bold") }}
+                                {{ form.deal_id(class="form-select" + (" is-invalid" if form.deal_id.errors else "")) }}
+                                {% if form.deal_id.errors %}
+                                    <div class="invalid-feedback">{{ form.deal_id.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="form-section">
+                    <h6><i class="fas fa-sticky-note text-primary"></i> Additional Information</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.status.label(class="form-label fw-bold") }}
+                                {{ form.status(class="form-select" + (" is-invalid" if form.status.errors else "")) }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback">{{ form.status.errors[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.tags.label(class="form-label fw-bold") }}
+                                {{ form.tags(class="form-control" + (" is-invalid" if form.tags.errors else ""), placeholder="tag1, tag2, tag3") }}
+                                {% if form.tags.errors %}
+                                    <div class="invalid-feedback">{{ form.tags.errors[0] }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Separate tags with commas</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.outcome.label(class="form-label fw-bold") }}
+                        {{ form.outcome(class="form-control" + (" is-invalid" if form.outcome.errors else ""), rows="3", placeholder="What was the outcome of this activity?") }}
+                        {% if form.outcome.errors %}
+                            <div class="invalid-feedback">{{ form.outcome.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.next_action.label(class="form-label fw-bold") }}
+                        {{ form.next_action(class="form-control" + (" is-invalid" if form.next_action.errors else ""), rows="3", placeholder="What should be done next?") }}
+                        {% if form.next_action.errors %}
+                            <div class="invalid-feedback">{{ form.next_action.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Privacy Settings -->
+                <div class="form-section">
+                    <h6><i class="fas fa-eye-slash text-primary"></i> Privacy Settings</h6>
+                    
+                    <div class="private-indicator">
+                        <div class="form-check">
+                            {{ form.is_private(class="form-check-input" + (" is-invalid" if form.is_private.errors else "")) }}
+                            {{ form.is_private.label(class="form-check-label") }}
+                            {% if form.is_private.errors %}
+                                <div class="invalid-feedback">{{ form.is_private.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        <small class="form-text text-muted">Private activities are only visible to you</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Help & Tips -->
+                <div class="form-section">
+                    <h6><i class="fas fa-question-circle text-primary"></i> Help & Tips</h6>
+                    
+                    <div class="help-section">
+                        <h6>Activity Types</h6>
+                        <ul class="list-unstyled">
+                            <li><span class="badge bg-call me-2">Call</span> Phone conversations</li>
+                            <li><span class="badge bg-email me-2">Email</span> Email communications</li>
+                            <li><span class="badge bg-meeting me-2">Meeting</span> Face-to-face or virtual meetings</li>
+                            <li><span class="badge bg-note me-2">Note</span> General notes and observations</li>
+                            <li><span class="badge bg-task me-2">Task</span> Action items and to-dos</li>
+                            <li><span class="badge bg-follow-up me-2">Follow-up</span> Follow-up activities</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h6>Status Options</h6>
+                        <ul class="list-unstyled">
+                            <li><span class="badge bg-scheduled me-2">Scheduled</span> Planned for future</li>
+                            <li><span class="badge bg-in-progress me-2">In Progress</span> Currently being worked on</li>
+                            <li><span class="badge bg-completed me-2">Completed</span> Finished successfully</li>
+                            <li><span class="badge bg-cancelled me-2">Cancelled</span> Cancelled or abandoned</li>
+                            <li><span class="badge bg-deferred me-2">Deferred</span> Postponed to later</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h6>Tips</h6>
+                        <ul class="small">
+                            <li>Use tags to categorize activities for easier searching</li>
+                            <li>Private activities are only visible to you</li>
+                            <li>Link activities to companies, contacts, or deals for better organization</li>
+                            <li>Set scheduled dates to track time-sensitive activities</li>
+                            <li>Use the outcome field to record results and learnings</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="form-section">
+                    <h6><i class="fas fa-bolt text-primary"></i> Quick Actions</h6>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-secondary" onclick="resetActivityForm()">
+                            <i class="fas fa-undo"></i> Reset Form
+                        </button>
+                        <button type="button" class="btn btn-outline-info" onclick="loadActivityDraft()">
+                            <i class="fas fa-download"></i> Load Draft
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/task-board.js') }}"></script>
+<script src="{{ url_for('static', filename='js/activity-form.js') }}"></script>
+{% endblock %} 

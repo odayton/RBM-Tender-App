@@ -1,0 +1,154 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create {% if item_type == 'company' %}Company{% elif item_type == 'contact' %}Contact{% else %}{{ config.display_name[:-1] }}{% endif %}{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">
+        <a href="{{ url_for('admin.dashboard') }}">
+            <i class="fas fa-cogs mr-1"></i>Admin
+        </a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{{ url_for('admin.manage_items', item_type=item_type) }}">
+            <i class="fas fa-list mr-1"></i>{{ config.display_name }}
+        </a>
+    </li>
+    <li class="breadcrumb-item active">Create {{ config.display_name[:-1] }}</li>
+{% endblock %}
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_forms.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-5 mb-2">
+                <i class="fas fa-plus text-primary mr-3"></i>Create New {% if item_type == 'company' %}Company{% elif item_type == 'contact' %}Contact{% else %}{{ config.display_name[:-1] }}{% endif %}
+            </h1>
+            <p class="text-muted lead mb-0">Add a new {% if item_type == 'company' %}company{% elif item_type == 'contact' %}contact{% else %}{{ config.display_name[:-1].lower() }}{% endif %} to your database</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('admin.manage_items', item_type=item_type) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-list mr-2"></i>View All {{ config.display_name }}
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="card {% if item_type == 'company' %}company-form-card{% elif item_type == 'contact' %}contact-form-card{% else %}admin-form-card{% endif %}">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="header-icon">
+                            {% if item_type == 'company' %}
+                                <i class="fas fa-building"></i>
+                            {% elif item_type == 'contact' %}
+                                <i class="fas fa-user-circle"></i>
+                            {% else %}
+                                <i class="fas fa-plus"></i>
+                            {% endif %}
+                        </div>
+                        <div class="header-content">
+                            <h4 class="mb-1">{% if item_type == 'company' %}Company{% elif item_type == 'contact' %}Contact{% else %}{{ config.display_name[:-1] }}{% endif %} Information</h4>
+                            <p class="text-muted mb-0">Fill in the details below to create a new {% if item_type == 'company' %}company{% elif item_type == 'contact' %}contact{% else %}{{ config.display_name[:-1].lower() }}{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation {% if item_type == 'company' %}company-form{% elif item_type == 'contact' %}contact-form{% else %}admin-form{% endif %}" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Form Fields Section -->
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-edit text-primary mr-2"></i>{% if item_type == 'company' %}Company{% elif item_type == 'contact' %}Contact{% else %}{{ config.display_name[:-1] }}{% endif %} Details
+                            </h5>
+                            
+                            {% for field in form if field.widget.input_type != 'hidden' and field.name != 'submit' %}
+                                <div class="row">
+                                    <div class="col-md-12 mb-4">
+                                        <label for="{{ field.id }}" class="form-label fw-bold">
+                                            {{ field.label }}
+                                            {% if field.flags.required %}<span class="text-danger">*</span>{% endif %}
+                                        </label>
+                                        
+                                        {% if field.type == 'TextAreaField' %}
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-sticky-note"></i>
+                                                </span>
+                                                {{ field(class="form-control", rows="4", placeholder="Enter " + field.label.text.lower() + "...") }}
+                                            </div>
+                                        {% elif field.type == 'SelectField' %}
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-list"></i>
+                                                </span>
+                                                {{ field(class="form-control") }}
+                                            </div>
+                                        {% else %}
+                                            <div class="input-group {% if field.flags.required %}input-group-lg{% endif %}">
+                                                <span class="input-group-text">
+                                                    {% if 'email' in field.name %}
+                                                        <i class="fas fa-envelope"></i>
+                                                    {% elif 'phone' in field.name %}
+                                                        <i class="fas fa-phone"></i>
+                                                    {% elif 'name' in field.name %}
+                                                        <i class="fas fa-user"></i>
+                                                    {% elif 'website' in field.name %}
+                                                        <i class="fas fa-globe"></i>
+                                                    {% elif 'domain' in field.name %}
+                                                        <i class="fas fa-at"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-edit"></i>
+                                                    {% endif %}
+                                                </span>
+                                                {{ field(class="form-control", placeholder="Enter " + field.label.text.lower()) }}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if field.description %}
+                                            <div class="form-text">
+                                                <i class="fas fa-info-circle text-info mr-1"></i>
+                                                {{ field.description }}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if field.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in field.errors %}
+                                                    <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="form-actions">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ url_for('admin.manage_items', item_type=item_type) }}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-arrow-left mr-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save mr-2"></i>{{ form.submit.label if form.submit else 'Save ' + ('Company' if item_type == 'company' else 'Contact' if item_type == 'contact' else config.display_name[:-1]) }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_forms.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_forms_enhanced.js') }}"></script>
+{% endblock %}

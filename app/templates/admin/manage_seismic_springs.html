@@ -1,0 +1,32 @@
+{% extends "admin/manage_base.html" %}
+
+{% block data_type %}Seismic Springs{% endblock %}
+{% block data_type_header %}Seismic Springs{% endblock %}
+{% block data_type_upload %}Seismic Spring{% endblock %}
+{% block data_type_list %}Seismic Springs{% endblock %}
+
+{% block table_headers %}
+    <th>Part Number</th>
+    <th>Name</th>
+    <th>Max Load (kg)</th>
+    <th>Static Deflection</th>
+    <th>Spring Constant (kg/mm)</th>
+    <th>Stripe 1</th>
+    <th>Stripe 2</th>
+    <th>Cost</th>
+{% endblock %}
+
+{% block table_rows %}
+    {% for spring in items %}
+    <tr>
+        <td>{{ spring.PartNumber }}</td>
+        <td>{{ spring.Name }}</td>
+        <td>{{ spring.MaxLoad_kg }}</td>
+        <td>{{ spring.StaticDeflection }}</td>
+        <td>{{ spring.SpringConstant_kg_mm }}</td>
+        <td>{{ spring.Stripe1 }}</td>
+        <td>{{ spring.Stripe2 }}</td>
+        <td>{{ spring.Cost }}</td>
+    </tr>
+    {% endfor %}
+{% endblock %}

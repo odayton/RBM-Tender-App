@@ -1,0 +1,312 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create Product - RBM Tender App{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Create New Product</h1>
+            <p class="text-muted">Add a new product to your catalog</p>
+        </div>
+        <div>
+            <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Products
+            </a>
+        </div>
+    </div>
+
+    <!-- Product Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Product Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('products.create_product') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <!-- Basic Information -->
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Basic Information</h6>
+                                
+                                <div class="mb-3">
+                                    {{ form.sku.label(class="form-label") }}
+                                    {{ form.sku(class="form-control" + (" is-invalid" if form.sku.errors else "")) }}
+                                    {% if form.sku.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.sku.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Unique product identifier</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.name.label(class="form-label") }}
+                                    {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                                    {% if form.name.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.category.label(class="form-label") }}
+                                    {{ form.category(class="form-select" + (" is-invalid" if form.category.errors else "")) }}
+                                    {% if form.category.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.category.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.brand.label(class="form-label") }}
+                                    {{ form.brand(class="form-control" + (" is-invalid" if form.brand.errors else "")) }}
+                                    {% if form.brand.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.brand.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.model_number.label(class="form-label") }}
+                                    {{ form.model_number(class="form-control" + (" is-invalid" if form.model_number.errors else "")) }}
+                                    {% if form.model_number.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.model_number.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Pricing and Inventory -->
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Pricing & Inventory</h6>
+                                
+                                <div class="mb-3">
+                                    {{ form.unit_price.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        {{ form.unit_price(class="form-control" + (" is-invalid" if form.unit_price.errors else "")) }}
+                                    </div>
+                                    {% if form.unit_price.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.unit_price.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.stock_quantity.label(class="form-label") }}
+                                    {{ form.stock_quantity(class="form-control" + (" is-invalid" if form.stock_quantity.errors else "")) }}
+                                    {% if form.stock_quantity.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.stock_quantity.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.reorder_level.label(class="form-label") }}
+                                    {{ form.reorder_level(class="form-control" + (" is-invalid" if form.reorder_level.errors else "")) }}
+                                    {% if form.reorder_level.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.reorder_level.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Stock level that triggers reorder alert</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.lead_time_days.label(class="form-label") }}
+                                    {{ form.lead_time_days(class="form-control" + (" is-invalid" if form.lead_time_days.errors else "")) }}
+                                    {% if form.lead_time_days.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.lead_time_days.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Days to receive new stock</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.is_active(class="form-check-input") }}
+                                        {{ form.is_active.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Physical Properties -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="mb-3">Physical Properties</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.weight_kg.label(class="form-label") }}
+                                    <div class="input-group">
+                                        {{ form.weight_kg(class="form-control" + (" is-invalid" if form.weight_kg.errors else "")) }}
+                                        <span class="input-group-text">kg</span>
+                                    </div>
+                                    {% if form.weight_kg.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.weight_kg.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.dimensions.label(class="form-label") }}
+                                    {{ form.dimensions(class="form-control" + (" is-invalid" if form.dimensions.errors else "")) }}
+                                    {% if form.dimensions.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.dimensions.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Format: LxWxH cm (e.g., 30x20x15)</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Description and Notes -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h6 class="mb-3">Additional Information</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.description.label(class="form-label") }}
+                                    {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=4) }}
+                                    {% if form.description.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.description.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Detailed product description</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.notes.label(class="form-label") }}
+                                    {{ form.notes(class="form-control" + (" is-invalid" if form.notes.errors else ""), rows=4) }}
+                                    {% if form.notes.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.notes.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Internal notes and comments</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Create Product
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quick Tips</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Product Creation Tips</h6>
+                        <ul class="mb-0">
+                            <li>Use a clear, descriptive SKU that's easy to identify</li>
+                            <li>Set appropriate reorder levels to avoid stockouts</li>
+                            <li>Include detailed descriptions for better search results</li>
+                            <li>Add physical properties for shipping calculations</li>
+                            <li>Use categories to organize your product catalog</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Important Notes</h6>
+                        <ul class="mb-0">
+                            <li>SKU must be unique across all products</li>
+                            <li>Stock quantities cannot be negative</li>
+                            <li>Prices must be positive values</li>
+                            <li>Inactive products won't appear in quotes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-format SKU to uppercase
+document.getElementById('sku').addEventListener('input', function() {
+    this.value = this.value.toUpperCase();
+});
+
+// Auto-format dimensions
+document.getElementById('dimensions').addEventListener('input', function() {
+    // Remove any non-alphanumeric characters except x
+    this.value = this.value.replace(/[^0-9x]/gi, '');
+});
+
+// Validate form before submission
+document.querySelector('form').addEventListener('submit', function(e) {
+    const sku = document.getElementById('sku').value.trim();
+    const name = document.getElementById('name').value.trim();
+    const price = parseFloat(document.getElementById('unit_price').value);
+    
+    if (!sku || !name || price < 0) {
+        e.preventDefault();
+        alert('Please fill in all required fields correctly.');
+    }
+});
+</script>
+{% endblock %} 

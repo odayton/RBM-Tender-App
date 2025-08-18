@@ -1,0 +1,355 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ task.title }} - CRM{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">{{ task.title }}</h1>
+                <div class="btn-group">
+                    <a href="{{ url_for('crm.tasks_list') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Tasks
+                    </a>
+                    {% if task.assigned_to_id == current_user.id or current_user.is_admin() %}
+                    <a href="{{ url_for('crm.edit_task', task_id=task.id) }}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    {% if task.status.value != 'Completed' %}
+                    <button type="button" class="btn btn-success" onclick="completeTask({{ task.id }})">
+                        <i class="fas fa-check"></i> Mark Complete
+                    </button>
+                    {% endif %}
+                    <button type="button" class="btn btn-danger" onclick="deleteTask({{ task.id }})">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Task Details Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info-circle"></i> Task Details
+                        </h5>
+                        <div>
+                            <span class="badge bg-{{ task.task_type.value.lower() }} me-2">
+                                {{ task.task_type.value }}
+                            </span>
+                            <span class="badge bg-{{ task.priority.value.lower() }} me-2">
+                                {{ task.priority.value }}
+                            </span>
+                            <span class="badge bg-{{ task.status.value.lower() }}">
+                                {{ task.status.value }}
+                            </span>
+                            {% if task.is_recurring %}
+                                <i class="fas fa-redo text-muted ms-2" title="Recurring Task"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if task.description %}
+                    <div class="mb-4">
+                        <h6 class="text-primary">Description</h6>
+                        <p class="mb-0">{{ task.description|nl2br }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Timing</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Due Date:</strong> 
+                                    <span class="{% if task.is_overdue() %}text-danger{% elif task.is_due_soon() %}text-warning{% endif %}">
+                                        {{ task.due_date.strftime('%Y-%m-%d %H:%M') }}
+                                    </span>
+                                </li>
+                                {% if task.start_date %}
+                                <li><strong>Start Date:</strong> {{ task.start_date.strftime('%Y-%m-%d %H:%M') }}</li>
+                                {% endif %}
+                                {% if task.estimated_hours %}
+                                <li><strong>Estimated Hours:</strong> {{ task.estimated_hours }}</li>
+                                {% endif %}
+                                <li><strong>Created:</strong> {{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</li>
+                                {% if task.updated_at and task.updated_at != task.created_at %}
+                                <li><strong>Updated:</strong> {{ task.updated_at.strftime('%Y-%m-%d %H:%M') }}</li>
+                                {% endif %}
+                                {% if task.completed_at %}
+                                <li><strong>Completed:</strong> {{ task.completed_at.strftime('%Y-%m-%d %H:%M') }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Assignment & Relations</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Assigned to:</strong> {{ task.assigned_to.username }}</li>
+                                {% if task.company %}
+                                <li><strong>Company:</strong> <a href="#">{{ task.company.company_name }}</a></li>
+                                {% endif %}
+                                {% if task.contact %}
+                                <li><strong>Contact:</strong> <a href="#">{{ task.contact.name }}</a></li>
+                                {% endif %}
+                                {% if task.deal %}
+                                <li><strong>Deal:</strong> <a href="#">{{ task.deal.project_name }}</a></li>
+                                {% endif %}
+                                <li><strong>Created by:</strong> {{ task.created_by.username }}</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {% if task.is_recurring %}
+                    <div class="mb-4">
+                        <h6 class="text-primary">Recurrence</h6>
+                        <p class="mb-0">
+                            This task recurs {{ task.recurrence_pattern }} 
+                            {% if task.recurrence_interval > 1 %}
+                                every {{ task.recurrence_interval }} {{ task.recurrence_pattern }}s
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    {% if task.tags %}
+                    <div class="mb-4">
+                        <h6 class="text-primary">Tags</h6>
+                        <div>
+                            {% for tag in task.tags.split(',') %}
+                                <span class="badge bg-secondary me-1">{{ tag.strip() }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if task.notes %}
+                    <div class="mb-4">
+                        <h6 class="text-primary">Notes</h6>
+                        <p class="mb-0">{{ task.notes|nl2br }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Task History -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history"></i> Task History
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-1">Task Created</h6>
+                                    <small class="text-muted">{{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <p class="mb-1 text-muted">Task "{{ task.title }}" was created by {{ task.created_by.username }}</p>
+                            </div>
+                        </div>
+                        {% if task.updated_at and task.updated_at != task.created_at %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-1">Task Updated</h6>
+                                    <small class="text-muted">{{ task.updated_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <p class="mb-1 text-muted">Task was last modified</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if task.completed_at %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-1">Task Completed</h6>
+                                    <small class="text-muted">{{ task.completed_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <p class="mb-1 text-muted">Task was marked as completed</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Task Status -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar"></i> Task Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="{% if task.is_overdue() %}text-danger{% elif task.is_due_soon() %}text-warning{% else %}text-primary{% endif %}">
+                                {{ task.get_days_until_due() }}
+                            </h4>
+                            <small class="text-muted">
+                                {% if task.is_overdue() %}Days Overdue{% elif task.is_due_soon() %}Days Left{% else %}Days Left{% endif %}
+                            </small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">{{ task.estimated_hours or 0 }}</h4>
+                            <small class="text-muted">Hours</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if task.status.value != 'Completed' %}
+                        <button type="button" class="btn btn-success" onclick="completeTask({{ task.id }})">
+                            <i class="fas fa-check"></i> Mark Complete
+                        </button>
+                        {% endif %}
+                        <a href="{{ url_for('crm.create_activity') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-plus"></i> Create Related Activity
+                        </a>
+                        <a href="{{ url_for('crm.create_task') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-tasks"></i> Create Subtask
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Tasks -->
+            {% if task.company or task.contact or task.deal %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-link"></i> Related Tasks
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Related tasks will appear here based on shared companies, contacts, or deals.</p>
+                    <!-- This would be populated with related tasks -->
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function completeTask(taskId) {
+    if (confirm('Mark this task as completed?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/crm/tasks/${taskId}/complete`;
+        
+        // Add CSRF token if available
+        const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+        if (csrfTokenElement) {
+            const csrfToken = csrfTokenElement.getAttribute('content');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+            }
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function deleteTask(taskId) {
+    if (confirm('Are you sure you want to delete this task?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/crm/tasks/${taskId}/delete`;
+        
+        // Add CSRF token if available
+        const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+        if (csrfTokenElement) {
+            const csrfToken = csrfTokenElement.getAttribute('content');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+            }
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 3px solid #007bff;
+}
+
+.bg-call { background-color: #28a745 !important; }
+.bg-email { background-color: #17a2b8 !important; }
+.bg-meeting { background-color: #ffc107 !important; }
+.bg-note { background-color: #6f42c1 !important; }
+.bg-task { background-color: #fd7e14 !important; }
+.bg-follow-up { background-color: #e83e8c !important; }
+
+.bg-scheduled { background-color: #17a2b8 !important; }
+.bg-in-progress { background-color: #ffc107 !important; }
+.bg-completed { background-color: #28a745 !important; }
+.bg-cancelled { background-color: #dc3545 !important; }
+.bg-deferred { background-color: #6c757d !important; }
+
+.bg-low { background-color: #6c757d !important; }
+.bg-medium { background-color: #ffc107 !important; }
+.bg-high { background-color: #fd7e14 !important; }
+.bg-urgent { background-color: #dc3545 !important; }
+</style>
+{% endblock %} 

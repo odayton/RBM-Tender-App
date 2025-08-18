@@ -1,0 +1,319 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}CRM Dashboard{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item active">CRM Dashboard</li>
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">CRM Dashboard</h1>
+                <div class="btn-group">
+                    <a href="{{ url_for('crm.create_activity') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Log Activity
+                    </a>
+                    <a href="{{ url_for('crm.create_task') }}" class="btn btn-success">
+                        <i class="fas fa-tasks"></i> Create Task
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_tasks }}</h4>
+                            <p class="card-text">Total Tasks</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tasks fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ completed_tasks }}</h4>
+                            <p class="card-text">Completed Tasks</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ upcoming_tasks|length }}</h4>
+                            <p class="card-text">Upcoming Tasks</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ overdue_tasks|length }}</h4>
+                            <p class="card-text">Overdue Tasks</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Upcoming Tasks -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock"></i> Upcoming Tasks
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_tasks %}
+                        <div class="list-group list-group-flush">
+                            {% for task in upcoming_tasks %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <a href="{{ url_for('crm.view_task', task_id=task.id) }}">{{ task.title }}</a>
+                                        </h6>
+                                        <p class="mb-1 text-muted">{{ task.description[:100] }}{% if task.description|length > 100 %}...{% endif %}</p>
+                                        <small class="text-muted">
+                                            Due: {{ task.due_date.strftime('%Y-%m-%d %H:%M') }}
+                                            {% if task.company %}
+                                                | {{ task.company.company_name }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="badge badge-{{ task.priority.value.lower() }}">{{ task.priority.value }}</span>
+                                        <br>
+                                        <small class="text-muted">{{ task.get_days_until_due() }} days</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-3">
+                            <a href="{{ url_for('crm.tasks_list') }}" class="btn btn-outline-primary btn-sm">View All Tasks</a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No upcoming tasks.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Tasks -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Overdue Tasks
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if overdue_tasks %}
+                        <div class="list-group list-group-flush">
+                            {% for task in overdue_tasks %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <a href="{{ url_for('crm.view_task', task_id=task.id) }}">{{ task.title }}</a>
+                                        </h6>
+                                        <p class="mb-1 text-muted">{{ task.description[:100] }}{% if task.description|length > 100 %}...{% endif %}</p>
+                                        <small class="text-danger">
+                                            Overdue since: {{ task.due_date.strftime('%Y-%m-%d %H:%M') }}
+                                            {% if task.company %}
+                                                | {{ task.company.company_name }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="badge badge-danger">{{ task.priority.value }}</span>
+                                        <br>
+                                        <small class="text-danger">{{ abs(task.get_days_until_due()) }} days overdue</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-3">
+                            <a href="{{ url_for('crm.tasks_list') }}" class="btn btn-outline-danger btn-sm">View All Tasks</a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No overdue tasks. Great job!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Recent Activities -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history"></i> Recent Activities
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_activities %}
+                        <div class="timeline">
+                            {% for activity in recent_activities %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-{{ activity.activity_type.value.lower() }}"></div>
+                                <div class="timeline-content">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="mb-1">{{ activity.title }}</h6>
+                                        <small class="text-muted">{{ activity.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                    </div>
+                                    <p class="mb-1 text-muted">{{ activity.description[:150] }}{% if activity.description|length > 150 %}...{% endif %}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-tag"></i> {{ activity.activity_type.value }}
+                                            {% if activity.company %}
+                                                | <i class="fas fa-building"></i> {{ activity.company.company_name }}
+                                            {% endif %}
+                                            {% if activity.contact %}
+                                                | <i class="fas fa-user"></i> {{ activity.contact.name }}
+                                            {% endif %}
+                                        </small>
+                                        <a href="{{ url_for('crm.view_activity', activity_id=activity.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-3">
+                            <a href="{{ url_for('crm.activities_list') }}" class="btn btn-outline-primary btn-sm">View All Activities</a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No recent activities.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('crm.log_call') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-phone"></i> Log Call
+                        </a>
+                        <a href="{{ url_for('crm.log_email') }}" class="btn btn-outline-info">
+                            <i class="fas fa-envelope"></i> Log Email
+                        </a>
+                        <a href="{{ url_for('crm.log_meeting') }}" class="btn btn-outline-success">
+                            <i class="fas fa-users"></i> Log Meeting
+                        </a>
+                        <a href="{{ url_for('crm.create_note') }}" class="btn btn-outline-warning">
+                            <i class="fas fa-sticky-note"></i> Create Note
+                        </a>
+                        <a href="{{ url_for('crm.create_task') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-tasks"></i> Create Task
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Summary -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-day"></i> Today's Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ today_activities|length }}</h4>
+                            <small class="text-muted">Activities</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">{{ today_activities|selectattr('status', 'equalto', 'Completed')|list|length }}</h4>
+                            <small class="text-muted">Completed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 3px solid #007bff;
+}
+
+.bg-call { background-color: #28a745 !important; }
+.bg-email { background-color: #17a2b8 !important; }
+.bg-meeting { background-color: #ffc107 !important; }
+.bg-note { background-color: #6f42c1 !important; }
+.bg-task { background-color: #fd7e14 !important; }
+.bg-follow-up { background-color: #e83e8c !important; }
+</style>
+{% endblock %} 

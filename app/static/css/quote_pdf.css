@@ -1,0 +1,341 @@
+@page {
+    size: A4;
+    margin: 0.5cm 1.5cm 0.5cm 1.5cm; /* matched bottom margin to top margin */
+    @top-left {
+        content: element(header);
+    }
+}
+body {
+    font-family: 'Helvetica', 'Arial', sans-serif;
+    font-size: 12px;
+    color: #333333;
+    background: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+header {
+    position: running(header);
+    width: 100%;
+}
+
+footer {
+    width: 100%;
+    text-align: center;
+    font-size: 9px;
+    color: #555555;
+    border-top: 1px solid #cccccc;
+    padding-top: 8px;
+    margin-top: 0;
+    page-break-inside: avoid;
+}
+
+/* Content wrapper for proper layout */
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Quote body styling */
+.quote-body {
+    max-width: 1050px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Footer styling for last page only */
+.header-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+    border-radius: 6px 6px 0 0;
+}
+.header-table td {
+    border: none;
+    padding: 10px 0 10px 10px;
+    vertical-align: top;
+}
+.logo {
+    max-width: 180px;
+    max-height: 60px;
+    background: #fff;
+    border-radius: 4px;
+    padding: 4px;
+}
+.quote-title-container {
+    padding: 10px 10px 5px 10px;
+    color: #fff;
+    text-align: right;
+    font-size: 22px;
+    font-weight: bold;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+.quote-title {
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+.info-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 4px;
+    margin-bottom: 10px;
+}
+.info-table td {
+    border: none;
+    padding: 2px 0;
+    vertical-align: top;
+}
+.text-right { text-align: right; }
+
+.main-table {
+    width: 100%;
+    max-width: 1050px;
+    border-collapse: collapse;
+    margin-top: 18px;
+    margin-bottom: 10px;
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.main-table th {
+    color: #fff;
+    border: none;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: left;
+    background: #982d31;
+}
+.main-table td {
+    border: none;
+    padding: 8px;
+    background: #fff;
+    font-size: 12px;
+    vertical-align: top;
+}
+.main-table td small {
+    font-size: 9px;
+    color: #666;
+}
+/* Zebra striping for main table - light grey alternating rows */
+.main-table tr:nth-child(even) td {
+    background: #f8f8f8 !important;
+}
+.main-table tr:hover td {
+    background: #f8f9fa;
+}
+.totals-table-container {
+    display: block;
+    width: 100%;
+    max-width: 1050px;
+    margin: 0 auto 24px auto;
+    text-align: right;
+}
+.totals-table {
+    width: 340px;
+    max-width: 340px;
+    margin: 0 0 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    overflow: hidden;
+    border-collapse: collapse;
+    float: right;
+}
+
+/* Remove header row from totals table */
+.totals-table thead {
+    display: none;
+}
+
+.totals-table td {
+    border: none;
+    padding: 10px 18px;
+    font-size: 1em;
+    text-align: right;
+}
+.totals-table td:first-child {
+    text-align: left;
+}
+
+/* Blank row above subtotal with rounded corners and division color */
+.totals-table tbody tr:first-child td:first-child {
+    background: #982d31 !important;
+    color: #ffffff !important;
+    border-top-left-radius: 8px;
+    padding: 8px 18px;
+}
+.totals-table tbody tr:first-child td:last-child {
+    background: #982d31 !important;
+    color: #ffffff !important;
+    border-top-right-radius: 8px;
+    padding: 8px 18px;
+}
+
+/* Division-specific colors for the blank row - higher specificity */
+.totals-table.hvac-color tbody tr:first-child td:first-child,
+.totals-table.hvac-color tbody tr:first-child td:last-child {
+    background: #799285 !important;
+    color: #ffffff !important;
+}
+.totals-table.plumbing-color tbody tr:first-child td:first-child,
+.totals-table.plumbing-color tbody tr:first-child td:last-child {
+    background: #37779e !important;
+    color: #ffffff !important;
+}
+.totals-table.hydronic-color tbody tr:first-child td:first-child,
+.totals-table.hydronic-color tbody tr:first-child td:last-child {
+    background: #982d31 !important;
+    color: #ffffff !important;
+}
+
+/* Zebra striping for totals table - match PDF exactly */
+.totals-table tbody tr:nth-child(odd):not(:first-child) td {
+    background: #f8f8f8 !important;
+}
+.totals-table tbody tr:nth-child(even):not(:first-child) td {
+    background: #ffffff !important;
+}
+
+/* Freight row styling with black borders - match PDF exactly */
+.totals-table tbody tr:nth-child(3) td {
+    border-top: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    background: #ffffff !important;
+}
+
+/* Grand total styling - match PDF exactly */
+.totals-table tbody tr.grand-total td {
+    background: #982d31 !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+.totals-table tbody tr.grand-total td:first-child {
+    border-bottom-left-radius: 8px;
+}
+.totals-table tbody tr.grand-total td:last-child {
+    border-bottom-right-radius: 8px;
+}
+
+/* Ensure grand total has proper styling for all quote types - maximum specificity */
+.totals-table.hvac-color tbody tr.grand-total td { 
+    background: #799285 !important; 
+    color: #ffffff !important; 
+    font-weight: bold;
+    font-size: 1.2em;
+}
+.totals-table.plumbing-color tbody tr.grand-total td { 
+    background: #37779e !important; 
+    color: #ffffff !important; 
+    font-weight: bold;
+    font-size: 1.2em;
+}
+.totals-table.hydronic-color tbody tr.grand-total td { 
+    background: #982d31 !important; 
+    color: #ffffff !important; 
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.comments {
+    margin-bottom: 25px;
+    font-size: 11px;
+    background: #eaf1ed;
+    padding: 8px 12px;
+    border-left: 4px solid #799285;
+    border-radius: 4px;
+}
+.terms {
+    font-size: 9px;
+    color: #555555;
+    page-break-inside: avoid;
+    margin-bottom: 15px;
+}
+
+.footer-bottom {
+    margin-top: auto;
+    padding: 20px 0;
+    border-top: 1px solid #cccccc;
+    text-align: center;
+    page-break-inside: avoid;
+    background: white;
+    position: relative;
+    bottom: 0;
+}
+
+.company-info {
+    font-size: 9px;
+    color: #555555;
+    margin-top: 15px;
+    line-height: 1.4;
+}
+
+.business-details {
+    font-size: 9px;
+    color: #555555;
+    page-break-inside: avoid;
+    line-height: 1.4;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- UPDATED RULES --- */
+.totals-terms-section {
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+}
+
+.hvac-color th, .hvac-color .main-table td { background: #799285 !important; }
+.plumbing-color th, .plumbing-color .main-table td { background: #37779e !important; }
+.hydronic-color th, .hydronic-color .main-table td { background: #982d31 !important; }
+/* Additional deal type colors - using existing color schemes */
+.data-centres-color th, .data-centres-color .main-table td { background: #799285 !important; }
+.merchant-color th, .merchant-color .main-table td { background: #37779e !important; }
+.wholesaler-color th, .wholesaler-color .main-table td { background: #37779e !important; }
+.oem-color th, .oem-color .main-table td { background: #37779e !important; }
+strong { font-weight: bold; }
+.section-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    padding: 6px 12px;
+    border-left: 6px solid #799285;
+    background: #f4f7f5;
+    color: #333;
+    border-radius: 4px;
+}
+
+/* Main table header colors for each division */
+.hvac-color .main-table th {
+    background: #799285 !important;
+    border-color: #799285 !important;
+}
+.plumbing-color .main-table th {
+    background: #37779e !important;
+    border-color: #37779e !important;
+}
+.hydronic-color .main-table th {
+    background: #982d31 !important;
+    border-color: #982d31 !important;
+}
+/* Additional deal type header colors - using existing color schemes */
+.data-centres-color .main-table th {
+    background: #799285 !important;
+    border-color: #799285 !important;
+}
+.merchant-color .main-table th {
+    background: #37779e !important;
+    border-color: #37779e !important;
+}
+.wholesaler-color .main-table th {
+    background: #37779e !important;
+    border-color: #37779e !important;
+}
+.oem-color .main-table th {
+    background: #37779e !important;
+    border-color: #37779e !important;
+}

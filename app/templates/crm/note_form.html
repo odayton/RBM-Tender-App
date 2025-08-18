@@ -1,0 +1,186 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create Note - CRM{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Create Note</h1>
+                <a href="{{ url_for('crm.activities_list') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Activities
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-sticky-note"></i> Note Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <!-- Note Information -->
+                            <div class="col-md-12">
+                                <h6 class="text-primary mb-3">Note Information</h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.note_type.label(class="form-label") }}
+                                    {{ form.note_type(class="form-select" + (" is-invalid" if form.note_type.errors else "")) }}
+                                    {% if form.note_type.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.note_type.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.tags.label(class="form-label") }}
+                                    {{ form.tags(class="form-control" + (" is-invalid" if form.tags.errors else ""), placeholder="Enter tags separated by commas") }}
+                                    {% if form.tags.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.tags.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Note Content -->
+                            <div class="col-md-12">
+                                <h6 class="text-primary mb-3">Note Content</h6>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    {{ form.content.label(class="form-label") }}
+                                    {{ form.content(class="form-control", rows="8" + (" is-invalid" if form.content.errors else "")) }}
+                                    {% if form.content.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.content.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Note Options -->
+                            <div class="col-md-12">
+                                <h6 class="text-primary mb-3">Note Options</h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.is_internal(class="form-check-input" + (" is-invalid" if form.is_internal.errors else "")) }}
+                                        {{ form.is_internal.label(class="form-check-label") }}
+                                        {% if form.is_internal.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.is_internal.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.is_important(class="form-check-input" + (" is-invalid" if form.is_important.errors else "")) }}
+                                        {{ form.is_important.label(class="form-check-label") }}
+                                        {% if form.is_important.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.is_important.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('crm.activities_list') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Create Note
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar with Help -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-question-circle"></i> Help & Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Note Types</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge bg-primary me-2">General</span> General notes</li>
+                        <li><span class="badge bg-success me-2">Customer</span> Customer-related notes</li>
+                        <li><span class="badge bg-info me-2">Project</span> Project-related notes</li>
+                        <li><span class="badge bg-warning me-2">Follow-up</span> Follow-up notes</li>
+                        <li><span class="badge bg-danger me-2">Issue</span> Issue or problem notes</li>
+                        <li><span class="badge bg-secondary me-2">Other</span> Other note types</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h6>Note Options</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge bg-warning me-2">Internal</span> Only visible to team members</li>
+                        <li><span class="badge bg-danger me-2">Important</span> Marked as important</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h6>Tips</h6>
+                    <ul class="small">
+                        <li>Use descriptive titles for easy searching</li>
+                        <li>Include relevant details and context</li>
+                        <li>Use tags to categorize notes</li>
+                        <li>Mark important notes for quick reference</li>
+                        <li>Use internal notes for sensitive information</li>
+                        <li>Link notes to relevant companies, contacts, or deals</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

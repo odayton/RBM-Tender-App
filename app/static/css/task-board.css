@@ -1,0 +1,266 @@
+/* Task Board Styles */
+
+/* Activity Cards */
+.activity-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.activity-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+.activity-card.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+/* Avatar Styles */
+.avatar-sm img {
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Progress Bars */
+.progress {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+/* Custom Colors */
+.bg-purple {
+    background-color: #6f42c1 !important;
+}
+
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+.btn-outline-purple {
+    color: #6f42c1;
+    border-color: #6f42c1;
+}
+
+.btn-outline-purple:hover {
+    color: #fff;
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+}
+
+/* Automation Rules */
+.automation-rule {
+    transition: all 0.3s ease;
+    border: 1px solid #dee2e6;
+}
+
+.automation-rule:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+    transform: translateY(-1px);
+}
+
+/* Status Colors */
+.bg-scheduled { background-color: #17a2b8 !important; }
+.bg-in-progress { background-color: #ffc107 !important; }
+.bg-completed { background-color: #28a745 !important; }
+.bg-cancelled { background-color: #dc3545 !important; }
+.bg-deferred { background-color: #6c757d !important; }
+.bg-stuck { background-color: #dc3545 !important; }
+
+/* Activity Type Colors */
+.bg-call { background-color: #28a745 !important; }
+.bg-email { background-color: #17a2b8 !important; }
+.bg-meeting { background-color: #ffc107 !important; }
+.bg-note { background-color: #6f42c1 !important; }
+.bg-task { background-color: #fd7e14 !important; }
+.bg-follow-up { background-color: #e83e8c !important; }
+
+/* Board Layout */
+.board-column {
+    min-height: 400px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.board-column-header {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Card Enhancements */
+.task-card {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.task-card-header {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f1f3f4;
+    background-color: #fafbfc;
+}
+
+.task-card-body {
+    padding: 1rem;
+}
+
+.task-card-footer {
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Time Tracking */
+.time-tracking-btn {
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.time-tracking-btn:hover {
+    transform: scale(1.05);
+}
+
+.time-display {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Statistics Cards */
+.stats-card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+}
+
+.stats-icon {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.stats-card:hover .stats-icon {
+    opacity: 1;
+}
+
+/* Notifications */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* View Toggle Buttons */
+.view-toggle .btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.view-toggle .btn.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .board-column {
+        margin-bottom: 1rem;
+    }
+    
+    .activity-card {
+        margin-bottom: 0.75rem;
+    }
+    
+    .stats-card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Filter Modal Enhancements */
+.filter-modal .form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.filter-modal .form-control,
+.filter-modal .form-select {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+}
+
+.filter-modal .form-control:focus,
+.filter-modal .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+} 

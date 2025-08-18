@@ -1,0 +1,204 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Import Products - RBM Tender App{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('products.list_products') }}">Products</a></li>
+                    <li class="breadcrumb-item active">Import</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0">Import Products</h1>
+            <p class="text-muted">Import products from CSV file</p>
+        </div>
+        <div>
+            <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Products
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Import Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Import Products from CSV</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('products.import_products') }}" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-4">
+                            <label for="csv_file" class="form-label">CSV File</label>
+                            <input type="file" class="form-control" id="csv_file" name="csv_file" 
+                                   accept=".csv" required>
+                            {% if form.csv_file.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.csv_file.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Upload a CSV file with product data</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    {{ form.update_existing(class="form-check-input") }}
+                                    {{ form.update_existing.label(class="form-check-label") }}
+                                    <small class="form-text text-muted d-block">Update existing products with matching SKU</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    {{ form.skip_errors(class="form-check-input") }}
+                                    {{ form.skip_errors.label(class="form-check-label") }}
+                                    <small class="form-text text-muted d-block">Skip rows with errors and continue import</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Import Products
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- CSV Format Guide -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">CSV Format Guide</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Required Columns:</h6>
+                    <ul class="list-unstyled">
+                        <li><code>sku</code> - Unique product identifier</li>
+                        <li><code>name</code> - Product name</li>
+                        <li><code>unit_price</code> - Price in dollars</li>
+                        <li><code>category</code> - Product category</li>
+                    </ul>
+                    
+                    <h6>Optional Columns:</h6>
+                    <ul class="list-unstyled">
+                        <li><code>description</code> - Product description</li>
+                        <li><code>brand</code> - Brand name</li>
+                        <li><code>model_number</code> - Model number</li>
+                        <li><code>weight_kg</code> - Weight in kilograms</li>
+                        <li><code>dimensions</code> - Dimensions (LxWxH cm)</li>
+                        <li><code>stock_quantity</code> - Current stock</li>
+                        <li><code>reorder_level</code> - Reorder threshold</li>
+                        <li><code>lead_time_days</code> - Lead time in days</li>
+                        <li><code>is_active</code> - Active status (true/false)</li>
+                        <li><code>notes</code> - Internal notes</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Sample CSV -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Sample CSV</h5>
+                </div>
+                <div class="card-body">
+                    <pre class="bg-light p-2 rounded"><code>sku,name,unit_price,category,brand,description
+PUMP-001,Centrifugal Pump 100L,1250.00,Pumps,ABC Pumps,High efficiency pump
+VALVE-001,Ball Valve 2",45.50,Plumbing,XYZ Valves,Standard ball valve
+CONTROL-001,Temperature Controller,320.00,Controls,TempTech,Digital controller</code></pre>
+                    <a href="{{ url_for('products.export_products') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-download"></i> Download Sample
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Import Tips -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Import Tips</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Best Practices</h6>
+                        <ul class="mb-0">
+                            <li>Use unique SKUs for each product</li>
+                            <li>Ensure prices are positive numbers</li>
+                            <li>Use standard categories for consistency</li>
+                            <li>Test with a small file first</li>
+                            <li>Backup your data before large imports</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Important Notes</h6>
+                        <ul class="mb-0">
+                            <li>SKU must be unique across all products</li>
+                            <li>Prices must be positive values</li>
+                            <li>Stock quantities cannot be negative</li>
+                            <li>Large files may take time to process</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// File upload preview
+document.getElementById('csv_file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const lines = text.split('\n');
+            if (lines.length > 0) {
+                const headers = lines[0].split(',');
+                console.log('CSV Headers:', headers);
+            }
+        };
+        reader.readAsText(file);
+    }
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const fileInput = document.getElementById('csv_file');
+    if (!fileInput.files[0]) {
+        e.preventDefault();
+        alert('Please select a CSV file to import.');
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+        e.preventDefault();
+        alert('Please select a valid CSV file.');
+        return;
+    }
+    
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        e.preventDefault();
+        alert('File size must be less than 10MB.');
+        return;
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,243 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create Contact{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">
+        <a href="{{ url_for('crm.customers_dashboard') }}">
+            <i class="fas fa-users mr-1"></i>Customers
+        </a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{{ url_for('crm.contacts_list') }}">
+            <i class="fas fa-address-book mr-1"></i>Contacts
+        </a>
+    </li>
+    <li class="breadcrumb-item active">Create Contact</li>
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-5 mb-2">
+                <i class="fas fa-user-plus text-primary mr-3"></i>Create New Contact
+            </h1>
+            <p class="text-muted lead mb-0">Add a new contact to your customer database</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('crm.contacts_list') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-list mr-2"></i>View All Contacts
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="card contact-form-card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="header-icon">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="header-content">
+                            <h4 class="mb-1">Contact Information</h4>
+                            <p class="text-muted mb-0">Fill in the details below to create a new contact</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.add_item', item_type='contact') }}" class="needs-validation contact-form" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Personal Information Section -->
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-user text-primary mr-2"></i>Personal Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-12 mb-4">
+                                    <label for="name" class="form-label fw-bold">
+                                        {{ form.name.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                        {{ form.name(class="form-control", placeholder="Enter full name (e.g., John Smith)") }}
+                                    </div>
+                                    {% if form.name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.name.errors %}
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="email" class="form-label fw-bold">
+                                        {{ form.email.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                        {{ form.email(class="form-control", placeholder="john.doe@example.com") }}
+                                    </div>
+                                    {% if form.email.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.email.errors %}
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="position" class="form-label fw-bold">{{ form.position.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-briefcase"></i>
+                                        </span>
+                                        {{ form.position(class="form-control", placeholder="e.g., Sales Manager, Engineer") }}
+                                    </div>
+                                    {% if form.position.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.position.errors %}
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information Section -->
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-phone text-primary mr-2"></i>Contact Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="phone_number" class="form-label fw-bold">{{ form.phone_number.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-phone"></i>
+                                        </span>
+                                        {{ form.phone_number(class="form-control", placeholder="+61 2 1234 5678") }}
+                                    </div>
+                                    {% if form.phone_number.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.phone_number.errors %}
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="mobile_number" class="form-label fw-bold">{{ form.mobile_number.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-mobile-alt"></i>
+                                        </span>
+                                        {{ form.mobile_number(class="form-control", placeholder="+61 4 1234 5678") }}
+                                    </div>
+                                    {% if form.mobile_number.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.mobile_number.errors %}
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Company Information Section -->
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-building text-primary mr-2"></i>Company Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-12 mb-4">
+                                    <label for="company" class="form-label fw-bold">{{ form.company.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-building"></i>
+                                        </span>
+                                        {{ form.company(class="form-control") }}
+                                    </div>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle text-info mr-1"></i>
+                                        Leave blank if company will be auto-assigned based on email domain
+                                    </div>
+                                    {% if form.company.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.company.errors %}
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information Section -->
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-sticky-note text-primary mr-2"></i>Additional Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-12 mb-4">
+                                    <label for="notes" class="form-label fw-bold">{{ form.notes.label }}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-sticky-note"></i>
+                                        </span>
+                                        {{ form.notes(class="form-control", rows="4", placeholder="Add any additional notes about this contact...") }}
+                                    </div>
+                                    {% if form.notes.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.notes.errors %}
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="form-actions">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ url_for('crm.contacts_list') }}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-arrow-left mr-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save mr-2"></i>{{ form.submit.label }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_forms.css') }}">
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_forms.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_forms_enhanced.js') }}"></script>
+{% endblock %}
+{% endblock %}

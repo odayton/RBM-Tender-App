@@ -1,0 +1,20 @@
+{% extends "admin/manage_base.html" %}
+
+{% block data_type %}Additional Price Adders{% endblock %}
+{% block data_type_header %}Additional Price Adders{% endblock %}
+{% block data_type_upload %}Additional Price Adder{% endblock %}
+{% block data_type_list %}Additional Price Adders{% endblock %}
+
+{% block table_headers %}
+    <th>Name</th>
+    <th>Price</th>
+{% endblock %}
+
+{% block table_rows %}
+    {% for adder in items %}
+    <tr>
+        <td>{{ adder.name }}</td>
+        <td>{{ adder.price }}</td>
+    </tr>
+    {% endfor %}
+{% endblock %}

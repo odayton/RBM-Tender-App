@@ -1,0 +1,105 @@
+/* /static/css/layout.css */
+
+.page-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-dark);
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    width: var(--sidebar-width);
+    /* --- FIX: Use the correct variable for the blue color --- */
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    flex-shrink: 0;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.sidebar-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Main Content --- */
+.main-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - var(--sidebar-width));
+    transition: width 0.3s ease-in-out;
+}
+
+.page-content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+/* --- Top Navbar in Main Content --- */
+.main-content-wrapper .navbar {
+    /* --- FIX: Use the correct variable for the blue color --- */
+    background-color: var(--primary-color) !important;
+}
+
+.main-content-wrapper .navbar .navbar-nav .nav-link {
+    color: var(--text-light) !important;
+}
+
+#sidebar-toggle {
+    margin-right: 1rem;
+    color: var(--text-light);
+    border-color: var(--text-light);
+}
+#sidebar-toggle:hover {
+    background-color: var(--link-hover);
+}
+
+/* --- Breadcrumb Navigation --- */
+.breadcrumb-nav {
+    background-color: #f8f9fa !important;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.breadcrumb-nav .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.breadcrumb-nav .breadcrumb-item {
+    color: #6c757d;
+}
+
+.breadcrumb-nav .breadcrumb-item a {
+    color: #007bff;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-nav .breadcrumb-item a:hover {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+.breadcrumb-nav .breadcrumb-item.active {
+    color: #495057;
+    font-weight: 600;
+}
+
+.breadcrumb-nav .breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    color: #6c757d;
+    font-weight: bold;
+    margin: 0 0.5rem;
+}
+
+/* --- Sidebar Toggling Behavior --- */
+.page-wrapper.sidebar-collapsed .sidebar {
+    margin-left: calc(-1 * var(--sidebar-width));
+}
+
+.page-wrapper.sidebar-collapsed .main-content-wrapper {
+    width: 100%;
+}

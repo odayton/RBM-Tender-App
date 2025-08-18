@@ -1,0 +1,50 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item active">Admin Dashboard</li>
+{% endblock %}
+
+{% block page_content %}
+    <h1>Admin Dashboard</h1>
+    <p>Welcome to the admin area. From here you can manage various aspects of the application.</p>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3>Content Management</h3>
+        </div>
+        <div class="list-group list-group-flush">
+            {% for key, config in management_items.items() %}
+                <a href="{{ url_for('admin.manage_items', item_type=key) }}" class="list-group-item list-group-item-action">
+                    Manage {{ config.display_name }}
+                </a>
+            {% else %}
+                <div class="list-group-item">No manageable items configured.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3>User Management</h3>
+        </div>
+        <div class="list-group list-group-flush">
+            <a href="{{ url_for('admin.manage_users') }}" class="list-group-item list-group-item-action">
+                <i class="fas fa-users mr-2"></i>Advanced User Management
+                <small class="text-muted d-block">Troubleshoot users, reset passwords, manage status</small>
+            </a>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3>Data Management</h3>
+        </div>
+        <div class="list-group list-group-flush">
+             {# You can create another mapping for these or hard-code them if they are special cases #}
+            <a href="#" class="list-group-item list-group-item-action disabled">Manage BOMs (Future)</a>
+            <a href="#" class="list-group-item list-group-item-action disabled">Manage Pumps (Future)</a>
+        </div>
+    </div>
+{% endblock %}
