@@ -7,13 +7,11 @@ from .core_logging import logger as core_logger
 from .core_security import security_manager
 from .core_errors import register_error_handlers
 from .core_events import event_manager
-# cache_manager is no longer used, so the import can be removed.
-# from .core_cache import cache_manager 
+# Remove the problematic import at the top
 
 class CoreInitializer:
     """Initializes the core components and extensions of the application."""
     
-    # Removed 'cache' from the __init__ method signature
     def __init__(self, app: Flask, db, login_manager, migrate, csrf):
         self.app = app
         self.db = db
@@ -29,7 +27,6 @@ class CoreInitializer:
         self.init_database()
         self.init_security()
         self.init_csrf()
-        # self.init_cache() # Removed this call
         self.init_events()
         self.init_error_handlers()
 
@@ -50,16 +47,20 @@ class CoreInitializer:
         self.migrate.init_app(self.app, self.db)
         core_logger.app_logger.info("Database and Migrations Initialized.")
         
-        # Initialize backup system
+        # Initialize backup system (simplified)
         try:
+            # Try to import from scripts directory
             import sys
-            from pathlib import Path
-            sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-            from backup_manager import BackupManager
-            
-            backup_manager = BackupManager()
-            backup_manager.auto_backup()
-            core_logger.app_logger.info("Backup system initialized successfully.")
+            scripts_path = Path(__file__).parent.parent.parent / 'scripts' / 'utils'
+            if scripts_path.exists():
+                sys.path.insert(0, str(scripts_path))
+                from backup_manager import BackupManager
+                
+                backup_manager = BackupManager()
+                backup_manager.auto_backup()
+                core_logger.app_logger.info("Backup system initialized successfully.")
+            else:
+                core_logger.app_logger.info("Backup system not available - scripts/utils directory not found.")
         except Exception as e:
             core_logger.app_logger.warning(f"Backup system initialization failed: {e}")
 
@@ -72,9 +73,6 @@ class CoreInitializer:
         """Initialize CSRF protection."""
         self.csrf.init_app(self.app)
         core_logger.app_logger.info("CSRF Protection Initialized.")
-        
-    # The init_cache method is no longer needed.
-    # def init_cache(self): ...
 
     def init_events(self):
         """Initialize the event manager and load listeners."""
