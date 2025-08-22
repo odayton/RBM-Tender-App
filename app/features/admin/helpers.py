@@ -9,15 +9,13 @@ from flask import (
 # Import the blueprint object, forms, and helpers from the local package
 from . import admin_bp
 from .forms import (
-    PumpUploadForm, TechDataUploadForm, ManageInertiaBasesForm,
-    ManageSeismicSpringsForm, ManageRubberMountsForm, ContactForm,
-    DealOwnerForm, CompanyForm, BOMUploadForm, AdditionalPriceAdderForm
+    ContactForm, DealOwnerForm, CompanyForm, BOMUploadForm, AdditionalPriceAdderForm
 )
 
 # Import the ORM models and db session for creation logic
 from app.extensions import db
 from app.models import (
-    Pump, User, UserRole, Company, Contact, Deal, DealStage
+    User, UserRole, Company, Contact, Deal, DealStage
 )
 from app.core.core_errors import ValidationError
 import secrets
@@ -100,77 +98,17 @@ def create_deal_owner():
     
     return render_template('admin/create_deal_owner.html', form=form)
 
-@admin_bp.route('/pumps', methods=['GET'])
-def manage_pumps():
-    """Displays the pump management page."""
-    # This should use a PumpManager in the future
-    pumps = Pump.query.all()
-    return render_template('admin/manage_pumps.html', pumps=pumps)
 
-@admin_bp.route('/tech-data/upload', methods=['GET', 'POST'])
-def upload_tech_data():
-    """Handles uploading technical data from a file."""
-    form = TechDataUploadForm()
-    if form.validate_on_submit():
-        # You would use the DataImporter helper here
-        flash('File processed (logic to be implemented).', 'info')
-        return redirect(url_for('admin.manage_pumps'))
-    
-    return render_template('admin/tech_data_upload.html', form=form)
 
-@admin_bp.route('/inertia-bases', methods=['GET', 'POST'])
-def manage_inertia_bases():
-    """Renders the page to manage inertia bases."""
-    form = ManageInertiaBasesForm()
-    if form.validate_on_submit():
-        flash('Inertia Base saved (logic to be implemented).', 'info')
-        return redirect(url_for('admin.dashboard'))
-    return render_template('admin/manage_inertia_bases.html', form=form)
 
-@admin_bp.route('/seismic-springs', methods=['GET', 'POST'])
-def manage_seismic_springs():
-    """Renders the page to manage seismic springs."""
-    form = ManageSeismicSpringsForm()
-    if form.validate_on_submit():
-        flash('Seismic Spring saved (logic to be implemented).', 'info')
-        return redirect(url_for('admin.dashboard'))
-    return render_template('admin/manage_seismic_springs.html', form=form)
 
-@admin_bp.route('/rubber-mounts', methods=['GET', 'POST'])
-def manage_rubber_mounts():
-    """Renders the page to manage rubber mounts."""
-    form = ManageRubberMountsForm()
-    if form.validate_on_submit():
-        flash('Rubber Mount saved (logic to be implemented).', 'info')
-        return redirect(url_for('admin.dashboard'))
-    return render_template('admin/manage_rubber_mounts.html', form=form)
 
-@admin_bp.route('/blank-tech-data/upload', methods=['GET', 'POST'])
-def blank_tech_data_upload():
-    """Handles uploading a blank technical data sheet."""
-    form = PumpUploadForm()
-    if form.validate_on_submit():
-        flash('File processed (logic to be implemented).', 'info')
-        return redirect(url_for('admin.view_blank_tech_data'))
-    
-    return render_template('admin/blank_tech_data_upload.html', form=form)
 
-@admin_bp.route('/blank-tech-data/view')
-def view_blank_tech_data():
-    """Displays a page for viewing blank technical data."""
-    return render_template('admin/view_blank_tech_data.html')
 
-@admin_bp.route('/blank-tech-data/download')
-def download_blank_tech_data():
-    """Downloads blank technical data as Excel file."""
-    try:
-        # This would typically generate an Excel file from the blank tech data
-        # For now, we'll just redirect back with a message
-        flash('Download functionality to be implemented.', 'info')
-        return redirect(url_for('admin.view_blank_tech_data'))
-    except Exception as e:
-        flash(f'Error downloading file: {e}', 'error')
-        return redirect(url_for('admin.view_blank_tech_data'))
+
+
+
+
 
 @admin_bp.route('/bom', methods=['GET'])
 def manage_bom():

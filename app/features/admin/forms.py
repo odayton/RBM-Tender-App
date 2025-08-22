@@ -47,39 +47,7 @@ class EditUserForm(FlaskForm):
     submit = SubmitField('Update User')
 
 
-class PumpUploadForm(FlaskForm):
-    """Form for uploading pump data"""
-    file = FileField('Excel File', validators=[
-        FileRequired(),
-        FileAllowed(['xlsx', 'xls'], 'Excel files only!')
-    ])
-    sheet_name = StringField('Sheet Name', validators=[Optional()])
 
-class TechDataUploadForm(FlaskForm):
-    """Form for uploading technical data"""
-    file = FileField('PDF File', validators=[
-        FileRequired(),
-        FileAllowed(['pdf'], 'PDF files only!')
-    ])
-    pump_type = SelectField('Pump Type', choices=[('NBG', 'NBG Series'), ('CR', 'CR Series'), ('TP', 'TP Series'), ('CM', 'CM Series'), ('MAGNA', 'Magna Series'), ('UPS', 'UPS Series'), ('CRE', 'CRE Series'), ('TPE', 'TPE Series'), ('NK', 'NK Series')], validators=[DataRequired()])
-
-class ManageInertiaBasesForm(FlaskForm):
-    """Form for managing inertia bases"""
-    part_number = StringField('Part Number', validators=[DataRequired()])
-    dimensions = StringField('Size', validators=[DataRequired()])
-    weight_kg = DecimalField('Weight (kg)', validators=[DataRequired(), NumberRange(min=0)])
-
-class ManageSeismicSpringsForm(FlaskForm):
-    """Form for managing seismic springs"""
-    part_number = StringField('Part Number', validators=[DataRequired()])
-    spring_rate_k = StringField('Spring Rate (k)', validators=[DataRequired()])
-    max_deflection_mm = DecimalField('Max Deflection (mm)', validators=[DataRequired(), NumberRange(min=0)])
-    
-class ManageRubberMountsForm(FlaskForm):
-    """Form for managing rubber mounts"""
-    part_number = StringField('Part Number', validators=[DataRequired()])
-    mount_type = StringField('Mount Type', validators=[DataRequired()])
-    load_capacity_kg = DecimalField('Load Capacity (kg)', validators=[DataRequired(), NumberRange(min=0)])
 
 class BOMUploadForm(FlaskForm):
     """Form for uploading BOM data"""
