@@ -510,8 +510,8 @@ def init_advanced_monitoring(app, db):
     # Create metrics collector
     metrics_collector = MetricsCollector(db)
     
-    # Register blueprint
-    app.register_blueprint(monitoring_bp)
+    # Note: Blueprint registration is handled in main app initialization
+    # to avoid duplicate registration errors
     
     # Start metrics collection
     metrics_collector.start_collection()
