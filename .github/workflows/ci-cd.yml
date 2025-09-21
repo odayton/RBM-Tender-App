@@ -236,7 +236,10 @@ jobs:
         cp -r app/ deployment-package/
         cp -r requirements/ deployment-package/
         cp -r scripts/ deployment-package/
-        cp -r migrations/ deployment-package/
+        # Copy migrations if they exist
+        if [ -d "migrations" ]; then
+          cp -r migrations/ deployment-package/
+        fi
         cp -r docs/ deployment-package/
         cp *.py deployment-package/
         cp *.md deployment-package/
