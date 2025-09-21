@@ -12,7 +12,7 @@ from pathlib import Path
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from backup_manager import BackupManager
+from scripts.utils.backup_manager import BackupManager
 
 @click.group()
 def backup():
