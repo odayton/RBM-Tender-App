@@ -47,9 +47,14 @@ def client(app):
 def db_session(app):
     """Create database session for testing."""
     with app.app_context():
-        # Clear all existing data before each test
-        db.drop_all()
-        db.create_all()
+        # Clear all existing data before each test (more efficient than drop_all)
+        db.session.rollback()
+        
+        # Delete all data from tables (faster than drop_all/create_all)
+        for table in reversed(db.metadata.sorted_tables):
+            db.session.execute(table.delete())
+        
+        db.session.commit()
         
         # Set the session for all factories
         from tests.factories import UserFactory, CompanyFactory, ContactFactory, DealFactory, ProductFactory, QuoteFactory
@@ -70,6 +75,7 @@ def db_session(app):
         yield db.session
         
         # Clean up after test
+        db.session.rollback()
         db.session.remove()
 
 
