@@ -137,6 +137,8 @@ jobs:
         from app import create_app, db
         app = create_app()
         with app.app_context():
+            # Drop all tables first to ensure clean state
+            db.drop_all()
             db.create_all()
             print('Database tables created successfully')
         "
@@ -150,6 +152,8 @@ jobs:
         export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
+        # Clean database before tests
+        python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.drop_all(); db.create_all(); print('Database cleaned for unit tests')"
         python -m pytest tests/unit/ -v --tb=short
 
     - name: Run integration tests
@@ -161,6 +165,8 @@ jobs:
         export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
+        # Clean database before tests
+        python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.drop_all(); db.create_all(); print('Database cleaned for integration tests')"
         python -m pytest tests/integration/ -v --tb=short
 
     - name: Run security tests
@@ -172,6 +178,8 @@ jobs:
         export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
+        # Clean database before tests
+        python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.drop_all(); db.create_all(); print('Database cleaned for security tests')"
         python -m pytest tests/security/ -v --tb=short
 
     - name: Run performance tests
@@ -183,6 +191,8 @@ jobs:
         export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
+        # Clean database before tests
+        python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.drop_all(); db.create_all(); print('Database cleaned for performance tests')"
         python -m pytest tests/performance/ -v --tb=short
 
     - name: Upload test results
