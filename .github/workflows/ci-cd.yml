@@ -344,8 +344,21 @@ jobs:
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
           sudo cp -r /tmp/rbm-tender-app/* /opt/rbm-tender-app/
           cd /opt/rbm-tender-app
-          sudo chown -R rbm-tender-app:rbm-tender-app .
-          sudo ./deploy.sh
+          sudo chown -R ubuntu:ubuntu .
+          
+          # Clean up any existing migrations directory
+          sudo rm -rf migrations migrations_bak 2>/dev/null || true
+          
+          # Set up database migrations
+          source venv/bin/activate
+          echo 'Setting up database migrations...'
+          flask db init --directory migrations
+          flask db migrate -m 'Initial migration'
+          flask db upgrade
+          
+          # Restart the application
+          sudo systemctl restart rbm-tender-app
+          sudo systemctl status rbm-tender-app
         "
 
     - name: Health check verification
