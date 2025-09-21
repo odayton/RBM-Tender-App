@@ -131,20 +131,14 @@ jobs:
         export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
-        # Handle migrations - if directory exists but has issues, remove and reinitialize
+        # Clean up any existing migrations and reinitialize
+        echo "Setting up database migrations..."
         if [ -d "migrations" ]; then
-          # Check if migrations directory is properly initialized
-          if [ ! -f "migrations/env.py" ]; then
-            echo "Migrations directory exists but is not properly initialized, removing..."
-            rm -rf migrations
-            flask db init
-            flask db migrate -m "Initial migration"
-          fi
-        else
-          # Initialize migrations if they don't exist
-          flask db init
-          flask db migrate -m "Initial migration"
+          echo "Removing existing migrations directory..."
+          rm -rf migrations
         fi
+        flask db init
+        flask db migrate -m "Initial migration"
         flask db upgrade
 
     - name: Run unit tests
@@ -251,20 +245,14 @@ jobs:
         pip install -r requirements/prod_requirements.txt
         
         # Run database migrations
-        # Handle migrations - if directory exists but has issues, remove and reinitialize
+        # Clean up any existing migrations and reinitialize
+        echo "Setting up database migrations..."
         if [ -d "migrations" ]; then
-          # Check if migrations directory is properly initialized
-          if [ ! -f "migrations/env.py" ]; then
-            echo "Migrations directory exists but is not properly initialized, removing..."
-            rm -rf migrations
-            flask db init
-            flask db migrate -m "Initial migration"
-          fi
-        else
-          # Initialize migrations if they don't exist
-          flask db init
-          flask db migrate -m "Initial migration"
+          echo "Removing existing migrations directory..."
+          rm -rf migrations
         fi
+        flask db init
+        flask db migrate -m "Initial migration"
         flask db upgrade
         
         # Restart application
