@@ -192,16 +192,26 @@ class FeatureFlagManager:
         if context and 'user_id' in context:
             return str(context['user_id'])
         
-        # Try to get user ID from Flask context
-        if hasattr(g, 'user') and g.user and hasattr(g.user, 'id'):
-            return str(g.user.id)
+        # Check if we're in an application context before accessing Flask globals
+        try:
+            from flask import has_app_context
+            if has_app_context():
+                # Try to get user ID from Flask context
+                if hasattr(g, 'user') and g.user and hasattr(g.user, 'id'):
+                    return str(g.user.id)
+                
+                # Fall back to session ID or IP address
+                if hasattr(request, 'session') and request.session:
+                    return request.session.get('session_id', 'anonymous')
+                
+                # Use IP address as last resort
+                return request.remote_addr if request else 'unknown'
+        except (ImportError, RuntimeError):
+            # Not in Flask context or Flask not available
+            pass
         
-        # Fall back to session ID or IP address
-        if hasattr(request, 'session') and request.session:
-            return request.session.get('session_id', 'anonymous')
-        
-        # Use IP address as last resort
-        return request.remote_addr if request else 'unknown'
+        # Fallback when not in Flask context
+        return 'system'
     
     def _check_conditions(self, flag: FeatureFlag, context: Optional[Dict[str, Any]] = None) -> bool:
         """Check if all conditions for a flag are met."""
@@ -421,8 +431,7 @@ def init_feature_flags(app):
     """Initialize feature flags with Flask app."""
     # This would typically load flags from database
     logger.info("Feature flags system initialized", 
-                total_flags=len(feature_flags.flags),
-                enabled_flags=len(feature_flags.get_enabled_flags()))
+                total_flags=len(feature_flags.flags))
 
 # Feature flag management endpoints (for admin interface)
 def get_feature_flag_stats():
