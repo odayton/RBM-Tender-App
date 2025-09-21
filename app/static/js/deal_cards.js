@@ -63,13 +63,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- Function to update the deal stage via fetch ---
     function updateDealStage(dealId, newStage) {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        
+        if (!csrfToken) {
+            console.error('CSRF token not found');
+            alert('Error: Security token not found. Please refresh the page.');
+            return;
+        }
 
         fetch(`/deals/update_stage/${dealId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
+                'X-CSRFToken': csrfToken.getAttribute('content')
             },
             body: JSON.stringify({
                 stage: newStage
@@ -77,21 +83,50 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(response => {
             if (!response.ok) {
-                alert('Error: Could not save the new deal stage. Please refresh the page.');
-                throw new Error('Server responded with an error.');
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             return response.json();
         })
         .then(data => {
             if (data.success) {
                 console.log(`Deal ${dealId} successfully moved to ${newStage}.`);
-                // Here you could trigger a small success notification if desired
+                // Show success notification
+                showNotification(`Deal moved to ${newStage}`, 'success');
             } else {
+                console.error('Server error:', data.error);
                 alert(`Error: ${data.error}`);
+                // Optionally revert the UI change here
             }
         })
         .catch(error => {
             console.error('Fetch error:', error);
+            alert(`Error: Could not save the new deal stage. ${error.message}`);
+            // Optionally revert the UI change here
         });
+    }
+
+    // Simple notification function
+    function showNotification(message, type = 'info') {
+        // Create a simple notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} notification-toast`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 300px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        `;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
     }
 });

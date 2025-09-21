@@ -1,3 +1,13 @@
+# =============================================================================
+# CRITICAL SECURITY PATTERNS - NEVER COMMIT THESE TO PRODUCTION
+# =============================================================================
+# These patterns protect against accidentally committing sensitive data:
+# - Environment files (.env, .env.production, config/.env.*)
+# - Credentials and secrets (*.key, *.pem, *.credentials)
+# - Production backups and deployment files
+# - Security scan results with sensitive information
+# =============================================================================
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -135,14 +145,26 @@ secrets.txt
 # Generated files
 generated_data/
 
-# Authentication and Security
+# Authentication and Security (CRITICAL - NEVER COMMIT)
 *.key
 *.pem
 *.crt
 *.p12
 *.pfx
+*.p8
+*.der
 session_files/
 sessions/
+credentials/
+secrets/
+*.credentials
+*.secret
+
+# Production deployment files (CRITICAL)
+deployment-keys/
+production-keys/
+*.deployment
+*.prod
 
 # Database files (additional)
 *.db
@@ -176,13 +198,20 @@ config/.vscode/
 config.py
 settings.py
 
-# Environment files - IGNORE these
+# Environment files - IGNORE these (CRITICAL FOR PRODUCTION SECURITY)
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+.env.testing
+config/.env
+config/.env.*
 
 # But allow templates (don't ignore these)
 !.env.example
+!config/env.example
+!config/production.env
 
 # Temporary files
 *.tmp
@@ -216,6 +245,36 @@ Thumbs.db
 .cache/
 cache/
 
+# Production and deployment specific
+production-backup/
+deployment-backup/
+*.backup
+backup_*/
+deployment_*/
+
+# Security scan results (temporary)
+security_reports/
+bandit_results/
+safety_results/
+*.security_report
+*_security_scan_*
+
+# CI/CD and deployment artifacts
+.github/secrets/
+.github/workflows/*.secret
+deployment_artifacts/
+ci_artifacts/
+
+# Cloud and infrastructure
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+terraform.tfvars
+*.pem
+*.key
+cloud-config/
+
 # Additional Python patterns
 *.pyc
 *.pyo
@@ -233,3 +292,26 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+
+# Documentation (exclude from production deployments)
+# Keep locally for development reference, but not needed in production
+docs/
+README.md
+COMPREHENSIVE_UPGRADE_PLAN.md
+
+# Scripts - exclude from GitHub for security (keep only essential files)
+scripts/
+!scripts/deployment/rbm-tender-app.service
+!scripts/production/start_production.py
+
+# Configuration files - exclude for security (contain sensitive data)
+config/
+
+# Benchmark and performance data
+.benchmarks/
+
+# Backup files and directories (never commit backups)
+backups/
+*backup*/
+*.backup
+*_backup_*

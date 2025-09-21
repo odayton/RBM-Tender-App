@@ -1,0 +1,44 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Setup Two-Factor Authentication{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-shield-alt"></i> Setup Two-Factor Authentication</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> What is Two-Factor Authentication?</h6>
+                        <p>Two-factor authentication (2FA) adds an extra layer of security to your account. 
+                        After entering your password, you'll need to enter a code from your authenticator app.</p>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Important</h6>
+                        <p>You'll need an authenticator app like Google Authenticator, Authy, or Microsoft Authenticator installed on your phone.</p>
+                    </div>
+                    
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group text-center">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

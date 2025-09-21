@@ -159,25 +159,47 @@ class MigrationManager:
             # Get database file path
             db_url = str(self.db.engine.url)
             
-            if 'sqlite' in db_url:
-                # Extract file path from SQLite URL
-                db_path = db_url.replace('sqlite:///', '').replace('sqlite://', '')
-                if not os.path.isabs(db_path):
-                    db_path = os.path.join(os.getcwd(), db_path)
+            # For PostgreSQL, we'll use pg_dump for backups
+            if 'postgresql' in db_url:
+                # Create backup filename with timestamp and description
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                desc_suffix = f"_{description.replace(' ', '_')}" if description else ""
+                backup_name = f"backup_{timestamp}{desc_suffix}_postgres.sql"
+                backup_path = self.backups_dir / backup_name
                 
-                if os.path.exists(db_path):
-                    # Create backup filename with timestamp and description
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    desc_suffix = f"_{description.replace(' ', '_')}" if description else ""
-                    backup_name = f"backup_{timestamp}{desc_suffix}_{os.path.basename(db_path)}"
-                    backup_path = self.backups_dir / backup_name
+                # Use pg_dump to create backup
+                import subprocess
+                import os
+                
+                # Parse connection details from URL
+                # Format: postgresql://user:password@host:port/database
+                url_parts = db_url.replace('postgresql://', '').split('@')
+                if len(url_parts) == 2:
+                    credentials = url_parts[0].split(':')
+                    host_port_db = url_parts[1].split('/')
                     
-                    # Copy database file
-                    shutil.copy2(db_path, backup_path)
-                    logger.info(f"Database backup created: {backup_path}")
-                    return str(backup_path)
+                    user = credentials[0]
+                    password = credentials[1]
+                    host_port = host_port_db[0].split(':')
+                    host = host_port[0]
+                    port = host_port[1] if len(host_port) > 1 else '5432'
+                    database = host_port_db[1]
                     
-            logger.info("Database backup skipped (not SQLite or file not found)")
+                    # Set environment variable for password
+                    env = os.environ.copy()
+                    env['PGPASSWORD'] = password
+                    
+                    # Run pg_dump
+                    cmd = ['pg_dump', '-U', user, '-h', host, '-p', port, '-d', database, '-f', str(backup_path)]
+                    result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+                    
+                    if result.returncode == 0:
+                        logger.info(f"PostgreSQL backup created: {backup_path}")
+                        return str(backup_path)
+                    else:
+                        logger.error(f"pg_dump failed: {result.stderr}")
+                        
+            logger.info("Database backup skipped (PostgreSQL backup failed or unsupported database)")
             return None
             
         except Exception as e:
@@ -191,22 +213,37 @@ class MigrationManager:
                 logger.error(f"Backup file not found: {backup_path}")
                 return False
                 
-            # Get current database path
+            # Get current database URL
             db_url = str(self.db.engine.url)
-            if 'sqlite' in db_url:
-                db_path = db_url.replace('sqlite:///', '').replace('sqlite://', '')
-                if not os.path.isabs(db_path):
-                    db_path = os.path.join(os.getcwd(), db_path)
+            if 'postgresql' in db_url:
+                # Parse connection details from URL
+                url_parts = db_url.replace('postgresql://', '').split('@')
+                if len(url_parts) == 2:
+                    credentials = url_parts[0].split(':')
+                    host_port_db = url_parts[1].split('/')
                     
-                # Close database connections
-                self.db.engine.dispose()
-                
-                # Restore backup
-                shutil.copy2(backup_path, db_path)
-                logger.info(f"Database restored from backup: {backup_path}")
-                return True
-                
-            logger.error("Restore only supported for SQLite databases")
+                    user = credentials[0]
+                    password = credentials[1]
+                    host_port = host_port_db[0].split(':')
+                    host = host_port[0]
+                    port = host_port[1] if len(host_port) > 1 else '5432'
+                    database = host_port_db[1]
+                    
+                    # Set environment variable for password
+                    env = os.environ.copy()
+                    env['PGPASSWORD'] = password
+                    
+                    # Run psql to restore backup
+                    cmd = ['psql', '-U', user, '-h', host, '-p', port, '-d', database, '-f', backup_path]
+                    result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+                    
+                    if result.returncode == 0:
+                        logger.info(f"PostgreSQL database restored from backup: {backup_path}")
+                        return True
+                    else:
+                        logger.error(f"psql restore failed: {result.stderr}")
+                        
+            logger.error("Restore only supported for PostgreSQL databases")
             return False
             
         except Exception as e:

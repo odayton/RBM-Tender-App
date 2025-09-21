@@ -54,7 +54,7 @@ class Company(BaseModel):
     def get_active_deals(self) -> List['Deal']:
         """Get all active deals for this company."""
         from ..deals.deal_types import DealStage
-        active_stages = [DealStage.SALES_LEAD, DealStage.QUOTE_PREPARATION, DealStage.QUOTE_SENT, DealStage.NEGOTIATION]
+        active_stages = [DealStage.SALES_LEAD, DealStage.TENDER, DealStage.PROPOSAL, DealStage.NEGOTIATION]
         return [deal for deal in self.deals if deal.stage in active_stages]
 
     def get_total_deal_value(self) -> float:

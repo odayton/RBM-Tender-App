@@ -98,6 +98,7 @@ def verify(backup_file):
     
     if not backup_path.exists():
         click.echo(f"❌ Backup file not found: {backup_file}")
+        click.echo("Use 'flask backup list' to see available backups.")
         raise click.Abort()
     
     success = manager.verify_backup(str(backup_path))
@@ -109,27 +110,49 @@ def verify(backup_file):
         raise click.Abort()
 
 @backup.command()
-@click.option('--keep', default=10, help='Number of backups to keep')
+@click.option('--keep', '-k', default=5, help='Number of backups to keep')
 @with_appcontext
 def cleanup(keep):
-    """Clean up old backups, keeping only the most recent ones."""
+    """Clean up old backups, keeping only the specified number."""
     manager = BackupManager()
     
-    backups = manager.list_backups()
-    
-    if len(backups) <= keep:
-        click.echo(f"📭 No cleanup needed. You have {len(backups)} backups (keeping {keep}).")
+    if not click.confirm(f"Are you sure you want to clean up old backups, keeping only {keep}?"):
+        click.echo("Cleanup cancelled.")
         return
     
-    to_delete = len(backups) - keep
-    click.echo(f"🗑️  Will delete {to_delete} old backup(s), keeping {keep} most recent.")
-    
-    if click.confirm("Proceed with cleanup?"):
-        manager._cleanup_old_backups(keep)
-        click.echo("✅ Cleanup completed!")
-    else:
-        click.echo("Cleanup cancelled.")
+    removed_count = manager.cleanup_old_backups(keep)
+    click.echo(f"✅ Cleanup completed. Removed {removed_count} old backup(s).")
+
+# Database Sync Commands
+@click.group()
+def sync():
+    """Database synchronization commands."""
+    pass
+
+@sync.command()
+@click.option('--env-file', '-e', default='.env.production', help='Environment file to use')
+@with_appcontext
+def database(env_file):
+    """Sync PostgreSQL database for deployment."""
+    click.echo("🔄 PostgreSQL database sync is now handled by the postgres_sync.py script")
+    click.echo("💡 Use: py scripts/development/postgres_sync.py for database synchronization")
+    click.echo("📋 Available commands:")
+    click.echo("  - Export database: py scripts/development/postgres_sync.py export")
+    click.echo("  - Import database: py scripts/development/postgres_sync.py import")
+    click.echo("  - Sync to OneDrive: py scripts/development/postgres_sync.py sync-out")
+    click.echo("  - Sync from OneDrive: py scripts/development/postgres_sync.py sync-in")
+
+@sync.command()
+@with_appcontext
+def status():
+    """Check the PostgreSQL database status."""
+    click.echo("🔍 PostgreSQL database status check")
+    click.echo("💡 Use the postgres_sync.py script for detailed database status:")
+    click.echo("  py scripts/development/postgres_sync.py")
+    click.echo("📋 Or check database directly:")
+    click.echo("  py -c \"import psycopg2; conn = psycopg2.connect('postgresql://postgres:YOUR_PASSWORD@localhost:5432/rbm_tender_app'); cur = conn.cursor(); cur.execute('SELECT version()'); print('PostgreSQL:', cur.fetchone()[0]); conn.close()\"")
 
 def register_backup_commands(app):
     """Register backup commands with the Flask app."""
-    app.cli.add_command(backup) 
+    app.cli.add_command(backup)
+    app.cli.add_command(sync) 

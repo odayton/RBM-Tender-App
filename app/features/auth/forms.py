@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
 from app.models import User, UserRole
+import pyotp
 
 class LoginForm(FlaskForm):
     """Form for user login."""
@@ -140,4 +141,42 @@ class EditProfileForm(FlaskForm):
         """Check if username is already taken by another user."""
         user = User.query.filter_by(username=field.data).first()
         if user and user.id != self.current_user.id:
-            raise ValidationError('Username is already taken by another user.') 
+            raise ValidationError('Username is already taken by another user.')
+
+
+class TwoFactorSetupForm(FlaskForm):
+    """Form for setting up 2FA."""
+    submit = SubmitField('Enable Two-Factor Authentication')
+
+
+class TwoFactorVerifyForm(FlaskForm):
+    """Form for verifying 2FA code."""
+    code = StringField('Authentication Code', validators=[
+        DataRequired(message='Authentication code is required'),
+        Length(min=6, max=6, message='Code must be 6 digits')
+    ])
+    submit = SubmitField('Verify Code')
+    
+    def validate_code(self, field):
+        """Validate the 2FA code format."""
+        if not field.data.isdigit():
+            raise ValidationError('Code must contain only numbers.')
+        if len(field.data) != 6:
+            raise ValidationError('Code must be exactly 6 digits.')
+
+
+class TwoFactorDisableForm(FlaskForm):
+    """Form for disabling 2FA."""
+    password = PasswordField('Current Password', validators=[
+        DataRequired(message='Password is required to disable 2FA')
+    ])
+    submit = SubmitField('Disable Two-Factor Authentication')
+
+
+class BackupCodeForm(FlaskForm):
+    """Form for using backup codes."""
+    backup_code = StringField('Backup Code', validators=[
+        DataRequired(message='Backup code is required'),
+        Length(min=8, max=8, message='Backup code must be 8 characters')
+    ])
+    submit = SubmitField('Use Backup Code') 

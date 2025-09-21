@@ -63,7 +63,46 @@
                                     <td><strong>Last Login:</strong></td>
                                     <td>{{ user.last_login|format_datetime if user.last_login else 'Never' }}</td>
                                 </tr>
+                                <tr>
+                                    <td><strong>Two-Factor Auth:</strong></td>
+                                    <td>
+                                        {% if user.two_factor_enabled %}
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-shield-alt"></i> Enabled
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-warning">
+                                                <i class="fas fa-exclamation-triangle"></i> Disabled
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
                             </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Two-Factor Authentication Section -->
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h5><i class="fas fa-shield-alt"></i> Two-Factor Authentication</h5>
+                            {% if user.two_factor_enabled %}
+                                <div class="alert alert-success">
+                                    <h6><i class="fas fa-check-circle"></i> Two-Factor Authentication is Enabled</h6>
+                                    <p>Your account is protected with two-factor authentication. You'll need to enter a code from your authenticator app when logging in.</p>
+                                </div>
+                                <a href="{{ url_for('auth.disable_2fa') }}" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-shield-alt"></i> Disable 2FA
+                                </a>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <h6><i class="fas fa-exclamation-triangle"></i> Two-Factor Authentication is Disabled</h6>
+                                    <p>Your account is not protected with two-factor authentication. We recommend enabling it for better security.</p>
+                                </div>
+                                <a href="{{ url_for('auth.setup_2fa') }}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-shield-alt"></i> Enable 2FA
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

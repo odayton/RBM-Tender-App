@@ -9,6 +9,30 @@ Flask-Migrate
 Flask-Login
 Flask-Security-Too
 email_validator
+pyotp>=2.8.0
+qrcode[pil]>=7.0.0
+
+# Security Scanning
+bandit>=1.7.0
+safety>=2.3.0
+
+# Secrets Management
+cryptography>=41.0.0
+
+# Rate Limiting
+Flask-Limiter>=3.0.0
+
+# Error Tracking and Monitoring
+sentry-sdk[flask]>=1.0.0
+structlog>=23.0.0
+
+# Metrics and Monitoring
+prometheus-client>=0.16.0
+flask-monitoring-dashboard>=3.1.0
+
+# API Documentation
+flask-restx>=1.0.0
+pyyaml>=6.0
 
 # Forms
 Flask-WTF
@@ -27,11 +51,14 @@ XlsxWriter
 numpy
 scipy
 matplotlib
+tqdm
+psutil>=5.9.0
 
 # PDF Generation
 playwright>=1.40.0
 weasyprint>=60.0
 
 Flask-Security-Too==5.6.2
-PyJWT==2.8.0
+PyJWT>=2.10.1
 WTForms-SQLAlchemy==0.3
+urllib3>=2.5.0

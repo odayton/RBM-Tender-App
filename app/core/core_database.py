@@ -2,7 +2,7 @@ from sqlalchemy import MetaData
 from flask_sqlalchemy import SQLAlchemy
 
 # Define a naming convention for all database constraints (keys, indexes, etc.).
-# This solves the "Constraint must have a name" error with SQLite and Alembic.
+# This ensures consistent constraint naming across PostgreSQL and Alembic.
 metadata = MetaData(
     naming_convention={
         "ix": 'ix_%(column_0_label)s',

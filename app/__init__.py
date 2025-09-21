@@ -1,4 +1,5 @@
 import os
+import time
 from flask import Flask, request
 from .core.core_init import CoreInitializer
 from .core.core_logging import logger
@@ -67,17 +68,28 @@ def register_template_filters(app: Flask):
 
 def create_app(config_class=None):
     """Create and configure an instance of the Flask application."""
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, 
+                instance_relative_config=True,
+                static_folder='static',
+                static_url_path='/static')
     
     # Load configuration
     if config_class:
         logger.info(f"Loading configuration from: {config_class.__name__}")
         app.config.from_object(config_class)
+        # Call init_app if the config class has it
+        if hasattr(config_class, 'init_app'):
+            config_instance = config_class()
+            config_instance.init_app(app)
+            app._config_initialized = True
     else:
         # Default to development if no config specified
         from .core.core_config import DevelopmentConfig
         logger.info("No config specified, using default DevelopmentConfig")
         app.config.from_object(DevelopmentConfig)
+        config_instance = DevelopmentConfig()
+        config_instance.init_app(app)
+        app._config_initialized = True
     
     # Ensure auto-login is explicitly set based on config class
     if config_class and hasattr(config_class, 'ENABLE_AUTO_LOGIN'):
@@ -91,6 +103,16 @@ def create_app(config_class=None):
     # Initialize core services using your existing CoreInitializer structure
     core_initializer = CoreInitializer(app, db, login_manager, migrate, csrf)
     core_initializer.init_app()
+    
+    # Initialize monitoring and error tracking
+    from app.core.core_monitoring import init_monitoring
+    from app.core.core_sentry import init_sentry
+    
+    init_monitoring(app)
+    init_sentry(app)
+    
+    # Set application start time for uptime tracking
+    app.config['START_TIME'] = time.time()
 
     # --- Development-Only Auto-Login ---
     # This block will only be active when ENABLE_AUTO_LOGIN is True
@@ -133,6 +155,7 @@ def create_app(config_class=None):
         from app.features.static_server import static_server_bp
         from app.features.crm import crm_bp
         from app.features.products import products_bp
+        from app.features.monitoring import monitoring_bp
 
         app.register_blueprint(auth_bp)
         app.register_blueprint(admin_bp, url_prefix='/admin')
@@ -144,6 +167,7 @@ def create_app(config_class=None):
         app.register_blueprint(static_server_bp)
         app.register_blueprint(crm_bp, url_prefix='/crm')
         app.register_blueprint(products_bp, url_prefix='/products')
+        app.register_blueprint(monitoring_bp)
 
         # Register template filters
         register_template_filters(app)

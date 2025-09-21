@@ -7,17 +7,27 @@ from .core_logging import logger as core_logger
 from .core_security import security_manager
 from .core_errors import register_error_handlers
 from .core_events import event_manager
+from .core_rate_limiting import create_rate_limiter, handle_rate_limit_exceeded
+from .core_metrics import init_metrics
+from .core_monitoring import init_monitoring
+from .core_caching import advanced_cache
+from .core_api_docs import init_api_docs
+from .core_feature_flags import init_feature_flags
+from .core_circuit_breaker import init_circuit_breakers
+from .core_db_safety import init_database_safety
+from .core_advanced_monitoring import init_advanced_monitoring
 # Remove the problematic import at the top
 
 class CoreInitializer:
     """Initializes the core components and extensions of the application."""
     
-    def __init__(self, app: Flask, db, login_manager, migrate, csrf):
+    def __init__(self, app: Flask, db, login_manager, migrate, csrf, limiter=None):
         self.app = app
         self.db = db
         self.login_manager = login_manager
         self.migrate = migrate
         self.csrf = csrf
+        self.limiter = limiter
 
     def init_app(self):
         """Run all initialization methods in the correct order."""
@@ -27,14 +37,27 @@ class CoreInitializer:
         self.init_database()
         self.init_security()
         self.init_csrf()
+        self.init_rate_limiting()
         self.init_events()
+        self.init_monitoring()
+        self.init_metrics()
+        self.init_caching()
+        self.init_api_docs()
+        self.init_feature_flags()
+        self.init_circuit_breakers()
+        self.init_advanced_monitoring()
         self.init_error_handlers()
 
     def init_config(self):
         """Initialize configuration from environment."""
-        config_name = os.getenv('FLASK_CONFIG', 'development')
-        self.app.config.from_object(config_dict[config_name])
-        config_dict[config_name].init_app(self.app)
+        # Only initialize config if it hasn't been set already
+        if not hasattr(self.app, '_config_initialized'):
+            config_name = os.getenv('FLASK_CONFIG', 'development')
+            config_class = config_dict[config_name]
+            self.app.config.from_object(config_class)
+            config_instance = config_class()
+            config_instance.init_app(self.app)
+            self.app._config_initialized = True
 
     def init_logging(self):
         """Initialize application logging."""
@@ -45,6 +68,10 @@ class CoreInitializer:
         """Initialize database components and Flask-Migrate."""
         self.db.init_app(self.app)
         self.migrate.init_app(self.app, self.db)
+        
+        # Initialize database safety manager
+        init_database_safety(self.db)
+        
         core_logger.app_logger.info("Database and Migrations Initialized.")
         
         # Initialize backup system (simplified)
@@ -74,10 +101,55 @@ class CoreInitializer:
         self.csrf.init_app(self.app)
         core_logger.app_logger.info("CSRF Protection Initialized.")
 
+    def init_rate_limiting(self):
+        """Initialize rate limiting."""
+        if self.limiter:
+            self.limiter.init_app(self.app)
+            # Register rate limit error handler
+            self.app.register_error_handler(429, handle_rate_limit_exceeded)
+            core_logger.app_logger.info("Rate Limiting Initialized.")
+        else:
+            core_logger.app_logger.warning("Rate Limiter not provided. Rate limiting disabled.")
+
     def init_events(self):
         """Initialize the event manager and load listeners."""
         event_manager.init_app(self.app)
         core_logger.app_logger.info("Event System Initialized.")
+
+    def init_monitoring(self):
+        """Initialize monitoring and health checks."""
+        init_monitoring(self.app)
+        core_logger.app_logger.info("Monitoring Initialized.")
+
+    def init_metrics(self):
+        """Initialize Prometheus metrics."""
+        init_metrics(self.app)
+        core_logger.app_logger.info("Metrics Initialized.")
+
+    def init_caching(self):
+        """Initialize advanced caching system."""
+        advanced_cache.init_app(self.app)
+        core_logger.app_logger.info("Advanced Caching Initialized.")
+
+    def init_api_docs(self):
+        """Initialize API documentation."""
+        init_api_docs(self.app)
+        core_logger.app_logger.info("API Documentation Initialized.")
+
+    def init_feature_flags(self):
+        """Initialize feature flags system."""
+        init_feature_flags(self.app)
+        core_logger.app_logger.info("Feature Flags Initialized.")
+
+    def init_circuit_breakers(self):
+        """Initialize circuit breakers system."""
+        init_circuit_breakers()
+        core_logger.app_logger.info("Circuit Breakers Initialized.")
+
+    def init_advanced_monitoring(self):
+        """Initialize advanced monitoring system."""
+        init_advanced_monitoring(self.app, self.db)
+        core_logger.app_logger.info("Advanced Monitoring Initialized.")
 
     def init_error_handlers(self):
         """Register application-wide error handlers."""

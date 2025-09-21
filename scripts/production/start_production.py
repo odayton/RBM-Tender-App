@@ -55,7 +55,7 @@ def main():
     print("   - Use Gunicorn for production: gunicorn --workers 1 --bind 0.0.0.0:5000 app:create_app()")
     print("   - Nginx handles static files and reverse proxy")
     print("   - Cloudflare handles HTTPS termination")
-    print("   - Database: PostgreSQL (not SQLite)")
+    print("   - Database: PostgreSQL")
     print()
     print("⏹️  Press Ctrl+C to stop the server")
     print("-" * 50)

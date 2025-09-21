@@ -2,11 +2,14 @@ from .base_model import BaseModel
 from .customers.company_model import Company
 from .customers.customer_model import Contact
 from .deals.deal_models import Deal, QuoteRecipient, Quote, QuoteOption, QuoteLineItem, Discount
+from .deals.quote_snapshot import QuoteSnapshot
 from .deals.deal_types import DealStage, DealType, AustralianState
 from .user_model import User, UserRole
 
 # --- NEW: Import the Product model ---
 from .products.product_model import Product
+
+# Pump models removed - no longer needed
 
 
 
@@ -29,6 +32,7 @@ __all__ = [
     'QuoteOption',
     'QuoteLineItem',
     'Discount',
+    'QuoteSnapshot',
     'DealStage',
     'DealType',
     'AustralianState',
@@ -37,6 +41,8 @@ __all__ = [
 
     # --- NEW: Export the Product model ---
     'Product',
+    
+    # Pump models removed - no longer needed
     # --- NEW: Export CRM models ---
     'Activity',
     'ActivityType',

@@ -148,6 +148,11 @@ class DatabaseVerifier:
                         ref_table = fk['referred_table']
                         ref_column = fk['referred_columns'][0]
                         
+                        # Validate all identifiers to prevent SQL injection
+                        if not all(self._is_valid_identifier(name) for name in [table_name, fk_column, ref_table, ref_column]):
+                            issues.append(f"Invalid identifier names detected in foreign key check for '{table_name}'")
+                            continue
+                        
                         query = f"""
                             SELECT t1."{fk_column}"
                             FROM "{table_name}" t1
@@ -163,3 +168,9 @@ class DatabaseVerifier:
             issues.append(f"Data integrity check error: {e}")
 
         return issues
+    
+    def _is_valid_identifier(self, identifier: str) -> bool:
+        """Validate database identifier to prevent SQL injection"""
+        import re
+        # Only allow alphanumeric characters and underscores, starting with letter or underscore
+        return bool(re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', identifier))

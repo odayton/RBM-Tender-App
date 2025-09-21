@@ -261,6 +261,7 @@ class QuoteOption(BaseModel):
     # Relationships
     quote = relationship("Quote", back_populates="options")
     line_items = relationship("QuoteLineItem", back_populates="option", cascade="all, delete-orphan", order_by="QuoteLineItem.display_order")
+    snapshots = relationship("QuoteSnapshot", back_populates="quote_option", cascade="all, delete-orphan", order_by="QuoteSnapshot.version_number.desc()")
     
     # Indexes
     __table_args__ = (

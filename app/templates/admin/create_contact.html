@@ -48,7 +48,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('admin.add_item', item_type='contact') }}" class="needs-validation contact-form" novalidate>
+                    <form method="POST" action="{{ url_for('admin.create_contact') }}" class="needs-validation contact-form" novalidate>
                         {{ form.hidden_tag() }}
                         
                         <!-- Personal Information Section -->
@@ -165,20 +165,20 @@
                             </h5>
                             <div class="row">
                                 <div class="col-md-12 mb-4">
-                                    <label for="company" class="form-label fw-bold">{{ form.company.label }}</label>
+                                    <label for="company_id" class="form-label fw-bold">{{ form.company_id.label }}</label>
                                     <div class="input-group">
                                         <span class="input-group-text">
                                             <i class="fas fa-building"></i>
                                         </span>
-                                        {{ form.company(class="form-control") }}
+                                        {{ form.company_id(class="form-control") }}
                                     </div>
                                     <div class="form-text">
                                         <i class="fas fa-info-circle text-info mr-1"></i>
                                         Leave blank if company will be auto-assigned based on email domain
                                     </div>
-                                    {% if form.company.errors %}
+                                    {% if form.company_id.errors %}
                                         <div class="invalid-feedback d-block">
-                                            {% for error in form.company.errors %}
+                                            {% for error in form.company_id.errors %}
                                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
                                             {% endfor %}
                                         </div>

@@ -100,14 +100,26 @@ class ChangeTracker:
     def _get_current_state(self, table_name: str, record_id: Any) -> Optional[Dict]:
         """Get current state of a database record"""
         try:
+            # Validate table name to prevent SQL injection
+            if not self._is_valid_table_name(table_name):
+                raise ValueError(f"Invalid table name: {table_name}")
+            
             # Assuming primary key columns are consistently named 'id' or passed in kwargs.
             pk_column = 'id' # This might need to be more flexible in a real-world scenario.
-            query = f"SELECT * FROM {table_name} WHERE {pk_column} = %s"
+            
+            # Use proper parameterized query with table name validation
+            query = f"SELECT * FROM \"{table_name}\" WHERE \"{pk_column}\" = %s"
             result = DatabaseManager.execute_query(query, (record_id,))
             return dict(result[0]) if result else None
         except Exception as e:
             logger.error(f"Error getting current state for {table_name}:{record_id}: {e}", exc_info=True)
             return None
+    
+    def _is_valid_table_name(self, table_name: str) -> bool:
+        """Validate table name to prevent SQL injection"""
+        import re
+        # Only allow alphanumeric characters and underscores
+        return bool(re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', table_name))
 
     def _get_new_state(self, table_name: str, record_id: Any, data: Optional[Dict] = None) -> Optional[Dict]:
         """Get new state of a record after operation"""

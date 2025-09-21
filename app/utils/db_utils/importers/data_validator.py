@@ -101,9 +101,19 @@ class DataValidator:
             raise ValueError("Invalid table or column name for validation.")
             
         try:
+            # Validate table and column names to prevent SQL injection
+            if not self._is_valid_identifier(table) or not self._is_valid_identifier(column):
+                raise ValueError(f"Invalid table or column name: {table}.{column}")
+            
             query = f'SELECT 1 FROM "{table}" WHERE "{column}" = %s'
             if not DatabaseManager.execute_query(query, (value,)):
                 raise ValueError(f"Referenced {field_name} '{value}' does not exist in table '{table}'.")
         except DatabaseError as e:
             logger.error(f"Database error while validating reference for {field_name} '{value}': {e}", exc_info=True)
             raise
+    
+    def _is_valid_identifier(self, identifier: str) -> bool:
+        """Validate database identifier to prevent SQL injection"""
+        import re
+        # Only allow alphanumeric characters and underscores, starting with letter or underscore
+        return bool(re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', identifier))

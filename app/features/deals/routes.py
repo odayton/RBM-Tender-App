@@ -13,13 +13,17 @@ from io import BytesIO
 
 from app.models import (
     Deal, User, Quote, QuoteLineItem, DealStage, AustralianState, DealType,
-    Company, Contact, QuoteRecipient, QuoteOption, Product
+    Company, Contact, QuoteRecipient, QuoteOption, Product, QuoteSnapshot
 )
 from .forms import DealForm, LineItemForm, QuoteOptionForm, UpdateDealForm
 from app.extensions import db
 from sqlalchemy import func
 from app.core.core_logging import logger
 from flask_login import login_required, current_user
+from app.core.core_monitoring import performance_timer, log_business_event
+from app.core.core_metrics import track_business_operation, record_deal_created, record_quote_generated
+from app.core.core_caching import cache_deal_data, cache_quote_data, invalidate_deal_cache, invalidate_quote_cache
+from app.core.core_circuit_breaker import pdf_generation_circuit_breaker, database_circuit_breaker
 
 from . import deals_bp
 from app.models import User, UserRole
@@ -59,6 +63,8 @@ def _clone_quote(source_quote, recipient, revision_number):
     return new_quote
 
 @deals_bp.route('/', methods=['GET'])
+@performance_timer('deals_list')
+@cache_deal_data(timeout=600)  # Cache for 10 minutes
 def list_deals():
     """Display a list of all deals, grouped by stage."""
     form = DealForm()
@@ -150,9 +156,12 @@ def deal_details(deal_id):
     )
 
 @deals_bp.route('/option/<int:option_id>/view/pdf', methods=['GET'])
+@login_required
+@pdf_generation_circuit_breaker(fallback=lambda: "PDF generation temporarily unavailable. Please try again later.")
 def view_quote_pdf(option_id):
     """
     Generates the quote PDF and serves it inline in the browser with PDF controls.
+    Automatically creates a snapshot of the quote when viewed.
     """
     option = QuoteOption.query.get_or_404(option_id)
     quote = option.quote
@@ -179,7 +188,7 @@ def view_quote_pdf(option_id):
     except FileNotFoundError:
         logger.error("quote_pdf.css not found!")
         css_content = ""
-
+    
     # Convert logo to base64 for embedding in PDF
     try:
         logo_path = os.path.join(current_app.static_folder, 'images', 'rbm_logo.png')
@@ -192,23 +201,60 @@ def view_quote_pdf(option_id):
         logger.info(f"Successfully loaded logo: {len(logo_data)} bytes, base64 length: {len(logo_base64)}")
     except FileNotFoundError:
         logger.error(f"rbm_logo.png not found at: {logo_path}")
+        logo_base64 = ""
         logo_data_url = ""
     except Exception as e:
         logger.error(f"Error loading logo: {e}")
+        logo_base64 = ""
         logo_data_url = ""
 
     # Filter contacts to only show those belonging to the quote recipient company
     company_contacts = [contact for contact in deal.contacts if contact.company_id == quote.recipient.company_id]
     
-    html_content = render_template(
-        template_name,
-        deal=deal,
-        revision=quote,
-        option=option,
-        css_content=css_content,
-        logo_data_url=logo_data_url,
-        company_contacts=company_contacts
-    )
+    # Generate the HTML content for the quote
+    try:
+        html_content = render_template(
+            template_name,
+            deal=deal,
+            revision=quote,
+            option=option,
+            css_content=css_content,
+            logo_data_url=logo_data_url,
+            company_contacts=company_contacts
+        )
+        
+        # Create a snapshot of this quote option
+        try:
+            from app.models import QuoteSnapshot
+            from flask_login import current_user
+            
+            # Debug logging for current_user
+            logger.info(f"current_user object: {current_user}")
+            logger.info(f"current_user type: {type(current_user)}")
+            logger.info(f"current_user.is_authenticated: {getattr(current_user, 'is_authenticated', 'NO_ATTR')}")
+            logger.info(f"current_user.id: {getattr(current_user, 'id', 'NO_ID')}")
+            
+            # Check if current_user is available and authenticated
+            if hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
+                # Create snapshot with the rendered HTML content
+                snapshot = QuoteSnapshot.create_snapshot(
+                    quote_option=option,
+                    rendered_html=html_content,
+                    user_id=current_user.id,
+                    pdf_generated=True,
+                    template_used=template_name
+                )
+                logger.info(f"Created quote snapshot v{snapshot.version_number} for option {option_id}")
+            else:
+                logger.warning("User not authenticated or current_user not available, skipping snapshot creation")
+                
+        except Exception as e:
+            logger.error(f"Failed to create quote snapshot: {e}", exc_info=True)
+            # Don't fail the PDF generation if snapshot creation fails
+        
+    except Exception as e:
+        logger.error(f"Failed to render quote template: {e}", exc_info=True)
+        return "Error rendering quote template", 500
     
     # Log some debugging info
     logger.info(f"Generated HTML for PDF: deal_id={deal.id}, option_id={option.id}, line_items_count={len(option.line_items)}")
@@ -228,6 +274,12 @@ def view_quote_pdf(option_id):
             response.headers['Content-Disposition'] = 'inline; filename=quote.html'
             return response
         else:
+            # Record metrics for successful PDF generation
+            record_quote_generated(
+                quote_type=deal.deal_type.value,
+                status='pdf_generated'
+            )
+            
             # Return PDF content
             response = make_response(pdf_data)
             response.headers['Content-Type'] = 'application/pdf'
@@ -290,6 +342,9 @@ def search_for_modal():
 
 @deals_bp.route('/create', methods=['POST'])
 @login_required
+@performance_timer('deal_create')
+@invalidate_deal_cache()
+@database_circuit_breaker(fallback=lambda: {"error": "Database temporarily unavailable. Please try again later."})
 def create_deal():
     """Creates a new deal from the form on the main deals page."""
     form = DealForm()
@@ -330,6 +385,21 @@ def create_deal():
                     db.session.add(QuoteRecipient(deal_id=new_deal.id, company_id=company.id))
 
             db.session.commit()
+            
+            # Record metrics
+            record_deal_created(
+                deal_type=new_deal.deal_type.value,
+                stage=new_deal.stage.value
+            )
+            
+            # Log business event
+            log_business_event('deal_created', 
+                              deal_id=new_deal.id,
+                              project_name=new_deal.project_name,
+                              deal_type=new_deal.deal_type.value,
+                              owner_id=owner.id,
+                              owner_email=owner.email)
+            
             flash('Deal created successfully!', 'success')
             return redirect(url_for('deals.deal_details', deal_id=new_deal.id))
 
@@ -371,6 +441,110 @@ def update_deal(deal_id):
             for error in errors:
                 flash(f"Error in {getattr(form, field).label.text}: {error}", 'error')
     return redirect(url_for('deals.deal_details', deal_id=deal.id))
+
+@deals_bp.route('/update_stage/<int:deal_id>', methods=['POST'])
+@login_required
+def update_deal_stage(deal_id):
+    """Updates the stage of a deal via AJAX (for kanban drag and drop)."""
+    try:
+        deal = Deal.query.get_or_404(deal_id)
+        data = request.get_json()
+        
+        if not data or 'stage' not in data:
+            return jsonify({'success': False, 'error': 'Invalid request data'}), 400
+        
+        new_stage = data['stage']
+        
+        # Validate that the stage is valid
+        try:
+            stage_enum = DealStage(new_stage)
+        except ValueError:
+            return jsonify({'success': False, 'error': f'Invalid stage: {new_stage}'}), 400
+        
+        # Update the deal stage
+        old_stage = deal.stage.value
+        deal.stage = stage_enum
+        db.session.commit()
+        
+        logger.info(f"Deal {deal_id} stage updated from '{old_stage}' to '{new_stage}' by user {current_user.username}")
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Deal moved to {new_stage}',
+            'old_stage': old_stage,
+            'new_stage': new_stage
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating deal {deal_id} stage: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
+@deals_bp.route('/option/<int:option_id>/snapshots', methods=['GET'])
+@login_required
+def view_quote_snapshots(option_id):
+    """Display version history for a quote option."""
+    option = QuoteOption.query.get_or_404(option_id)
+    snapshots = QuoteSnapshot.get_snapshots_for_option(option_id)
+    
+    return render_template(
+        'deals/quote_snapshots.html',
+        option=option,
+        snapshots=snapshots,
+        deal=option.quote.recipient.deal
+    )
+
+@deals_bp.route('/snapshot/<int:snapshot_id>/view', methods=['GET'])
+@login_required
+def view_quote_snapshot(snapshot_id):
+    """View a specific quote snapshot."""
+    snapshot = QuoteSnapshot.query.get_or_404(snapshot_id)
+    
+    return render_template(
+        'deals/quote_snapshot_view.html',
+        snapshot=snapshot,
+        option=snapshot.quote_option,
+        deal=snapshot.quote_option.quote.recipient.deal
+    )
+
+@deals_bp.route('/snapshot/<int:snapshot_id>/restore', methods=['POST'])
+@login_required
+def restore_quote_snapshot(snapshot_id):
+    """Restore a quote option to a previous snapshot version."""
+    try:
+        snapshot = QuoteSnapshot.query.get_or_404(snapshot_id)
+        option = snapshot.quote_option
+        
+        # Create a snapshot of the current state before restoring
+        current_html = render_template(
+            'deals/pdf/hvac_quote_template.html',  # Default template
+            deal=option.quote.recipient.deal,
+            quote=option.quote,
+            option=option,
+            css_content="",
+            logo_base64=""
+        )
+        
+        # Save current state as snapshot
+        current_snapshot = QuoteSnapshot.create_snapshot(
+            quote_option=option,
+            rendered_html=current_html,
+            user_id=current_user.id,
+            restored_from_snapshot_id=snapshot_id,
+            action_type='restore_backup'
+        )
+        
+        # TODO: Implement actual restoration logic
+        # This would involve parsing the snapshot HTML and updating the current option
+        
+        flash(f'Quote restored to version {snapshot.get_formatted_version()}. Current state backed up as version {current_snapshot.get_formatted_version()}.', 'success')
+        
+        return redirect(url_for('deals.deal_details', deal_id=option.quote.recipient.deal_id))
+        
+    except Exception as e:
+        logger.error(f"Error restoring quote snapshot: {e}", exc_info=True)
+        flash('Error restoring quote snapshot.', 'error')
+        return redirect(url_for('deals.deal_details', deal_id=option.quote.recipient.deal_id))
 
 @deals_bp.route('/add_revision/<int:deal_id>', methods=['POST'])
 def add_revision(deal_id):

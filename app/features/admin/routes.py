@@ -2,6 +2,7 @@ from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from app.features.admin import admin_bp
 from app.core.core_security import admin_required, rate_limit, security_manager
+from app.core.core_rate_limiting import admin_rate_limit, security_rate_limit
 from app.core.core_logging import logger
 from app.models import User, UserRole, Company, Contact
 from app.features.admin.forms import CreateUserForm, EditUserForm, CompanyForm, ContactForm
@@ -18,7 +19,7 @@ MANAGEMENT_ITEMS = {
         'display_name': 'Companies',
         'model': Company,
         'form': CompanyForm,
-        'columns': ['company_name', 'address', 'phone', 'email']
+        'columns': ['company_name', 'phone_number', 'domain']
     },
     'contact': {
         'display_name': 'Contacts',
@@ -28,10 +29,192 @@ MANAGEMENT_ITEMS = {
     }
 }
 
+# Import additional models and forms for specific routes
+from app.models import User, UserRole, Company, Contact
+from app.features.admin.forms import CompanyForm, ContactForm, DealOwnerForm
+from app.core.core_security import security_manager
+from app.core.core_errors import ValidationError
+import secrets
+
+def safe_getattr(obj, attr_name, default=''):
+    """Safely get attribute from object, handling nested attributes."""
+    try:
+        if '.' in attr_name:
+            # Handle nested attributes like 'company.company_name'
+            parts = attr_name.split('.')
+            value = obj
+            for part in parts:
+                value = getattr(value, part, None)
+                if value is None:
+                    break
+            return value if value is not None else default
+        else:
+            # Handle direct attributes
+            value = getattr(obj, attr_name, default)
+            return value if value is not None else default
+    except (AttributeError, TypeError):
+        return default
+
+# Register the function with the admin blueprint
+admin_bp.add_app_template_filter(safe_getattr, 'safe_getattr')
+
+@admin_bp.route('/create-company', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_company():
+    """Handles the creation of a new company."""
+    form = CompanyForm()
+    if form.validate_on_submit():
+        try:
+            # Sanitize input to prevent XSS attacks
+            company_name = security_manager.sanitize_input(form.company_name.data)
+            phone_number = security_manager.sanitize_input(form.phone_number.data) if form.phone_number.data else None
+            domain = security_manager.sanitize_input(form.domain.data) if form.domain.data else None
+            
+            new_company = Company(
+                company_name=company_name,
+                phone_number=phone_number,
+                domain=domain
+            )
+            
+            # Add validation call before saving
+            new_company.validate()
+            
+            # Use transaction safety with savepoint
+            from app.extensions import db
+            with db.session.begin_nested():
+                db.session.add(new_company)
+                db.session.commit()
+            
+            logger.info(f"Admin created new company: {company_name}")
+            flash('Company created successfully!', 'success')
+            return redirect(url_for('admin.dashboard'))
+            
+        except ValidationError as e:
+            from app.extensions import db
+            db.session.rollback()
+            logger.warning(f"Validation error creating company: {e}")
+            flash(f'Validation error: {e}', 'error')
+        except Exception as e:
+            from app.extensions import db
+            db.session.rollback()
+            logger.error(f"Unexpected error creating company: {e}", exc_info=True)
+            flash('An unexpected error occurred while creating the company. Please try again.', 'error')
+        
+    return render_template('admin/create_company.html', form=form)
+
+@admin_bp.route('/create-contact', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_contact():
+    """Handles creating a new contact."""
+    form = ContactForm()
+    if form.validate_on_submit():
+        try:
+            # Sanitize input to prevent XSS attacks
+            name = security_manager.sanitize_input(form.name.data)
+            email = security_manager.sanitize_input(form.email.data)
+            phone_number = security_manager.sanitize_input(form.phone_number.data) if form.phone_number.data else None
+            mobile_number = security_manager.sanitize_input(form.mobile_number.data) if form.mobile_number.data else None
+            position = security_manager.sanitize_input(form.position.data) if form.position.data else None
+            
+            new_contact = Contact(
+                name=name,
+                email=email,
+                phone_number=phone_number,
+                mobile_number=mobile_number,
+                position=position,
+                company_id=form.company_id.data
+            )
+            
+            # Add validation call before saving
+            new_contact.validate()
+            
+            # Use transaction safety with savepoint
+            from app.extensions import db
+            with db.session.begin_nested():
+                db.session.add(new_contact)
+                db.session.commit()
+            
+            logger.info(f"Admin created new contact: {name} ({email})")
+            flash('Contact created successfully!', 'success')
+            return redirect(url_for('admin.dashboard'))
+            
+        except ValidationError as e:
+            from app.extensions import db
+            db.session.rollback()
+            logger.warning(f"Validation error creating contact: {e}")
+            flash(f'Validation error: {e}', 'error')
+        except Exception as e:
+            from app.extensions import db
+            db.session.rollback()
+            logger.error(f"Unexpected error creating contact: {e}", exc_info=True)
+            flash('An unexpected error occurred while creating the contact. Please try again.', 'error')
+
+    return render_template('admin/create_contact.html', form=form)
+
+@admin_bp.route('/create-deal-owner', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_deal_owner():
+    """Handles creating a new deal owner (user)."""
+    form = DealOwnerForm()
+    if form.validate_on_submit():
+        existing_user = User.query.filter_by(email=form.email.data).first()
+        if existing_user:
+            flash('A user with that email already exists.', 'danger')
+        else:
+            try:
+                # Sanitize input to prevent XSS attacks
+                username = security_manager.sanitize_input(form.username.data)
+                email = security_manager.sanitize_input(form.email.data)
+                first_name = security_manager.sanitize_input(form.first_name.data)
+                last_name = security_manager.sanitize_input(form.last_name.data)
+                phone_number = security_manager.sanitize_input(form.phone_number.data) if form.phone_number.data else None
+                
+                # Generate a secure temporary password
+                temp_password = secrets.token_hex(16)
+                
+                new_owner = User(
+                    username=username,
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    phone_number=phone_number,
+                    role=UserRole.SALES
+                )
+                
+                # Set password properly (this will hash it via the property setter)
+                new_owner.password = temp_password
+                
+                # Use transaction safety with savepoint
+                from app.extensions import db
+                with db.session.begin_nested():
+                    db.session.add(new_owner)
+                    db.session.commit()
+                
+                logger.info(f"Admin created new deal owner: {username} ({email})")
+                flash(f'Deal Owner created successfully! Temporary password: {temp_password}', 'success')
+                flash('The user will be required to change their password on first login.', 'info')
+                return redirect(url_for('admin.dashboard'))
+                
+            except ValidationError as e:
+                from app.extensions import db
+                db.session.rollback()
+                logger.warning(f"Validation error creating deal owner: {e}")
+                flash(f'Validation error: {e}', 'error')
+            except Exception as e:
+                from app.extensions import db
+                db.session.rollback()
+                logger.error(f"Unexpected error creating deal owner: {e}", exc_info=True)
+                flash('An unexpected error occurred while creating the deal owner. Please try again.', 'error')
+    
+    return render_template('admin/create_deal_owner.html', form=form)
+
 @admin_bp.route('/dashboard')
 @login_required
 @admin_required
-@rate_limit(max_requests=30, window_seconds=60)
+@admin_rate_limit()
 def dashboard():
     """Admin dashboard with enhanced security."""
     try:
@@ -304,11 +487,11 @@ def system_info():
         from sqlalchemy import text
         
         # Get database information
-        result = db.session.execute(text("SELECT sqlite_version()"))
+        result = db.session.execute(text("SELECT version()"))
         db_version = result.scalar()
         
         # Get table information
-        result = db.session.execute(text("SELECT name FROM sqlite_master WHERE type='table'"))
+        result = db.session.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"))
         tables = [row[0] for row in result.fetchall()]
         
         system_info = {

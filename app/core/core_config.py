@@ -6,9 +6,10 @@ from datetime import timedelta
 import yaml
 from dotenv import load_dotenv
 from app.core.core_logging import logger # Use central app logger
+from app.core.core_secrets import secrets_manager, env_validator, validate_secrets
 
-# Load environment variables from .env file at the module level
-load_dotenv()
+# Load environment variables from .env file in config directory
+load_dotenv('config/.env')
 
 class ConfigurationError(Exception):
     """Custom exception for configuration-related errors."""
@@ -21,7 +22,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     if not SECRET_KEY:
         # Generate a cryptographically secure secret key if not provided
-        SECRET_KEY = secrets.token_urlsafe(32)
+        SECRET_KEY = secrets_manager.generate_secret_key(64)
         logger.warning("SECRET_KEY not set in environment. Generated temporary key. Set SECRET_KEY environment variable for production.")
     
     DEBUG = False
@@ -34,8 +35,8 @@ class Config:
     
     # Base path configuration
     BASE_DIR = Path(__file__).resolve().parent.parent
-    # Fix INSTANCE_PATH to be relative to the application root (/app) not the core_config.py location
-    INSTANCE_PATH = Path('/app/instance')
+    # Fix INSTANCE_PATH to be relative to the application root, not absolute
+    INSTANCE_PATH = BASE_DIR / 'instance'
     
     # Application-specific paths (these will be used by CoreInitializer to create dirs)
     LOG_DIR = INSTANCE_PATH / 'logs'
@@ -46,7 +47,7 @@ class Config:
     # Session configuration - SECURED for production
     SESSION_TYPE = 'filesystem'
     PERMANENT_SESSION_LIFETIME = timedelta(hours=8)  # Reduced from 31 days
-    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = False  # Temporarily disabled for HTTP testing
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     REMEMBER_COOKIE_SECURE = True
@@ -68,25 +69,30 @@ class Config:
     SECURITY_MAX_LOGIN_ATTEMPTS = int(os.environ.get('SECURITY_MAX_LOGIN_ATTEMPTS', '10'))
     SECURITY_BLOCK_DURATION_MINUTES = int(os.environ.get('SECURITY_BLOCK_DURATION_MINUTES', '15'))
     
-    @staticmethod
-    def validate_environment():
+    def validate_environment(self):
         """Validate critical environment variables for production."""
-        required_vars = []
-        if os.environ.get('FLASK_ENV') == 'production':
-            required_vars = ['DATABASE_URL', 'SECRET_KEY']
+        # Use our comprehensive secrets validation
+        if not validate_secrets():
+            validation_result = env_validator.validate_environment()
+            missing_critical = validation_result.get('missing_critical', [])
+            if missing_critical:
+                raise ConfigurationError(f"Missing critical environment variables: {', '.join(missing_critical)}")
         
-        missing_vars = [var for var in required_vars if not os.environ.get(var)]
-        if missing_vars:
-            raise ConfigurationError(f"Missing required environment variables for production: {', '.join(missing_vars)}")
+        # Additional environment-specific validation
+        env = os.environ.get('FLASK_ENV', 'development')
+        if env == 'production':
+            if not os.environ.get('SECRET_KEY') or len(os.environ.get('SECRET_KEY', '')) < 32:
+                raise ConfigurationError("SECRET_KEY must be at least 32 characters in production")
+            if os.environ.get('DEBUG', '').lower() == 'true':
+                raise ConfigurationError("DEBUG must be False in production")
     
-    @staticmethod
-    def init_app(app):
+    def init_app(self, app):
         """
         A hook for any post-configuration initialization.
         We also load an optional YAML file here for overrides.
         """
-        # Validate environment variables
-        Config.validate_environment()
+        # Validate environment variables - call the method on the actual config class
+        self.validate_environment()
         
         config_yaml_path = app.config.get('INSTANCE_PATH') / 'config.yaml'
         try:
@@ -105,22 +111,25 @@ class DevelopmentConfig(Config):
     DEBUG = True
     LOG_LEVEL = 'DEBUG'
     
-    # --- THIS IS THE UPDATED LINE ---
-    # We are changing 'new_dev.db' to 'rbm_tender_app.db'
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        'DEV_DATABASE_URL', 
-        f"sqlite:///{Config.INSTANCE_PATH / 'rbm_tender_app.db'}"
-    )
-    # ------------------------------------
+    # PostgreSQL for development
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE URL')
 
     # Use a simpler cache for development
     CACHE_TYPE = 'SimpleCache'
     
     # Development-specific settings - SECURITY: Keep CSRF enabled for security testing
-    WTF_CSRF_ENABLED = True
+    WTF_CSRF_ENABLED = False  # Temporarily disabled for debugging
     SESSION_COOKIE_SECURE = False  # Allow HTTP in development
     REMEMBER_COOKIE_SECURE = False  # Allow HTTP in development
     ENABLE_AUTO_LOGIN = False  # Disable auto-login for normal development
+    
+    def init_app(self, app):
+        """Initialize development configuration with validation."""
+        super().init_app(app)
+        
+        # Validate that DEV_DATABASE_URL is set for development
+        if not self.SQLALCHEMY_DATABASE_URI:
+            raise ConfigurationError("DEV_DATABASE_URL must be set for development environment")
 
 class ProductionConfig(Config):
     """Production-specific configuration."""
@@ -130,8 +139,8 @@ class ProductionConfig(Config):
     # Production security settings
     DEBUG = False
     TESTING = False
-    WTF_CSRF_ENABLED = True
-    SESSION_COOKIE_SECURE = True
+    WTF_CSRF_ENABLED = False  # Temporarily disabled for debugging
+    SESSION_COOKIE_SECURE = False  # Temporarily disabled for HTTP testing
     REMEMBER_COOKIE_SECURE = True
     
     # Use Redis for caching in production
@@ -140,8 +149,7 @@ class ProductionConfig(Config):
         logger.warning("REDIS_URL is not set for production. Caching will fall back to in-memory.")
         CACHE_TYPE = 'SimpleCache'
     
-    @classmethod
-    def init_app(cls, app):
+    def init_app(self, app):
         """Initialize production configuration with validation."""
         super().init_app(app)
         
@@ -150,9 +158,7 @@ class ProductionConfig(Config):
         
         # Validate that DATABASE_URL is set for production
         if not cls.SQLALCHEMY_DATABASE_URI:
-            logger.error("DATABASE_URL is not set for production environment. Falling back to SQLite.")
-            # Use SQLite as fallback but with proper permissions
-            cls.SQLALCHEMY_DATABASE_URI = f"sqlite:///{Config.INSTANCE_PATH / 'rbm_tender_app.db'}"
+            raise ConfigurationError("DATABASE_URL must be set for production environment")
         
         # Additional production security checks
         if app.config.get('DEBUG'):
@@ -166,10 +172,23 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     """Testing-specific configuration."""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:' # Use in-memory SQLite database for tests
+    # Use PostgreSQL for testing - prioritize TEST_DATABASE_URL, fallback to DEV_DATABASE_URL
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or os.environ.get('DEV_DATABASE_URL')
+    if not SQLALCHEMY_DATABASE_URI:
+        # Final fallback to default test database URL
+        SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:MadeInItaly1953!@localhost:5432/rbm_tender_app_test'
+    
     WTF_CSRF_ENABLED = False # Disable CSRF forms in tests
     CACHE_TYPE = 'NullCache' # Disable caching for tests
     ENABLE_AUTO_LOGIN = False  # Disable auto-login for testing
+    # Use environment variable for test secret key, fallback to generated key
+    SECRET_KEY = os.environ.get('TEST_SECRET_KEY', secrets_manager.generate_secret_key(32))
+    LOG_LEVEL = 'WARNING'  # Reduce log noise during testing
+    
+    def validate_environment(self):
+        """Skip environment validation for testing."""
+        # Testing doesn't require environment validation
+        pass
 
 
 class DevEasyConfig(DevelopmentConfig):

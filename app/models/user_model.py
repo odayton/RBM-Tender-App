@@ -38,6 +38,11 @@ class User(BaseModel, UserMixin):
     last_login = Column(DateTime)
     force_password_change = Column(Boolean, default=False)
     
+    # Two-Factor Authentication (2FA)
+    two_factor_enabled = Column(Boolean, default=False)
+    two_factor_secret = Column(String(32), nullable=True)  # Base32 secret for TOTP
+    backup_codes = Column(String(500), nullable=True)  # JSON string of backup codes
+    
     # Additional fields for better user management (commented out until database is updated)
     # employee_id = Column(String(20), unique=True, nullable=True)
     # department = Column(String(100), nullable=True)
@@ -138,7 +143,7 @@ class User(BaseModel, UserMixin):
     def get_active_deals(self) -> List['Deal']:
         """Get all active deals owned by this user"""
         from .deals.deal_types import DealStage
-        active_stages = [DealStage.SALES_LEAD, DealStage.QUOTE_PREPARATION, DealStage.QUOTE_SENT, DealStage.NEGOTIATION]
+        active_stages = [DealStage.SALES_LEAD, DealStage.TENDER, DealStage.PROPOSAL, DealStage.NEGOTIATION]
         return [deal for deal in self.deals if deal.stage in active_stages and deal.is_active]
 
     def get_closed_deals(self) -> List['Deal']:
@@ -161,6 +166,7 @@ class User(BaseModel, UserMixin):
             'active_deals': len(active_deals),
             'closed_deals': len(closed_deals),
             'won_deals': len(won_deals),
+            'closed_won_deals': len(won_deals),  # Alias for compatibility
             'lost_deals': len(closed_deals) - len(won_deals),
             'total_active_value': float(total_active_value),
             'total_won_value': float(total_won_value),
@@ -190,25 +196,30 @@ class User(BaseModel, UserMixin):
             User.is_active == True
         ).all()
 
-    def validate(self) -> None:
+    def validate(self) -> bool:
         """Custom validation for user data."""
-        super().validate()
-        
-        # Email validation
-        if not self.email or '@' not in self.email:
-            raise ValidationError("Invalid email format.")
-        
-        # Username validation
-        if not self.username or len(self.username) < 3:
-            raise ValidationError("Username must be at least 3 characters long.")
-        
-        # Role validation
-        if not self.role:
-            raise ValidationError("User role is required.")
-        
-        # Employee ID validation
-        if self.employee_id and len(self.employee_id.strip()) < 2:
-            raise ValidationError("Employee ID must be at least 2 characters long.")
+        try:
+            super().validate()
+            
+            # Email validation
+            if not self.email or '@' not in self.email:
+                return False
+            
+            # Username validation
+            if not self.username or len(self.username) < 3:
+                return False
+            
+            # Role validation
+            if not self.role:
+                return False
+            
+            # Employee ID validation (commented out until field is enabled)
+            # if self.employee_id and len(self.employee_id.strip()) < 2:
+            #     return False
+            
+            return True
+        except Exception:
+            return False
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the user instance to a dictionary."""
@@ -221,5 +232,95 @@ class User(BaseModel, UserMixin):
         data['is_recently_active'] = self.is_recently_active()
         return data
 
+    # Two-Factor Authentication Methods
+    def setup_two_factor(self) -> str:
+        """Setup 2FA for the user and return the secret"""
+        secret = self.generate_2fa_secret()
+        self.generate_backup_codes()
+        return secret
+    
+    def generate_2fa_secret(self) -> str:
+        """Generate a new 2FA secret for the user"""
+        import pyotp
+        secret = pyotp.random_base32()
+        self.two_factor_secret = secret
+        return secret
+    
+    def get_2fa_qr_code_url(self) -> str:
+        """Get the QR code URL for 2FA setup"""
+        if not self.two_factor_secret:
+            return None
+        
+        import pyotp
+        totp = pyotp.TOTP(self.two_factor_secret)
+        return totp.provisioning_uri(
+            name=self.email,
+            issuer_name="RBM Tender App"
+        )
+    
+    def verify_2fa_code(self, code: str) -> bool:
+        """Verify a 2FA code"""
+        if not self.two_factor_enabled or not self.two_factor_secret:
+            return False
+        
+        import pyotp
+        totp = pyotp.TOTP(self.two_factor_secret)
+        return totp.verify(code, valid_window=1)  # Allow 1 time step tolerance
+    
+    def generate_backup_codes(self) -> List[str]:
+        """Generate backup codes for 2FA"""
+        import json
+        codes = [secrets.token_hex(4).upper() for _ in range(10)]
+        self.backup_codes = json.dumps(codes)
+        return codes
+    
+    def verify_backup_code(self, code: str) -> bool:
+        """Verify a backup code and remove it if valid"""
+        if not self.backup_codes:
+            return False
+        
+        import json
+        try:
+            codes = json.loads(self.backup_codes)
+            if code.upper() in codes:
+                codes.remove(code.upper())
+                self.backup_codes = json.dumps(codes) if codes else None
+                return True
+        except (json.JSONDecodeError, ValueError):
+            pass
+        
+        return False
+    
+    def enable_2fa(self) -> bool:
+        """Enable 2FA for the user (requires secret to be set)"""
+        if self.two_factor_secret:
+            self.two_factor_enabled = True
+            return True
+        return False
+    
+    def disable_2fa(self):
+        """Disable 2FA for the user"""
+        self.two_factor_enabled = False
+        self.two_factor_secret = None
+        self.backup_codes = None
+    
+    def verify_two_factor(self, code: str) -> bool:
+        """Verify a 2FA code and enable 2FA if not already enabled"""
+        if not self.two_factor_secret:
+            return False
+        
+        import pyotp
+        totp = pyotp.TOTP(self.two_factor_secret)
+        is_valid = totp.verify(code, valid_window=1)
+        
+        if is_valid and not self.two_factor_enabled:
+            self.two_factor_enabled = True
+        
+        return is_valid
+    
+    def get_qr_code(self) -> str:
+        """Get the QR code URL for 2FA setup"""
+        return self.get_2fa_qr_code_url()
+
     def __repr__(self) -> str:
-        return f"<User(id={self.id}, username='{self.username}', role='{self.role.value}', active={self.is_active})>"
+        return f"<User {self.username}>"

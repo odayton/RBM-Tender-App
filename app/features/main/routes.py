@@ -1,4 +1,4 @@
-from flask import render_template, jsonify
+from flask import render_template, jsonify, send_from_directory
 from flask_login import login_required, current_user
 from app.models import Deal, Company, Contact, Product
 from . import main_bp
@@ -12,6 +12,12 @@ def health():
         'service': 'rbm-tender-app',
         'timestamp': '2025-08-08T01:00:00Z'
     }), 200
+
+# Favicon route to prevent 404 errors
+@main_bp.route('/favicon.ico')
+def favicon():
+    """Handle favicon requests to prevent 404 errors."""
+    return send_from_directory('static/images', 'rbm_logo.png')
 
 # Route for the root URL /
 @main_bp.route('/')

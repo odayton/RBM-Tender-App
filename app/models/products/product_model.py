@@ -42,15 +42,11 @@ class Product(BaseModel):
     # Relationships
     discount = relationship("Discount", back_populates="products")
     
-    pump_assembly_id = Column(Integer, ForeignKey('pump_assemblies.id'), nullable=True)
-    pump_assembly = relationship("PumpAssembly", back_populates="product", uselist=False)
-    
     # Line items that use this product
     line_items = relationship("QuoteLineItem", back_populates="product")
 
     # Constraints and indexes
     __table_args__ = (
-        UniqueConstraint('pump_assembly_id', name='uq_product_pump_assembly_id'),
         CheckConstraint('unit_price >= 0', name='check_product_unit_price'),
         CheckConstraint('list_price_2025 >= 0', name='check_product_list_price'),
         CheckConstraint('nett_buy_price_gst >= 0', name='check_product_nett_price'),
@@ -98,7 +94,6 @@ class Product(BaseModel):
         """Convert the product instance to a dictionary."""
         data = super().to_dict()
         data['discount_percentage'] = self.discount.percentage if self.discount else 0
-        data['has_pump_assembly'] = bool(self.pump_assembly_id)
         data['discounted_price'] = float(self.get_discounted_price())
         data['is_low_stock'] = self.is_low_stock()
         data['is_out_of_stock'] = self.is_out_of_stock()

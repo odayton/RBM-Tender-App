@@ -48,7 +48,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('admin.add_item', item_type='company') }}" class="needs-validation company-form" novalidate>
+                    <form method="POST" action="{{ url_for('admin.create_company') }}" class="needs-validation company-form" novalidate>
                         {{ form.hidden_tag() }}
                         
                         <!-- Company Information Section -->
@@ -95,23 +95,6 @@
                                     {% if form.phone_number.errors %}
                                         <div class="invalid-feedback d-block">
                                             {% for error in form.phone_number.errors %}
-                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="col-md-6 mb-4">
-                                    <label for="website" class="form-label fw-bold">{{ form.website.label }}</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-globe"></i>
-                                        </span>
-                                        {{ form.website(class="form-control", placeholder="https://www.example.com") }}
-                                    </div>
-                                    {% if form.website.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.website.errors %}
                                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
                                             {% endfor %}
                                         </div>

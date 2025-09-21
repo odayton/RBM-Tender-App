@@ -138,6 +138,11 @@ def register_error_handlers(app: Flask):
     @app.errorhandler(Exception)
     def handle_generic_error(error):
         """Handle uncaught exceptions to prevent sensitive data leaks."""
+        # Skip error handling for static file requests to avoid interfering with Flask's static file serving
+        if request.path.startswith('/static/'):
+            # Let Flask handle static file errors normally
+            raise error
+        
         # This is a fallback for unexpected errors.
         # We log the actual exception but return a generic error message to the user.
         logger.critical(f"Unhandled Exception: {error}", exc_info=True)

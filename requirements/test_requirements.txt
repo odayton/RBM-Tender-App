@@ -1,0 +1,24 @@
+# Testing Framework
+pytest>=7.0.0
+pytest-flask>=1.2.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+pytest-xdist>=3.0.0
+
+# Test Data Generation
+factory-boy>=3.2.0
+faker>=18.0.0
+
+# Test Database (commented out due to Windows compatibility issues)
+# pytest-postgresql>=5.0.0
+
+# Performance Testing
+locust>=2.15.0
+pytest-benchmark>=4.0.0
+
+# API Testing
+requests>=2.28.0
+responses>=0.22.0
+
+# Test Utilities
+freezegun>=1.2.0

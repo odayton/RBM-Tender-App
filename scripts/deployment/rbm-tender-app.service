@@ -1,0 +1,17 @@
+[Unit]
+Description=RBM Tender App
+After=network.target postgresql.service redis.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/rbm-tender-app
+EnvironmentFile=/opt/rbm-tender-app/.env
+ExecStart=/opt/rbm-tender-app/venv/bin/python /opt/rbm-tender-app/app_runner.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
+

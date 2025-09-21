@@ -5,7 +5,7 @@ from . import admin_bp
 from .forms import (CompanyForm, ContactForm, DealOwnerForm,
                     ManageInertiaBasesForm, ManageRubberMountsForm, ManageSeismicSpringsForm,
                     AdditionalPriceAdderForm)
-from app.utils.db_utils.import.excel_import import ExcelImporter
+from app.utils.db_utils.importers.excel_import import ExcelImporter
 from app.models import (Company, Contact, User, InertiaBase,
                         SeismicSpring)
 from app.utils.file_utils.file_validation import FileValidation

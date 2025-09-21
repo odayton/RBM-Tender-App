@@ -139,7 +139,7 @@ class CacheManager:
             def wrapper(*args, **kwargs):
                 # Generate a key based on function and arguments
                 key_parts = [func.__name__] + [str(a) for a in args] + [f"{k}={v}" for k, v in sorted(kwargs.items())]
-                key = hashlib.md5(':'.join(key_parts).encode()).hexdigest()
+                key = hashlib.md5(':'.join(key_parts).encode(), usedforsecurity=False).hexdigest()
                 
                 cached_value = self.get(key)
                 if cached_value is not None:

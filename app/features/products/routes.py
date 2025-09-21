@@ -28,105 +28,132 @@ products_bp = Blueprint('products', __name__, url_prefix='/products')
 @login_required
 def list_products():
     """List all products with search and filtering."""
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 20, type=int)
-    
-    # Get search parameters
-    search_term = request.args.get('search_term', '')
-    category = request.args.get('category', '')
-    series = request.args.get('series', '')
-    item_no = request.args.get('item_no', '')
-    brand = request.args.get('brand', '')
-    availability = request.args.get('availability', '')
-    price_range = request.args.get('price_range', '')
-    
-    # Build query
-    query = Product.query
-    
-    # Apply search filters
-    if search_term:
-        query = query.filter(
-            or_(
-                Product.name.ilike(f'%{search_term}%'),
-                Product.sku.ilike(f'%{search_term}%'),
-                Product.description.ilike(f'%{search_term}%'),
-                Product.brand.ilike(f'%{search_term}%'),
-                Product.model_number.ilike(f'%{search_term}%')
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+        
+        # Get search parameters
+        search_term = request.args.get('search_term', '')
+        category = request.args.get('category', '')
+        series = request.args.get('series', '')
+        item_no = request.args.get('item_no', '')
+        brand = request.args.get('brand', '')
+        availability = request.args.get('availability', '')
+        price_range = request.args.get('price_range', '')
+        
+        # Build query
+        query = Product.query
+        
+        # Apply search filters
+        if search_term:
+            query = query.filter(
+                or_(
+                    Product.name.ilike(f'%{search_term}%'),
+                    Product.sku.ilike(f'%{search_term}%'),
+                    Product.description.ilike(f'%{search_term}%'),
+                    Product.brand.ilike(f'%{search_term}%'),
+                    Product.model_number.ilike(f'%{search_term}%')
+                )
             )
+        
+        if category:
+            query = query.filter(Product.category.ilike(f'%{category}%'))
+        
+        if series:
+            query = query.filter(Product.series.ilike(f'%{series}%'))
+        
+        if item_no:
+            query = query.filter(Product.item_no.ilike(f'%{item_no}%'))
+        
+        if brand:
+            query = query.filter(Product.brand.ilike(f'%{brand}%'))
+        
+        # Apply availability filter
+        if availability:
+            if availability == 'in_stock':
+                query = query.filter(and_(Product.is_active == True, Product.stock_quantity > Product.reorder_level))
+            elif availability == 'low_stock':
+                query = query.filter(and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level, Product.stock_quantity > 0))
+            elif availability == 'out_of_stock':
+                query = query.filter(and_(Product.is_active == True, Product.stock_quantity == 0))
+            elif availability == 'inactive':
+                query = query.filter(Product.is_active == False)
+        
+        # Apply price range filter
+        if price_range:
+            if price_range == '0-100':
+                query = query.filter(Product.unit_price <= 100)
+            elif price_range == '100-500':
+                query = query.filter(and_(Product.unit_price > 100, Product.unit_price <= 500))
+            elif price_range == '500-1000':
+                query = query.filter(and_(Product.unit_price > 500, Product.unit_price <= 1000))
+            elif price_range == '1000+':
+                query = query.filter(Product.unit_price > 1000)
+        
+        # Get paginated results
+        products = query.order_by(Product.name).paginate(
+            page=page, per_page=per_page, error_out=False
         )
+        
+        # Get statistics
+        total_products = query.count()
+        active_products = query.filter(Product.is_active == True).count()
+        low_stock_products = query.filter(
+            and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level)
+        ).count()
+        out_of_stock_products = query.filter(
+            and_(Product.is_active == True, Product.stock_quantity == 0)
+        ).count()
+        
+        # Get unique categories, series, and brands for filters
+        categories = db.session.query(Product.category).distinct().filter(Product.category.isnot(None)).all()
+        series_list = db.session.query(Product.series).distinct().filter(Product.series.isnot(None)).all()
+        brands = db.session.query(Product.brand).distinct().filter(Product.brand.isnot(None)).all()
+        
+        # Log the results for debugging
+        logger.info(f"Products page loaded: {total_products} total products, {len(products.items)} on current page")
+        
+        return render_template('products/list.html',
+                             products=products,
+                             search_term=search_term,
+                             category=category,
+                             series=series,
+                             item_no=item_no,
+                             brand=brand,
+                             availability=availability,
+                             price_range=price_range,
+                             categories=[c[0] for c in categories],
+                             series_list=[s[0] for s in series_list],
+                             brands=[b[0] for b in brands],
+                             stats={
+                                 'total': total_products,
+                                 'active': active_products,
+                                 'low_stock': low_stock_products,
+                                 'out_of_stock': out_of_stock_products
+                             })
     
-    if category:
-        query = query.filter(Product.category.ilike(f'%{category}%'))
-    
-    if series:
-        query = query.filter(Product.series.ilike(f'%{series}%'))
-    
-    if item_no:
-        query = query.filter(Product.item_no.ilike(f'%{item_no}%'))
-    
-    if brand:
-        query = query.filter(Product.brand.ilike(f'%{brand}%'))
-    
-    # Apply availability filter
-    if availability:
-        if availability == 'in_stock':
-            query = query.filter(and_(Product.is_active == True, Product.stock_quantity > Product.reorder_level))
-        elif availability == 'low_stock':
-            query = query.filter(and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level, Product.stock_quantity > 0))
-        elif availability == 'out_of_stock':
-            query = query.filter(and_(Product.is_active == True, Product.stock_quantity == 0))
-        elif availability == 'inactive':
-            query = query.filter(Product.is_active == False)
-    
-    # Apply price range filter
-    if price_range:
-        if price_range == '0-100':
-            query = query.filter(Product.unit_price <= 100)
-        elif price_range == '100-500':
-            query = query.filter(and_(Product.unit_price > 100, Product.unit_price <= 500))
-        elif price_range == '500-1000':
-            query = query.filter(and_(Product.unit_price > 500, Product.unit_price <= 1000))
-        elif price_range == '1000+':
-            query = query.filter(Product.unit_price > 1000)
-    
-    # Get paginated results
-    products = query.order_by(Product.name).paginate(
-        page=page, per_page=per_page, error_out=False
-    )
-    
-    # Get statistics
-    total_products = query.count()
-    active_products = query.filter(Product.is_active == True).count()
-    low_stock_products = query.filter(
-        and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level)
-    ).count()
-    out_of_stock_products = query.filter(
-        and_(Product.is_active == True, Product.stock_quantity == 0)
-    ).count()
-    
-    # Get unique categories, series, and brands for filters
-    categories = db.session.query(Product.category).distinct().filter(Product.category.isnot(None)).all()
-    series_list = db.session.query(Product.series).distinct().filter(Product.series.isnot(None)).all()
-    brands = db.session.query(Product.brand).distinct().filter(Product.brand.isnot(None)).all()
-    
-    return render_template('products/list.html',
-                         products=products,
-                         search_term=search_term,
-                         category=category,
-                         series=series,
-                         item_no=item_no,
-                         brand=brand,
-                         availability=availability,
-                         price_range=price_range,
-                         categories=[c[0] for c in categories],
-                         series_list=[s[0] for s in series_list],
-                         brands=[b[0] for b in brands],
-                         stats={
-                             'total': total_products,
-                             'active': active_products,
-                             'low_stock': low_stock_products,
-                             'out_of_stock': out_of_stock_products
-                         })
+    except Exception as e:
+        logger.error(f"Error loading products page: {e}", exc_info=True)
+        flash('An error occurred while loading the products page. Please try again.', 'error')
+        # Return a simple error template or redirect
+        return render_template('products/list.html',
+                             products=None,
+                             search_term='',
+                             category='',
+                             series='',
+                             item_no='',
+                             brand='',
+                             availability='',
+                             price_range='',
+                             categories=[],
+                             series_list=[],
+                             brands=[],
+                             stats={
+                                 'total': 0,
+                                 'active': 0,
+                                 'low_stock': 0,
+                                 'out_of_stock': 0
+                             })
 
 @products_bp.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -550,3 +577,32 @@ def dashboard():
                          category_stats=category_stats,
                          recent_products=recent_products,
                          low_stock_list=low_stock_list) 
+
+@products_bp.route('/debug')
+@login_required
+def debug_products():
+    """Debug route to check products database status."""
+    try:
+        # Basic product count
+        total_products = Product.query.count()
+        
+        # Check if any products exist
+        first_product = Product.query.first()
+        
+        # Get table info
+        from sqlalchemy import text
+        result = db.session.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'products'"))
+        table_exists = result.fetchone() is not None
+        
+        debug_info = {
+            'table_exists': table_exists,
+            'total_products': total_products,
+            'first_product': str(first_product) if first_product else None,
+            'dev_database_url': str(db.engine.url),
+        }
+        
+        return jsonify(debug_info)
+        
+    except Exception as e:
+        logger.error(f"Error in debug route: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500 

@@ -3,12 +3,17 @@ from flask_login import login_user, logout_user, login_required, current_user
 from urllib.parse import urlparse
 from datetime import datetime
 from app.features.auth import auth_bp
-from app.features.auth.forms import LoginForm, ChangePasswordForm, ForcePasswordChangeForm, RegistrationForm
+from app.features.auth.forms import (LoginForm, ChangePasswordForm, ForcePasswordChangeForm, 
+                                     RegistrationForm, TwoFactorSetupForm, TwoFactorVerifyForm, 
+                                     TwoFactorDisableForm, BackupCodeForm)
 from app.models import User, UserRole
 from app.core.core_security import security_manager, admin_required
 from app.core.core_logging import logger
+from app.core.core_rate_limiting import auth_rate_limit, sensitive_rate_limit, security_rate_limit
+from app.core.core_metrics import record_login_attempt, record_2fa_attempt
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@auth_rate_limit()
 def login():
     """Handle user login with enhanced security."""
     if current_user.is_authenticated:
@@ -29,6 +34,7 @@ def login():
         if user is None or not user.verify_password(password):
             # Track failed login attempt
             security_manager._track_failed_login(request.remote_addr)
+            record_login_attempt('failed', 'standard')
             flash('Invalid email or password', 'error')
             return render_template('auth/login.html', form=form)
         
@@ -40,6 +46,10 @@ def login():
         login_user(user, remember=form.remember_me.data)
         user.last_login = datetime.utcnow()
         user.save()
+        
+        # Record successful login metrics
+        user_type = 'admin' if user.has_role('admin') else 'standard'
+        record_login_attempt('success', user_type)
         
         logger.info(f"User {user.email} logged in successfully from IP {request.remote_addr}")
         
@@ -69,6 +79,7 @@ def logout():
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @login_required
 @admin_required
+@sensitive_rate_limit("2/hour")
 def register():
     """Handle user registration (admin only)."""
     form = RegistrationForm()
@@ -210,4 +221,95 @@ def reset_password(token):
     """Handle password reset with token validation."""
     # Implementation for password reset with token
     flash('Password reset functionality not implemented yet.', 'info')
-    return render_template('auth/reset_password.html') 
+    return render_template('auth/reset_password.html')
+
+
+# Two-Factor Authentication Routes
+@auth_bp.route('/2fa/setup', methods=['GET', 'POST'])
+@login_required
+@sensitive_rate_limit("2/hour")
+def setup_2fa():
+    """Set up two-factor authentication for the current user."""
+    if current_user.two_factor_enabled:
+        flash('Two-factor authentication is already enabled.', 'info')
+        return redirect(url_for('auth.profile'))
+    
+    form = TwoFactorSetupForm()
+    
+    if form.validate_on_submit():
+        # Generate 2FA secret
+        secret = current_user.generate_2fa_secret()
+        backup_codes = current_user.generate_backup_codes()
+        
+        # Save to database
+        current_user.save()
+        
+        # Generate QR code URL
+        qr_code_url = current_user.get_2fa_qr_code_url()
+        
+        flash('Two-factor authentication setup initiated. Please scan the QR code and verify with a code.', 'info')
+        return render_template('auth/2fa_verify_setup.html', 
+                             qr_code_url=qr_code_url, 
+                             backup_codes=backup_codes,
+                             secret=secret)
+    
+    return render_template('auth/2fa_setup.html', form=form)
+
+
+@auth_bp.route('/2fa/verify-setup', methods=['POST'])
+@login_required
+@auth_rate_limit()
+def verify_2fa_setup():
+    """Verify 2FA setup with a code."""
+    form = TwoFactorVerifyForm()
+    
+    if form.validate_on_submit():
+        if current_user.verify_2fa_code(form.code.data):
+            # Enable 2FA
+            current_user.enable_2fa()
+            current_user.save()
+            
+            flash('Two-factor authentication has been enabled successfully!', 'success')
+            return redirect(url_for('auth.profile'))
+        else:
+            flash('Invalid authentication code. Please try again.', 'error')
+    
+    return render_template('auth/2fa_verify_setup.html', form=form)
+
+
+@auth_bp.route('/2fa/disable', methods=['GET', 'POST'])
+@login_required
+def disable_2fa():
+    """Disable two-factor authentication."""
+    if not current_user.two_factor_enabled:
+        flash('Two-factor authentication is not enabled.', 'info')
+        return redirect(url_for('auth.profile'))
+    
+    form = TwoFactorDisableForm()
+    
+    if form.validate_on_submit():
+        if current_user.verify_password(form.password.data):
+            current_user.disable_2fa()
+            current_user.save()
+            
+            flash('Two-factor authentication has been disabled.', 'success')
+            return redirect(url_for('auth.profile'))
+        else:
+            flash('Invalid password. Please try again.', 'error')
+    
+    return render_template('auth/2fa_disable.html', form=form)
+
+
+@auth_bp.route('/2fa/verify', methods=['GET', 'POST'])
+def verify_2fa():
+    """Verify 2FA code during login."""
+    # This would be called after successful password verification
+    # Implementation depends on your login flow
+    form = TwoFactorVerifyForm()
+    
+    if form.validate_on_submit():
+        # Verify the code (this would be called with the user context)
+        # Implementation depends on your session management
+        pass
+    
+    return render_template('auth/2fa_verify.html', form=form) 
