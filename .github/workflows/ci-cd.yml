@@ -131,20 +131,15 @@ jobs:
         export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
-        # Set up database migrations
-        echo "Setting up database migrations..."
-        echo "Current directory contents:"
-        ls -la
-        echo "Force removing any existing migrations directory..."
-        rm -rf migrations 2>/dev/null || true
-        rm -rf migrations_bak 2>/dev/null || true
-        echo "Verifying removal..."
-        ls -la | grep migrations || echo "No migrations directories found"
-        echo "Initializing Flask-Migrate..."
-        flask db init --directory migrations
-        echo "Creating initial migration..."
-        flask db migrate -m "Initial migration"
-        flask db upgrade
+        # Skip migrations for testing - create database tables directly
+        echo "Setting up test database schema..."
+        python -c "
+        from app import create_app, db
+        app = create_app()
+        with app.app_context():
+            db.create_all()
+            print('Database tables created successfully')
+        "
 
     - name: Run unit tests
       run: |
