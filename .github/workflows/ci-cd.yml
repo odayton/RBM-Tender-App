@@ -236,13 +236,24 @@ jobs:
         cp -r app/ deployment-package/
         cp -r requirements/ deployment-package/
         cp -r scripts/ deployment-package/
-        # Copy migrations if they exist
+        # Copy optional directories if they exist
         if [ -d "migrations" ]; then
           cp -r migrations/ deployment-package/
         fi
-        cp -r docs/ deployment-package/
-        cp *.py deployment-package/
-        cp *.md deployment-package/
+        if [ -d "docs" ]; then
+          cp -r docs/ deployment-package/
+        fi
+        if [ -d "config" ]; then
+          cp -r config/ deployment-package/
+        fi
+        # Copy Python files if they exist
+        if ls *.py 1> /dev/null 2>&1; then
+          cp *.py deployment-package/
+        fi
+        # Copy markdown files if they exist
+        if ls *.md 1> /dev/null 2>&1; then
+          cp *.md deployment-package/
+        fi
         
         # Create deployment script
         cat > deployment-package/deploy.sh << 'EOF'
