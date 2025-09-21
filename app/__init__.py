@@ -175,6 +175,7 @@ def create_app(config_class=None):
         from app.features.crm import crm_bp
         from app.features.products import products_bp
         from app.features.monitoring import monitoring_bp
+        from app.core.core_advanced_monitoring import monitoring_bp as advanced_monitoring_bp
 
         app.register_blueprint(auth_bp)
         app.register_blueprint(admin_bp, url_prefix='/admin')
@@ -187,6 +188,7 @@ def create_app(config_class=None):
         app.register_blueprint(crm_bp, url_prefix='/crm')
         app.register_blueprint(products_bp, url_prefix='/products')
         app.register_blueprint(monitoring_bp)
+        app.register_blueprint(advanced_monitoring_bp)
 
         # Register template filters
         register_template_filters(app)
