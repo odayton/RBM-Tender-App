@@ -157,7 +157,7 @@ class ProductionConfig(Config):
         app.config['DEBUG'] = False
         
         # Validate that DATABASE_URL is set for production
-        if not cls.SQLALCHEMY_DATABASE_URI:
+        if not self.SQLALCHEMY_DATABASE_URI:
             raise ConfigurationError("DATABASE_URL must be set for production environment")
         
         # Additional production security checks
