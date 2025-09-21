@@ -388,8 +388,8 @@ class MetricsCollector:
             if datetime.fromisoformat(metric['timestamp']) > cutoff_time
         ]
 
-# Create monitoring blueprint
-monitoring_bp = Blueprint('monitoring', __name__, url_prefix='/monitoring')
+# Create advanced monitoring blueprint with unique name
+monitoring_bp = Blueprint('advanced_monitoring', __name__, url_prefix='/monitoring')
 
 @monitoring_bp.route('/dashboard')
 def monitoring_dashboard():
