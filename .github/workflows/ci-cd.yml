@@ -163,8 +163,7 @@ jobs:
         export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
-            # Clean database before tests
-            timeout 30 python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.drop_all(); db.create_all(); print('Database cleaned for unit tests')"
+            # Run unit tests (database cleanup handled by conftest.py)
             timeout 900 python -m pytest tests/unit/ -v --tb=short
 
     - name: Run integration tests
@@ -176,8 +175,7 @@ jobs:
         export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
-            # Clean database before tests
-            timeout 30 python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.drop_all(); db.create_all(); print('Database cleaned for integration tests')"
+            # Run integration tests (database cleanup handled by conftest.py)
             timeout 1200 python -m pytest tests/integration/ -v --tb=short
 
     - name: Run security tests
@@ -189,8 +187,7 @@ jobs:
         export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
-        # Clean database before tests
-        timeout 30 python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.drop_all(); db.create_all(); print('Database cleaned for security tests')"
+        # Run security tests (database cleanup handled by conftest.py)
         timeout 600 python -m pytest tests/security/ -v --tb=short
 
     - name: Run performance tests
@@ -202,8 +199,7 @@ jobs:
         export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
-        # Clean database before tests
-        timeout 30 python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.drop_all(); db.create_all(); print('Database cleaned for performance tests')"
+        # Run performance tests (database cleanup handled by conftest.py)
         timeout 600 python -m pytest tests/performance/ -v --tb=short
 
     - name: Upload test results
