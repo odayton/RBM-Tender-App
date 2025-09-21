@@ -131,6 +131,11 @@ jobs:
         export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
+        # Initialize migrations if they don't exist
+        if [ ! -d "migrations" ]; then
+          flask db init
+          flask db migrate -m "Initial migration"
+        fi
         flask db upgrade
 
     - name: Run unit tests
@@ -237,6 +242,11 @@ jobs:
         pip install -r requirements/prod_requirements.txt
         
         # Run database migrations
+        # Initialize migrations if they don't exist
+        if [ ! -d "migrations" ]; then
+          flask db init
+          flask db migrate -m "Initial migration"
+        fi
         flask db upgrade
         
         # Restart application
