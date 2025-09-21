@@ -47,6 +47,12 @@ class CoreInitializer:
         self.init_circuit_breakers()
         self.init_advanced_monitoring()
         self.init_error_handlers()
+        
+        # Initialize database safety after all other components are ready
+        with self.app.app_context():
+            from .core_db_safety import init_database_safety
+            init_database_safety(self.db)
+            core_logger.app_logger.info("Database Safety Manager Initialized.")
 
     def init_config(self):
         """Initialize configuration from environment."""
@@ -68,9 +74,6 @@ class CoreInitializer:
         """Initialize database components and Flask-Migrate."""
         self.db.init_app(self.app)
         self.migrate.init_app(self.app, self.db)
-        
-        # Initialize database safety manager
-        init_database_safety(self.db)
         
         core_logger.app_logger.info("Database and Migrations Initialized.")
         
