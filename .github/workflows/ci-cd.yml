@@ -114,8 +114,10 @@ jobs:
     - name: Set up test environment
       run: |
         export FLASK_CONFIG=testing
+        export TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export REDIS_URL=redis://localhost:6379/0
+        export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
         echo "Test environment configured"
@@ -123,8 +125,10 @@ jobs:
     - name: Run database migrations
       run: |
         export FLASK_CONFIG=testing
+        export TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export REDIS_URL=redis://localhost:6379/0
+        export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
         flask db upgrade
@@ -132,8 +136,10 @@ jobs:
     - name: Run unit tests
       run: |
         export FLASK_CONFIG=testing
+        export TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export REDIS_URL=redis://localhost:6379/0
+        export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
         python scripts/development/run_tests.py --suite unit --coverage
@@ -141,8 +147,10 @@ jobs:
     - name: Run integration tests
       run: |
         export FLASK_CONFIG=testing
+        export TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export REDIS_URL=redis://localhost:6379/0
+        export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
         python scripts/development/run_tests.py --suite integration
@@ -150,8 +158,10 @@ jobs:
     - name: Run security tests
       run: |
         export FLASK_CONFIG=testing
+        export TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export REDIS_URL=redis://localhost:6379/0
+        export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
         python scripts/development/run_tests.py --suite security
@@ -159,8 +169,10 @@ jobs:
     - name: Run performance tests
       run: |
         export FLASK_CONFIG=testing
+        export TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/rbm_tender_app_test
         export REDIS_URL=redis://localhost:6379/0
+        export TEST_SECRET_KEY=test-secret-key
         export SECRET_KEY=test-secret-key
         export SENTRY_DSN=""
         python scripts/development/run_tests.py --suite performance
