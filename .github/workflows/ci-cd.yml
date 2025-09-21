@@ -133,10 +133,15 @@ jobs:
         export SENTRY_DSN=""
         # Set up database migrations
         echo "Setting up database migrations..."
-        echo "Removing any existing migrations directory to ensure clean start..."
-        rm -rf migrations || true
+        echo "Current directory contents:"
+        ls -la
+        echo "Force removing any existing migrations directory..."
+        rm -rf migrations 2>/dev/null || true
+        rm -rf migrations_bak 2>/dev/null || true
+        echo "Verifying removal..."
+        ls -la | grep migrations || echo "No migrations directories found"
         echo "Initializing Flask-Migrate..."
-        flask db init
+        flask db init --directory migrations
         echo "Creating initial migration..."
         flask db migrate -m "Initial migration"
         flask db upgrade
@@ -247,10 +252,15 @@ jobs:
         # Run database migrations
         # Set up database migrations
         echo "Setting up database migrations..."
-        echo "Removing any existing migrations directory to ensure clean start..."
-        rm -rf migrations || true
+        echo "Current directory contents:"
+        ls -la
+        echo "Force removing any existing migrations directory..."
+        rm -rf migrations 2>/dev/null || true
+        rm -rf migrations_bak 2>/dev/null || true
+        echo "Verifying removal..."
+        ls -la | grep migrations || echo "No migrations directories found"
         echo "Initializing Flask-Migrate..."
-        flask db init
+        flask db init --directory migrations
         echo "Creating initial migration..."
         flask db migrate -m "Initial migration"
         flask db upgrade
