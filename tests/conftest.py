@@ -47,6 +47,8 @@ def client(app):
 def db_session(app):
     """Create database session for testing."""
     with app.app_context():
+        # Clear all existing data before each test
+        db.drop_all()
         db.create_all()
         
         # Set the session for all factories
@@ -65,16 +67,9 @@ def db_session(app):
         ManagerUserFactory._meta.sqlalchemy_session = db.session
         ViewerUserFactory._meta.sqlalchemy_session = db.session
         
-        # Start a transaction that will be rolled back
-        connection = db.engine.connect()
-        transaction = connection.begin()
-        db.session.configure(bind=connection)
-        
         yield db.session
         
-        # Rollback the transaction to clean up
-        transaction.rollback()
-        connection.close()
+        # Clean up after test
         db.session.remove()
 
 
