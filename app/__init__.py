@@ -83,13 +83,32 @@ def create_app(config_class=None):
             config_instance.init_app(app)
             app._config_initialized = True
     else:
-        # Default to development if no config specified
-        from .core.core_config import DevelopmentConfig
-        logger.info("No config specified, using default DevelopmentConfig")
-        app.config.from_object(DevelopmentConfig)
-        config_instance = DevelopmentConfig()
-        config_instance.init_app(app)
-        app._config_initialized = True
+        # Check FLASK_CONFIG environment variable
+        flask_config = os.environ.get('FLASK_CONFIG', 'development').lower()
+        logger.info(f"FLASK_CONFIG environment variable: {flask_config}")
+        
+        if flask_config == 'testing':
+            from .core.core_config import TestingConfig
+            logger.info("Using TestingConfig from FLASK_CONFIG")
+            app.config.from_object(TestingConfig)
+            config_instance = TestingConfig()
+            config_instance.init_app(app)
+            app._config_initialized = True
+        elif flask_config == 'production':
+            from .core.core_config import ProductionConfig
+            logger.info("Using ProductionConfig from FLASK_CONFIG")
+            app.config.from_object(ProductionConfig)
+            config_instance = ProductionConfig()
+            config_instance.init_app(app)
+            app._config_initialized = True
+        else:
+            # Default to development if no config specified
+            from .core.core_config import DevelopmentConfig
+            logger.info("No config specified, using default DevelopmentConfig")
+            app.config.from_object(DevelopmentConfig)
+            config_instance = DevelopmentConfig()
+            config_instance.init_app(app)
+            app._config_initialized = True
     
     # Ensure auto-login is explicitly set based on config class
     if config_class and hasattr(config_class, 'ENABLE_AUTO_LOGIN'):
