@@ -84,7 +84,7 @@ class CoreInitializer:
             scripts_path = Path(__file__).parent.parent.parent / 'scripts' / 'utils'
             if scripts_path.exists():
                 sys.path.insert(0, str(scripts_path))
-                from backup_manager import BackupManager
+                from app.utils.backup_manager import BackupManager
                 
                 backup_manager = BackupManager()
                 backup_manager.auto_backup()
