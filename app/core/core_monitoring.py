@@ -219,6 +219,11 @@ def init_monitoring(app):
             duration = time.time() - g.request_start_time
             
             # Log request completion
+            try:
+                response_size = len(response.get_data()) if hasattr(response, 'get_data') else 0
+            except (RuntimeError, AttributeError):
+                response_size = 0
+                
             logger.info(
                 "Request completed",
                 correlation_id=CorrelationIDManager.get_correlation_id(),
@@ -226,7 +231,7 @@ def init_monitoring(app):
                 path=request.path,
                 status_code=response.status_code,
                 duration_ms=round(duration * 1000, 2),
-                response_size=len(response.get_data())
+                response_size=response_size
             )
         
         return response

@@ -77,22 +77,24 @@ class CoreInitializer:
         
         core_logger.app_logger.info("Database and Migrations Initialized.")
         
-        # Initialize backup system (simplified)
-        try:
-            # Try to import from scripts directory
-            import sys
-            scripts_path = Path(__file__).parent.parent.parent / 'scripts' / 'utils'
-            if scripts_path.exists():
-                sys.path.insert(0, str(scripts_path))
-                from app.utils.backup_manager import BackupManager
-                
-                backup_manager = BackupManager()
-                backup_manager.auto_backup()
-                core_logger.app_logger.info("Backup system initialized successfully.")
-            else:
-                core_logger.app_logger.info("Backup system not available - scripts/utils directory not found.")
-        except Exception as e:
-            core_logger.app_logger.warning(f"Backup system initialization failed: {e}")
+        # Initialize backup system (simplified) - only once per app instance
+        # Skip auto-backup in development mode to prevent loops
+        if not hasattr(self.app, '_backup_initialized'):
+            try:
+                # Import from app.utils directory
+                try:
+                    from app.utils.backup_manager import BackupManager
+                    
+                    backup_manager = BackupManager()
+                    backup_manager.auto_backup()
+                    self.app._backup_initialized = True
+                    core_logger.app_logger.info("Backup system initialized successfully.")
+                except ImportError as e:
+                    core_logger.app_logger.warning(f"Backup system not available: {e}")
+            except Exception as e:
+                core_logger.app_logger.warning(f"Backup system initialization failed: {e}")
+        else:
+            core_logger.app_logger.info("Backup system already initialized.")
 
     def init_security(self):
         """Initialize security components."""

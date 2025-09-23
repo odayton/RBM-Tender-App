@@ -195,9 +195,18 @@ class BackupManager:
     
     def auto_backup(self):
         """Create an automatic backup if needed."""
+        # Skip auto-backup in development mode to prevent loops
+        import os
+        if os.environ.get('FLASK_ENV') == 'development':
+            return None
+            
         # Check if we need to create a backup
         if not self._should_create_backup():
             return None
+        
+        # Add a small delay to prevent rapid-fire backups
+        import time
+        time.sleep(1)
         
         return self.create_backup("auto_backup")
     

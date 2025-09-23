@@ -108,11 +108,11 @@ class Config:
 
 class DevelopmentConfig(Config):
     """Development-specific configuration."""
-    DEBUG = True
+    DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     LOG_LEVEL = 'DEBUG'
     
     # PostgreSQL for development
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE URL')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL')
 
     # Use a simpler cache for development
     CACHE_TYPE = 'SimpleCache'

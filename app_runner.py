@@ -182,7 +182,30 @@ def start_app(env):
     # Start the Flask app
     try:
         print(f"🚀 Starting Flask app on {host}:{port}...")
-        app.run(host=host, port=port, debug=app.config.get('DEBUG', False), threaded=True)
+        
+        # Configure reloader exclusions to prevent unnecessary restarts
+        extra_files = []
+        if app.config.get('DEBUG', False):
+            # Exclude common directories that cause unnecessary restarts
+            import os
+            exclude_dirs = [
+                'instance/logs',
+                'instance/sessions', 
+                'instance/uploads',
+                'instance/exports',
+                '__pycache__',
+                '.git',
+                'node_modules'
+            ]
+            print("🔧 Debug mode: Auto-reloader active (excludes logs, cache, uploads)")
+        
+        app.run(
+            host=host, 
+            port=port, 
+            debug=app.config.get('DEBUG', False), 
+            threaded=True,
+            extra_files=extra_files
+        )
     except KeyboardInterrupt:
         print("\n\n👋 Server stopped. Cleaning up...")
         clear_mode()

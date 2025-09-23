@@ -411,12 +411,42 @@ def import_products():
                         product = Product()
                         imported_count += 1
                     
-                    # Update product fields
-                    product.sku = row['sku'].strip()
-                    product.name = row['name'].strip()
-                    product.description = row.get('description', '').strip()
-                    product.unit_price = Decimal(row.get('unit_price', 0))
-                    product.category = row.get('category', 'Other')
+                    # Update product fields - Map CSV columns to database fields
+                    # CSV: Category,SubCategory,Series,Item No,Description,Pack,Carton Qty,2025 List Price,Disc Code,Nett
+                    
+                    # Use Item No as SKU (primary identifier)
+                    product.sku = row['Item No'].strip()
+                    
+                    # Use Description as name
+                    product.name = row['Description'].strip()
+                    
+                    # Set description from Description field
+                    product.description = row['Description'].strip()
+                    
+                    # Map 2025 List Price to unit_price (remove $ and commas)
+                    list_price_str = row['2025 List Price'].replace('$', '').replace(',', '').strip()
+                    product.unit_price = Decimal(list_price_str) if list_price_str else Decimal('0')
+                    
+                    # Map Category
+                    product.category = row['Category'].strip()
+                    
+                    # Map Series
+                    product.series = row['Series'].strip()
+                    
+                    # Map Item No
+                    product.item_no = row['Item No'].strip()
+                    
+                    # Map 2025 List Price to list_price_2025
+                    product.list_price_2025 = Decimal(list_price_str) if list_price_str else Decimal('0')
+                    
+                    # Map Disc Code to discount_code
+                    product.discount_code = row['Disc Code'].strip() if row['Disc Code'].strip() else None
+                    
+                    # Map Nett to nett_buy_price_gst (remove $ and commas)
+                    nett_str = row['Nett'].replace('$', '').replace(',', '').strip()
+                    product.nett_buy_price_gst = Decimal(nett_str) if nett_str else Decimal('0')
+                    
+                    # Set default values for fields not in CSV
                     product.brand = row.get('brand', '').strip()
                     product.model_number = row.get('model_number', '').strip()
                     product.weight_kg = Decimal(row.get('weight_kg', 0)) if row.get('weight_kg') else None
