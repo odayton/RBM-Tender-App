@@ -249,8 +249,10 @@ class AdvancedCache:
                 'hit_rate': self._calculate_hit_rate(info)
             }
         except Exception as e:
-            logger.error("Failed to get cache stats", error=str(e))
-            return {'error': str(e)}
+            # Don't spam logs with Redis connection errors in development
+            if "connection refused" not in str(e).lower():
+                logger.error("Failed to get cache stats", error=str(e))
+            return {'error': 'Redis not available'}
     
     def _calculate_hit_rate(self, info: Dict[str, Any]) -> float:
         """Calculate cache hit rate."""

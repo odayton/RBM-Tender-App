@@ -209,6 +209,7 @@ class MetricsCollector:
     def _collect_database_metrics(self) -> DatabaseMetrics:
         """Collect database performance metrics."""
         try:
+            # Use a shorter connection timeout to prevent connection pool exhaustion
             with self.db.engine.connect() as conn:
                 # Connection stats
                 conn_stats = conn.execute(text("""
@@ -270,7 +271,9 @@ class MetricsCollector:
                 )
                 
         except Exception as e:
-            logger.error("Failed to collect database metrics", error=str(e))
+            # Don't spam logs with connection errors
+            if "too many clients" not in str(e).lower():
+                logger.error("Failed to collect database metrics", error=str(e))
             return DatabaseMetrics(
                 timestamp=datetime.utcnow(),
                 active_connections=0,
