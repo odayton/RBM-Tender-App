@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop, 'feature/*', 'test/*' ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main ]
 
@@ -316,10 +316,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [build]
-    if: |
-      github.ref == 'refs/heads/main' || 
-      startsWith(github.ref, 'refs/heads/feature/') || 
-      startsWith(github.ref, 'refs/heads/test/')
+    if: github.ref == 'refs/heads/main'
     environment: production
     
     steps:
@@ -345,17 +342,32 @@ jobs:
         # Extract package
         tar -xzf rbm-tender-app-*.tar.gz
         
+        # Test SSH connection first
+        echo "🔍 Testing SSH connection..."
+        ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'" || {
+          echo "❌ SSH connection failed!"
+          echo "🔧 Troubleshooting steps:"
+          echo "1. Check if EC2 instance is running"
+          echo "2. Verify security group allows SSH (port 22)"
+          echo "3. Check SSH_PRIVATE_KEY secret is correct"
+          echo "4. Verify SSH_USER and SSH_HOST secrets"
+          exit 1
+        }
+        
         # Create backup of current deployment
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-          sudo systemctl stop rbm-tender-app
-          sudo cp -r /opt/rbm-tender-app /opt/rbm-tender-app.backup.$(date +%Y%m%d-%H%M%S)
+        echo "📦 Creating backup..."
+        ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          sudo systemctl stop rbm-tender-app || echo 'Service not running'
+          sudo cp -r /opt/rbm-tender-app /opt/rbm-tender-app.backup.$(date +%Y%m%d-%H%M%S) || echo 'No existing deployment to backup'
         "
         
         # Upload new deployment
-        scp -o StrictHostKeyChecking=no -r deployment-package/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/rbm-tender-app/
+        echo "📤 Uploading deployment package..."
+        scp -o ConnectTimeout=30 -o StrictHostKeyChecking=no -r deployment-package/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/rbm-tender-app/
         
         # Deploy on server
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+        echo "🚀 Deploying on server..."
+        ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
           sudo cp -r /tmp/rbm-tender-app/* /opt/rbm-tender-app/
           cd /opt/rbm-tender-app
           sudo chown -R ubuntu:ubuntu .
