@@ -187,7 +187,6 @@ def start_app(env):
         extra_files = []
         if app.config.get('DEBUG', False):
             # Exclude common directories that cause unnecessary restarts
-            import os
             exclude_dirs = [
                 'instance/logs',
                 'instance/sessions', 
