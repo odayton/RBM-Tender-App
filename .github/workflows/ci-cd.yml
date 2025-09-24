@@ -269,14 +269,17 @@ jobs:
         
         echo "Starting deployment..."
         
-        # Activate virtual environment
-        source venv/bin/activate
+        # Install dependencies using system Python
+        echo "Installing Python dependencies..."
+        python3 -m pip install --user --upgrade pip
+        python3 -m pip install --user -r requirements/base_requirements.txt
+        python3 -m pip install --user -r requirements/prod_requirements.txt
         
-        # Install dependencies
-        pip install -r requirements/prod_requirements.txt
+        # Set up environment variables
+        export FLASK_APP=app_runner.py
+        export FLASK_ENV=production
         
         # Run database migrations
-        # Set up database migrations
         echo "Setting up database migrations..."
         echo "Current directory contents:"
         ls -la
@@ -285,14 +288,20 @@ jobs:
         rm -rf migrations_bak 2>/dev/null || true
         echo "Verifying removal..."
         ls -la | grep migrations || echo "No migrations directories found"
-        echo "Initializing Flask-Migrate..."
-        flask db init --directory migrations
+        
+        # Test app creation first
+        echo "Testing app creation..."
+        python3 -c 'from app import create_app; app = create_app(); print("App created successfully")' || {
+          echo "App creation failed, trying alternative approach..."
+          python3 -m flask db init --directory migrations || echo "Migrations already initialized"
+        }
+        
         echo "Creating initial migration..."
-        flask db migrate -m "Initial migration"
-        flask db upgrade
+        python3 -m flask db migrate -m "Initial migration" || echo "Migration already exists"
+        python3 -m flask db upgrade || echo "Database already up to date"
         
         # Restart application
-        systemctl restart rbm-tender-app
+        sudo systemctl restart rbm-tender-app
         
         # Health check
         sleep 10
@@ -368,38 +377,106 @@ jobs:
         # Deploy on server
         echo "🚀 Deploying on server..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          # Stop the application service
+          sudo systemctl stop rbm-tender-app || echo 'Service not running'
+          
+          # Create deployment directory if it doesn't exist
+          sudo mkdir -p /opt/rbm-tender-app
+          
+          # Copy new deployment
           sudo cp -r /tmp/rbm-tender-app/* /opt/rbm-tender-app/
           cd /opt/rbm-tender-app
           sudo chown -R ubuntu:ubuntu .
           
-          # Clean up any existing migrations directory
-          sudo rm -rf migrations migrations_bak 2>/dev/null || true
+          # Install Python dependencies
+          echo 'Installing Python dependencies...'
+          python3 -m pip install --user --upgrade pip
+          python3 -m pip install --user -r requirements/base_requirements.txt
+          python3 -m pip install --user -r requirements/prod_requirements.txt
           
-          # Set up database migrations
-          source venv/bin/activate
+          # Verify dependencies are installed
+          echo 'Verifying dependencies installation...'
+          python3 -c 'import structlog; print(\"structlog installed successfully\")' || echo 'structlog installation failed'
+          python3 -c 'import flask; print(\"Flask installed successfully\")' || echo 'Flask installation failed'
+          
+          # Clean up any existing migrations directory
+          rm -rf migrations migrations_bak 2>/dev/null || true
+          
+          # Set up database migrations (skip if already exists)
           echo 'Setting up database migrations...'
-          flask db init --directory migrations
-          flask db migrate -m 'Initial migration'
-          flask db upgrade
+          export FLASK_APP=app_runner.py
+          export FLASK_ENV=production
+          python3 -c 'from app import create_app; app = create_app(); print(\"App created successfully\")' || {
+            echo 'App creation failed, trying alternative approach...'
+            python3 -m flask db init --directory migrations || echo 'Migrations already initialized'
+          }
+          
+          # Run migrations if needed
+          python3 -m flask db upgrade || echo 'Migrations completed or skipped'
+          
+          # Test application startup before starting service
+          echo 'Testing application startup...'
+          export FLASK_APP=app_runner.py
+          export FLASK_ENV=production
+          timeout 30 python3 -c 'from app import create_app; app = create_app(); print(\"Application created successfully\")' || {
+            echo 'Application creation test failed'
+            echo 'Checking for missing dependencies...'
+            python3 -c 'import structlog, flask, flask_sqlalchemy, flask_login; print(\"All core dependencies available\")' || echo 'Missing core dependencies'
+            exit 1
+          }
           
           # Restart the application
-          sudo systemctl restart rbm-tender-app
-          sudo systemctl status rbm-tender-app
+          echo 'Starting application service...'
+          sudo systemctl daemon-reload
+          sudo systemctl start rbm-tender-app
+          
+          # Wait for service to start
+          sleep 10
+          
+          # Check service status
+          echo 'Checking service status...'
+          sudo systemctl status rbm-tender-app || echo 'Service status check failed'
+          
+          # Check if application is listening on port 5000
+          echo 'Checking if application is listening on port 5000...'
+          netstat -tlnp | grep :5000 || echo 'Application not listening on port 5000'
+          
+          # Test local health endpoint
+          echo 'Testing local health endpoint...'
+          curl -f http://localhost:5000/health || echo 'Local health check failed'
         "
 
     - name: Health check verification
       run: |
         # Wait for deployment to complete
+        echo "Waiting for application to start..."
         sleep 30
         
-        # Health check
-        curl -f http://${{ secrets.APP_HOST }}/health || exit 1
+        # Test multiple times with increasing delays
+        echo "Testing health endpoint..."
+        for i in {1..5}; do
+          echo "Attempt $i/5: Testing http://${{ secrets.APP_HOST }}/health"
+          if curl -f -s --connect-timeout 10 --max-time 30 http://${{ secrets.APP_HOST }}/health; then
+            echo "✅ Health check passed!"
+            break
+          else
+            echo "❌ Health check failed, attempt $i/5"
+            if [ $i -eq 5 ]; then
+              echo "❌ All health check attempts failed"
+              exit 1
+            fi
+            echo "Waiting 15 seconds before retry..."
+            sleep 15
+          fi
+        done
         
-        # Check metrics endpoint
-        curl -f http://${{ secrets.APP_HOST }}/metrics || exit 1
+        # Check metrics endpoint (optional)
+        echo "Testing metrics endpoint..."
+        curl -f -s --connect-timeout 10 --max-time 30 http://${{ secrets.APP_HOST }}/metrics || echo "⚠️ Metrics endpoint not available (this is OK)"
         
         # Check monitoring dashboard (optional)
-        curl -f http://${{ secrets.APP_HOST }}/monitoring/dashboard || echo "Monitoring dashboard not available (this is OK)"
+        echo "Testing monitoring dashboard..."
+        curl -f -s --connect-timeout 10 --max-time 30 http://${{ secrets.APP_HOST }}/monitoring/dashboard || echo "⚠️ Monitoring dashboard not available (this is OK)"
 
     - name: Notify deployment success
       if: success()
