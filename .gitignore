@@ -1,22 +1,23 @@
-# =============================================================================
-# CRITICAL SECURITY PATTERNS - NEVER COMMIT THESE TO PRODUCTION
-# =============================================================================
-# These patterns protect against accidentally committing sensitive data:
-# - Environment files (.env, .env.production, config/.env.*)
-# - Credentials and secrets (*.key, *.pem, *.credentials)
-# - Production backups and deployment files
-# - Security scan results with sensitive information
-# =============================================================================
+# Environment variables and secrets
+.env
+.env.local
+.env.production
+.env.staging
+*.env
 
-# Byte-compiled / optimized / DLL files
+# GitHub Actions workflows (should be private)
+.github/workflows/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -30,288 +31,53 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
-# PyInstaller
-# Usually these files are written by a python script from a template
-# before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-# Add the flask_session directory to ignore user session files
-/flask_session/
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# celery beat schedule file
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
+# Virtual environments
 venv/
+env/
 ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.type/
-
-# Cython debug symbols
-cython_debug/
-
-# Custom patterns
-/uploads/
-/logs/
-*.log.*
-secrets.txt
-
-# Generated files
-generated_data/
-
-# Authentication and Security (CRITICAL - NEVER COMMIT)
-*.key
-*.pem
-*.crt
-*.p12
-*.pfx
-*.p8
-*.der
-session_files/
-sessions/
-credentials/
-secrets/
-*.credentials
-*.secret
-
-# Production deployment files (CRITICAL)
-deployment-keys/
-production-keys/
-*.deployment
-*.prod
-
-# Database files (additional)
-*.db
-*.sqlite
-*.sqlite3
-app/instance/*.db
-app/instance/*.sqlite
-app/instance/*.sqlite3
-
-# Database and instance files - CRITICAL
-app/instance/backups/
-app/instance/exports/
-app/instance/logs/
-app/instance/sessions/
-app/instance/uploads/
-
-# Migration backups
-migrations/backups/
-migrations/__pycache__/
-
-# Business data files (consider if sensitive)
-data/*.xlsx
-data/*.csv
-data/backups/
-
-# VS Code settings (personal preferences)
-config/.vscode/
+# IDE
 .vscode/
-
-# Environment and configuration
-config.py
-settings.py
-
-# Environment files - IGNORE these (CRITICAL FOR PRODUCTION SECURITY)
-.env
-.env.local
-.env.*.local
-.env.production
-.env.development
-.env.testing
-config/.env
-config/.env.*
-
-# But allow templates (don't ignore these)
-!.env.example
-!config/env.example
-!config/production.env
-
-# Temporary files
-*.tmp
-*.temp
+.idea/
 *.swp
 *.swo
 *~
 
-# IDE and editor files
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-.vscode/settings.json
-
-# OS generated files
+# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
 
 # Backup files
 *.bak
 *.backup
-*.old
 
-# Cache directories
-.cache/
-cache/
+# Configuration files with secrets
+config/secrets.yml
+config/production.yml
+config/staging.yml
 
-# Production and deployment specific
-production-backup/
-deployment-backup/
-*.backup
-backup_*/
-deployment_*/
+# Test files that might contain sensitive data
+tests/fixtures/
+tests/secrets/
 
-# Security scan results (temporary)
-security_reports/
-bandit_results/
-safety_results/
-*.security_report
-*_security_scan_*
+# Deployment scripts with hardcoded paths
+scripts/deployment/production/
+scripts/deployment/staging/
 
-# CI/CD and deployment artifacts
-.github/secrets/
-.github/workflows/*.secret
-deployment_artifacts/
-ci_artifacts/
-
-# Cloud and infrastructure
-.terraform/
-*.tfstate
-*.tfstate.*
-.terraform.lock.hcl
-terraform.tfvars
-*.pem
-*.key
-cloud-config/
-
-# Additional Python patterns
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Documentation (exclude from production deployments)
-# Keep locally for development reference, but not needed in production
-docs/
-README.md
-COMPREHENSIVE_UPGRADE_PLAN.md
-
-# Scripts - exclude from GitHub for security (keep only essential files)
-scripts/
-!scripts/deployment/rbm-tender-app.service
-!scripts/production/start_production.py
-
-# Configuration files - exclude for security (contain sensitive data)
-config/
-
-# Benchmark and performance data
-.benchmarks/
-
-# Backup files and directories (never commit backups)
-backups/
-*backup*/
-*.backup
-*_backup_*
+# Documentation that might contain sensitive info
+docs/deployment/secrets/
+docs/config/secrets/
