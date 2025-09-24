@@ -409,16 +409,19 @@ jobs:
             python -m pip install --upgrade pip
             python -m pip install -r requirements/base_requirements.txt
             python -m pip install -r requirements/prod_requirements.txt
-            PYTHON_CMD="python"
+            
+            # Verify dependencies are installed
+            echo 'Verifying dependencies installation...'
+            python -c 'import structlog; print("structlog installed successfully")' || echo 'structlog installation failed'
+            python -c 'import flask; print("Flask installed successfully")' || echo 'Flask installation failed'
           else
             echo 'Using system Python with --break-system-packages...'
-            PYTHON_CMD="python3"
+            
+            # Verify dependencies are installed
+            echo 'Verifying dependencies installation...'
+            python3 -c 'import structlog; print("structlog installed successfully")' || echo 'structlog installation failed'
+            python3 -c 'import flask; print("Flask installed successfully")' || echo 'Flask installation failed'
           fi
-          
-          # Verify dependencies are installed
-          echo 'Verifying dependencies installation...'
-          $PYTHON_CMD -c 'import structlog; print(\"structlog installed successfully\")' || echo 'structlog installation failed'
-          $PYTHON_CMD -c 'import flask; print(\"Flask installed successfully\")' || echo 'Flask installation failed'
           
           # Clean up any existing migrations directory
           rm -rf migrations migrations_bak 2>/dev/null || true
@@ -427,24 +430,39 @@ jobs:
           echo 'Setting up database migrations...'
           export FLASK_APP=app_runner.py
           export FLASK_ENV=production
-          $PYTHON_CMD -c 'from app import create_app; app = create_app(); print(\"App created successfully\")' || {
-            echo 'App creation failed, trying alternative approach...'
-            $PYTHON_CMD -m flask db init --directory migrations || echo 'Migrations already initialized'
-          }
           
-          # Run migrations if needed
-          $PYTHON_CMD -m flask db upgrade || echo 'Migrations completed or skipped'
-          
-          # Test application startup before starting service
-          echo 'Testing application startup...'
-          export FLASK_APP=app_runner.py
-          export FLASK_ENV=production
-          timeout 30 $PYTHON_CMD -c 'from app import create_app; app = create_app(); print(\"Application created successfully\")' || {
-            echo 'Application creation test failed'
-            echo 'Checking for missing dependencies...'
-            $PYTHON_CMD -c 'import structlog, flask, flask_sqlalchemy, flask_login; print(\"All core dependencies available\")' || echo 'Missing core dependencies'
-            exit 1
-          }
+          if [ -d "venv" ]; then
+            source venv/bin/activate
+            python -c 'from app import create_app; app = create_app(); print("App created successfully")' || {
+              echo 'App creation failed, trying alternative approach...'
+              python -m flask db init --directory migrations || echo 'Migrations already initialized'
+            }
+            python -m flask db upgrade || echo 'Migrations completed or skipped'
+            
+            # Test application startup before starting service
+            echo 'Testing application startup...'
+            timeout 30 python -c 'from app import create_app; app = create_app(); print("Application created successfully")' || {
+              echo 'Application creation test failed'
+              echo 'Checking for missing dependencies...'
+              python -c 'import structlog, flask, flask_sqlalchemy, flask_login; print("All core dependencies available")' || echo 'Missing core dependencies'
+              exit 1
+            }
+          else
+            python3 -c 'from app import create_app; app = create_app(); print("App created successfully")' || {
+              echo 'App creation failed, trying alternative approach...'
+              python3 -m flask db init --directory migrations || echo 'Migrations already initialized'
+            }
+            python3 -m flask db upgrade || echo 'Migrations completed or skipped'
+            
+            # Test application startup before starting service
+            echo 'Testing application startup...'
+            timeout 30 python3 -c 'from app import create_app; app = create_app(); print("Application created successfully")' || {
+              echo 'Application creation test failed'
+              echo 'Checking for missing dependencies...'
+              python3 -c 'import structlog, flask, flask_sqlalchemy, flask_login; print("All core dependencies available")' || echo 'Missing core dependencies'
+              exit 1
+            }
+          fi
           
           # Update systemd service to use correct Python path
           echo 'Updating systemd service configuration...'
