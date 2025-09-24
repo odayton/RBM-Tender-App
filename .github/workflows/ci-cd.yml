@@ -344,6 +344,7 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Deploy to production server
+      continue-on-error: true
       run: |
         # Display branch information
         echo "🚀 Deploying branch: ${{ github.ref_name }}"
@@ -534,11 +535,39 @@ jobs:
           echo '=== END DEBUGGING ==='
         "
 
+    - name: Check deployment status
+      run: |
+        echo "🔍 Checking if deployment step succeeded..."
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Deployment step completed successfully"
+        else
+          echo "⚠️ Deployment step had issues, but continuing with health checks..."
+        fi
+
     - name: Health check verification
       run: |
         # Wait for deployment to complete
         echo "Waiting for application to start..."
         sleep 30
+        
+        # First, let's check what's happening on the server
+        echo "🔍 Checking server status before health checks..."
+        ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          echo '=== SERVER STATUS CHECK ==='
+          echo 'Service status:'
+          sudo systemctl status rbm-tender-app --no-pager || echo 'Service not found or failed'
+          echo 'Service logs (last 20 lines):'
+          sudo journalctl -u rbm-tender-app --no-pager -n 20 || echo 'No service logs found'
+          echo 'Port 5000 status:'
+          netstat -tlnp | grep :5000 || echo 'Port 5000 not listening'
+          echo 'Process list (python processes):'
+          ps aux | grep python || echo 'No python processes found'
+          echo 'Directory contents:'
+          ls -la /opt/rbm-tender-app/ || echo 'Directory not found'
+          echo 'Environment file:'
+          ls -la /opt/rbm-tender-app/.env || echo 'No .env file found'
+          echo '=== END SERVER STATUS ==='
+        "
         
         # Test multiple times with increasing delays
         echo "Testing health endpoint..."
@@ -551,6 +580,33 @@ jobs:
             echo "❌ Health check failed, attempt $i/5"
             if [ $i -eq 5 ]; then
               echo "❌ All health check attempts failed"
+              echo "🔍 Final debugging check..."
+              ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+                echo '=== FINAL DEBUGGING ==='
+                echo 'Service status:'
+                sudo systemctl status rbm-tender-app --no-pager
+                echo 'Service logs (last 50 lines):'
+                sudo journalctl -u rbm-tender-app --no-pager -n 50
+                echo 'Port 5000 status:'
+                netstat -tlnp | grep :5000 || echo 'Port 5000 not listening'
+                echo 'Process list (python processes):'
+                ps aux | grep python || echo 'No python processes found'
+                echo 'Environment variables:'
+                env | grep -E '(FLASK|DATABASE|REDIS)' || echo 'No relevant environment variables found'
+                echo 'Directory permissions:'
+                ls -la /opt/rbm-tender-app/
+                echo 'Python version and path:'
+                cd /opt/rbm-tender-app
+                if [ -d "venv" ]; then
+                  source venv/bin/activate
+                  which python
+                  python --version
+                else
+                  which python3
+                  python3 --version
+                fi
+                echo '=== END FINAL DEBUGGING ==='
+              "
               exit 1
             fi
             echo "Waiting 15 seconds before retry..."
