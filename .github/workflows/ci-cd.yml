@@ -412,15 +412,15 @@ jobs:
             
             # Verify dependencies are installed
             echo 'Verifying dependencies installation...'
-            python -c 'import structlog; print("structlog installed successfully")' || echo 'structlog installation failed'
-            python -c 'import flask; print("Flask installed successfully")' || echo 'Flask installation failed'
+            python -c 'import structlog; print("structlog installed successfully")'
+            python -c 'import flask; print("Flask installed successfully")'
           else
             echo 'Using system Python with --break-system-packages...'
             
             # Verify dependencies are installed
             echo 'Verifying dependencies installation...'
-            python3 -c 'import structlog; print("structlog installed successfully")' || echo 'structlog installation failed'
-            python3 -c 'import flask; print("Flask installed successfully")' || echo 'Flask installation failed'
+            python3 -c 'import structlog; print("structlog installed successfully")'
+            python3 -c 'import flask; print("Flask installed successfully")'
           fi
           
           # Clean up any existing migrations directory
@@ -433,35 +433,21 @@ jobs:
           
           if [ -d "venv" ]; then
             source venv/bin/activate
-            python -c 'from app import create_app; app = create_app(); print("App created successfully")' || {
-              echo 'App creation failed, trying alternative approach...'
-              python -m flask db init --directory migrations || echo 'Migrations already initialized'
-            }
-            python -m flask db upgrade || echo 'Migrations completed or skipped'
+            python -c 'from app import create_app; app = create_app(); print("App created successfully")'
+            python -m flask db init --directory migrations
+            python -m flask db upgrade
             
             # Test application startup before starting service
             echo 'Testing application startup...'
-            timeout 30 python -c 'from app import create_app; app = create_app(); print("Application created successfully")' || {
-              echo 'Application creation test failed'
-              echo 'Checking for missing dependencies...'
-              python -c 'import structlog, flask, flask_sqlalchemy, flask_login; print("All core dependencies available")' || echo 'Missing core dependencies'
-              exit 1
-            }
+            python -c 'from app import create_app; app = create_app(); print("Application created successfully")'
           else
-            python3 -c 'from app import create_app; app = create_app(); print("App created successfully")' || {
-              echo 'App creation failed, trying alternative approach...'
-              python3 -m flask db init --directory migrations || echo 'Migrations already initialized'
-            }
-            python3 -m flask db upgrade || echo 'Migrations completed or skipped'
+            python3 -c 'from app import create_app; app = create_app(); print("App created successfully")'
+            python3 -m flask db init --directory migrations
+            python3 -m flask db upgrade
             
             # Test application startup before starting service
             echo 'Testing application startup...'
-            timeout 30 python3 -c 'from app import create_app; app = create_app(); print("Application created successfully")' || {
-              echo 'Application creation test failed'
-              echo 'Checking for missing dependencies...'
-              python3 -c 'import structlog, flask, flask_sqlalchemy, flask_login; print("All core dependencies available")' || echo 'Missing core dependencies'
-              exit 1
-            }
+            python3 -c 'from app import create_app; app = create_app(); print("Application created successfully")'
           fi
           
           # Update systemd service to use correct Python path
