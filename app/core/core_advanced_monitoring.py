@@ -510,6 +510,11 @@ def init_advanced_monitoring(app, db):
     """Initialize advanced monitoring system."""
     global metrics_collector
     
+    # Check if advanced monitoring is disabled
+    if not app.config.get('ENABLE_ADVANCED_MONITORING', True):
+        logger.info("Advanced monitoring system disabled via configuration")
+        return None
+    
     # Create metrics collector
     metrics_collector = MetricsCollector(db)
     

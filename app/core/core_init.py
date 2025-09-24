@@ -153,6 +153,11 @@ class CoreInitializer:
 
     def init_advanced_monitoring(self):
         """Initialize advanced monitoring system."""
+        # Check if advanced monitoring is enabled
+        if not self.app.config.get('ENABLE_ADVANCED_MONITORING', True):
+            core_logger.app_logger.info("Advanced Monitoring Disabled via configuration.")
+            return
+            
         init_advanced_monitoring(self.app, self.db)
         core_logger.app_logger.info("Advanced Monitoring Initialized.")
 

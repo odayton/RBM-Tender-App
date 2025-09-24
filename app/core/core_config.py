@@ -65,6 +65,9 @@ class Config:
     # Auto-login configuration (disabled by default)
     ENABLE_AUTO_LOGIN = False
     
+    # Advanced monitoring configuration (can be disabled to prevent CPU issues)
+    ENABLE_ADVANCED_MONITORING = os.environ.get('ENABLE_ADVANCED_MONITORING', 'true').lower() in ('true', '1', 'yes')
+    
     # Security configuration
     SECURITY_MAX_LOGIN_ATTEMPTS = int(os.environ.get('SECURITY_MAX_LOGIN_ATTEMPTS', '10'))
     SECURITY_BLOCK_DURATION_MINUTES = int(os.environ.get('SECURITY_BLOCK_DURATION_MINUTES', '15'))
