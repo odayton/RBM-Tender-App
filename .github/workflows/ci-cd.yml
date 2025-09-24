@@ -62,7 +62,7 @@ jobs:
     
     services:
       postgres:
-        image: postgres:15
+        image: ghcr.io/postgres/postgres:15
         env:
           POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
           POSTGRES_DB: ${{ secrets.TEST_DB_NAME }}
@@ -75,7 +75,7 @@ jobs:
           - 5432:5432
 
       redis:
-        image: redis:7
+        image: ghcr.io/redis/redis:7
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
