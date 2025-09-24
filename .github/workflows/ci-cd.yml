@@ -446,9 +446,36 @@ jobs:
             python3 -m flask db init --directory migrations
             python3 -m flask db upgrade
             
-            # Test application startup before starting service
-            echo 'Testing application startup...'
-            python3 -c 'from app import create_app; app = create_app(); print("Application created successfully")'
+          # Test application startup before starting service
+          echo 'Testing application startup...'
+          python3 -c 'from app import create_app; app = create_app(); print("Application created successfully")'
+          fi
+          
+          # Check if .env file exists and is readable
+          echo 'Checking environment configuration...'
+          if [ -f ".env" ]; then
+            echo 'Found .env file:'
+            ls -la .env
+            echo 'Environment file is readable'
+          else
+            echo 'No .env file found - this might be the issue!'
+          fi
+          
+          # Check if app_runner.py exists and is executable
+          echo 'Checking app_runner.py...'
+          if [ -f "app_runner.py" ]; then
+            echo 'Found app_runner.py:'
+            ls -la app_runner.py
+            echo 'Testing app_runner.py syntax...'
+            if [ -d "venv" ]; then
+              source venv/bin/activate
+              python -m py_compile app_runner.py
+            else
+              python3 -m py_compile app_runner.py
+            fi
+            echo 'app_runner.py syntax is valid'
+          else
+            echo 'app_runner.py not found!'
           fi
           
           # Update systemd service to use correct Python path
@@ -480,6 +507,31 @@ jobs:
           # Test local health endpoint
           echo 'Testing local health endpoint...'
           curl -f http://localhost:5000/health || echo 'Local health check failed'
+          
+          # Additional debugging
+          echo '=== DEBUGGING INFORMATION ==='
+          echo 'Service status:'
+          sudo systemctl status rbm-tender-app --no-pager
+          echo 'Service logs (last 50 lines):'
+          sudo journalctl -u rbm-tender-app --no-pager -n 50
+          echo 'Port 5000 status:'
+          netstat -tlnp | grep :5000 || echo 'Port 5000 not listening'
+          echo 'Process list (python processes):'
+          ps aux | grep python || echo 'No python processes found'
+          echo 'Environment variables:'
+          env | grep -E '(FLASK|DATABASE|REDIS)' || echo 'No relevant environment variables found'
+          echo 'Directory permissions:'
+          ls -la /opt/rbm-tender-app/
+          echo 'Python version and path:'
+          if [ -d "venv" ]; then
+            source venv/bin/activate
+            which python
+            python --version
+          else
+            which python3
+            python3 --version
+          fi
+          echo '=== END DEBUGGING ==='
         "
 
     - name: Health check verification
