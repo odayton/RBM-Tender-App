@@ -62,7 +62,7 @@ jobs:
     
     services:
       postgres:
-        image: ghcr.io/postgres/postgres:15
+        image: postgres:15
         env:
           POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
           POSTGRES_DB: ${{ secrets.TEST_DB_NAME }}
@@ -75,7 +75,7 @@ jobs:
           - 5432:5432
 
       redis:
-        image: ghcr.io/redis/redis:7
+        image: redis:7
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -87,6 +87,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
     - name: Set up Python
       uses: actions/setup-python@v4
