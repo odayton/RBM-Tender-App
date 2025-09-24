@@ -5,8 +5,8 @@
 .env.staging
 *.env
 
-# GitHub Actions workflows (should be private)
-.github/workflows/
+# GitHub Actions workflows - now using secrets (secure)
+# .github/workflows/ - removed this line since we're using secrets now
 
 # Database files
 *.db
