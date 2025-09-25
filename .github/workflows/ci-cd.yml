@@ -76,8 +76,9 @@ jobs:
     # Use Docker Hub official images, with credentials so services can pull before steps run
     services:
       postgres:
-        image: postgres:15
+        image: docker.io/library/postgres:15
         credentials:
+          registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
         env:
@@ -85,21 +86,18 @@ jobs:
           POSTGRES_DB: ${{ secrets.TEST_DB_NAME }}
         options: >-
           --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
+          --health-interval=10s --health-timeout=5s --health-retries=10
         ports:
           - 5432:5432
       redis:
-        image: redis:7
+        image: docker.io/library/redis:7
         credentials:
+          registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
         options: >-
           --health-cmd="redis-cli ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
+          --health-interval=10s --health-timeout=5s --health-retries=10
         ports:
           - 6379:6379
 
