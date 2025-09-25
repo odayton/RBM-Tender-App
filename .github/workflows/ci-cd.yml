@@ -96,6 +96,7 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+      continue-on-error: true
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -117,6 +118,19 @@ jobs:
         pip install -r requirements/test_requirements.txt
 
 
+    - name: Debug Docker containers
+      run: |
+        echo "=== Docker Debug Information ==="
+        echo "Docker version:"
+        docker --version
+        echo "Docker images:"
+        docker images
+        echo "Docker containers:"
+        docker ps -a
+        echo "Docker network:"
+        docker network ls
+        echo "=== End Docker Debug ==="
+
     - name: Set up test environment
       run: |
         export FLASK_CONFIG=testing
@@ -131,6 +145,11 @@ jobs:
     - name: Wait for PostgreSQL
       run: |
         echo "Waiting for PostgreSQL to be ready..."
+        echo "Checking if PostgreSQL container is running..."
+        docker ps | grep postgres || echo "PostgreSQL container not found"
+        echo "Checking port 5432..."
+        netstat -tlnp | grep 5432 || echo "Port 5432 not listening"
+        echo "Attempting to connect to PostgreSQL..."
         timeout 60 bash -c 'until pg_isready -h localhost -p 5432 -U postgres; do sleep 2; done'
         echo "PostgreSQL is ready!"
 
