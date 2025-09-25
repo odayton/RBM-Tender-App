@@ -72,13 +72,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: quality-checks
-
+    
     # Use Docker Hub official images, with credentials so services can pull before steps run
     services:
       postgres:
         image: docker.io/library/postgres:15
         credentials:
-          registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
         env:
@@ -92,7 +91,6 @@ jobs:
       redis:
         image: docker.io/library/redis:7
         credentials:
-          registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
         options: >-
@@ -143,10 +141,10 @@ jobs:
       run: |
         python - <<'PY'
         from app import create_app, db
-        app = create_app()
-        with app.app_context():
-            db.drop_all()
-            db.create_all()
+            app = create_app()
+            with app.app_context():
+                db.drop_all()
+                db.create_all()
             print("Test database tables created")
         PY
 
@@ -171,7 +169,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [quality-checks, test]
     if: github.ref == 'refs/heads/main'
-
+    
     steps:
     - uses: actions/checkout@v4
 
@@ -211,7 +209,7 @@ jobs:
         echo "Deployment completed"
         EOF
         chmod +x deployment-package/deploy.sh
-
+        
         tar -czf rbm-tender-app-$(date +%Y%m%d-%H%M%S).tar.gz deployment-package/
 
     - uses: actions/upload-artifact@v4
@@ -225,7 +223,7 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main'
     environment: production
-
+    
     steps:
     - uses: actions/checkout@v4
 
@@ -242,7 +240,7 @@ jobs:
       run: |
         set -euo pipefail
         tar -xzf rbm-tender-app-*.tar.gz
-
+        
         echo "Testing SSH..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH OK'"
 
@@ -251,10 +249,10 @@ jobs:
           sudo systemctl stop rbm-tender-app || true
           sudo mkdir -p /opt/rbm-tender-app /tmp/rbm-tender-app
         "
-
+        
         echo "Uploading package..."
         scp -o ConnectTimeout=30 -o StrictHostKeyChecking=no -r deployment-package/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/rbm-tender-app/
-
+        
         echo "Installing on server..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
           set -euo pipefail
