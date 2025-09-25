@@ -175,11 +175,8 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     """Testing-specific configuration."""
     TESTING = True
-    # Use PostgreSQL for testing - prioritize TEST_DATABASE_URL, fallback to DEV_DATABASE_URL
-    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or os.environ.get('DEV_DATABASE_URL')
-    if not SQLALCHEMY_DATABASE_URI:
-        # Final fallback to default test database URL
-        SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:MadeInItaly1953!@localhost:5432/rbm_tender_app_test'
+    # Use SQLite for testing (no external dependencies)
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///test.db')
     
     WTF_CSRF_ENABLED = False # Disable CSRF forms in tests
     CACHE_TYPE = 'NullCache' # Disable caching for tests
