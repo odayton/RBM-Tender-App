@@ -123,9 +123,11 @@ jobs:
 
     - name: Install test deps (incl. psql client)
       run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install -r requirements/base_requirements.txt
-        python3 -m pip install -r requirements/test_requirements.txt
+        python3 -m venv test-env
+        source test-env/bin/activate
+        python -m pip install --upgrade pip
+        pip install -r requirements/base_requirements.txt
+        pip install -r requirements/test_requirements.txt
         sudo apt-get update -y
         sudo apt-get install -y postgresql-client
 
@@ -139,7 +141,8 @@ jobs:
 
     - name: Init test DB schema (drop/create all)
       run: |
-        python3 -c "
+        source test-env/bin/activate
+        python -c "
         from app import create_app, db
         app = create_app()
         with app.app_context():
@@ -150,8 +153,9 @@ jobs:
 
     - name: Run unit tests with coverage + JUnit
       run: |
+        source test-env/bin/activate
         mkdir -p test-results coverage-report
-        python3 -m pytest tests/unit/ -v --tb=short \
+        python -m pytest tests/unit/ -v --tb=short \
           --junitxml=test-results/junit.xml \
           --cov=app --cov-report=xml:coverage-report/coverage.xml --cov-report=term
 
