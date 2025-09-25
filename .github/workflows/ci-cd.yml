@@ -288,10 +288,10 @@ jobs:
           [ -z "$DATABASE_URL" ] && echo "ERROR: DATABASE_URL not set" && exit 1
 
           $PYBIN << 'EOF'
-          from app import create_app
-          app = create_app()
-          print("App OK")
-          EOF
+from app import create_app
+app = create_app()
+print("App OK")
+EOF
           $FLASK db upgrade || true
 
           if [ -f /etc/systemd/system/rbm-tender-app.service ]; then
