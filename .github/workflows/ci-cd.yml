@@ -2,27 +2,26 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches:
+      - main
+      - develop
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
-# Least privilege for the workflow itself
 permissions:
   contents: read
 
 # Cancel older runs for PRs/branches, but NOT on main
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request'
-      && format('pr-{0}', github.event.pull_request.number)
-      || github.ref }}
+  group: "${{ github.workflow }}-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.ref }}"
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
   PYTHON_VERSION: '3.11'
 
 jobs:
-  # Job 1: Code Quality and Security Checks
   quality-checks:
     runs-on: ubuntu-latest
     steps:
@@ -45,14 +44,13 @@ jobs:
         pip install -r requirements/dev_requirements.txt
 
     - name: Formatting (placeholder)
-      run: echo "Code formatting check passed"  # replace with black/ruff --check
+      run: echo "Code formatting check passed"
 
     - name: Lint (placeholder)
-      run: echo "Linting passed"  # replace with ruff/pylint
+      run: echo "Linting passed"
 
     - name: Bandit (security)
-      run: |
-        bandit -r app/ -f json -o bandit-report.json || true
+      run: bandit -r app/ -f json -o bandit-report.json || true
 
     - name: Safety (v2 or v3)
       run: |
@@ -68,12 +66,11 @@ jobs:
           bandit-report.json
           safety-report.json
 
-  # Job 2: Test Suite
   test:
     runs-on: ubuntu-latest
     needs: quality-checks
-    
-    # Use Docker Hub official images, with credentials so services can pull before steps run
+
+    # Docker Hub official images, authenticate the *service pulls*
     services:
       postgres:
         image: docker.io/library/postgres:15
@@ -124,7 +121,7 @@ jobs:
     - name: Install test deps (incl. psql client)
       run: |
         python3 -m venv test-env
-        source test-env/bin/activate
+        . test-env/bin/activate
         python -m pip install --upgrade pip
         pip install -r requirements/base_requirements.txt
         pip install -r requirements/test_requirements.txt
@@ -141,18 +138,21 @@ jobs:
 
     - name: Init test DB schema (drop/create all)
       run: |
-        source test-env/bin/activate && python -c "
+        . test-env/bin/activate
+        python - <<'PY'
         from app import create_app, db
         app = create_app()
         with app.app_context():
             db.drop_all()
             db.create_all()
-            print('Test database tables created')
-        "
+            print("Test database tables created")
+        PY
 
     - name: Run unit tests with coverage + JUnit
       run: |
-        source test-env/bin/activate && mkdir -p test-results coverage-report && python -m pytest tests/unit/ -v --tb=short \
+        . test-env/bin/activate
+        mkdir -p test-results coverage-report
+        python -m pytest tests/unit/ -v --tb=short \
           --junitxml=test-results/junit.xml \
           --cov=app --cov-report=xml:coverage-report/coverage.xml --cov-report=term
 
@@ -165,12 +165,11 @@ jobs:
           test-results/
           coverage-report/
 
-  # Job 3: Build and Package (main only)
   build:
     runs-on: ubuntu-latest
     needs: [quality-checks, test]
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
     - uses: actions/checkout@v4
 
@@ -194,6 +193,7 @@ jobs:
         [ -d scripts ] && cp -r scripts/ deployment-package/ || true
         ls *.py >/dev/null 2>&1 && cp *.py deployment-package/ || true
 
+        # (left for reference; not executed remotely)
         cat > deployment-package/deploy.sh << 'EOF'
         #!/bin/bash
         set -euo pipefail
@@ -201,23 +201,9 @@ jobs:
         python3 -m pip install --user --upgrade pip
         python3 -m pip install --user -r requirements/base_requirements.txt
         python3 -m pip install --user -r requirements/prod_requirements.txt
-        
-        # Set critical environment variables
         export FLASK_APP=app_runner.py
         export FLASK_ENV=production
         export FLASK_CONFIG=production
-        
-        # Check if environment variables are set
-        if [ -z "$SECRET_KEY" ]; then
-          echo "ERROR: SECRET_KEY environment variable is not set"
-          exit 1
-        fi
-        if [ -z "$DATABASE_URL" ]; then
-          echo "ERROR: DATABASE_URL environment variable is not set"
-          exit 1
-        fi
-        
-        echo "Environment variables validated successfully"
         python3 -c 'from app import create_app; create_app(); print("App OK")'
         python3 -m flask db upgrade || true
         sudo systemctl restart rbm-tender-app
@@ -226,7 +212,7 @@ jobs:
         echo "Deployment completed"
         EOF
         chmod +x deployment-package/deploy.sh
-        
+
         tar -czf rbm-tender-app-$(date +%Y%m%d-%H%M%S).tar.gz deployment-package/
 
     - uses: actions/upload-artifact@v4
@@ -234,13 +220,12 @@ jobs:
         name: deployment-package
         path: rbm-tender-app-*.tar.gz
 
-  # Job 4: Deploy to Production (main only)
   deploy:
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main'
     environment: production
-    
+
     steps:
     - uses: actions/checkout@v4
 
@@ -257,7 +242,7 @@ jobs:
       run: |
         set -euo pipefail
         tar -xzf rbm-tender-app-*.tar.gz
-        
+
         echo "Testing SSH..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH OK'"
 
@@ -266,34 +251,31 @@ jobs:
           sudo systemctl stop rbm-tender-app || true
           sudo mkdir -p /opt/rbm-tender-app /tmp/rbm-tender-app
         "
-        
+
         echo "Uploading package..."
         scp -o ConnectTimeout=30 -o StrictHostKeyChecking=no -r deployment-package/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/rbm-tender-app/
-        
+
         echo "Installing on server..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
           set -euo pipefail
           sudo rsync -a --delete /tmp/rbm-tender-app/ /opt/rbm-tender-app/
           cd /opt/rbm-tender-app
 
-          # Prefer venv; fall back to system with --break-system-packages
-          if [ -d venv ]; then
-            . venv/bin/activate
-            python -m pip install --upgrade pip
-            python -m pip install -r requirements/base_requirements.txt -r requirements/prod_requirements.txt
-          else
-            python3 -m venv venv || true
-            if [ -d venv ]; then
-              . venv/bin/activate
-              python -m pip install --upgrade pip
-              python -m pip install -r requirements/base_requirements.txt -r requirements/prod_requirements.txt
-            else
-              python3 -m pip install --upgrade pip --break-system-packages
-              python3 -m pip install -r requirements/base_requirements.txt -r requirements/prod_requirements.txt --break-system-packages
-            fi
+          # Ensure venv exists
+          if [ ! -d venv ]; then
+            python3 -m venv venv
           fi
 
-          # Set critical environment variables
+          PYBIN="/opt/rbm-tender-app/venv/bin/python"
+          PIP="/opt/rbm-tender-app/venv/bin/pip"
+          FLASK="/opt/rbm-tender-app/venv/bin/flask"
+
+          $PYBIN -m pip install --upgrade pip
+          $PIP install -r requirements/base_requirements.txt -r requirements/prod_requirements.txt
+
+          echo "Python in use: $($PYBIN -V)"
+          echo "Flask version: $($PYBIN -c "import flask; print(flask.__version__)")"
+
           export FLASK_APP=app_runner.py
           export FLASK_ENV=production
           export FLASK_CONFIG=production
@@ -301,54 +283,21 @@ jobs:
           export DATABASE_URL="${{ secrets.PROD_DATABASE_URL }}"
           export REDIS_URL="${{ secrets.PROD_REDIS_URL }}"
           export SENTRY_DSN="${{ secrets.SENTRY_DSN }}"
-          
-          # Validate environment variables are set
-          if [ -z "$SECRET_KEY" ]; then
-            echo "ERROR: SECRET_KEY is not set"
-            exit 1
-          fi
-          if [ -z "$DATABASE_URL" ]; then
-            echo "ERROR: DATABASE_URL is not set"
-            exit 1
-          fi
-          
-          echo "Environment variables set successfully"
-          
-          # Ensure we're using the virtual environment Python
-          if [ -d venv ]; then
-            . venv/bin/activate
-            echo "Virtual environment activated"
-          fi
-          
-          python -c "from app import create_app; create_app(); print(\"App OK\")"
-          
-          # Initialize Flask-Migrate if migrations directory doesn't exist
-          if [ ! -d migrations ]; then
-            echo "Initializing Flask-Migrate..."
-            python -m flask db init
-          fi
-          
-          # Run database migrations
-          python -m flask db upgrade || echo "Migration failed, continuing..."
 
-          # Stop the service first to avoid conflicts
-          sudo systemctl stop rbm-tender-app || true
-          
-          # Update systemd service file with environment variables
-          sudo sed -i "s|Environment=SECRET_KEY=|Environment=SECRET_KEY=$SECRET_KEY|g" /etc/systemd/system/rbm-tender-app.service
-          sudo sed -i "s|Environment=DATABASE_URL=|Environment=DATABASE_URL=$DATABASE_URL|g" /etc/systemd/system/rbm-tender-app.service
-          sudo sed -i "s|Environment=REDIS_URL=|Environment=REDIS_URL=$REDIS_URL|g" /etc/systemd/system/rbm-tender-app.service
-          sudo sed -i "s|Environment=SENTRY_DSN=|Environment=SENTRY_DSN=$SENTRY_DSN|g" /etc/systemd/system/rbm-tender-app.service
-          
-          # Copy updated service file if it exists in the deployment package
-          if [ -f scripts/deployment/rbm-tender-app.service ]; then
-            sudo cp scripts/deployment/rbm-tender-app.service /etc/systemd/system/
-            # Update the copied file with environment variables
-            sudo sed -i "s|Environment=SECRET_KEY=|Environment=SECRET_KEY=$SECRET_KEY|g" /etc/systemd/system/rbm-tender-app.service
-            sudo sed -i "s|Environment=DATABASE_URL=|Environment=DATABASE_URL=$DATABASE_URL|g" /etc/systemd/system/rbm-tender-app.service
-            sudo sed -i "s|Environment=REDIS_URL=|Environment=REDIS_URL=$REDIS_URL|g" /etc/systemd/system/rbm-tender-app.service
-            sudo sed -i "s|Environment=SENTRY_DSN=|Environment=SENTRY_DSN=$SENTRY_DSN|g" /etc/systemd/system/rbm-tender-app.service
+          [ -z "$SECRET_KEY" ] && echo "ERROR: SECRET_KEY not set" && exit 1
+          [ -z "$DATABASE_URL" ] && echo "ERROR: DATABASE_URL not set" && exit 1
+
+          $PYBIN -c "from app import create_app; create_app(); print('App OK')"
+          $FLASK db upgrade || true
+
+          if [ -f /etc/systemd/system/rbm-tender-app.service ]; then
+            sudo sed -i "s|^ExecStart=.*|ExecStart=/opt/rbm-tender-app/venv/bin/python /opt/rbm-tender-app/app_runner.py|" /etc/systemd/system/rbm-tender-app.service
           fi
+
+          sudo sed -i "s|^Environment=SECRET_KEY=.*|Environment=SECRET_KEY=$SECRET_KEY|g" /etc/systemd/system/rbm-tender-app.service || true
+          sudo sed -i "s|^Environment=DATABASE_URL=.*|Environment=DATABASE_URL=$DATABASE_URL|g" /etc/systemd/system/rbm-tender-app.service || true
+          sudo sed -i "s|^Environment=REDIS_URL=.*|Environment=REDIS_URL=$REDIS_URL|g" /etc/systemd/system/rbm-tender-app.service || true
+          sudo sed -i "s|^Environment=SENTRY_DSN=.*|Environment=SENTRY_DSN=$SENTRY_DSN|g" /etc/systemd/system/rbm-tender-app.service || true
 
           sudo systemctl daemon-reload
           sudo systemctl start rbm-tender-app
@@ -362,13 +311,13 @@ jobs:
         for i in {1..5}; do
           echo "Attempt $i: http://${{ secrets.APP_HOST }}/health"
           if curl -f -s --connect-timeout 10 --max-time 30 http://${{ secrets.APP_HOST }}/health; then
-            echo "✅ Health check passed"; exit 0
+            echo "Health check passed"; exit 0
           fi
-          [ $i -eq 5 ] && echo "❌ Health check failed" && exit 1
+          [ $i -eq 5 ] && echo "Health check failed" && exit 1
           sleep 15
         done
 
     - name: Done
       if: success()
       run: |
-        echo "✅ Deployment successful: http://${{ secrets.APP_HOST }}"
+        echo "Deployment successful: http://${{ secrets.APP_HOST }}"
