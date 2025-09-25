@@ -313,8 +313,19 @@ jobs:
           
           echo "Environment variables set successfully"
           python -c "from app import create_app; create_app(); print(\"App OK\")"
-          python -m flask db upgrade || true
+          
+          # Initialize Flask-Migrate if migrations directory doesn't exist
+          if [ ! -d migrations ]; then
+            echo "Initializing Flask-Migrate..."
+            python -m flask db init
+          fi
+          
+          # Run database migrations
+          python -m flask db upgrade || echo "Migration failed, continuing..."
 
+          # Stop the service first to avoid conflicts
+          sudo systemctl stop rbm-tender-app || true
+          
           # Update systemd service file with environment variables
           sudo sed -i "s|Environment=SECRET_KEY=|Environment=SECRET_KEY=$SECRET_KEY|g" /etc/systemd/system/rbm-tender-app.service
           sudo sed -i "s|Environment=DATABASE_URL=|Environment=DATABASE_URL=$DATABASE_URL|g" /etc/systemd/system/rbm-tender-app.service
@@ -324,6 +335,11 @@ jobs:
           # Copy updated service file if it exists in the deployment package
           if [ -f scripts/deployment/rbm-tender-app.service ]; then
             sudo cp scripts/deployment/rbm-tender-app.service /etc/systemd/system/
+            # Update the copied file with environment variables
+            sudo sed -i "s|Environment=SECRET_KEY=|Environment=SECRET_KEY=$SECRET_KEY|g" /etc/systemd/system/rbm-tender-app.service
+            sudo sed -i "s|Environment=DATABASE_URL=|Environment=DATABASE_URL=$DATABASE_URL|g" /etc/systemd/system/rbm-tender-app.service
+            sudo sed -i "s|Environment=REDIS_URL=|Environment=REDIS_URL=$REDIS_URL|g" /etc/systemd/system/rbm-tender-app.service
+            sudo sed -i "s|Environment=SENTRY_DSN=|Environment=SENTRY_DSN=$SENTRY_DSN|g" /etc/systemd/system/rbm-tender-app.service
           fi
 
           sudo systemctl daemon-reload
