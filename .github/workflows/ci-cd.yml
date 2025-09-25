@@ -64,15 +64,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -92,60 +83,14 @@ jobs:
         pip install -r requirements/base_requirements.txt
         pip install -r requirements/test_requirements.txt
 
-    - name: Set up test environment
+    - name: Run tests with SQLite
+      env:
+        FLASK_ENV: testing
+        DATABASE_URL: sqlite:///test.db
+        SECRET_KEY: ${{ secrets.TEST_SECRET_KEY }}
       run: |
-        export FLASK_CONFIG=testing
-        export TEST_DATABASE_URL=postgresql://postgres:${{ secrets.TEST_DB_PASSWORD }}@localhost:5432/${{ secrets.TEST_DB_NAME }}
-        export DATABASE_URL=postgresql://postgres:${{ secrets.TEST_DB_PASSWORD }}@localhost:5432/${{ secrets.TEST_DB_NAME }}
-        export REDIS_URL=redis://localhost:6379/0
-        export TEST_SECRET_KEY=${{ secrets.TEST_SECRET_KEY }}
-        export SECRET_KEY=${{ secrets.TEST_SECRET_KEY }}
-        export SENTRY_DSN=""
-        echo "Test environment configured"
-
-    - name: Wait for PostgreSQL
-      run: |
-        echo "Waiting for PostgreSQL to be ready..."
-        timeout 60 bash -c 'until pg_isready -h localhost -p 5432 -U postgres; do sleep 2; done'
-        echo "PostgreSQL is ready!"
-
-    - name: Run database migrations
-      run: |
-        export FLASK_CONFIG=testing
-        export TEST_DATABASE_URL=postgresql://postgres:${{ secrets.TEST_DB_PASSWORD }}@localhost:5432/${{ secrets.TEST_DB_NAME }}
-        export DATABASE_URL=postgresql://postgres:${{ secrets.TEST_DB_PASSWORD }}@localhost:5432/${{ secrets.TEST_DB_NAME }}
-        export REDIS_URL=redis://localhost:6379/0
-        export TEST_SECRET_KEY=${{ secrets.TEST_SECRET_KEY }}
-        export SECRET_KEY=${{ secrets.TEST_SECRET_KEY }}
-        export SENTRY_DSN=""
-        # Skip migrations for testing - create database tables directly
-        echo "Setting up test database schema..."
-        timeout 30 python -c "
-        import sys
-        from app import create_app, db
-        try:
-            app = create_app()
-            with app.app_context():
-                # Drop all tables first to ensure clean state
-                db.drop_all()
-                db.create_all()
-                print('Database tables created successfully')
-        except Exception as e:
-            print(f'Database setup failed: {e}')
-            sys.exit(1)
-        "
-
-    - name: Run unit tests
-      run: |
-        export FLASK_CONFIG=testing
-        export TEST_DATABASE_URL=postgresql://postgres:${{ secrets.TEST_DB_PASSWORD }}@localhost:5432/${{ secrets.TEST_DB_NAME }}
-        export DATABASE_URL=postgresql://postgres:${{ secrets.TEST_DB_PASSWORD }}@localhost:5432/${{ secrets.TEST_DB_NAME }}
-        export REDIS_URL=redis://localhost:6379/0
-        export TEST_SECRET_KEY=${{ secrets.TEST_SECRET_KEY }}
-        export SECRET_KEY=${{ secrets.TEST_SECRET_KEY }}
-        export SENTRY_DSN=""
-        # Run unit tests (database cleanup handled by conftest.py)
-        timeout 900 python -m pytest tests/unit/ -v --tb=short || echo "Unit tests completed with some failures"
+        # Run tests with SQLite (no Docker required)
+        python -m pytest tests/ -v --tb=short --maxfail=5
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
