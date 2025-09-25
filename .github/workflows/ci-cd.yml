@@ -287,7 +287,11 @@ jobs:
           [ -z "$SECRET_KEY" ] && echo "ERROR: SECRET_KEY not set" && exit 1
           [ -z "$DATABASE_URL" ] && echo "ERROR: DATABASE_URL not set" && exit 1
 
-          $PYBIN -c 'from app import create_app; create_app(); print("App OK")'
+          $PYBIN << 'EOF'
+          from app import create_app
+          app = create_app()
+          print("App OK")
+          EOF
           $FLASK db upgrade || true
 
           if [ -f /etc/systemd/system/rbm-tender-app.service ]; then
