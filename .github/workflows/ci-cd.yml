@@ -139,14 +139,14 @@ jobs:
 
     - name: Init test DB schema (drop/create all)
       run: |
-        python - <<'PY'
+        python -c "
         from app import create_app, db
-            app = create_app()
-            with app.app_context():
-                db.drop_all()
-                db.create_all()
-            print("Test database tables created")
-        PY
+        app = create_app()
+        with app.app_context():
+            db.drop_all()
+            db.create_all()
+            print('Test database tables created')
+        "
 
     - name: Run unit tests with coverage + JUnit
       run: |
