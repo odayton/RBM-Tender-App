@@ -312,16 +312,23 @@ jobs:
           fi
           
           echo "Environment variables set successfully"
-          ./venv/bin/python -c "from app import create_app; create_app(); print(\"App OK\")"
+          
+          # Ensure we're using the virtual environment Python
+          if [ -d venv ]; then
+            . venv/bin/activate
+            echo "Virtual environment activated"
+          fi
+          
+          python -c "from app import create_app; create_app(); print(\"App OK\")"
           
           # Initialize Flask-Migrate if migrations directory doesn't exist
           if [ ! -d migrations ]; then
             echo "Initializing Flask-Migrate..."
-            ./venv/bin/python -m flask db init
+            python -m flask db init
           fi
           
           # Run database migrations
-          ./venv/bin/python -m flask db upgrade || echo "Migration failed, continuing..."
+          python -m flask db upgrade || echo "Migration failed, continuing..."
 
           # Stop the service first to avoid conflicts
           sudo systemctl stop rbm-tender-app || true
