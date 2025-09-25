@@ -204,6 +204,7 @@ jobs:
         # Set critical environment variables
         export FLASK_APP=app_runner.py
         export FLASK_ENV=production
+        export FLASK_CONFIG=production
         
         # Check if environment variables are set
         if [ -z "$SECRET_KEY" ]; then
@@ -294,6 +295,7 @@ jobs:
           # Set critical environment variables
           export FLASK_APP=app_runner.py
           export FLASK_ENV=production
+          export FLASK_CONFIG=production
           export SECRET_KEY="${{ secrets.PROD_SECRET_KEY }}"
           export DATABASE_URL="${{ secrets.PROD_DATABASE_URL }}"
           export REDIS_URL="${{ secrets.PROD_REDIS_URL }}"
