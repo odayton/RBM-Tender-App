@@ -141,8 +141,7 @@ jobs:
 
     - name: Init test DB schema (drop/create all)
       run: |
-        source test-env/bin/activate
-        python -c "
+        source test-env/bin/activate && python -c "
         from app import create_app, db
         app = create_app()
         with app.app_context():
@@ -153,9 +152,7 @@ jobs:
 
     - name: Run unit tests with coverage + JUnit
       run: |
-        source test-env/bin/activate
-        mkdir -p test-results coverage-report
-        python -m pytest tests/unit/ -v --tb=short \
+        source test-env/bin/activate && mkdir -p test-results coverage-report && python -m pytest tests/unit/ -v --tb=short \
           --junitxml=test-results/junit.xml \
           --cov=app --cov-report=xml:coverage-report/coverage.xml --cov-report=term
 
