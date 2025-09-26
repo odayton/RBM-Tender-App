@@ -274,6 +274,8 @@ jobs:
         echo "Preparing directories..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
           sudo mkdir -p /opt/rbm-tender-app /tmp/rbm-tender-app
+          sudo chown -R ${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} /tmp/rbm-tender-app
+          sudo chmod -R 755 /tmp/rbm-tender-app
         "
 
         echo "Uploading package..."
