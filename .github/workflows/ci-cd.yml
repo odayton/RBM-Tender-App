@@ -257,7 +257,19 @@ jobs:
         
         # Test SSH connection with verbose output
         echo "Testing SSH connection..."
-        ssh -vvv -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH OK'"
+        if ssh -vvv -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH OK'"; then
+          echo "SSH connection successful"
+        else
+          echo "SSH connection failed - trying Systems Manager fallback..."
+          # Try to restart SSH service via Systems Manager
+          aws ssm send-command \
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["sudo systemctl restart ssh", "sudo systemctl status ssh"]' \
+            --output text --query 'Command.CommandId'
+          echo "SSH service restart command sent via Systems Manager"
+          exit 1
+        fi
 
         echo "Preparing directories..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
@@ -328,10 +340,16 @@ jobs:
 
           # Environment variables are now loaded from .env file, no need to modify service file
 
+          # Ensure SSH service remains enabled
+          sudo systemctl enable ssh || true
+          
           sudo systemctl daemon-reload
           sudo systemctl reload-or-restart rbm-tender-app
           sleep 10
           sudo systemctl status rbm-tender-app --no-pager || true
+          
+          # Verify SSH service is still working
+          sudo systemctl is-enabled ssh || echo "WARNING: SSH service is not enabled"
           curl -f http://localhost:5000/health
         '
 
