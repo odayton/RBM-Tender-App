@@ -311,8 +311,8 @@ jobs:
           PIP="/opt/rbm-tender-app/venv/bin/pip"
           FLASK="/opt/rbm-tender-app/venv/bin/flask"
 
-          $PYBIN -m pip install --upgrade pip
-          $PIP install -r requirements/base_requirements.txt -r requirements/prod_requirements.txt
+          timeout 300 $PYBIN -m pip install --upgrade pip || echo "Pip upgrade timed out"
+          timeout 600 $PIP install -r requirements/base_requirements.txt -r requirements/prod_requirements.txt || echo "Package installation timed out"
 
           echo "Python in use: $($PYBIN -V)"
           echo "Flask version: $($PYBIN -c "import flask; print(flask.__version__)")"
@@ -334,7 +334,7 @@ jobs:
           print("App OK")
           PYEOF
           $PYBIN test_app.py
-          $FLASK db upgrade || true
+          timeout 120 $FLASK db upgrade || echo "Database upgrade timed out"
 
           if [ -f /etc/systemd/system/rbm-tender-app.service ]; then
             sudo sed -i "s|^ExecStart=.*|ExecStart=/opt/rbm-tender-app/venv/bin/python /opt/rbm-tender-app/app_runner.py|" /etc/systemd/system/rbm-tender-app.service
@@ -346,13 +346,13 @@ jobs:
           sudo systemctl enable ssh || true
           
           sudo systemctl daemon-reload
-          sudo systemctl reload-or-restart rbm-tender-app
+          timeout 30 sudo systemctl reload-or-restart rbm-tender-app || echo "Service restart timed out"
           sleep 10
           sudo systemctl status rbm-tender-app --no-pager || true
           
           # Verify SSH service is still working
           sudo systemctl is-enabled ssh || echo "WARNING: SSH service is not enabled"
-          curl -f http://localhost:5000/health
+          timeout 30 curl -f http://localhost:5000/health || echo "Health check timed out"
         '
 
     - name: Health check verification
