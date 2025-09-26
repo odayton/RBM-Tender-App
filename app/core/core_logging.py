@@ -28,14 +28,22 @@ class CoreLogger:
     def __init__(self):
         self.app: Optional[Flask] = None
         self.loggers: Dict[str, logging.Logger] = {}
+        self.handlers: Dict[str, logging.Handler] = {}
         self.default_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        self._initialized = False
 
     def init_app(self, app: Flask) -> None:
         """Initialize and configure logging for the Flask application."""
+        if self._initialized:
+            return  # Prevent double initialization
+            
         self.app = app
         log_dir = Path(app.config.get('LOG_DIR', 'instance/logs'))
         
         log_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Clear existing handlers to prevent file descriptor leaks
+        self._cleanup_existing_handlers()
         
         logging_config = self._get_logging_config(log_dir)
         logging.config.dictConfig(logging_config)
@@ -44,7 +52,26 @@ class CoreLogger:
             self.loggers[logger_name] = logging.getLogger(logger_name)
         
         self._setup_request_logging()
+        self._initialized = True
         self.app_logger.info("CoreLogger initialized successfully.")
+
+    def _cleanup_existing_handlers(self):
+        """Clean up existing handlers to prevent file descriptor leaks."""
+        # Close all existing handlers
+        for logger_name in list(self.loggers.keys()):
+            logger = logging.getLogger(logger_name)
+            for handler in logger.handlers[:]:
+                handler.close()
+                logger.removeHandler(handler)
+        
+        # Clear root logger handlers
+        root_logger = logging.getLogger()
+        for handler in root_logger.handlers[:]:
+            handler.close()
+            root_logger.removeHandler(handler)
+        
+        # Clear our handler cache
+        self.handlers.clear()
 
     def _get_logging_config(self, log_dir: Path) -> Dict[str, Any]:
         """Constructs the dictionary for logging.config.dictConfig."""
@@ -71,25 +98,28 @@ class CoreLogger:
                 'app_file': {
                     'class': 'logging.handlers.RotatingFileHandler',
                     'formatter': 'detailed',
-                    'filename': log_dir / 'app.log',
-                    'maxBytes': 10 * 1024 * 1024,
-                    'backupCount': 10
+                    'filename': str(log_dir / 'app.log'),
+                    'maxBytes': 5 * 1024 * 1024,  # Reduced from 10MB to 5MB
+                    'backupCount': 5,  # Reduced from 10 to 5
+                    'delay': True  # Delay file opening to prevent immediate file creation
                 },
                 'error_file': {
                     'class': 'logging.handlers.RotatingFileHandler',
                     'formatter': 'detailed',
-                    'filename': log_dir / 'errors.log',
-                    'maxBytes': 10 * 1024 * 1024,
-                    'backupCount': 10,
-                    'level': 'ERROR'
+                    'filename': str(log_dir / 'errors.log'),
+                    'maxBytes': 5 * 1024 * 1024,  # Reduced from 10MB to 5MB
+                    'backupCount': 5,  # Reduced from 10 to 5
+                    'level': 'ERROR',
+                    'delay': True  # Delay file opening to prevent immediate file creation
                 },
                  'request_file': {
                     'class': 'logging.handlers.TimedRotatingFileHandler',
                     'formatter': 'request',
-                    'filename': log_dir / 'requests.log',
+                    'filename': str(log_dir / 'requests.log'),
                     'when': 'midnight',
                     'interval': 1,
-                    'backupCount': 30
+                    'backupCount': 7,  # Reduced from 30 to 7 days
+                    'delay': True  # Delay file opening to prevent immediate file creation
                 }
             },
             'loggers': {
@@ -150,5 +180,33 @@ class CoreLogger:
     @property
     def request_logger(self) -> logging.Logger:
         return self.loggers.get('request', logging.getLogger('request'))
+    
+    def cleanup(self):
+        """Clean up logging resources to prevent file descriptor leaks."""
+        if not self._initialized:
+            return
+            
+        # Close all handlers
+        for logger_name, logger in self.loggers.items():
+            for handler in logger.handlers[:]:
+                try:
+                    handler.close()
+                except Exception:
+                    pass  # Ignore errors during cleanup
+                logger.removeHandler(handler)
+        
+        # Clear root logger handlers
+        root_logger = logging.getLogger()
+        for handler in root_logger.handlers[:]:
+            try:
+                handler.close()
+            except Exception:
+                pass  # Ignore errors during cleanup
+            root_logger.removeHandler(handler)
+        
+        # Clear our caches
+        self.handlers.clear()
+        self.loggers.clear()
+        self._initialized = False
 
 logger = CoreLogger()

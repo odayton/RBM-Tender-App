@@ -220,14 +220,45 @@ class MetricsCollector:
                     WHERE state = 'active'
                 """)).fetchone()
                 
-                # Query performance stats
-                query_stats = conn.execute(text("""
-                    SELECT 
-                        count(*) as query_count,
-                        count(*) FILTER (WHERE mean_exec_time > 1000) as slow_query_count,
-                        avg(mean_exec_time) as avg_query_time_ms
-                    FROM pg_stat_statements
-                """)).fetchone()
+                # Query performance stats - check if pg_stat_statements extension exists
+                query_stats = None
+                try:
+                    # First check if the extension is installed
+                    extension_check = conn.execute(text("""
+                        SELECT EXISTS(
+                            SELECT 1 FROM pg_extension WHERE extname = 'pg_stat_statements'
+                        )
+                    """)).fetchone()
+                    
+                    if extension_check and extension_check[0]:
+                        query_stats = conn.execute(text("""
+                            SELECT 
+                                count(*) as query_count,
+                                count(*) FILTER (WHERE mean_exec_time > 1000) as slow_query_count,
+                                avg(mean_exec_time) as avg_query_time_ms
+                            FROM pg_stat_statements
+                        """)).fetchone()
+                    else:
+                        # Extension not installed, use alternative query
+                        query_stats = conn.execute(text("""
+                            SELECT 
+                                count(*) as query_count,
+                                0 as slow_query_count,
+                                0.0 as avg_query_time_ms
+                            FROM pg_stat_activity 
+                            WHERE state = 'active'
+                        """)).fetchone()
+                except Exception as ext_error:
+                    # Fallback if pg_stat_statements query fails
+                    logger.debug("pg_stat_statements not available, using fallback", error=str(ext_error))
+                    query_stats = conn.execute(text("""
+                        SELECT 
+                            count(*) as query_count,
+                            0 as slow_query_count,
+                            0.0 as avg_query_time_ms
+                        FROM pg_stat_activity 
+                        WHERE state = 'active'
+                    """)).fetchone()
                 
                 # Cache hit ratio
                 cache_stats = conn.execute(text("""
@@ -271,9 +302,12 @@ class MetricsCollector:
                 )
                 
         except Exception as e:
-            # Don't spam logs with connection errors
-            if "too many clients" not in str(e).lower():
+            # Don't spam logs with connection errors or missing extension errors
+            error_str = str(e).lower()
+            if "too many clients" not in error_str and "pg_stat_statements" not in error_str:
                 logger.error("Failed to collect database metrics", error=str(e))
+            elif "pg_stat_statements" in error_str:
+                logger.debug("pg_stat_statements extension not available", error=str(e))
             return DatabaseMetrics(
                 timestamp=datetime.utcnow(),
                 active_connections=0,
