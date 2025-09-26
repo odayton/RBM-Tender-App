@@ -314,10 +314,7 @@ jobs:
             sudo sed -i "s|^ExecStart=.*|ExecStart=/opt/rbm-tender-app/venv/bin/python /opt/rbm-tender-app/app_runner.py|" /etc/systemd/system/rbm-tender-app.service
           fi
 
-          sudo sed -i "s|^Environment=SECRET_KEY=.*|Environment=SECRET_KEY=$SECRET_KEY|g" /etc/systemd/system/rbm-tender-app.service || true
-          sudo sed -i "s|^Environment=DATABASE_URL=.*|Environment=DATABASE_URL=$DATABASE_URL|g" /etc/systemd/system/rbm-tender-app.service || true
-          sudo sed -i "s|^Environment=REDIS_URL=.*|Environment=REDIS_URL=$REDIS_URL|g" /etc/systemd/system/rbm-tender-app.service || true
-          sudo sed -i "s|^Environment=SENTRY_DSN=.*|Environment=SENTRY_DSN=$SENTRY_DSN|g" /etc/systemd/system/rbm-tender-app.service || true
+          # Environment variables are now loaded from .env file, no need to modify service file
 
           sudo systemctl daemon-reload
           sudo systemctl start rbm-tender-app
