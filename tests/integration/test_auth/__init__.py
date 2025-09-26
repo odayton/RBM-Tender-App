@@ -1,4 +1,0 @@
-"""
-Authentication integration tests package
-"""
-

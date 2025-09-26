@@ -246,8 +246,9 @@ jobs:
         echo "Testing SSH..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH OK'"
 
-        echo "Preparing directories..."
+        echo "Stopping service & preparing dirs..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          sudo systemctl stop rbm-tender-app || true
           sudo mkdir -p /opt/rbm-tender-app /tmp/rbm-tender-app
         "
 
@@ -316,7 +317,7 @@ jobs:
           # Environment variables are now loaded from .env file, no need to modify service file
 
           sudo systemctl daemon-reload
-          sudo systemctl reload-or-restart rbm-tender-app
+          sudo systemctl start rbm-tender-app
           sleep 10
           sudo systemctl status rbm-tender-app --no-pager || true
           curl -f http://localhost:5000/health
