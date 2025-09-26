@@ -243,12 +243,24 @@ jobs:
         set -euo pipefail
         tar -xzf rbm-tender-app-*.tar.gz
 
-        echo "Testing SSH..."
-        ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH OK'"
+        echo "Testing SSH connectivity..."
+        echo "SSH Host: ${{ secrets.SSH_HOST }}"
+        echo "SSH User: ${{ secrets.SSH_USER }}"
+        
+        # Test basic connectivity
+        echo "Testing ping..."
+        ping -c 3 ${{ secrets.SSH_HOST }} || echo "Ping failed"
+        
+        # Test SSH port
+        echo "Testing SSH port 22..."
+        nc -zv ${{ secrets.SSH_HOST }} 22 || echo "Port 22 not accessible"
+        
+        # Test SSH connection with verbose output
+        echo "Testing SSH connection..."
+        ssh -vvv -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH OK'"
 
-        echo "Stopping service & preparing dirs..."
+        echo "Preparing directories..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-          sudo systemctl stop rbm-tender-app || true
           sudo mkdir -p /opt/rbm-tender-app /tmp/rbm-tender-app
         "
 
@@ -317,7 +329,7 @@ jobs:
           # Environment variables are now loaded from .env file, no need to modify service file
 
           sudo systemctl daemon-reload
-          sudo systemctl start rbm-tender-app
+          sudo systemctl reload-or-restart rbm-tender-app
           sleep 10
           sudo systemctl status rbm-tender-app --no-pager || true
           curl -f http://localhost:5000/health
