@@ -99,16 +99,16 @@ class CoreLogger:
                     'class': 'logging.handlers.RotatingFileHandler',
                     'formatter': 'detailed',
                     'filename': str(log_dir / 'app.log'),
-                    'maxBytes': 5 * 1024 * 1024,  # Reduced from 10MB to 5MB
-                    'backupCount': 5,  # Reduced from 10 to 5
+                    'maxBytes': 1 * 1024 * 1024,  # Reduced to 1MB
+                    'backupCount': 3,  # Reduced to 3 backups
                     'delay': True  # Delay file opening to prevent immediate file creation
                 },
                 'error_file': {
                     'class': 'logging.handlers.RotatingFileHandler',
                     'formatter': 'detailed',
                     'filename': str(log_dir / 'errors.log'),
-                    'maxBytes': 5 * 1024 * 1024,  # Reduced from 10MB to 5MB
-                    'backupCount': 5,  # Reduced from 10 to 5
+                    'maxBytes': 1 * 1024 * 1024,  # Reduced to 1MB
+                    'backupCount': 3,  # Reduced to 3 backups
                     'level': 'ERROR',
                     'delay': True  # Delay file opening to prevent immediate file creation
                 },

@@ -64,11 +64,16 @@ logs/
 # Backup files
 *.bak
 *.backup
+backups/
+backup_*/
 
 # Configuration files with secrets
 config/secrets.yml
 config/production.yml
 config/staging.yml
+config/.env.development
+config/.env.production
+config/.env.staging
 
 # Test files that might contain sensitive data
 tests/fixtures/
@@ -81,3 +86,15 @@ scripts/deployment/staging/
 # Documentation that might contain sensitive info
 docs/deployment/secrets/
 docs/config/secrets/
+
+# Data files (may contain sensitive business data)
+data/
+*.xlsx
+*.csv
+
+# Instance data (runtime files)
+instance/
+app/instance/
+
+# SSH and deployment files
+SSH_TROUBLESHOOTING.md

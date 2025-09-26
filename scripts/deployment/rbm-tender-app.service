@@ -1,0 +1,33 @@
+[Unit]
+Description=RBM Tender App
+After=network.target postgresql.service redis.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/rbm-tender-app
+Environment=PATH=/opt/rbm-tender-app/venv/bin:/home/ubuntu/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=FLASK_ENV=production
+Environment=FLASK_APP=scripts/production/start_production.py
+# Critical environment variables - these must be set by the deployment process
+Environment=SECRET_KEY=
+Environment=DATABASE_URL=
+Environment=REDIS_URL=
+Environment=SENTRY_DSN=
+ExecStart=/opt/rbm-tender-app/venv/bin/python /opt/rbm-tender-app/scripts/production/start_production.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rbm-tender-app
+
+# Resource limits to prevent system instability
+MemoryLimit=1G
+CPUQuota=80%
+LimitNOFILE=1024
+LimitNPROC=256
+
+[Install]
+WantedBy=multi-user.target
+
+

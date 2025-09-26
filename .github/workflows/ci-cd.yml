@@ -242,6 +242,9 @@ jobs:
       run: |
         set -euo pipefail
         tar -xzf rbm-tender-app-*.tar.gz
+        
+        # Configure AWS region
+        export AWS_DEFAULT_REGION=us-east-1
 
         echo "Testing SSH connectivity..."
         echo "SSH Host: ${{ secrets.SSH_HOST }}"
@@ -262,13 +265,29 @@ jobs:
         else
           echo "SSH connection failed - trying Systems Manager fallback..."
           # Try to restart SSH service via Systems Manager
-          aws ssm send-command \
+          echo "Attempting to restart SSH service via Systems Manager..."
+          COMMAND_ID=$(aws ssm send-command \
             --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
             --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["sudo systemctl restart ssh", "sudo systemctl status ssh"]' \
-            --output text --query 'Command.CommandId'
-          echo "SSH service restart command sent via Systems Manager"
-          exit 1
+            --parameters 'commands=["sudo systemctl restart ssh", "sudo systemctl enable ssh", "sudo systemctl status ssh --no-pager"]' \
+            --output text --query 'Command.CommandId' 2>/dev/null || echo "FAILED")
+          
+          if [ "$COMMAND_ID" != "FAILED" ]; then
+            echo "SSH service restart command sent via Systems Manager (ID: $COMMAND_ID)"
+            echo "Waiting 30 seconds for SSH service to restart..."
+            sleep 30
+            
+            echo "Testing SSH connection again..."
+            if ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH OK after restart'"; then
+              echo "SSH connection successful after restart"
+            else
+              echo "SSH still not working - instance may need restart"
+              exit 1
+            fi
+          else
+            echo "Systems Manager command failed - instance may be unresponsive"
+            exit 1
+          fi
         fi
 
         echo "Preparing directories..."
@@ -284,6 +303,17 @@ jobs:
         echo "Installing on server..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
           set -euo pipefail
+          
+          # Create smart backup before deployment
+          echo "Creating smart backup..."
+          if [ -f /opt/rbm-tender-app/scripts/deployment/smart_backup.py ]; then
+            sudo python3 /opt/rbm-tender-app/scripts/deployment/smart_backup.py --app-path /opt/rbm-tender-app --backup-dir /opt --max-backups 3
+          else
+            echo "Smart backup script not found, creating manual backup..."
+            TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+            sudo cp -r /opt/rbm-tender-app /opt/rbm-tender-app.backup.$TIMESTAMP
+            echo "Manual backup created: /opt/rbm-tender-app.backup.$TIMESTAMP"
+          fi
           
           # Backup existing .env file if it exists
           if [ -f /opt/rbm-tender-app/config/.env ]; then
@@ -342,6 +372,12 @@ jobs:
 
           # Environment variables are now loaded from .env file, no need to modify service file
 
+          # Clean up disk space to prevent SSH issues
+          echo "Cleaning up disk space..."
+          sudo journalctl --vacuum-time=7d || true
+          sudo apt clean || true
+          sudo find /var/log -name "*.log" -type f -size +50M -exec truncate -s 0 {} \; || true
+          
           # Ensure SSH service remains enabled
           sudo systemctl enable ssh || true
           

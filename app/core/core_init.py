@@ -153,6 +153,10 @@ class CoreInitializer:
 
     def init_advanced_monitoring(self):
         """Initialize advanced monitoring system."""
+        # Temporarily disable advanced monitoring to prevent resource issues
+        core_logger.app_logger.info("Advanced Monitoring Disabled to prevent SSH instability.")
+        return
+        
         # Check if advanced monitoring is enabled
         if not self.app.config.get('ENABLE_ADVANCED_MONITORING', True):
             core_logger.app_logger.info("Advanced Monitoring Disabled via configuration.")

@@ -149,7 +149,87 @@ def status():
     click.echo("📋 Or check database directly:")
     click.echo("  py -c \"import psycopg2; conn = psycopg2.connect('postgresql://postgres:YOUR_PASSWORD@localhost:5432/rbm_tender_app'); cur = conn.cursor(); cur.execute('SELECT version()'); print('PostgreSQL:', cur.fetchone()[0]); conn.close()\"")
 
+@click.group()
+def smart_backup():
+    """Smart backup commands for full application backups."""
+    pass
+
+@smart_backup.command()
+@click.option('--force', '-f', is_flag=True, help='Force backup creation even if no changes detected')
+@click.option('--max-backups', '-k', default=3, help='Maximum number of backups to keep')
+@with_appcontext
+def create(force, max_backups):
+    """Create a smart backup of the entire application."""
+    import subprocess
+    import sys
+    
+    # Run the smart backup script
+    script_path = Path(__file__).parent.parent.parent / 'scripts' / 'deployment' / 'smart_backup.py'
+    
+    if not script_path.exists():
+        click.echo("❌ Smart backup script not found!")
+        click.echo(f"Expected location: {script_path}")
+        raise click.Abort()
+    
+    cmd = [sys.executable, str(script_path)]
+    if force:
+        cmd.append('--force')
+    cmd.extend(['--max-backups', str(max_backups)])
+    
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        click.echo(result.stdout)
+    except subprocess.CalledProcessError as e:
+        click.echo(f"❌ Smart backup failed: {e}")
+        click.echo(e.stderr)
+        raise click.Abort()
+
+@smart_backup.command()
+@with_appcontext
+def list():
+    """List all smart backups."""
+    import subprocess
+    import sys
+    
+    script_path = Path(__file__).parent.parent.parent / 'scripts' / 'deployment' / 'smart_backup.py'
+    
+    if not script_path.exists():
+        click.echo("❌ Smart backup script not found!")
+        raise click.Abort()
+    
+    try:
+        result = subprocess.run([sys.executable, str(script_path), '--list'], 
+                              capture_output=True, text=True, check=True)
+        click.echo(result.stdout)
+    except subprocess.CalledProcessError as e:
+        click.echo(f"❌ Failed to list backups: {e}")
+        click.echo(e.stderr)
+        raise click.Abort()
+
+@smart_backup.command()
+@with_appcontext
+def cleanup():
+    """Clean up old smart backups."""
+    import subprocess
+    import sys
+    
+    script_path = Path(__file__).parent.parent.parent / 'scripts' / 'deployment' / 'smart_backup.py'
+    
+    if not script_path.exists():
+        click.echo("❌ Smart backup script not found!")
+        raise click.Abort()
+    
+    try:
+        result = subprocess.run([sys.executable, str(script_path), '--cleanup'], 
+                              capture_output=True, text=True, check=True)
+        click.echo(result.stdout)
+    except subprocess.CalledProcessError as e:
+        click.echo(f"❌ Failed to cleanup backups: {e}")
+        click.echo(e.stderr)
+        raise click.Abort()
+
 def register_backup_commands(app):
     """Register backup commands with the Flask app."""
     app.cli.add_command(backup)
-    app.cli.add_command(sync) 
+    app.cli.add_command(sync)
+    app.cli.add_command(smart_backup) 
