@@ -258,7 +258,22 @@ jobs:
         echo "Installing on server..."
         ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
           set -euo pipefail
+          
+          # Backup existing .env file if it exists
+          if [ -f /opt/rbm-tender-app/config/.env ]; then
+            echo "Backing up existing .env file..."
+            sudo cp /opt/rbm-tender-app/config/.env /tmp/rbm-tender-app.env.backup
+          fi
+          
           sudo rsync -a --delete /tmp/rbm-tender-app/ /opt/rbm-tender-app/
+          
+          # Restore .env file if backup exists
+          if [ -f /tmp/rbm-tender-app.env.backup ]; then
+            echo "Restoring .env file..."
+            sudo mv /tmp/rbm-tender-app.env.backup /opt/rbm-tender-app/config/.env
+            sudo chown ubuntu:ubuntu /opt/rbm-tender-app/config/.env
+            sudo chmod 600 /opt/rbm-tender-app/config/.env
+          fi
           cd /opt/rbm-tender-app
 
           # Ensure venv exists
