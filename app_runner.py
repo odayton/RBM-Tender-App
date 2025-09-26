@@ -2,6 +2,9 @@ import os
 import sys
 import tempfile
 import atexit
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv('config/.env')
 from app import create_app
 from app.core.core_config import config_dict
 
