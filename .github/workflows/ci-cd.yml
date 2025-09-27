@@ -343,8 +343,11 @@ jobs:
           PIP="/opt/rbm-tender-app/venv/bin/pip"
           FLASK="/opt/rbm-tender-app/venv/bin/flask"
 
-          timeout 300 $PYBIN -m pip install --upgrade pip || echo "Pip upgrade timed out"
-          timeout 600 $PIP install -r requirements/base_requirements.txt -r requirements/prod_requirements.txt || echo "Package installation timed out"
+          echo "Upgrading pip (timeout: 15 minutes)..."
+          timeout 900 $PYBIN -m pip install --upgrade pip --verbose || echo "Pip upgrade timed out"
+          
+          echo "Installing Python packages (timeout: 20 minutes)..."
+          timeout 1200 $PIP install -r requirements/base_requirements.txt -r requirements/prod_requirements.txt --verbose --no-cache-dir || echo "Package installation timed out"
 
           echo "Python in use: $($PYBIN -V)"
           echo "Flask version: $($PYBIN -c "import flask; print(flask.__version__)")"
