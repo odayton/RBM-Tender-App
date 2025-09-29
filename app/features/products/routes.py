@@ -10,6 +10,7 @@ from sqlalchemy import or_, and_, func
 from decimal import Decimal
 import csv
 import io
+import os
 from datetime import datetime
 
 from app.models.products.product_model import Product
@@ -603,6 +604,41 @@ def import_products():
             flash('An error occurred while importing products.', 'error')
     
     return render_template('products/import.html', form=form)
+
+@products_bp.route('/download-sample-csv')
+@login_required
+def download_sample_csv():
+    """Download sample CSV template."""
+    try:
+        # Try to read the sample CSV from the new location first
+        sample_path = os.path.join(current_app.root_path, 'static', 'samples', 'products.csv')
+        
+        if os.path.exists(sample_path):
+            with open(sample_path, 'r', encoding='utf-8') as f:
+                csv_content = f.read()
+        else:
+            # Fallback to old location
+            sample_path = os.path.join(current_app.root_path, '..', 'data', 'products.csv')
+            if os.path.exists(sample_path):
+                with open(sample_path, 'r', encoding='utf-8') as f:
+                    csv_content = f.read()
+            else:
+                # Create a default sample if file doesn't exist
+                csv_content = "Category,SubCategory,Series,Item No,Description,Pack,Carton Qty,List price,Nett,Disc Code,Note,weight_kg,dimensions,lead_time_days,is_active\n"
+        
+        from flask import Response
+        return Response(
+            csv_content,
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': 'attachment; filename=products_sample.csv'
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error downloading sample CSV: {e}")
+        flash('Error downloading sample CSV.', 'error')
+        return redirect(url_for('products.import_products'))
 
 @products_bp.route('/export')
 @login_required
