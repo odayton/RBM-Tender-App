@@ -4,6 +4,18 @@
 
 {% block page_content %}
 <div class="container-fluid">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -37,7 +49,7 @@
                             <h6><i class="fas fa-info-circle"></i> Updated CSV Format Required</h6>
                             <p class="mb-2">Your CSV must include these columns (in this order):</p>
                             <div class="bg-light p-3 rounded">
-                                <code class="d-block">
+                                <code class="d-block text-break">
                                     Category, SubCategory, Series, Item No, Description, Pack, Carton Qty, List price, Nett, Disc Code, Note, weight_kg, dimensions, lead_time_days, is_active
                                 </code>
                             </div>
@@ -76,12 +88,12 @@
                         <div class="d-flex justify-content-between">
                             <div>
                                 <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times"></我> Cancel
+                                    <i class="fas fa-times"></i> Cancel
                                 </a>
                             </div>
                             <div>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-upload"></我> Import Products
+                                    <i class="fas fa-upload"></i> Import Products
                                 </button>
                                 <a href="{{ url_for('products.download_sample_csv') }}" 
                                    class="btn btn-outline-info ms-2">
