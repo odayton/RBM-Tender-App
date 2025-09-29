@@ -454,12 +454,26 @@ def import_products():
             
             for row_num, row in enumerate(csv_reader, 2):  # Start from 2 to account for header
                 try:
-                    # Check if product exists
-                    existing_product = Product.query.filter_by(sku=row['sku']).first()
+                    # Validate required fields
+                    required_fields = ['Item No', 'Description', 'Category']
+                    missing_fields = []
+                    for field in required_fields:
+                        if not row.get(field) or not row[field].strip():
+                            missing_fields.append(field)
+                    
+                    if missing_fields:
+                        errors.append(f"Row {row_num}: Missing required fields: {', '.join(missing_fields)}")
+                        if not skip_errors:
+                            continue
+                    
+                    # Check if product exists by Item No
+                    item_no = row['Item No'].strip()
+                    existing_product = Product.query.filter_by(item_no=item_no).first()
                     
                     if existing_product and not update_existing:
-                        errors.append(f"Row {row_num}: SKU {row['sku']} already exists")
-                        continue
+                        errors.append(f"Row {row_num}: Item No '{item_no}' already exists")
+                        if not skip_errors:
+                            continue
                     
                     # Create or update product
                     if existing_product and update_existing:
@@ -469,117 +483,84 @@ def import_products():
                         product = Product()
                         imported_count += 1
                     
-                    # Update product fields - Map CSV columns to database fields
-                    # CSV Headers: Category | SubCategory | Series | Item No | Description | Pack | Carton Qty | 2025 List Price | Nett | Disc Code | Note | weight_kg | dimensions | lead_time_days | is_active
-                    
-                    # Use Item No as SKU (primary identifier)
-                    product.sku = row['Item No'].strip()
-                    
-                    # Use Description as name
-                    product.name = row['Description'].strip()
-                    
-                    # Set description from Description field
+                    # Map CSV columns to database fields using new schema
+                    product.item_no = item_no
                     product.description = row['Description'].strip()
-                    
-                    # Map 2025 List Price to unit_price (remove $ and commas)
-                    list_price_str = row['2025 List Price'].replace('$', '').replace(',', '').strip()
-                    try:
-                        product.unit_price = Decimal(list_price_str) if list_price_str else Decimal('0')
-                    except (ValueError, TypeError) as e:
-                        logger.warning(f"Invalid price format '{row['2025 List Price']}' for SKU {row['Item No']}, using 0")
-                        product.unit_price = Decimal('0')
-                    
-                    # Map Category
                     product.category = row['Category'].strip()
                     
-                    # Map Series
-                    product.series = row['Series'].strip()
+                    # Optional fields with validation
+                    if row.get('SubCategory'):
+                        product.sub_category = row['SubCategory'].strip()
                     
-                    # Map Item No
-                    product.item_no = row['Item No'].strip()
+                    if row.get('Series'):
+                        product.series = row['Series'].strip()
                     
-                    # Map 2025 List Price to list_price_2025
+                    # Pack and Carton Qty with defaults
                     try:
-                        product.list_price_2025 = Decimal(list_price_str) if list_price_str else Decimal('0')
-                    except (ValueError, TypeError) as e:
-                        logger.warning(f"Invalid list price format '{row['2025 List Price']}' for SKU {row['Item No']}, using 0")
-                        product.list_price_2025 = Decimal('0')
-                    
-                    # Map SubCategory to a new field (if needed) or notes
-                    subcategory = row.get('SubCategory', '').strip()
-                    
-                    # Map Pack information
-                    pack_info = row.get('Pack', '').strip()
-                    
-                    # Map Carton Qty
-                    carton_qty = row.get('Carton Qty', '').strip()
-                    
-                    # Map Disc Code to discount_code - handle foreign key constraint
-                    disc_code = row['Disc Code'].strip() if row['Disc Code'].strip() else None
-                    if disc_code:
-                        # Check if discount code exists in database
-                        from app.models.deals.deal_models import Discount
-                        existing_discount = Discount.query.filter_by(code=disc_code).first()
-                        if existing_discount:
-                            product.discount_code = disc_code
-                        else:
-                            # Log warning but don't fail the import
-                            logger.warning(f"Discount code '{disc_code}' not found in database, skipping discount for SKU {product.sku}")
-                            product.discount_code = None
-                    else:
-                        product.discount_code = None
-                    
-                    # Map Nett to nett_buy_price_gst (remove $ and commas)
-                    nett_str = row['Nett'].replace('$', '').replace(',', '').strip()
-                    try:
-                        product.nett_buy_price_gst = Decimal(nett_str) if nett_str else Decimal('0')
-                    except (ValueError, TypeError) as e:
-                        logger.warning(f"Invalid nett price format '{row['Nett']}' for SKU {row['Item No']}, using 0")
-                        product.nett_buy_price_gst = Decimal('0')
-                    
-                    # Map Note field
-                    note_text = row.get('Note', '').strip()
-                    if note_text:
-                        # Combine subcategory, pack info, and notes if they exist
-                        combined_notes = []
-                        if subcategory:
-                            combined_notes.append(f"SubCategory: {subcategory}")
-                        if pack_info:
-                            combined_notes.append(f"Pack: {pack_info}")
-                        if carton_qty:
-                            combined_notes.append(f"Carton Qty: {carton_qty}")
-                        if note_text:
-                            combined_notes.append(note_text)
-                        product.notes = ' | '.join(combined_notes)
-                    else:
-                        product.notes = None
-                    
-                    # Map weight_kg from CSV
-                    weight_str = row.get('weight_kg', '').strip()
-                    try:
-                        product.weight_kg = Decimal(weight_str) if weight_str else None
+                        product.pack = int(row.get('Pack', 1)) if row.get('Pack') else 1
                     except (ValueError, TypeError):
-                        product.weight_kg = None
+                        errors.append(f"Row {row_num}: Invalid Pack value '{row.get('Pack')}', using default 1")
+                        product.pack = 1
                     
-                    # Map dimensions from CSV
-                    product.dimensions = row.get('dimensions', '').strip() or None
-                    
-                    # Map lead_time_days from CSV
-                    lead_time_str = row.get('lead_time_days', '').strip()
                     try:
-                        product.lead_time_days = int(lead_time_str) if lead_time_str else 0
+                        product.carton_qty = int(row.get('Carton Qty', 1)) if row.get('Carton Qty') else 1
                     except (ValueError, TypeError):
-                        product.lead_time_days = 0
+                        errors.append(f"Row {row_num}: Invalid Carton Qty value '{row.get('Carton Qty')}', using default 1")
+                        product.carton_qty = 1
                     
-                    # Map is_active from CSV
+                    # Pricing fields
+                    if row.get('List price'):
+                        try:
+                            list_price_str = row['List price'].replace('$', '').replace(',', '').strip()
+                            product.list_price = Decimal(list_price_str) if list_price_str else None
+                        except (ValueError, TypeError):
+                            errors.append(f"Row {row_num}: Invalid List price format '{row['List price']}'")
+                    
+                    if row.get('Nett'):
+                        try:
+                            nett_str = row['Nett'].replace('$', '').replace(',', '').strip()
+                            product.nett = Decimal(nett_str) if nett_str else None
+                        except (ValueError, TypeError):
+                            errors.append(f"Row {row_num}: Invalid Nett price format '{row['Nett']}'")
+                    
+                    # Physical properties
+                    if row.get('weight_kg'):
+                        try:
+                            product.weight_kg = Decimal(row['weight_kg']) if row['weight_kg'] else None
+                        except (ValueError, TypeError):
+                            errors.append(f"Row {row_num}: Invalid weight format '{row['weight_kg']}'")
+                    
+                    if row.get('dimensions'):
+                        product.dimensions = row['dimensions'].strip()
+                    
+                    if row.get('lead_time_days'):
+                        try:
+                            product.lead_time_days = int(row['lead_time_days']) if row['lead_time_days'] else None
+                        except (ValueError, TypeError):
+                            errors.append(f"Row {row_num}: Invalid lead time format '{row['lead_time_days']}'")
+                    
+                    # Notes and discount code
+                    if row.get('Note'):
+                        product.notes = row['Note'].strip()
+                    
+                    if row.get('Disc Code'):
+                        product.discount_code = row['Disc Code'].strip()
+                    
+                    # Active status
                     is_active_str = row.get('is_active', 'true').strip().lower()
-                    product.is_active = is_active_str in ('true', '1', 'yes', 'y')
+                    product.is_active = is_active_str in ['true', '1', 'yes', 'y']
                     
-                    # Set default values for fields not in CSV
-                    product.brand = row.get('brand', '').strip() or None
-                    product.model_number = row.get('model_number', '').strip() or None
-                    product.stock_quantity = int(row.get('stock_quantity', 0)) if row.get('stock_quantity') else 0
-                    product.reorder_level = int(row.get('reorder_level', 0)) if row.get('reorder_level') else 0
+                    # Legacy fields for backward compatibility
+                    product.sku = item_no  # Use Item No as SKU
+                    product.name = product.description  # Use Description as name
+                    if product.list_price:
+                        product.unit_price = product.list_price  # Use List Price as unit price
+                    
+                    # Set default values for legacy fields
+                    product.brand = None
+                    product.model_number = None
+                    product.stock_quantity = 0
+                    product.reorder_level = 0
                     
                     product.save()
                     
@@ -589,19 +570,38 @@ def import_products():
                     if not skip_errors:
                         raise e
             
-            # Show results
+            # Show results with detailed error messages
             if imported_count > 0:
-                flash(f'{imported_count} products imported successfully!', 'success')
+                flash(f'✅ {imported_count} products imported successfully!', 'success')
             if updated_count > 0:
-                flash(f'{updated_count} products updated successfully!', 'success')
+                flash(f'✅ {updated_count} products updated successfully!', 'success')
+            
             if errors:
-                flash(f'{len(errors)} errors occurred during import.', 'warning')
+                # Show detailed error messages instead of generic count
+                error_count = len(errors)
+                if error_count <= 5:
+                    # Show all errors if 5 or fewer
+                    for error in errors:
+                        flash(f'❌ {error}', 'error')
+                else:
+                    # Show first 3 errors and count if more
+                    for error in errors[:3]:
+                        flash(f'❌ {error}', 'error')
+                    flash(f'❌ ... and {error_count - 3} more errors. Check logs for details.', 'error')
             
             logger.info(f"Products imported: {imported_count} new, {updated_count} updated by {current_user.email}")
             
         except Exception as e:
             logger.error(f"Error importing products: {e}")
-            flash('An error occurred while importing products.', 'error')
+            # Provide more specific error messages
+            if "No such file or directory" in str(e):
+                flash('❌ CSV file not found or could not be read.', 'error')
+            elif "Permission denied" in str(e):
+                flash('❌ Permission denied accessing the CSV file.', 'error')
+            elif "Invalid CSV format" in str(e):
+                flash('❌ Invalid CSV format. Please check your file structure.', 'error')
+            else:
+                flash(f'❌ Import failed: {str(e)}', 'error')
     
     return render_template('products/import.html', form=form)
 
