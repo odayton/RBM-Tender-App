@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from sqlalchemy import or_, and_, func
 from decimal import Decimal
+import decimal
 import csv
 import io
 import os
@@ -524,20 +525,28 @@ def import_products():
                         errors.append(f"Row {row_num}: Invalid Carton Qty value '{row.get('Carton Qty')}', using default 1")
                         product.carton_qty = 1
                     
-                    # Pricing fields
+                    # Pricing fields with better error handling
                     if row.get('List price'):
                         try:
-                            list_price_str = row['List price'].replace('$', '').replace(',', '').strip()
-                            product.list_price = Decimal(list_price_str) if list_price_str else None
-                        except (ValueError, TypeError):
-                            errors.append(f"Row {row_num}: Invalid List price format '{row['List price']}'")
+                            list_price_str = str(row['List price']).replace('$', '').replace(',', '').replace(' ', '').strip()
+                            if list_price_str and list_price_str.lower() not in ['', 'null', 'none', 'n/a']:
+                                product.list_price = Decimal(list_price_str)
+                            else:
+                                product.list_price = None
+                        except (ValueError, TypeError, decimal.InvalidOperation) as e:
+                            errors.append(f"Row {row_num}: Invalid List price format '{row['List price']}' - must be a number")
+                            product.list_price = None
                     
                     if row.get('Nett'):
                         try:
-                            nett_str = row['Nett'].replace('$', '').replace(',', '').strip()
-                            product.nett = Decimal(nett_str) if nett_str else None
-                        except (ValueError, TypeError):
-                            errors.append(f"Row {row_num}: Invalid Nett price format '{row['Nett']}'")
+                            nett_str = str(row['Nett']).replace('$', '').replace(',', '').replace(' ', '').strip()
+                            if nett_str and nett_str.lower() not in ['', 'null', 'none', 'n/a']:
+                                product.nett = Decimal(nett_str)
+                            else:
+                                product.nett = None
+                        except (ValueError, TypeError, decimal.InvalidOperation) as e:
+                            errors.append(f"Row {row_num}: Invalid Nett price format '{row['Nett']}' - must be a number")
+                            product.nett = None
                     
                     # Physical properties
                     if row.get('weight_kg'):
@@ -559,8 +568,20 @@ def import_products():
                     if row.get('Note'):
                         product.notes = row['Note'].strip()
                     
-                    if row.get('Disc Code'):
-                        product.discount_code = row['Disc Code'].strip()
+                    # Handle discount code with validation
+                    disc_code = row.get('Disc Code', '').strip()
+                    if disc_code:
+                        # Check if discount code exists in database
+                        from app.models.deals.deal_models import Discount
+                        existing_discount = Discount.query.filter_by(code=disc_code).first()
+                        if existing_discount:
+                            product.discount_code = disc_code
+                        else:
+                            # Log warning and skip discount code instead of failing
+                            errors.append(f"Row {row_num}: Discount code '{disc_code}' not found in database, skipping discount")
+                            product.discount_code = None
+                    else:
+                        product.discount_code = None
                     
                     # Active status
                     is_active_str = row.get('is_active', 'true').strip().lower()
@@ -572,6 +593,12 @@ def import_products():
                     if product.list_price:
                         product.unit_price = product.list_price  # Use List Price as unit price
                     
+                    # Map to legacy field names for database compatibility
+                    if product.list_price:
+                        product.list_price_2025 = product.list_price
+                    if product.nett:
+                        product.nett_buy_price_gst = product.nett
+                    
                     # Set default values for legacy fields
                     product.brand = None
                     product.model_number = None
@@ -581,7 +608,18 @@ def import_products():
                     product.save()
                     
                 except Exception as e:
-                    error_msg = f"Row {row_num}: {str(e)}"
+                    # Provide more specific error messages for common issues
+                    if "ConversionSyntax" in str(e):
+                        error_msg = f"Row {row_num}: Invalid number format in CSV data. Check price fields (List price, Nett) for non-numeric values like '$', commas, or text."
+                    elif "ValueError" in str(e):
+                        error_msg = f"Row {row_num}: Invalid data format - {str(e)}"
+                    elif "TypeError" in str(e):
+                        error_msg = f"Row {row_num}: Data type error - {str(e)}"
+                    elif "ForeignKeyViolation" in str(e):
+                        error_msg = f"Row {row_num}: Database constraint error - {str(e)}"
+                    else:
+                        error_msg = f"Row {row_num}: {str(e)}"
+                    
                     errors.append(error_msg)
                     if not skip_errors:
                         raise e
