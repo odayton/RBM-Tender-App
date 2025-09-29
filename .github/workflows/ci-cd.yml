@@ -315,7 +315,7 @@ jobs:
           # Create smart backup before deployment
           echo "Creating smart backup..."
           if [ -f /opt/rbm-tender-app/scripts/deployment/smart_backup.py ]; then
-            sudo python3 /opt/rbm-tender-app/scripts/deployment/smart_backup.py --app-path /opt/rbm-tender-app --backup-dir /opt --max-backups 3
+            sudo python3 /opt/rbm-tender-app/scripts/deployment/smart_backup.py --app-path /opt/rbm-tender-app --backup-dir /opt --max-backups 3 || echo "Backup skipped or failed - continuing with deployment"
           else
             echo "Smart backup script not found, creating manual backup..."
             TIMESTAMP=$(date +%Y%m%d-%H%M%S)
