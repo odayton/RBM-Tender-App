@@ -435,8 +435,24 @@ def import_products():
             update_existing = form.update_existing.data
             skip_errors = form.skip_errors.data
             
-            # Read CSV file
-            csv_data = csv_file.read().decode('utf-8')
+            # Read CSV file with encoding detection
+            csv_file.seek(0)  # Reset file pointer
+            raw_data = csv_file.read()
+            
+            # Try different encodings
+            encodings_to_try = ['utf-8', 'utf-8-sig', 'latin-1', 'cp1252', 'iso-8859-1']
+            csv_data = None
+            
+            for encoding in encodings_to_try:
+                try:
+                    csv_data = raw_data.decode(encoding)
+                    logger.info(f"Successfully decoded CSV with {encoding} encoding")
+                    break
+                except UnicodeDecodeError:
+                    continue
+            
+            if csv_data is None:
+                raise ValueError("Could not decode CSV file. Please save your file as UTF-8 encoding.")
             # Clean up trailing commas that might cause empty columns
             csv_lines = csv_data.strip().split('\n')
             cleaned_lines = []
@@ -594,7 +610,9 @@ def import_products():
         except Exception as e:
             logger.error(f"Error importing products: {e}")
             # Provide more specific error messages
-            if "No such file or directory" in str(e):
+            if "Could not decode CSV file" in str(e):
+                flash('❌ CSV file encoding issue. Please save your file as UTF-8 encoding in Excel/Google Sheets.', 'error')
+            elif "No such file or directory" in str(e):
                 flash('❌ CSV file not found or could not be read.', 'error')
             elif "Permission denied" in str(e):
                 flash('❌ Permission denied accessing the CSV file.', 'error')
