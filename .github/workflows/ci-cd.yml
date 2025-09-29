@@ -4,11 +4,17 @@ on:
   push:
     branches:
       - main
-      - develop
   pull_request:
     branches:
       - main
   workflow_dispatch:
+
+# Add descriptive run names
+run-name: |
+  ${{ github.ref_name == 'main' && '🚀 Production Deployment' || '' }}
+  ${{ github.event_name == 'pull_request' && '🔍 PR Testing' || '' }}
+  ${{ github.event_name == 'workflow_dispatch' && '⚡ Manual Trigger' || '' }}
+  - ${{ github.head_commit.message }}
 
 permissions:
   contents: read
