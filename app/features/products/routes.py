@@ -34,12 +34,15 @@ def list_products():
         
         # Get search parameters
         search_term = request.args.get('search_term', '')
-        category = request.args.get('category', '')
+        category = request.args.get('category') or request.args.get('sub_category', '')
         series = request.args.get('series', '')
         item_no = request.args.get('item_no', '')
         brand = request.args.get('brand', '')
         availability = request.args.get('availability', '')
         price_range = request.args.get('price_range', '')
+        
+        # Handle sub_category parameter separately
+        sub_category = request.args.get('sub_category', '')
         
         # Build query
         query = Product.query
@@ -48,16 +51,22 @@ def list_products():
         if search_term:
             query = query.filter(
                 or_(
-                    Product.name.ilike(f'%{search_term}%'),
-                    Product.sku.ilike(f'%{search_term}%'),
+                    Product.item_no.ilike(f'%{search_term}%'),
                     Product.description.ilike(f'%{search_term}%'),
-                    Product.brand.ilike(f'%{search_term}%'),
-                    Product.model_number.ilike(f'%{search_term}%')
+                    Product.category.ilike(f'%{search_term}%'),
+                    Product.sub_category.ilike(f'%{search_term}%'),
+                    Product.series.ilike(f'%{search_term}%'),
+                    Product.sku.ilike(f'%{search_term}%'),  # Legacy
+                    Product.name.ilike(f'%{search_term}%'),  # Legacy
+                    Product.brand.ilike(f'%{search_term}%')  # Legacy
                 )
             )
         
         if category:
             query = query.filter(Product.category.ilike(f'%{category}%'))
+        
+        if sub_category:
+            query = query.filter(Product.sub_category.ilike(f'%{sub_category}%'))
         
         if series:
             query = query.filter(Product.series.ilike(f'%{series}%'))
@@ -79,19 +88,43 @@ def list_products():
             elif availability == 'inactive':
                 query = query.filter(Product.is_active == False)
         
-        # Apply price range filter
+        # Apply price range filter (using list_price or nett as primary, fallback to unit_price)
         if price_range:
             if price_range == '0-100':
-                query = query.filter(Product.unit_price <= 100)
+                query = query.filter(
+                    or_(
+                        Product.list_price <= 100,
+                        Product.nett <= 100,
+                        Product.unit_price <= 100
+                    )
+                )
             elif price_range == '100-500':
-                query = query.filter(and_(Product.unit_price > 100, Product.unit_price <= 500))
+                query = query.filter(
+                    or_(
+                        and_(Product.list_price > 100, Product.list_price <= 500),
+                        and_(Product.nett > 100, Product.nett <= 500),
+                        and_(Product.unit_price > 100, Product.unit_price <= 500)
+                    )
+                )
             elif price_range == '500-1000':
-                query = query.filter(and_(Product.unit_price > 500, Product.unit_price <= 1000))
+                query = query.filter(
+                    or_(
+                        and_(Product.list_price > 500, Product.list_price <= 1000),
+                        and_(Product.nett > 500, Product.nett <= 1000),
+                        and_(Product.unit_price > 500, Product.unit_price <= 1000)
+                    )
+                )
             elif price_range == '1000+':
-                query = query.filter(Product.unit_price > 1000)
+                query = query.filter(
+                    or_(
+                        Product.list_price > 1000,
+                        Product.nett > 1000,
+                        Product.unit_price > 1000
+                    )
+                )
         
-        # Get paginated results
-        products = query.order_by(Product.name).paginate(
+        # Get paginated results (order by item_no first, then description)
+        products = query.order_by(Product.item_no, Product.description).paginate(
             page=page, per_page=per_page, error_out=False
         )
         
@@ -105,8 +138,9 @@ def list_products():
             and_(Product.is_active == True, Product.stock_quantity == 0)
         ).count()
         
-        # Get unique categories, series, and brands for filters
+        # Get unique categories, sub-categories, series, and brands for filters
         categories = db.session.query(Product.category).distinct().filter(Product.category.isnot(None)).all()
+        sub_categories = db.session.query(Product.sub_category).distinct().filter(Product.sub_category.isnot(None)).all()
         series_list = db.session.query(Product.series).distinct().filter(Product.series.isnot(None)).all()
         brands = db.session.query(Product.brand).distinct().filter(Product.brand.isnot(None)).all()
         
@@ -117,12 +151,14 @@ def list_products():
                              products=products,
                              search_term=search_term,
                              category=category,
+                             sub_category=sub_category,
                              series=series,
                              item_no=item_no,
                              brand=brand,
                              availability=availability,
                              price_range=price_range,
                              categories=[c[0] for c in categories],
+                             sub_categories=[s[0] for s in sub_categories],
                              series_list=[s[0] for s in series_list],
                              brands=[b[0] for b in brands],
                              stats={
@@ -165,31 +201,37 @@ def create_product():
     if form.validate_on_submit():
         try:
             product = Product(
-                sku=form.sku.data.strip(),
-                name=form.name.data.strip(),
-                description=form.description.data.strip() if form.description.data else None,
-                unit_price=form.unit_price.data,
+                # New primary fields
                 category=form.category.data.strip(),
+                sub_category=form.sub_category.data.strip() if form.sub_category.data else None,
                 series=form.series.data.strip() if form.series.data else None,
-                item_no=form.item_no.data.strip() if form.item_no.data else None,
-                list_price_2025=form.list_price_2025.data,
-                nett_buy_price_gst=form.nett_buy_price_gst.data,
+                item_no=form.item_no.data.strip(),
+                description=form.description.data.strip(),
+                pack=form.pack.data or 1,
+                carton_qty=form.carton_qty.data or 1,
+                list_price=form.list_price.data,
+                nett=form.nett.data,
                 discount_code=form.discount_code.data.strip() if form.discount_code.data else None,
-                brand=form.brand.data.strip() if form.brand.data else None,
-                model_number=form.model_number.data.strip() if form.model_number.data else None,
+                notes=form.notes.data.strip() if form.notes.data else None,
                 weight_kg=form.weight_kg.data,
                 dimensions=form.dimensions.data.strip() if form.dimensions.data else None,
-                stock_quantity=form.stock_quantity.data,
-                reorder_level=form.reorder_level.data,
-                lead_time_days=form.lead_time_days.data,
+                lead_time_days=form.lead_time_days.data or 0,
                 is_active=form.is_active.data,
-                notes=form.notes.data.strip() if form.notes.data else None
+                
+                # Legacy fields (for backward compatibility)
+                sku=form.sku.data.strip() if form.sku.data else None,
+                name=form.name.data.strip() if form.name.data else None,
+                unit_price=form.unit_price.data,
+                brand=form.brand.data.strip() if form.brand.data else None,
+                model_number=form.model_number.data.strip() if form.model_number.data else None,
+                stock_quantity=form.stock_quantity.data or 0,
+                reorder_level=form.reorder_level.data or 0
             )
             
             product.save()
             
-            logger.info(f"Product created: {product.sku} by {current_user.email}")
-            flash(f'Product "{product.name}" created successfully!', 'success')
+            logger.info(f"Product created: {product.item_no} - {product.description} by {current_user.email}")
+            flash(f'Product "{product.item_no}" created successfully!', 'success')
             
             return redirect(url_for('products.view_product', product_id=product.id))
             
@@ -229,30 +271,36 @@ def edit_product(product_id):
     
     if form.validate_on_submit():
         try:
-            product.sku = form.sku.data.strip()
-            product.name = form.name.data.strip()
-            product.description = form.description.data.strip() if form.description.data else None
-            product.unit_price = form.unit_price.data
+            # Update new primary fields
             product.category = form.category.data.strip()
+            product.sub_category = form.sub_category.data.strip() if form.sub_category.data else None
             product.series = form.series.data.strip() if form.series.data else None
-            product.item_no = form.item_no.data.strip() if form.item_no.data else None
-            product.list_price_2025 = form.list_price_2025.data
-            product.nett_buy_price_gst = form.nett_buy_price_gst.data
+            product.item_no = form.item_no.data.strip()
+            product.description = form.description.data.strip()
+            product.pack = form.pack.data or 1
+            product.carton_qty = form.carton_qty.data or 1
+            product.list_price = form.list_price.data
+            product.nett = form.nett.data
             product.discount_code = form.discount_code.data.strip() if form.discount_code.data else None
-            product.brand = form.brand.data.strip() if form.brand.data else None
-            product.model_number = form.model_number.data.strip() if form.model_number.data else None
+            product.notes = form.notes.data.strip() if form.notes.data else None
             product.weight_kg = form.weight_kg.data
             product.dimensions = form.dimensions.data.strip() if form.dimensions.data else None
-            product.stock_quantity = form.stock_quantity.data
-            product.reorder_level = form.reorder_level.data
-            product.lead_time_days = form.lead_time_days.data
+            product.lead_time_days = form.lead_time_days.data or 0
             product.is_active = form.is_active.data
-            product.notes = form.notes.data.strip() if form.notes.data else None
+            
+            # Update legacy fields (for backward compatibility)
+            product.sku = form.sku.data.strip() if form.sku.data else None
+            product.name = form.name.data.strip() if form.name.data else None
+            product.unit_price = form.unit_price.data
+            product.brand = form.brand.data.strip() if form.brand.data else None
+            product.model_number = form.model_number.data.strip() if form.model_number.data else None
+            product.stock_quantity = form.stock_quantity.data or 0
+            product.reorder_level = form.reorder_level.data or 0
             
             product.save()
             
-            logger.info(f"Product updated: {product.sku} by {current_user.email}")
-            flash(f'Product "{product.name}" updated successfully!', 'success')
+            logger.info(f"Product updated: {product.item_no} - {product.description} by {current_user.email}")
+            flash(f'Product "{product.item_no}" updated successfully!', 'success')
             
             return redirect(url_for('products.view_product', product_id=product.id))
             
@@ -270,11 +318,11 @@ def delete_product(product_id):
     product = Product.query.get_or_404(product_id)
     
     try:
-        product_name = product.name
+        product_identifier = product.item_no or product.description or f"ID {product.id}"
         product.delete()
         
-        logger.info(f"Product deleted: {product.sku} by {current_user.email}")
-        flash(f'Product "{product_name}" deleted successfully!', 'success')
+        logger.info(f"Product deleted: {product.item_no} - {product.description} by {current_user.email}")
+        flash(f'Product "{product_identifier}" deleted successfully!', 'success')
         
     except Exception as e:
         logger.error(f"Error deleting product: {e}")
@@ -294,8 +342,8 @@ def toggle_product_status(product_id):
         product.save()
         
         status = "activated" if product.is_active else "deactivated"
-        logger.info(f"Product {status}: {product.sku} by {current_user.email}")
-        flash(f'Product "{product.name}" {status}!', 'success')
+        logger.info(f"Product {status}: {product.item_no} - {product.description} by {current_user.email}")
+        flash(f'Product "{product.item_no}" {status}!', 'success')
         
     except Exception as e:
         logger.error(f"Error toggling product status: {e}")

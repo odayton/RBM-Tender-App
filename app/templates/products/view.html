@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}View Product - RBM Tender App{% endblock %}
+{% block title %}{{ product.item_no or product.description or product.name }} - RBM Tender App{% endblock %}
 
 {% block page_content %}
 <div class="container-fluid">
@@ -10,11 +10,11 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ url_for('products.list_products') }}">Products</a></li>
-                    <li class="breadcrumb-item active">{{ product.name }}</li>
+                    <li class="breadcrumb-item active">{{ product.item_no or product.sku or 'Unknown' }}</li>
                 </ol>
             </nav>
-            <h1 class="h3 mb-0">{{ product.name }}</h1>
-            <p class="text-muted mb-0">SKU: {{ product.sku }}</p>
+            <h1 class="h3 mb-0">{{ product.item_no or product.sku }}</h1>
+            <p class="text-muted mb-0">{{ product.description or product.name }}</p>
         </div>
         <div class="btn-group">
             {% if current_user.can_manage_users() %}
@@ -50,217 +50,217 @@
             <!-- Basic Information Card -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Product Information</h5>
+                    <h5 class="card-title mb-0">Basic Information</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <table class="table table-borderless">
+                            <table class="table table-sm table-borderless">
                                 <tr>
-                                    <td><strong>SKU:</strong></td>
-                                    <td>{{ product.sku }}</td>
+                                    <th width="40%" class="text-muted">Item No:</th>
+                                    <td><strong>{{ product.item_no or product.sku or '-' }}</strong></td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Name:</strong></td>
-                                    <td>{{ product.name }}</td>
+                                    <th class="text-muted">Category:</th>
+                                    <td><span class="badge bg-primary">{{ product.category or '-' }}</span></td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Category:</strong></td>
-                                    <td><span class="badge bg-secondary">{{ product.category }}</span></td>
+                                    <th class="text-muted">SubCategory:</th>
+                                    <td>{{ product.sub_category or '-' }}</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Brand:</strong></td>
-                                    <td>{{ product.brand or 'Not specified' }}</td>
+                                    <th class="text-muted">Series:</th>
+                                    <td>{{ product.series or '-' }}</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Model:</strong></td>
-                                    <td>{{ product.model_number or 'Not specified' }}</td>
+                                    <th class="text-muted">Status:</th>
+                                    <td>
+                                        <span class="badge bg-{% if product.is_active %}success{% else %}danger{% endif %}">
+                                            {% if product.is_active %}Active{% else %}Inactive{% endif %}
+                                        </span>
+                                    </td>
                                 </tr>
                             </table>
                         </div>
                         <div class="col-md-6">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <td><strong>Status:</strong></td>
-                                    <td>
-                                        {% if product.is_active %}
-                                        <span class="badge bg-success">Active</span>
-                                        {% else %}
-                                        <span class="badge bg-secondary">Inactive</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Availability:</strong></td>
-                                    <td>
-                                        {% if product.is_out_of_stock() %}
-                                        <span class="badge bg-danger">Out of Stock</span>
-                                        {% elif product.is_low_stock() %}
-                                        <span class="badge bg-warning">Low Stock</span>
-                                        {% else %}
-                                        <span class="badge bg-success">In Stock</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Created:</strong></td>
-                                    <td>{{ product.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Updated:</strong></td>
-                                    <td>{{ product.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    {% if product.description %}
-                    <div class="mt-3">
-                        <h6>Description</h6>
-                        <p class="mb-0">{{ product.description }}</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Pricing and Inventory Card -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Pricing & Inventory</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span><strong>Unit Price:</strong></span>
-                                <span class="h4 mb-0 text-primary">${{ "%.2f"|format(product.unit_price) }}</span>
+                            {% if product.description %}
+                            <div class="mb-3">
+                                <h6 class="text-muted">Description:</h6>
+                                <p>{{ product.description }}</p>
                             </div>
-                            
-                            {% if product.discount %}
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span><strong>Discount:</strong></span>
-                                <span class="text-success">-{{ product.discount.percentage }}%</span>
-                            </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span><strong>Discounted Price:</strong></span>
-                                <span class="h5 mb-0 text-success">${{ "%.2f"|format(product.get_discounted_price()) }}</span>
+                            {% endif %}
+                            {% if product.notes %}
+                            <div class="mb-3">
+                                <h6 class="text-muted">Notes:</h6>
+                                <p class="text-muted">{{ product.notes }}</p>
                             </div>
                             {% endif %}
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing Information Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Pricing & Packaging</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
                         <div class="col-md-6">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span><strong>Stock Quantity:</strong></span>
-                                <span class="h4 mb-0 {% if product.is_out_of_stock() %}text-danger{% elif product.is_low_stock() %}text-warning{% else %}text-success{% endif %}">
-                                    {{ product.stock_quantity }}
-                                </span>
-                            </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span><strong>Reorder Level:</strong></span>
-                                <span>{{ product.reorder_level }}</span>
-                            </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span><strong>Lead Time:</strong></span>
-                                <span>{{ product.lead_time_days }} days</span>
-                            </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span><strong>Total Value:</strong></span>
-                                <span class="h5 mb-0">${{ "%.2f"|format(product.get_total_value()) }}</span>
-                            </div>
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <th width="40%" class="text-muted">List Price:</th>
+                                    <td>
+                                        {% if product.list_price %}
+                                            <strong class="text-success">${{ "%.2f"|format(product.list_price) }}</strong>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Nett:</th>
+                                    <td>
+                                        {% if product.nett %}
+                                            <strong class="text-info">${{ "%.2f"|format(product.nett) }}</strong>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Disc Code:</th>
+                                    <td><span class="badge bg-secondary">{{ product.discount_code or '-' }}</span></td>
+                                </tr>
+                                {% if product.discount %}
+                                <tr>
+                                    <th class="text-muted">Discount:</th>
+                                    <td><span class="badge bg-warning">{{ product.discount.percentage }}%</span></td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <th width="40%" class="text-muted">Pack:</th>
+                                    <td>{{ product.pack or '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Carton Qty:</th>
+                                    <td>{{ product.carton_qty or '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Effective Price:</th>
+                                    <td>
+                                        <strong class="text-primary">${{ "%.2f"|format(product.get_effective_price()) }}</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Discounted Price:</th>
+                                    <td>
+                                        <strong class="text-success">${{ "%.2f"|format(product.get_discounted_price()) }}</strong>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
-                    
-                    <!-- Stock Update Form -->
-                    {% if current_user.can_manage_users() %}
-                    <hr>
-                    <h6>Update Stock</h6>
-                    <form method="POST" action="{{ url_for('products.update_stock', product_id=product.id) }}" class="row g-3">
-                        <div class="col-md-4">
-                            <label for="quantity_change" class="form-label">Quantity Change</label>
-                            <input type="number" class="form-control" id="quantity_change" name="quantity_change" 
-                                   placeholder="+10 or -5" required>
-                            <small class="form-text text-muted">Use positive numbers to add stock, negative to reduce</small>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary d-block">
-                                <i class="fas fa-save"></i> Update Stock
-                            </button>
-                        </div>
-                    </form>
-                    {% endif %}
                 </div>
             </div>
 
             <!-- Physical Properties Card -->
-            {% if product.weight_kg or product.dimensions %}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Physical Properties</h5>
+                    <h5 class="card-title mb-0">Physical Properties & Management</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        {% if product.weight_kg %}
                         <div class="col-md-6">
-                            <strong>Weight:</strong> {{ "%.3f"|format(product.weight_kg) }} kg
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <th width="40%" class="text-muted">Weight:</th>
+                                    <td>{{ product.weight_kg or '-' }} kg</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Dimensions:</th>
+                                    <td>{{ product.dimensions or '-' }}</td>
+                                </tr>
+                            </table>
                         </div>
-                        {% endif %}
-                        {% if product.dimensions %}
                         <div class="col-md-6">
-                            <strong>Dimensions:</strong> {{ product.dimensions }}
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Usage Statistics Card -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Usage Statistics</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h4 class="text-primary">{{ usage_stats.usage_count }}</h4>
-                                <small class="text-muted">Times Used</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h4 class="text-success">{{ usage_stats.total_quantity_sold }}</h4>
-                                <small class="text-muted">Units Sold</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h4 class="text-info">${{ "%.2f"|format(usage_stats.total_value_sold) }}</h4>
-                                <small class="text-muted">Total Value</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h4 class="text-warning">{{ "%.1f"|format(usage_stats.average_quantity_per_use) }}</h4>
-                                <small class="text-muted">Avg per Use</small>
-                            </div>
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <th width="40%" class="text-muted">Lead Time:</th>
+                                    <td>{{ product.lead_time_days or '-' }} days</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Stock Qty:</th>
+                                    <td>
+                                        {% if product.is_out_of_stock() %}
+                                        <span class="badge bg-danger">Out of Stock ({{ product.stock_quantity }})</span>
+                                        {% elif product.is_low_stock() %}
+                                        <span class="badge bg-warning">Low Stock ({{ product.stock_quantity }})</span>
+                                        {% else %}
+                                        <span class="badge bg-success">{{ product.stock_quantity }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Notes Card -->
-            {% if product.notes %}
+            <!-- Legacy Information Card (if exists) -->
+            {% if product.sku or product.name or product.brand %}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Notes</h5>
+                    <h5 class="card-title mb-0">Legacy Information</h5>
                 </div>
                 <div class="card-body">
-                    <p class="mb-0">{{ product.notes }}</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-sm table-borderless">
+                                {% if product.sku != product.item_no %}
+                                <tr>
+                                    <th width="40%" class="text-muted">SKU (Legacy):</th>
+                                    <td>{{ product.sku or '-' }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if product.name %}
+                                <tr>
+                                    <th class="text-mute.2%f"|format(product.unit_price) if product.unit_price }}</span>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-sm table-borderless">
+                                {% if product.brand %}
+                                <tr>
+                                    <th width="40%" class="text-muted">Brand:</th>
+                                    <td>{{ product.brand }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if product.model_number %}
+                                <tr>
+                                    <th class="text-muted">Model No:</th>
+                                    <td>{{ product.model_number }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if product.reorder_level %}
+                                <tr>
+                                    <th class="text-muted">Reorder Level:</th>
+                                    <td>{{ product.reorder_level }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
             {% endif %}
@@ -268,97 +268,90 @@
 
         <!-- Sidebar -->
         <div class="col-lg-4">
-            <!-- Quick Actions -->
+            <!-- Status Summary Card -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Quick Actions</h5>
+                    <h5 class="card-title mb-0">Status Summary</h5>
                 </div>
                 <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('deals.create_deal') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-plus"></i> Create Quote
-                        </a>
-                        <a href="{{ url_for('products.list_products') }}?search_term={{ product.sku }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-search"></i> Find Similar
-                        </a>
-                        {% if current_user.can_manage_users() %}
-                        <button type="button" class="btn btn-outline-warning" onclick="duplicateProduct()">
-                            <i class="fas fa-copy"></i> Duplicate
-                        </button>
+                    <div class="text-center mb-3">
+                        {% if product.is_active %}
+                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                        <h4 class="text-success mt-2">Active Product</h4>
+                        {% else %}
+                        <i class="fas fa-times-circle fa-3x text-danger"></i>
+                        <h4 class="text-danger mt-2">Inactive Product</h4>
                         {% endif %}
+                    </div>
+                    
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h5 class="mb-1">{{ product.get_availability_status() }}</h5>
+                                <small class="text-muted">Availability</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="mb-1">{{ product.stock_quantity }}</h5>
+                            <small class="text-muted">In Stock</small>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Similar Products -->
+            <!-- Statistics Card -->
+            {% if product.line_items %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Usage Statistics</h5>
+                </div>
+                <div class="card-body">
+                    {% set stats = product.get_usage_statistics() %}
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h5 class="mb-1">{{ stats.total_quantity_sold }}</h5>
+                                <small class="text-muted">Units Sold</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="mb-1">${{ "%.0f"|format(stats.total_value_sold) }}</h5>
+                            <small class="text-muted">Revenue</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <h6 class="mb-1">{{ stats.usage_count }} quotes</h6>
+                        <small class="text-muted">Total Usage</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Similar Products Card -->
             {% if similar_products %}
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Similar Products</h5>
                 </div>
                 <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        {% for similar in similar_products %}
-                        <a href="{{ url_for('products.view_product', product_id=similar.id) }}" 
-                           class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ similar.name }}</h6>
-                                <small class="text-muted">${{ "%.2f"|format(similar.unit_price) }}</small>
-                            </div>
-                            <small class="text-muted">{{ similar.sku }}</small>
-                        </a>
-                        {% endfor %}
+                    {% for similar in similar_products %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <strong>{{ similar.item_no or similar.sku }}</strong>
+                            <br><small class="text-muted">{{ similar.description or similar.name }}</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-success">${{ "%.2f"|format(similar.get_effective_price()) }}</small>
+                            <br><a href="{{ url_for('products.view_product', product_id=similar.id) }}">View</a>
+                        </div>
                     </div>
+                    {% if not loop.last %}<hr class="my-2">{% endif %}
+                    {% endfor %}
                 </div>
             </div>
             {% endif %}
-
-            <!-- Product Status -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Product Status</h5>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-{% if product.is_active %}success{% else %}secondary{% endif %}">
-                        <h6><i class="fas fa-info-circle"></i> Current Status</h6>
-                        <p class="mb-0">
-                            {% if product.is_active %}
-                            This product is <strong>active</strong> and available for quotes.
-                            {% else %}
-                            This product is <strong>inactive</strong> and will not appear in quotes.
-                            {% endif %}
-                        </p>
-                    </div>
-                    
-                    {% if product.is_low_stock() %}
-                    <div class="alert alert-warning">
-                        <h6><i class="fas fa-exclamation-triangle"></i> Low Stock Alert</h6>
-                        <p class="mb-0">Stock quantity ({{ product.stock_quantity }}) is at or below reorder level ({{ product.reorder_level }}).</p>
-                    </div>
-                    {% endif %}
-                    
-                    {% if product.is_out_of_stock() %}
-                    <div class="alert alert-danger">
-                        <h6><i class="fas fa-times-circle"></i> Out of Stock</h6>
-                        <p class="mb-0">This product is currently out of stock and may not be available for immediate delivery.</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
         </div>
     </div>
 </div>
-
-<script>
-function duplicateProduct() {
-    if (confirm('Create a copy of this product?')) {
-        // You can implement duplication logic here
-        // For now, just redirect to create form with pre-filled data
-        window.location.href = "{{ url_for('products.create_product') }}?duplicate={{ product.id }}";
-    }
-}
-
-// Auto-focus on quantity change input
-document.getElementById('quantity_change')?.focus();
-</script>
-{% endblock %} 
+{% endblock %}

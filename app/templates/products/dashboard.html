@@ -125,10 +125,10 @@
                         <a href="{{ url_for('products.view_product', product_id=product.id) }}" 
                            class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ product.name }}</h6>
+                                <h6 class="mb-1">{{ product.item_no or product.sku }}</h6>
                                 <small class="text-muted">{{ product.created_at.strftime('%m/%d') }}</small>
                             </div>
-                            <small class="text-muted">{{ product.sku }} • ${{ "%.2f"|format(product.unit_price) }}</small>
+                            <small class="text-muted">{{ product.description or product.name }} • ${{ "%.2f"|format(product.get_effective_price()) }}</small>
                         </a>
                         {% endfor %}
                     </div>
@@ -156,7 +156,7 @@
                             <thead>
                                 <tr>
                                     <th>Product</th>
-                                    <th>SKU</th>
+                                    <th>Item No</th>
                                     <th>Current Stock</th>
                                     <th>Reorder Level</th>
                                     <th>Status</th>
@@ -168,9 +168,9 @@
                                 <tr>
                                     <td>
                                         <a href="{{ url_for('products.view_product', product_id=product.id) }}" 
-                                           class="text-decoration-none">{{ product.name }}</a>
+                                           class="text-decoration-none">{{ product.description or product.name }}</a>
                                     </td>
-                                    <td>{{ product.sku }}</td>
+                                    <td>{{ product.item_no or product.sku }}</td>
                                     <td>
                                         <span class="badge bg-{% if product.stock_quantity == 0 %}danger{% else %}warning{% endif %}">
                                             {{ product.stock_quantity }}

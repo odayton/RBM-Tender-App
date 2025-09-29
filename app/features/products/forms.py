@@ -15,52 +15,50 @@ from app.extensions import db
 class ProductForm(FlaskForm):
     """Form for creating and editing products."""
     
-    # Basic Information
-    sku = StringField('SKU', validators=[
-        DataRequired(message='SKU is required'),
-        Length(min=1, max=80, message='SKU must be between 1 and 80 characters')
-    ])
-    
-    name = StringField('Product Name', validators=[
-        DataRequired(message='Product name is required'),
-        Length(min=2, max=200, message='Product name must be between 2 and 200 characters')
-    ])
-    
-    description = TextAreaField('Description', validators=[
-        Optional(),
-        Length(max=1000, message='Description cannot exceed 1000 characters')
-    ])
-    
-    # Pricing
-    unit_price = DecimalField('Unit Price ($)', validators=[
-        DataRequired(message='Unit price is required'),
-        NumberRange(min=0, message='Unit price must be positive')
-    ])
-    
-    # User's Required Fields
+    # New Schema Fields (Primary)
     category = StringField('Category', validators=[
         DataRequired(message='Category is required'),
-        Length(max=100, message='Category cannot exceed 100 characters')
+        Length(max=200, message='Category cannot exceed 200 characters')
+    ])
+    
+    sub_category = StringField('Sub Category', validators=[
+        Optional(),
+        Length(max=200, message='Sub Category cannot exceed 200 characters')
     ])
     
     series = StringField('Series', validators=[
         Optional(),
-        Length(max=100, message='Series cannot exceed 100 characters')
+        Length(max=200, message='Series cannot exceed 200 characters')
     ])
     
     item_no = StringField('Item No', validators=[
-        Optional(),
-        Length(max=100, message='Item number cannot exceed 100 characters')
+        DataRequired(message='Item No is required'),
+        Length(max=200, message='Item number cannot exceed 200 characters')
     ])
     
-    list_price_2025 = DecimalField('2025 List Price ($)', validators=[
+    description = TextAreaField('Description', validators=[
+        DataRequired(message='Description is required'),
+        Length(max=2000, message='Description cannot exceed 2000 characters')
+    ])
+    
+    pack = IntegerField('Pack', validators=[
+        Optional(),
+        NumberRange(min=0, message='Pack must be positive')
+    ])
+    
+    carton_qty = IntegerField('Carton Qty', validators=[
+        Optional(),
+        NumberRange(min=0, message='Carton quantity must be positive')
+    ])
+    
+    list_price = DecimalField('List Price ($)', validators=[
         Optional(),
         NumberRange(min=0, message='List price must be positive')
     ])
     
-    nett_buy_price_gst = DecimalField('Nett Buy Price (+GST) ($)', validators=[
+    nett = DecimalField('Nett ($)', validators=[
         Optional(),
-        NumberRange(min=0, message='Buy price must be positive')
+        NumberRange(min=0, message='Nett price must be positive')
     ])
     
     discount_code = StringField('Disc Code', validators=[
@@ -68,14 +66,9 @@ class ProductForm(FlaskForm):
         Length(max=10, message='Discount code cannot exceed 10 characters')
     ])
     
-    brand = StringField('Brand', validators=[
+    notes = TextAreaField('Notes', validators=[
         Optional(),
-        Length(max=100, message='Brand cannot exceed 100 characters')
-    ])
-    
-    model_number = StringField('Model Number', validators=[
-        Optional(),
-        Length(max=100, message='Model number cannot exceed 100 characters')
+        Length(max=1000, message='Notes cannot exceed 1000 characters')
     ])
     
     # Physical Properties
@@ -84,38 +77,70 @@ class ProductForm(FlaskForm):
         NumberRange(min=0, message='Weight must be positive')
     ])
     
-    dimensions = StringField('Dimensions (LxWxH cm)', validators=[
+    dimensions = StringField('Dimensions', validators=[
         Optional(),
-        Length(max=100, message='Dimensions cannot exceed 100 characters')
+        Length(max=200, message='Dimensions cannot exceed 200 characters')
     ])
     
-    # Inventory Management
-    stock_quantity = IntegerField('Stock Quantity', validators=[
-        DataRequired(message='Stock quantity is required'),
-        NumberRange(min=0, message='Stock quantity must be positive')
-    ])
-    
-    reorder_level = IntegerField('Reorder Level', validators=[
-        DataRequired(message='Reorder level is required'),
-        NumberRange(min=0, message='Reorder level must be positive')
-    ])
-    
+    # Management Fields
     lead_time_days = IntegerField('Lead Time (days)', validators=[
-        DataRequired(message='Lead time is required'),
+        Optional(),
         NumberRange(min=0, message='Lead time must be positive')
     ])
     
     # Status
     is_active = BooleanField('Active')
     
-    # Additional Information
-    notes = TextAreaField('Notes', validators=[
+    # Legacy Fields (for backward compatibility)
+    sku = StringField('SKU (Legacy)', validators=[
         Optional(),
-        Length(max=1000, message='Notes cannot exceed 1000 characters')
+        Length(max=80, message='SKU cannot exceed 80 characters')
     ])
     
+    name = StringField('Product Name (Legacy)', validators=[
+        Optional(),
+        Length(max=200, message='Product name cannot exceed 200 characters')
+    ])
+    
+    unit_price = DecimalField('Unit Price (Legacy) ($)', validators=[
+        Optional(),
+        NumberRange(min=0, message='Unit price must be positive')
+    ])
+    
+    brand = StringField('Brand (Legacy)', validators=[
+        Optional(),
+        Length(max=100, message='Brand cannot exceed 100 characters')
+    ])
+    
+    model_number = StringField('Model Number (Legacy)', validators=[
+        Optional(),
+        Length(max=100, message='Model number cannot exceed 100 characters')
+    ])
+    
+    stock_quantity = IntegerField('Stock Quantity (Legacy)', validators=[
+        Optional(),
+        NumberRange(min=0, message='Stock quantity must be positive')
+    ])
+    
+    reorder_level = IntegerField('Reorder Level (Legacy)', validators=[
+        Optional(),
+        NumberRange(min=0, message='Reorder level must be positive')
+    ])
+    
+    def validate_item_no(self, field):
+        """Validate that Item No is unique."""
+        # Check if this is an edit operation
+        product_id = getattr(self, '_product_id', None)
+        
+        existing_product = Product.query.filter_by(item_no=field.data).first()
+        if existing_product and existing_product.id != product_id:
+            raise ValidationError('Item No must be unique. This Item No is already in use.')
+    
     def validate_sku(self, field):
-        """Validate that SKU is unique."""
+        """Validate that SKU is unique (legacy)."""
+        if not field.data:
+            return
+            
         # Check if this is an edit operation
         product_id = getattr(self, '_product_id', None)
         
@@ -132,25 +157,30 @@ class ProductSearchForm(FlaskForm):
     
     search_term = StringField('Search', validators=[
         Optional(),
-        Length(max=100, message='Search term cannot exceed 100 characters')
+        Length(max=200, message='Search term cannot exceed 200 characters')
     ])
     
     category = StringField('Category', validators=[
         Optional(),
-        Length(max=100, message='Category cannot exceed 100 characters')
+        Length(max=200, message='Category cannot exceed 200 characters')
+    ])
+    
+    sub_category = StringField('Sub Category', validators=[
+        Optional(),
+        Length(max=200, message='Sub Category cannot exceed 200 characters')
     ])
     
     series = StringField('Series', validators=[
         Optional(),
-        Length(max=100, message='Series cannot exceed 100 characters')
+        Length(max=200, message='Series cannot exceed 200 characters')
     ])
     
     item_no = StringField('Item No', validators=[
         Optional(),
-        Length(max=100, message='Item number cannot exceed 100 characters')
+        Length(max=200, message='Item number cannot exceed 200 characters')
     ])
     
-    brand = StringField('Brand', validators=[
+    brand = StringField('Brand (Legacy)', validators=[
         Optional(),
         Length(max=100, message='Brand cannot exceed 100 characters')
     ])

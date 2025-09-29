@@ -14,7 +14,7 @@
                 </ol>
             </nav>
             <h1 class="h3 mb-0">Import Products</h1>
-            <p class="text-muted">Import products from CSV file</p>
+            <p class="text-muted">Import products from CSV file with new schema</p>
         </div>
         <div>
             <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">
@@ -25,7 +25,6 @@
 
     <div class="row">
         <div class="col-lg-8">
-            <!-- Import Form -->
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Import Products from CSV</h5>
@@ -35,135 +34,187 @@
                         {{ form.hidden_tag() }}
                         
                         <div class="alert alert-info mb-4">
-                            <h6><i class="fas fa-info-circle"></i> New CSV Format</h6>
-                            <p class="mb-2">Your CSV should include these columns:</p>
-                            <code>Category, SubCategory, Series, Item No, Description, Pack, Carton Qty, List price, Nett, Disc Code, Note, weight_kg, dimensions, lead_time_days, is_active</code>
+                            <h6><i class="fas fa-info-circle"></i> Updated CSV Format Required</h6>
+                            <p class="mb-2">Your CSV must include these columns (in this order):</p>
+                            <div class="bg-light p-3 rounded">
+                                <code class="d-block">
+                                    Category, SubCategory, Series, Item No, Description, Pack, Carton Qty, List price, Nett, Disc Code, Note, weight_kg, dimensions, lead_time_days, is_active
+                                </code>
+                            </div>
                         </div>
                         
                         <div class="mb-4">
-                            <label for="csv_file" class="form-label">CSV File</label>
-                            <input type="file" class="form-control" id="csv_file" name="csv_file" 
-                                   accept=".csv" required>
+                            {{ form.csv_file.label(class="form-label") }}
+                            {{ form.csv_file(class="form-control" + (" is-invalid" if form.csv_file.errors else "")) }}
                             {% if form.csv_file.errors %}
-                                <div class="invalid-feedback d-block">
+                                <div class="invalid-feedback">
                                     {% for error in form.csv_file.errors %}
                                         {{ error }}
                                     {% endfor %}
                                 </div>
                             {% endif %}
-                            <small class="form-text text-muted">Upload a CSV file with product data matching the format above</small>
+                            <small class="form-text text-muted">Select a CSV file with the updated schema</small>
                         </div>
                         
-                        <div class="row">
+                        <div class="row mb-4">
                             <div class="col-md-6">
-                                <div class="form-check mb-3">
+                                <div class="form-check">
                                     {{ form.update_existing(class="form-check-input") }}
                                     {{ form.update_existing.label(class="form-check-label") }}
-                                    <small class="form-text text-muted d-block">Update existing products with matching SKU</small>
                                 </div>
+                                <small class="form-text text-muted">Update existing products with matching Item No</small>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-check mb-3">
+                                <div class="form-check">
                                     {{ form.skip_errors(class="form-check-input") }}
                                     {{ form.skip_errors.label(class="form-check-label") }}
-                                    <small class="form-text text-muted d-block">Skip rows with errors and continue import</small>
                                 </div>
+                                <small class="form-text text-muted">Continue import even if some rows have errors</small>
                             </div>
                         </div>
                         
-                        <hr>
-                        
                         <div class="d-flex justify-content-between">
-                            <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-upload"></i> Import Products
-                            </button>
+                            <div>
+                                <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></我> Cancel
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-upload"></我> Import Products
+                                </button>
+                                <a href="{{ url_for('products.download_sample_csv') }}" 
+                                   class="btn btn-outline-info ms-2">
+                                    <i class="fas fa-download"></i> Download Sample
+                                </a>
+                            </div>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
         
-        <!-- Sidebar -->
         <div class="col-lg-4">
-            <!-- CSV Format Guide -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">CSV Format Guide</h5>
-                </div>
-                <div class="card-body">
-                    <h6>Required Columns:</h6>
-                    <ul class="list-unstyled">
-                        <li><code>Category</code> - Product category</li>
-                        <li><code>Item No</code> - Unique product identifier (used as SKU)</li>
-                        <li><code>Description</code> - Product name and description</li>
-                        <li><code>List price</code> - Price in dollars (e.g., $96.00)</li>
-                    </ul>
-                    
-                    <h6>Additional Columns:</h6>
-                    <ul class="list-unstyled">
-                        <li><code>SubCategory</code> - Product subcategory</li>
-                        <li><code>Series</code> - Product series</li>
-                        <li><code>Pack</code> - Pack size</li>
-                        <li><code>Carton Qty</code> - Carton quantity</li>
-                        <li><code>Nett</code> - Nett price (e.g., $28.80)</li>
-                        <li><code>Disc Code</code> - Discount code</li>
-                        <li><code>Note</code> - Internal notes</li>
-                    </ul>
-                    
-                    <h6>Optional Columns:</h6>
-                    <ul class="list-unstyled">
-                        <li><code>weight_kg</code> - Weight in kilograms</li>
-                        <li><code>dimensions</code> - Dimensions (LxWxH cm)</li>
-                        <li><code>lead_time_days</code> - Lead time in days</li>
-                        <li><code>is_active</code> - Active status (true/false)</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Sample CSV -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Sample CSV</h5>
-                </div>
-                <div class="card-body">
-                    <pre class="bg-light p-2 rounded"><code>Category,SubCategory,Series,Item No,Description,Pack,Carton Qty,List price,Nett,Disc Code,Note,weight_kg,dimensions,lead_time_days,is_active
-Plumbing & Water Distribution,Pressure Reducing Valves,2581.A,25810400,"Rinox Plus M G1/2"" (15mm) Pressure reducing valve",1,10,$96.00,$28.80,P1,"Standard pressure reducing valve",1.5,"15x10x8cm",7,true
-Plumbing & Water Distribution,Pressure Reducing Valves,2581.A,25810500,"Rinox Plus M G3/4"" (20mm) Pressure reducing valve",1,10,$96.00,$28.80,P1,"Standard pressure reducing valve",2.0,"20x12x10cm",7,true
-Plumbing & Water Distribution,Pressure Reducing Valves,2581.A,25810600,"Rinox Plus M G1"" (25mm) Pressure reducing valve",1,4,$240.00,$72.00,P1,"Standard pressure reducing valve",2.5,"25x15x12cm",7,true</code></pre>
-                    <a href="{{ url_for('products.export_products') }}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-download"></i> Download Sample
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Import Tips -->
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Import Tips</h5>
+                    <h5 class="card-title mb-0">Import Guide</h5>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <h6><i class="fas fa-info-circle"></i> Best Practices</h6>
-                        <ul class="mb-0">
-                            <li>Use unique SKUs for each product</li>
-                            <li>Ensure prices are positive numbers</li>
-                            <li>Use standard categories for consistency</li>
-                            <li>Test with a small file first</li>
-                            <li>Backup your data before large imports</li>
-                        </ul>
-                    </div>
-                    
                     <div class="alert alert-warning">
                         <h6><i class="fas fa-exclamation-triangle"></i> Important Notes</h6>
                         <ul class="mb-0">
-                            <li>SKU must be unique across all products</li>
-                            <li>Prices must be positive values</li>
-                            <li>Stock quantities cannot be negative</li>
-                            <li>Large files may take time to process</li>
+                            <li><strong>Item No</strong> is the primary identifier (replaces SKU)</li>
+                            <li><strong>Description</strong> is the main product name</li>
+                            <li><strong>Category</strong> is required for all products</li>
+                            <li><strong>SubCategory</strong> helps with organization</li>
                         </ul>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Required Fields:</h6>
+                        <ul class="small">
+                            <li>Item No (unique identifier)</li>
+                            <li>Description (product name)</li>
+                            <li>Category</li>
+                            <li>Pack (default: 1)</li>
+                            <li>Carton Qty (default: 1)</li>
+                            <li>is_active (true/false)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Optional Fields:</h6>
+                        <ul class="small">
+                            <li>SubCategory</li>
+                            <li>Series</li>
+                            <li>List price</li>
+                            <li>Nett price</li>
+                            <li>Disc Code</li>
+                            <li>Note</li>
+                            <li>weight_kg</li>
+                            <li>dimensions</li>
+                            <li>lead_time_days</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb"></i> Tips</h6>
+                        <ul class="mb-0">
+                            <li>Use quotes for text containing commas</li>
+                            <li>Leave empty cells for optional fields</li>
+                            <li>Use true/false for is_active field</li>
+                            <li>Save file as UTF-8 encoding</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Migration from Old Format</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">If you have an old CSV format, the system will:</p>
+                    <ul class="small mb-0">
+                        <li>Map SKU → Item No</li>
+                        <li>Map Name → Description</li>
+                        <li>Map Unit Price → List Price</li>
+                        <li>Set defaults for new fields</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Example Data Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Example CSV Content</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>SubCategory</th>
+                                    <th>Series</th>
+                                    <th>Item No</th>
+                                    <th>Description</th>
+                                    <th>Pack</th>
+                                    <th>Carton Qty</th>
+                                    <th>List price</th>
+                                    <th>Nett</th>
+                                    <th>Disc Code</th>
+                                    <th>Note</th>
+                                    <th>weight_kg</th>
+                                    <th>dimensions</th>
+                                    <th>lead_time_days</th>
+                                    <th>is_active</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>"Plumbing"</td>
+                                    <td>"Valves"</td>
+                                    <td>"VIP001"</td>
+                                    <td>"VV15001"</td>
+                                    <td>"Ball Valve 15mm"</td>
+                                    <td>1</td>
+                                    <td>10</td>
+                                    <td>45.50</td>
+                                    <td>30.00</td>
+                                    <td>"P1"</td>
+                                    <td>"High quality valve"</td>
+                                    <td>0.5</td>
+                                    <td>"15x8x12"</td>
+                                    <td>7</td>
+                                    <td>true</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -172,20 +223,13 @@ Plumbing & Water Distribution,Pressure Reducing Valves,2581.A,25810600,"Rinox Pl
 </div>
 
 <script>
-// File upload preview
+// Add file preview functionality
 document.getElementById('csv_file').addEventListener('change', function(e) {
     const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const text = e.target.result;
-            const lines = text.split('\n');
-            if (lines.length > 0) {
-                const headers = lines[0].split(',');
-                console.log('CSV Headers:', headers);
-            }
-        };
-        reader.readAsText(file);
+    if (file && file.type === 'text/csv') {
+        console.log('Valid CSV file selected:', file.name);
+    } else {
+        alert('Please select a valid CSV file.');
     }
 });
 
@@ -195,21 +239,15 @@ document.querySelector('form').addEventListener('submit', function(e) {
     if (!fileInput.files[0]) {
         e.preventDefault();
         alert('Please select a CSV file to import.');
-        return;
+        return false;
     }
     
-    const file = fileInput.files[0];
-    if (!file.name.toLowerCase().endsWith('.csv')) {
+    const fileName = fileInput.files[0].name.toLowerCase();
+    if (!fileName.endsWith('.csv')) {
         e.preventDefault();
-        alert('Please select a valid CSV file.');
-        return;
-    }
-    
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        e.preventDefault();
-        alert('File size must be less than 10MB.');
-        return;
+        alert('Please select a CSV file with .csv extension.');
+        return false;
     }
 });
 </script>
-{% endblock %} 
+{% endblock %}

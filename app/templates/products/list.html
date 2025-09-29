@@ -165,10 +165,10 @@
                             <th>
                                 <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
                             </th>
-                            <th>SKU</th>
-                            <th>Name</th>
+                            <th>Item No</th>
+                            <th>Description</th>
                             <th>Category</th>
-                            <th>Brand</th>
+                            <th>SubCategory</th>
                             <th>Price</th>
                             <th>Stock</th>
                             <th>Status</th>
@@ -182,24 +182,29 @@
                                 <input type="checkbox" class="product-checkbox" value="{{ product.id }}" onchange="updateSelection()">
                             </td>
                             <td>
-                                <strong>{{ product.sku }}</strong>
+                                <strong>{{ product.item_no or product.sku }}</strong>
                             </td>
                             <td>
                                 <a href="{{ url_for('products.view_product', product_id=product.id) }}" class="text-decoration-none">
-                                    {{ product.name }}
+                                    {{ product.description or product.name }}
                                 </a>
-                                {% if product.description %}
-                                <br><small class="text-muted">{{ product.description[:50] }}{% if product.description|length > 50 %}...{% endif %}</small>
+                                {% if product.series %}
+                                <br><small class="text-muted">Series: {{ product.series }}</small>
                                 {% endif %}
                             </td>
                             <td>
                                 <span class="badge bg-secondary">{{ product.category }}</span>
                             </td>
-                            <td>{{ product.brand or '-' }}</td>
+                            <td>{{ product.sub_category or '-' }}</td>
                             <td>
-                                <strong>${{ "%.2f"|format(product.unit_price) }}</strong>
+                                {% if product.get_effective_price() %}
+                                <strong>${{ "%.2f"|format(product.get_effective_price()) }}</strong>
+                                {% endif %}
+                                {% if product.list_price and product.nett and product.list_price != product.nett %}
+                                <br><small class="text-success">Nett: ${{ "%.2f"|format(product.nett) }}</small>
+                                {% endif %}
                                 {% if product.discount %}
-                                <br><small class="text-success">-{{ product.discount.percentage }}%</small>
+                                <br><small class="text-info">-{{ product.discount.percentage }}%</small>
                                 {% endif %}
                             </td>
                             <td>
