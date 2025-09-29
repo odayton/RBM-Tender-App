@@ -14,19 +14,34 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv('config/.env')
+def load_env_file():
+    """Load environment variables from config/.env file"""
+    env_file = project_root / 'config' / '.env'
+    env_vars = {}
+    
+    if env_file.exists():
+        with open(env_file, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    env_vars[key] = value
+                    os.environ[key] = value
+    
+    return env_vars
 
 def create_backup():
     """Create a manual backup of the PostgreSQL database"""
+    
+    # Load environment variables
+    load_env_file()
     
     # Get database connection details from environment
     database_url = os.environ.get('DATABASE_URL') or os.environ.get('SQLALCHEMY_DATABASE_URI')
     
     if not database_url:
         print("❌ DATABASE_URL not found in environment variables")
+        print("💡 Make sure config/.env file exists and contains DATABASE_URL")
         return False
     
     # Parse connection details
@@ -127,6 +142,9 @@ def list_recent_backups(backup_dir, count=5):
 
 def restore_backup(backup_filename):
     """Restore database from backup file"""
+    
+    # Load environment variables
+    load_env_file()
     
     # Get database connection details
     database_url = os.environ.get('DATABASE_URL') or os.environ.get('SQLALCHEMY_DATABASE_URI')

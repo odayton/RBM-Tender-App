@@ -34,6 +34,12 @@
                     <form method="POST" action="{{ url_for('products.import_products') }}" enctype="multipart/form-data">
                         {{ form.hidden_tag() }}
                         
+                        <div class="alert alert-info mb-4">
+                            <h6><i class="fas fa-info-circle"></i> New CSV Format</h6>
+                            <p class="mb-2">Your CSV should include these columns:</p>
+                            <code>Category, SubCategory, Series, Item No, Description, Pack, Carton Qty, List price, Nett, Disc Code, Note, weight_kg, dimensions, lead_time_days, is_active</code>
+                        </div>
+                        
                         <div class="mb-4">
                             <label for="csv_file" class="form-label">CSV File</label>
                             <input type="file" class="form-control" id="csv_file" name="csv_file" 
@@ -45,7 +51,7 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
-                            <small class="form-text text-muted">Upload a CSV file with product data</small>
+                            <small class="form-text text-muted">Upload a CSV file with product data matching the format above</small>
                         </div>
                         
                         <div class="row">
@@ -90,10 +96,10 @@
                 <div class="card-body">
                     <h6>Required Columns:</h6>
                     <ul class="list-unstyled">
+                        <li><code>Category</code> - Product category</li>
                         <li><code>Item No</code> - Unique product identifier (used as SKU)</li>
                         <li><code>Description</code> - Product name and description</li>
-                        <li><code>2025 List Price</code> - Price in dollars (e.g., $96.00)</li>
-                        <li><code>Category</code> - Product category</li>
+                        <li><code>List price</code> - Price in dollars (e.g., $96.00)</li>
                     </ul>
                     
                     <h6>Additional Columns:</h6>
@@ -102,21 +108,17 @@
                         <li><code>Series</code> - Product series</li>
                         <li><code>Pack</code> - Pack size</li>
                         <li><code>Carton Qty</code> - Carton quantity</li>
-                        <li><code>Disc Code</code> - Discount code</li>
                         <li><code>Nett</code> - Nett price (e.g., $28.80)</li>
+                        <li><code>Disc Code</code> - Discount code</li>
+                        <li><code>Note</code> - Internal notes</li>
                     </ul>
                     
-                    <h6>Optional Columns (if present):</h6>
+                    <h6>Optional Columns:</h6>
                     <ul class="list-unstyled">
-                        <li><code>brand</code> - Brand name</li>
-                        <li><code>model_number</code> - Model number</li>
                         <li><code>weight_kg</code> - Weight in kilograms</li>
                         <li><code>dimensions</code> - Dimensions (LxWxH cm)</li>
-                        <li><code>stock_quantity</code> - Current stock</li>
-                        <li><code>reorder_level</code> - Reorder threshold</li>
                         <li><code>lead_time_days</code> - Lead time in days</li>
                         <li><code>is_active</code> - Active status (true/false)</li>
-                        <li><code>notes</code> - Internal notes</li>
                     </ul>
                 </div>
             </div>
@@ -127,10 +129,10 @@
                     <h5 class="card-title mb-0">Sample CSV</h5>
                 </div>
                 <div class="card-body">
-                    <pre class="bg-light p-2 rounded"><code>Category,SubCategory,Series,Item No,Description,Pack,Carton Qty,2025 List Price,Disc Code,Nett
-Plumbing & Water Distribution,Pressure Reducing Valves,2581.A,25810400,"Rinox Plus M G1/2"" (15mm) Pressure reducing valve",1,10,$96.00,P1,$28.80
-Plumbing & Water Distribution,Pressure Reducing Valves,2581.A,25810500,"Rinox Plus M G3/4"" (20mm) Pressure reducing valve",1,10,$96.00,P1,$28.80
-Plumbing & Water Distribution,Pressure Reducing Valves,2581.A,25810600,"Rinox Plus M G1"" (25mm) Pressure reducing valve",1,4,$240.00,P1,$72.00</code></pre>
+                    <pre class="bg-light p-2 rounded"><code>Category,SubCategory,Series,Item No,Description,Pack,Carton Qty,List price,Nett,Disc Code,Note,weight_kg,dimensions,lead_time_days,is_active
+Plumbing & Water Distribution,Pressure Reducing Valves,2581.A,25810400,"Rinox Plus M G1/2"" (15mm) Pressure reducing valve",1,10,$96.00,$28.80,P1,"Standard pressure reducing valve",1.5,"15x10x8cm",7,true
+Plumbing & Water Distribution,Pressure Reducing Valves,2581.A,25810500,"Rinox Plus M G3/4"" (20mm) Pressure reducing valve",1,10,$96.00,$28.80,P1,"Standard pressure reducing valve",2.0,"20x12x10cm",7,true
+Plumbing & Water Distribution,Pressure Reducing Valves,2581.A,25810600,"Rinox Plus M G1"" (25mm) Pressure reducing valve",1,4,$240.00,$72.00,P1,"Standard pressure reducing valve",2.5,"25x15x12cm",7,true</code></pre>
                     <a href="{{ url_for('products.export_products') }}" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-download"></i> Download Sample
                     </a>
