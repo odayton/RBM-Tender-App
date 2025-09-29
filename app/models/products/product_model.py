@@ -112,8 +112,19 @@ class Product(BaseModel):
         return self.list_price_2025 if self.list_price_2025 else self.unit_price
 
     def get_nett_buy_price_gst(self) -> Decimal:
-        """Get the nett buy price including GST."""
-        return self.nett_buy_price_gst if self.nett_buy_price_gst else self.unit_price
+        """Get the nett buy price including GST, calculated from list price and discount."""
+        # If nett_buy_price_gst is already set, use it
+        if self.nett_buy_price_gst:
+            return self.nett_buy_price_gst
+        
+        # Calculate from list price and discount code
+        list_price = self.get_list_price_2025()
+        if self.discount and self.discount.is_valid():
+            discount_factor = 1 - (self.discount.percentage / Decimal('100'))
+            return list_price * discount_factor
+        
+        # If no discount, nett price equals list price
+        return list_price
 
     def is_low_stock(self) -> bool:
         """Check if product is low on stock (below reorder level)."""
