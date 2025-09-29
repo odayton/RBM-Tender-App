@@ -388,6 +388,15 @@ def import_products():
             
             # Read CSV file
             csv_data = csv_file.read().decode('utf-8')
+            # Clean up trailing commas that might cause empty columns
+            csv_lines = csv_data.strip().split('\n')
+            cleaned_lines = []
+            for line in csv_lines:
+                # Remove trailing commas and whitespace
+                cleaned_line = line.rstrip(', \t')
+                cleaned_lines.append(cleaned_line)
+            csv_data = '\n'.join(cleaned_lines)
+            
             csv_reader = csv.DictReader(io.StringIO(csv_data))
             
             imported_count = 0
@@ -412,7 +421,7 @@ def import_products():
                         imported_count += 1
                     
                     # Update product fields - Map CSV columns to database fields
-                    # CSV: Category,SubCategory,Series,Item No,Description,Pack,Carton Qty,2025 List Price,Disc Code,Nett
+                    # CSV Headers: Category | SubCategory | Series | Item No | Description | Pack | Carton Qty | 2025 List Price | Nett | Disc Code | Note | weight_kg | dimensions | lead_time_days | is_active
                     
                     # Use Item No as SKU (primary identifier)
                     product.sku = row['Item No'].strip()
@@ -425,7 +434,11 @@ def import_products():
                     
                     # Map 2025 List Price to unit_price (remove $ and commas)
                     list_price_str = row['2025 List Price'].replace('$', '').replace(',', '').strip()
-                    product.unit_price = Decimal(list_price_str) if list_price_str else Decimal('0')
+                    try:
+                        product.unit_price = Decimal(list_price_str) if list_price_str else Decimal('0')
+                    except (ValueError, TypeError) as e:
+                        logger.warning(f"Invalid price format '{row['2025 List Price']}' for SKU {row['Item No']}, using 0")
+                        product.unit_price = Decimal('0')
                     
                     # Map Category
                     product.category = row['Category'].strip()
@@ -437,25 +450,87 @@ def import_products():
                     product.item_no = row['Item No'].strip()
                     
                     # Map 2025 List Price to list_price_2025
-                    product.list_price_2025 = Decimal(list_price_str) if list_price_str else Decimal('0')
+                    try:
+                        product.list_price_2025 = Decimal(list_price_str) if list_price_str else Decimal('0')
+                    except (ValueError, TypeError) as e:
+                        logger.warning(f"Invalid list price format '{row['2025 List Price']}' for SKU {row['Item No']}, using 0")
+                        product.list_price_2025 = Decimal('0')
                     
-                    # Map Disc Code to discount_code
-                    product.discount_code = row['Disc Code'].strip() if row['Disc Code'].strip() else None
+                    # Map SubCategory to a new field (if needed) or notes
+                    subcategory = row.get('SubCategory', '').strip()
+                    
+                    # Map Pack information
+                    pack_info = row.get('Pack', '').strip()
+                    
+                    # Map Carton Qty
+                    carton_qty = row.get('Carton Qty', '').strip()
+                    
+                    # Map Disc Code to discount_code - handle foreign key constraint
+                    disc_code = row['Disc Code'].strip() if row['Disc Code'].strip() else None
+                    if disc_code:
+                        # Check if discount code exists in database
+                        from app.models.deals.deal_models import Discount
+                        existing_discount = Discount.query.filter_by(code=disc_code).first()
+                        if existing_discount:
+                            product.discount_code = disc_code
+                        else:
+                            # Log warning but don't fail the import
+                            logger.warning(f"Discount code '{disc_code}' not found in database, skipping discount for SKU {product.sku}")
+                            product.discount_code = None
+                    else:
+                        product.discount_code = None
                     
                     # Map Nett to nett_buy_price_gst (remove $ and commas)
                     nett_str = row['Nett'].replace('$', '').replace(',', '').strip()
-                    product.nett_buy_price_gst = Decimal(nett_str) if nett_str else Decimal('0')
+                    try:
+                        product.nett_buy_price_gst = Decimal(nett_str) if nett_str else Decimal('0')
+                    except (ValueError, TypeError) as e:
+                        logger.warning(f"Invalid nett price format '{row['Nett']}' for SKU {row['Item No']}, using 0")
+                        product.nett_buy_price_gst = Decimal('0')
+                    
+                    # Map Note field
+                    note_text = row.get('Note', '').strip()
+                    if note_text:
+                        # Combine subcategory, pack info, and notes if they exist
+                        combined_notes = []
+                        if subcategory:
+                            combined_notes.append(f"SubCategory: {subcategory}")
+                        if pack_info:
+                            combined_notes.append(f"Pack: {pack_info}")
+                        if carton_qty:
+                            combined_notes.append(f"Carton Qty: {carton_qty}")
+                        if note_text:
+                            combined_notes.append(note_text)
+                        product.notes = ' | '.join(combined_notes)
+                    else:
+                        product.notes = None
+                    
+                    # Map weight_kg from CSV
+                    weight_str = row.get('weight_kg', '').strip()
+                    try:
+                        product.weight_kg = Decimal(weight_str) if weight_str else None
+                    except (ValueError, TypeError):
+                        product.weight_kg = None
+                    
+                    # Map dimensions from CSV
+                    product.dimensions = row.get('dimensions', '').strip() or None
+                    
+                    # Map lead_time_days from CSV
+                    lead_time_str = row.get('lead_time_days', '').strip()
+                    try:
+                        product.lead_time_days = int(lead_time_str) if lead_time_str else 0
+                    except (ValueError, TypeError):
+                        product.lead_time_days = 0
+                    
+                    # Map is_active from CSV
+                    is_active_str = row.get('is_active', 'true').strip().lower()
+                    product.is_active = is_active_str in ('true', '1', 'yes', 'y')
                     
                     # Set default values for fields not in CSV
-                    product.brand = row.get('brand', '').strip()
-                    product.model_number = row.get('model_number', '').strip()
-                    product.weight_kg = Decimal(row.get('weight_kg', 0)) if row.get('weight_kg') else None
-                    product.dimensions = row.get('dimensions', '').strip()
-                    product.stock_quantity = int(row.get('stock_quantity', 0))
-                    product.reorder_level = int(row.get('reorder_level', 0))
-                    product.lead_time_days = int(row.get('lead_time_days', 0))
-                    product.is_active = row.get('is_active', 'true').lower() == 'true'
-                    product.notes = row.get('notes', '').strip()
+                    product.brand = row.get('brand', '').strip() or None
+                    product.model_number = row.get('model_number', '').strip() or None
+                    product.stock_quantity = int(row.get('stock_quantity', 0)) if row.get('stock_quantity') else 0
+                    product.reorder_level = int(row.get('reorder_level', 0)) if row.get('reorder_level') else 0
                     
                     product.save()
                     
