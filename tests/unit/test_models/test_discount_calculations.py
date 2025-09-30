@@ -67,7 +67,7 @@ class TestDiscountCalculations:
     
     def test_line_item_discount_calculation(self, db_session):
         """Test line item total price with discount."""
-        product = ProductFactory(unit_price=Decimal('500.00'))
+        product = ProductFactory(list_price=Decimal('500.00'))
         db_session.add(product)
         db_session.commit()
         
@@ -121,7 +121,7 @@ class TestDiscountCalculations:
             option_id=option.id,
             product_id=product.id,
             quantity=2,
-            unit_price=Decimal('500.00'),
+            unit_price=product.list_price,
             discount=Decimal('15.00')  # 15% discount
         )
         db_session.add(line_item)

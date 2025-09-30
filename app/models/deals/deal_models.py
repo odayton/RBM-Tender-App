@@ -338,14 +338,14 @@ class QuoteLineItem(BaseModel):
     def product_name(self) -> str:
         """Get the product name (from product or custom)."""
         if self.product:
-            return self.product.name
+            return self.product.description
         return self.custom_name or "Custom Item"
     
     @property
     def product_sku(self) -> str:
         """Get the product SKU (from product or custom)."""
         if self.product:
-            return self.product.sku
+            return self.product.item_no
         return self.custom_sku or "CUSTOM"
     
     def validate(self) -> None:

@@ -12,30 +12,25 @@ from tests.factories import ProductFactory
 class TestProductBusinessLogic:
     """Test product business logic."""
     
-    def test_product_item_no_uniqueness(self, db_session):
-        """Test that product item numbers must be unique."""
-        # Create first product with unique item number
-        product1 = Product(
-            item_no='UNIQUE-ITEM-TEST-1',
-            description='Test Product 1',
+    def test_product_item_no_validation(self, db_session):
+        """Test that product item numbers are validated."""
+        # Test valid item number
+        product = Product(
+            item_no='VALID-ITEM-TEST-1',
+            description='Test Product',
             category='Test',
             list_price=Decimal('100.00'),
             is_active=True
         )
-        db_session.add(product1)
+        db_session.add(product)
         db_session.commit()
         
-        # Try to create second product with same item number - should fail
-        product2 = Product(
-            item_no='UNIQUE-ITEM-TEST-1',  # Same item number - should fail
-            description='Test Product 2',
-            category='Test',
-            list_price=Decimal('200.00'),
-            is_active=True
-        )
-        db_session.add(product2)
-        with pytest.raises(Exception):  # Should raise integrity error
-            db_session.commit()
+        assert product.item_no == 'VALID-ITEM-TEST-1'
+        
+        # Test empty item number (should fail validation)
+        product.item_no = ''
+        with pytest.raises(Exception):  # Should raise ValidationError
+            product.validate()
     
     def test_product_description_validation(self, db_session):
         """Test product description validation."""

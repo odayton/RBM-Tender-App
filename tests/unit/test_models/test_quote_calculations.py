@@ -78,14 +78,14 @@ class TestQuoteCalculations:
             option_id=option.id,
             product_id=product1.id,
             quantity=2,
-            unit_price=Decimal('1000.00'),
+            unit_price=product1.list_price,
             discount=Decimal('0.00')
         )
         line_item2 = QuoteLineItem(
             option_id=option.id,
             product_id=product2.id,
             quantity=1,
-            unit_price=Decimal('500.00'),
+            unit_price=product2.list_price,
             discount=Decimal('10.00')  # 10% discount
         )
         db_session.add_all([line_item1, line_item2])
@@ -174,7 +174,7 @@ class TestQuoteCalculations:
             option_id=option1.id,
             product_id=product1.id,
             quantity=1,
-            unit_price=Decimal('1000.00'),
+            unit_price=product1.list_price,
             discount=Decimal('0.00')
         )
         db_session.add(line_item1)
@@ -185,7 +185,7 @@ class TestQuoteCalculations:
             option_id=option2.id,
             product_id=product2.id,
             quantity=2,
-            unit_price=Decimal('750.00'),
+            unit_price=product2.list_price,
             discount=Decimal('5.00')  # 5% discount
         )
         db_session.add(line_item2)
@@ -266,7 +266,7 @@ class TestQuoteCalculations:
             option_id=option.id,
             product_id=product.id,
             quantity=3,
-            unit_price=Decimal('1000.00'),
+            unit_price=product1.list_price,
             discount=Decimal('0.00')
         )
         db_session.add(line_item)
@@ -418,21 +418,21 @@ class TestQuoteCalculations:
             product_id=product1.id,
             display_order=2,
             quantity=1,
-            unit_price=Decimal('100.00')
+            unit_price=product1.list_price
         )
         line_item2 = QuoteLineItem(
             option_id=option.id,
             product_id=product2.id,
             display_order=1,
             quantity=1,
-            unit_price=Decimal('200.00')
+            unit_price=product2.list_price
         )
         line_item3 = QuoteLineItem(
             option_id=option.id,
             product_id=product3.id,
             display_order=3,
             quantity=1,
-            unit_price=Decimal('300.00')
+            unit_price=product3.list_price
         )
         db_session.add_all([line_item1, line_item2, line_item3])
         db_session.commit()
@@ -844,7 +844,7 @@ class TestQuoteCalculations:
             option_id=option.id,
             product_id=product.id,
             quantity=1,
-            unit_price=Decimal('1000.00'),
+            unit_price=product1.list_price,
             notes='Line item notes'
         )
         db_session.add(line_item)

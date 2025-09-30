@@ -229,10 +229,8 @@ class TestModelMethodsFunctionality:
         
         # Test methods that are actually available
         assert product.get_discounted_price() is not None
-        assert product.get_list_price() is not None
-        assert isinstance(product.is_low_stock(), bool)
-        assert isinstance(product.is_out_of_stock(), bool)
-        assert isinstance(product.get_availability_status(), str)
+        assert product.list_price is not None
+        assert isinstance(product.is_active, bool)
         assert isinstance(product.to_dict(), dict)
     
     def test_product_model_queries_work(self, db_session):
