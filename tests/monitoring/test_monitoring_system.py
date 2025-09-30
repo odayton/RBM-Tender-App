@@ -47,20 +47,41 @@ class TestMonitoringEndpoints:
         except requests.exceptions.RequestException:
             pytest.skip("Application not running - skipping endpoint tests")
     
-    def test_monitoring_status_endpoint(self):
-        """Test the status endpoint."""
+    def test_enhanced_health_check_endpoint(self):
+        """Test the enhanced health check endpoint."""
         base_url = "http://localhost:5000"
         
         try:
-            response = requests.get(f"{base_url}/monitoring/status", timeout=10)
+            response = requests.get(f"{base_url}/health", timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 assert 'status' in data
-                print("✅ Status endpoint: OK")
+                assert 'checks' in data
+                
+                # Check that enhanced health checks are present
+                expected_checks = [
+                    'schema_compatibility',
+                    'model_methods',
+                    'critical_endpoints',
+                    'database_constraints',
+                    'foreign_key_integrity'
+                ]
+                
+                for check_name in expected_checks:
+                    assert check_name in data['checks'], f"Missing health check: {check_name}"
+                
+                print("✅ Enhanced health endpoint: OK")
+                print(f"✅ Health status: {data['status']}")
+                
+                # Print check results
+                for check_name, check_result in data['checks'].items():
+                    status = check_result.get('status', 'unknown')
+                    print(f"✅ {check_name}: {status}")
+                
             else:
-                pytest.skip("Application not running - skipping endpoint tests")
+                pytest.skip("Application not running - skipping enhanced health check tests")
         except requests.exceptions.RequestException:
-            pytest.skip("Application not running - skipping endpoint tests")
+            pytest.skip("Application not running - skipping enhanced health check tests")
 
 
 @pytest.mark.monitoring
@@ -124,29 +145,50 @@ class TestMonitoringSystem:
         except ImportError as e:
             pytest.skip(f"Monitoring components not available: {e}")
     
-    def test_health_check_functionality(self):
-        """Test health check functionality."""
+    def test_enhanced_health_check_functionality(self):
+        """Test enhanced health check functionality."""
         try:
             # Add project root to path
             project_root = Path(__file__).parent.parent.parent
             sys.path.insert(0, str(project_root))
             
-            from app.core.core_monitoring import health_checker
+            from app.core.core_enhanced_health_checks import (
+                check_model_schema_compatibility,
+                check_model_methods_functionality,
+                check_critical_endpoints_functionality,
+                check_database_constraints,
+                check_foreign_key_integrity
+            )
             
-            # Run health checks
-            health_status = health_checker.run_checks()
+            # Test schema compatibility check
+            schema_result = check_model_schema_compatibility()
+            assert 'status' in schema_result
+            print(f"✅ Schema compatibility check: {schema_result['status']}")
             
-            # Verify health check structure
-            assert 'overall_status' in health_status
-            assert 'checks' in health_status
-            assert isinstance(health_status['checks'], list)
+            # Test model methods functionality check
+            methods_result = check_model_methods_functionality()
+            assert 'status' in methods_result
+            print(f"✅ Model methods check: {methods_result['status']}")
             
-            print(f"✅ Health check completed: {health_status['overall_status']}")
+            # Test critical endpoints functionality check
+            endpoints_result = check_critical_endpoints_functionality()
+            assert 'status' in endpoints_result
+            print(f"✅ Critical endpoints check: {endpoints_result['status']}")
+            
+            # Test database constraints check
+            constraints_result = check_database_constraints()
+            assert 'status' in constraints_result
+            print(f"✅ Database constraints check: {constraints_result['status']}")
+            
+            # Test foreign key integrity check
+            fk_result = check_foreign_key_integrity()
+            assert 'status' in fk_result
+            print(f"✅ Foreign key integrity check: {fk_result['status']}")
             
         except ImportError as e:
-            pytest.skip(f"Health checker not available: {e}")
+            pytest.skip(f"Enhanced health check modules not available: {e}")
         except Exception as e:
-            pytest.skip(f"Health check failed: {e}")
+            pytest.skip(f"Enhanced health check failed: {e}")
 
 
 @pytest.mark.monitoring

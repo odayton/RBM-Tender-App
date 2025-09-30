@@ -8,6 +8,7 @@ from .contact_factory import ContactFactory, PrimaryContactFactory
 from .deal_factory import DealFactory, HVACDealFactory, PlumbingDealFactory, HydronicHeatingDealFactory, ClosedWonDealFactory, SalesLeadDealFactory
 from .product_factory import ProductFactory, HVACProductFactory, PlumbingProductFactory, HydronicProductFactory, LowStockProductFactory, OutOfStockProductFactory
 from .quote_factory import QuoteFactory, QuoteRecipientFactory, QuoteOptionFactory, QuoteLineItemFactory, MultiOptionQuoteFactory, SimpleQuoteFactory
+from .discount_factory import DiscountFactory
 
 __all__ = [
     'UserFactory',
@@ -35,5 +36,6 @@ __all__ = [
     'QuoteOptionFactory',
     'QuoteLineItemFactory',
     'MultiOptionQuoteFactory',
-    'SimpleQuoteFactory'
+    'SimpleQuoteFactory',
+    'DiscountFactory'
 ]

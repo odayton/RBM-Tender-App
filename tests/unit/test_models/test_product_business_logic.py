@@ -303,25 +303,24 @@ class TestProductBusinessLogic:
     
     def test_product_list_price_fallback(self, db_session):
         """Test product list price fallback."""
-        # Test with list_price set
+        # Test that get_list_price() returns unit_price (since list_price was removed)
         product1 = ProductFactory(
-            unit_price=Decimal('1000.00'),
-            list_price=Decimal('1200.00')
+            unit_price=Decimal('1000.00')
         )
         db_session.add(product1)
         db_session.commit()
         
-        assert product1.get_list_price() == Decimal('1200.00')
+        # get_list_price() should return unit_price since list_price column was removed
+        assert product1.get_list_price() == Decimal('1000.00')
         
-        # Test fallback to unit_price
+        # Test with different unit_price
         product2 = ProductFactory(
-            unit_price=Decimal('1000.00'),
-            list_price=None
+            unit_price=Decimal('500.00')
         )
         db_session.add(product2)
         db_session.commit()
         
-        assert product2.get_list_price() == Decimal('1000.00')
+        assert product2.get_list_price() == Decimal('500.00')
     
     
     def test_product_dimensions_formatting(self, db_session):
