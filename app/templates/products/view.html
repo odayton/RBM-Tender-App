@@ -110,17 +110,7 @@
                         <div class="col-md-6">
                             <table class="table table-sm table-borderless">
                                 <tr>
-                                    <th width="40%" class="text-muted">List Price:</th>
-                                    <td>
-                                        {% if product.list_price %}
-                                            <strong class="text-success">${{ "%.2f"|format(product.list_price) }}</strong>
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Nett:</th>
+                                    <th width="40%" class="text-muted">Nett:</th>
                                     <td>
                                         {% if product.nett %}
                                             <strong class="text-info">${{ "%.2f"|format(product.nett) }}</strong>
@@ -143,14 +133,6 @@
                         </div>
                         <div class="col-md-6">
                             <table class="table table-sm table-borderless">
-                                <tr>
-                                    <th width="40%" class="text-muted">Pack:</th>
-                                    <td>{{ product.pack or '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">Carton Qty:</th>
-                                    <td>{{ product.carton_qty or '-' }}</td>
-                                </tr>
                                 <tr>
                                     <th class="text-muted">Effective Price:</th>
                                     <td>

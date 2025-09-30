@@ -200,9 +200,6 @@
                                 {% if product.get_effective_price() %}
                                 <strong>${{ "%.2f"|format(product.get_effective_price()) }}</strong>
                                 {% endif %}
-                                {% if product.list_price and product.nett and product.list_price != product.nett %}
-                                <br><small class="text-success">Nett: ${{ "%.2f"|format(product.nett) }}</small>
-                                {% endif %}
                                 {% if product.discount %}
                                 <br><small class="text-info">-{{ product.discount.percentage }}%</small>
                                 {% endif %}

@@ -90,36 +90,16 @@ def list_products():
             elif availability == 'inactive':
                 query = query.filter(Product.is_active == False)
         
-        # Apply price range filter (using list_price as primary, fallback to unit_price)
+        # Apply price range filter (using unit_price)
         if price_range:
             if price_range == '0-100':
-                query = query.filter(
-                    or_(
-                        Product.list_price <= 100,
-                        Product.unit_price <= 100
-                    )
-                )
+                query = query.filter(Product.unit_price <= 100)
             elif price_range == '100-500':
-                query = query.filter(
-                    or_(
-                        and_(Product.list_price > 100, Product.list_price <= 500),
-                        and_(Product.unit_price > 100, Product.unit_price <= 500)
-                    )
-                )
+                query = query.filter(and_(Product.unit_price > 100, Product.unit_price <= 500))
             elif price_range == '500-1000':
-                query = query.filter(
-                    or_(
-                        and_(Product.list_price > 500, Product.list_price <= 1000),
-                        and_(Product.unit_price > 500, Product.unit_price <= 1000)
-                    )
-                )
+                query = query.filter(and_(Product.unit_price > 500, Product.unit_price <= 1000))
             elif price_range == '1000+':
-                query = query.filter(
-                    or_(
-                        Product.list_price > 1000,
-                        Product.unit_price > 1000
-                    )
-                )
+                query = query.filter(Product.unit_price > 1000)
         
         # Get paginated results (order by item_no first, then description)
         products = query.order_by(Product.item_no, Product.description).paginate(
@@ -205,9 +185,6 @@ def create_product():
                 series=form.series.data.strip() if form.series.data else None,
                 item_no=form.item_no.data.strip(),
                 description=form.description.data.strip(),
-                pack=form.pack.data or 1,
-                carton_qty=form.carton_qty.data or 1,
-                list_price=form.list_price.data,
                 nett=form.nett.data,
                 discount_code=form.discount_code.data.strip() if form.discount_code.data else None,
                 notes=form.notes.data.strip() if form.notes.data else None,
@@ -275,9 +252,6 @@ def edit_product(product_id):
             product.series = form.series.data.strip() if form.series.data else None
             product.item_no = form.item_no.data.strip()
             product.description = form.description.data.strip()
-            product.pack = form.pack.data or 1
-            product.carton_qty = form.carton_qty.data or 1
-            product.list_price = form.list_price.data
             product.nett = form.nett.data
             product.discount_code = form.discount_code.data.strip() if form.discount_code.data else None
             product.notes = form.notes.data.strip() if form.notes.data else None
@@ -508,31 +482,6 @@ def import_products():
                     if row.get('Series'):
                         product.series = row['Series'].strip()
                     
-                    # Pack and Carton Qty with defaults
-                    try:
-                        product.pack = int(row.get('Pack', 1)) if row.get('Pack') else 1
-                    except (ValueError, TypeError):
-                        errors.append(f"Row {row_num}: Invalid Pack value '{row.get('Pack')}', using default 1")
-                        product.pack = 1
-                    
-                    try:
-                        product.carton_qty = int(row.get('Carton Qty', 1)) if row.get('Carton Qty') else 1
-                    except (ValueError, TypeError):
-                        errors.append(f"Row {row_num}: Invalid Carton Qty value '{row.get('Carton Qty')}', using default 1")
-                        product.carton_qty = 1
-                    
-                    # Pricing fields with better error handling
-                    if row.get('List price'):
-                        try:
-                            list_price_str = str(row['List price']).replace('$', '').replace(',', '').replace(' ', '').strip()
-                            if list_price_str and list_price_str.lower() not in ['', 'null', 'none', 'n/a']:
-                                product.list_price = Decimal(list_price_str)
-                            else:
-                                product.list_price = None
-                        except (ValueError, TypeError, decimal.InvalidOperation) as e:
-                            errors.append(f"Row {row_num}: Invalid List price format '{row['List price']}' - must be a number")
-                            product.list_price = None
-                    
                     # Physical properties
                     if row.get('weight_kg'):
                         try:
@@ -575,8 +524,7 @@ def import_products():
                     # Legacy fields for backward compatibility
                     product.sku = item_no  # Use Item No as SKU
                     product.name = product.description  # Use Description as name
-                    if product.list_price:
-                        product.unit_price = product.list_price  # Use List Price as unit price
+                    product.unit_price = Decimal('0.00')  # Set default unit price
                     
                     # Set default values for legacy fields
                     product.brand = None

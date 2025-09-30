@@ -41,21 +41,6 @@ class ProductForm(FlaskForm):
         Length(max=2000, message='Description cannot exceed 2000 characters')
     ])
     
-    pack = IntegerField('Pack', validators=[
-        Optional(),
-        NumberRange(min=0, message='Pack must be positive')
-    ])
-    
-    carton_qty = IntegerField('Carton Qty', validators=[
-        Optional(),
-        NumberRange(min=0, message='Carton quantity must be positive')
-    ])
-    
-    list_price = DecimalField('List Price ($)', validators=[
-        Optional(),
-        NumberRange(min=0, message='List price must be positive')
-    ])
-    
     nett = DecimalField('Nett ($)', validators=[
         Optional(),
         NumberRange(min=0, message='Nett price must be positive')

@@ -25,9 +25,6 @@ class Product(BaseModel):
     series = Column(String(100))  # Series
     item_no = Column(String(100))  # Item No
     description = Column(Text)  # Description
-    pack = Column(Integer, default=1)  # Pack
-    carton_qty = Column(Integer, default=1)  # Carton Qty
-    list_price = Column(Numeric(10, 2))  # List price
     discount_code = Column(String(10), ForeignKey('discounts.code'), nullable=True)  # Disc Code
     notes = Column(Text)  # Note
     weight_kg = Column(Numeric(8, 3))  # weight_kg
@@ -50,7 +47,6 @@ class Product(BaseModel):
     # Constraints and indexes
     __table_args__ = (
         CheckConstraint('unit_price >= 0', name='check_product_unit_price'),
-        CheckConstraint('list_price >= 0', name='check_product_list_price'),
         CheckConstraint('stock_quantity >= 0', name='check_product_stock_quantity'),
         CheckConstraint('reorder_level >= 0', name='check_product_reorder_level'),
         CheckConstraint('lead_time_days >= 0', name='check_product_lead_time'),
@@ -72,9 +68,6 @@ class Product(BaseModel):
         
         if self.unit_price < 0:
             raise ValidationError("Unit price cannot be negative.")
-        
-        if self.list_price and self.list_price < 0:
-            raise ValidationError("List Price cannot be negative.")
         
         if self.stock_quantity < 0:
             raise ValidationError("Stock quantity cannot be negative.")
@@ -107,7 +100,7 @@ class Product(BaseModel):
 
     def get_list_price(self) -> Decimal:
         """Get the list price, fallback to unit_price if not set."""
-        return self.list_price if self.list_price else self.unit_price
+        return self.unit_price
 
     def is_low_stock(self) -> bool:
         """Check if product is low on stock (below reorder level)."""
