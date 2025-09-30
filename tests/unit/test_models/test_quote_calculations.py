@@ -266,7 +266,7 @@ class TestQuoteCalculations:
             option_id=option.id,
             product_id=product.id,
             quantity=3,
-            unit_price=product1.list_price,
+            unit_price=product.list_price,
             discount=Decimal('0.00')
         )
         db_session.add(line_item)
@@ -844,7 +844,7 @@ class TestQuoteCalculations:
             option_id=option.id,
             product_id=product.id,
             quantity=1,
-            unit_price=product1.list_price,
+            unit_price=product.list_price,
             notes='Line item notes'
         )
         db_session.add(line_item)
