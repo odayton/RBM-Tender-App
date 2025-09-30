@@ -90,5 +90,9 @@ def home():
             'contacts': Contact.query.all(),
             'products': Product.query.all()
         }
+        
+        # Log dashboard data for debugging
+        from app.core.core_logging import logger
+        logger.info(f"Home page dashboard data - Products: {len(dashboard_data['products'])}, Deals: {len(dashboard_data['deals'])}, Companies: {len(dashboard_data['companies'])}, Contacts: {len(dashboard_data['contacts'])}")
     
     return render_template('home.html', **dashboard_data)

@@ -106,13 +106,13 @@ def list_products():
             page=page, per_page=per_page, error_out=False
         )
         
-        # Get statistics
-        total_products = query.count()
-        active_products = query.filter(Product.is_active == True).count()
-        low_stock_products = query.filter(
+        # Get statistics - use base query for total count, filtered query for others
+        total_products = Product.query.count()  # Always get total from base query
+        active_products = Product.query.filter(Product.is_active == True).count()
+        low_stock_products = Product.query.filter(
             and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level)
         ).count()
-        out_of_stock_products = query.filter(
+        out_of_stock_products = Product.query.filter(
             and_(Product.is_active == True, Product.stock_quantity == 0)
         ).count()
         
@@ -124,6 +124,8 @@ def list_products():
         
         # Log the results for debugging
         logger.info(f"Products page loaded: {total_products} total products, {len(products.items)} on current page")
+        logger.info(f"Query filters applied - search_term: '{search_term}', category: '{category}', sub_category: '{sub_category}'")
+        logger.info(f"Statistics - Total: {total_products}, Active: {active_products}, Low Stock: {low_stock_products}, Out of Stock: {out_of_stock_products}")
         
         return render_template('products/list.html',
                              products=products,
