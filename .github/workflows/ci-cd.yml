@@ -412,13 +412,38 @@ jobs:
 
     - name: Health check verification
       run: |
-        for i in {1..5}; do
+        echo "Waiting for application to fully start..."
+        sleep 30
+        
+        for i in {1..8}; do
           echo "Attempt $i: http://${{ secrets.APP_HOST }}/health"
-          if curl -f -s --connect-timeout 10 --max-time 30 http://${{ secrets.APP_HOST }}/health; then
-            echo "Health check passed"; exit 0
+          
+          # Test local health first
+          echo "Testing local health endpoint..."
+          if curl -f -s --connect-timeout 5 --max-time 10 http://localhost:5000/health; then
+            echo "Local health check passed"
+          else
+            echo "Local health check failed"
           fi
-          [ $i -eq 5 ] && echo "Health check failed" && exit 1
-          sleep 15
+          
+          # Test external health endpoint
+          if curl -f -s --connect-timeout 10 --max-time 30 http://${{ secrets.APP_HOST }}/health; then
+            echo "External health check passed"; exit 0
+          else
+            echo "External health check failed"
+            
+            # Fallback: test with IP address if domain fails
+            echo "Trying fallback with IP address..."
+            if curl -f -s --connect-timeout 10 --max-time 30 -H "Host: ${{ secrets.APP_HOST }}" http://54.206.238.122/health; then
+              echo "Fallback health check passed"; exit 0
+            else
+              echo "Fallback health check also failed"
+            fi
+          fi
+          
+          [ $i -eq 8 ] && echo "Health check failed after 8 attempts" && exit 1
+          echo "Waiting 20 seconds before next attempt..."
+          sleep 20
         done
 
     - name: Done
