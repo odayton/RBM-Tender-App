@@ -114,5 +114,18 @@ class Product(BaseModel):
             Product.is_active == True
         ).limit(limit).all()
 
+    def is_out_of_stock(self) -> bool:
+        """Check if product is out of stock (placeholder - no stock tracking)."""
+        return False  # No stock tracking in current system
+    
+    def is_low_stock(self) -> bool:
+        """Check if product is low stock (placeholder - no stock tracking)."""
+        return False  # No stock tracking in current system
+    
+    @property
+    def stock_quantity(self) -> int:
+        """Get stock quantity (placeholder - no stock tracking)."""
+        return 0  # No stock tracking in current system
+
     def __repr__(self):
         return f"<Product(id={self.id}, item_no='{self.item_no}', description='{self.description}', active={self.is_active})>"

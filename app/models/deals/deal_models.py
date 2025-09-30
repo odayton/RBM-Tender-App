@@ -317,7 +317,7 @@ class QuoteLineItem(BaseModel):
     
     # Relationships
     option = relationship("QuoteOption", back_populates="line_items")
-    product = relationship("Product")
+    product = relationship("Product", back_populates="line_items")
     
     # Indexes and constraints
     __table_args__ = (

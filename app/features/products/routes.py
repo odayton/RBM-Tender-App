@@ -203,11 +203,23 @@ def view_product(product_id):
     """View product details."""
     product = Product.query.get_or_404(product_id)
     
-    # Get similar products
-    similar_products = product.get_similar_products(limit=5)
-    
-    # Get usage statistics
-    usage_stats = product.get_usage_statistics()
+    try:
+        # Get similar products
+        similar_products = product.get_similar_products(limit=5)
+        
+        # Get usage statistics
+        usage_stats = product.get_usage_statistics()
+        
+    except Exception as e:
+        logger.error(f"Error loading product details for product {product_id}: {e}")
+        # Provide fallback values to prevent 500 error
+        similar_products = []
+        usage_stats = {
+            'total_quantity_sold': 0,
+            'total_value_sold': 0.0,
+            'usage_count': 0,
+            'average_quantity_per_use': 0
+        }
     
     return render_template('products/view.html',
                          product=product,
@@ -646,18 +658,18 @@ def api_search():
     if not search_term:
         return jsonify([])
     
-        products = Product.query.filter(
-            and_(
-                Product.is_active == True,
-                or_(
-                    Product.item_no.ilike(f'%{search_term}%'),
-                    Product.description.ilike(f'%{search_term}%'),
-                    Product.category.ilike(f'%{search_term}%'),
-                    Product.sub_category.ilike(f'%{search_term}%'),
-                    Product.series.ilike(f'%{search_term}%')
-                )
+    products = Product.query.filter(
+        and_(
+            Product.is_active == True,
+            or_(
+                Product.item_no.ilike(f'%{search_term}%'),
+                Product.description.ilike(f'%{search_term}%'),
+                Product.category.ilike(f'%{search_term}%'),
+                Product.sub_category.ilike(f'%{search_term}%'),
+                Product.series.ilike(f'%{search_term}%')
             )
-        ).limit(limit).all()
+        )
+    ).limit(limit).all()
     
     results = []
     for product in products:
@@ -699,7 +711,9 @@ def dashboard():
                          stats={
                              'total': total_products,
                              'active': active_products,
-                             'inactive': inactive_products
+                             'inactive': inactive_products,
+                             'low_stock': 0,  # No stock tracking in current system
+                             'out_of_stock': 0  # No stock tracking in current system
                          },
                          category_stats=category_stats,
                          recent_products=recent_products,
