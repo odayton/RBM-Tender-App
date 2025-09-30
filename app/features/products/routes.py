@@ -82,24 +82,29 @@ def list_products():
             elif availability == 'inactive':
                 query = query.filter(Product.is_active == False)
         
-        # Apply price range filter (using unit_price)
+        # Apply price range filter (using list_price)
         if price_range:
             if price_range == '0-100':
-                query = query.filter(Product.unit_price <= 100)
+                query = query.filter(Product.list_price <= 100)
             elif price_range == '100-500':
-                query = query.filter(and_(Product.unit_price > 100, Product.unit_price <= 500))
+                query = query.filter(and_(Product.list_price > 100, Product.list_price <= 500))
             elif price_range == '500-1000':
-                query = query.filter(and_(Product.unit_price > 500, Product.unit_price <= 1000))
+                query = query.filter(and_(Product.list_price > 500, Product.list_price <= 1000))
             elif price_range == '1000+':
-                query = query.filter(Product.unit_price > 1000)
+                query = query.filter(Product.list_price > 1000)
         
-        # Get paginated results (order by item_no first, then description)
-        products = query.order_by(Product.item_no, Product.description).paginate(
+        # Get paginated results (order by item_no first, then description, then id)
+        # Use COALESCE to handle NULL values in ordering
+        products = query.order_by(
+            func.coalesce(Product.item_no, ''),
+            func.coalesce(Product.description, ''),
+            Product.id
+        ).paginate(
             page=page, per_page=per_page, error_out=False
         )
         
-        # Get statistics - simplified without stock tracking
-        total_products = Product.query.count()  # Always get total from base query
+        # Get statistics
+        total_products = Product.query.count()
         active_products = Product.query.filter(Product.is_active == True).count()
         inactive_products = Product.query.filter(Product.is_active == False).count()
         
@@ -167,7 +172,9 @@ def create_product():
                 series=form.series.data.strip() if form.series.data else None,
                 item_no=form.item_no.data.strip(),
                 description=form.description.data.strip(),
-                nett=form.nett.data,
+                pack=form.pack.data.strip() if form.pack.data else None,
+                carton_qty=form.carton_qty.data or 1,
+                list_price=form.list_price.data,
                 discount_code=form.discount_code.data.strip() if form.discount_code.data else None,
                 notes=form.notes.data.strip() if form.notes.data else None,
                 weight_kg=form.weight_kg.data,
@@ -175,10 +182,6 @@ def create_product():
                 lead_time_days=form.lead_time_days.data or 0,
                 is_active=form.is_active.data,
                 
-                # Legacy fields (for backward compatibility)
-                sku=form.sku.data.strip() if form.sku.data else None,
-                name=form.name.data.strip() if form.name.data else None,
-                unit_price=form.unit_price.data
             )
             
             product.save()
@@ -219,7 +222,7 @@ def edit_product(product_id):
     product = Product.query.get_or_404(product_id)
     form = ProductForm(obj=product)
     
-    # Set product ID for SKU validation
+    # Set product ID for validation
     form.set_product_id(product_id)
     
     if form.validate_on_submit():
@@ -230,7 +233,9 @@ def edit_product(product_id):
             product.series = form.series.data.strip() if form.series.data else None
             product.item_no = form.item_no.data.strip()
             product.description = form.description.data.strip()
-            product.nett = form.nett.data
+            product.pack = form.pack.data.strip() if form.pack.data else None
+            product.carton_qty = form.carton_qty.data or 1
+            product.list_price = form.list_price.data
             product.discount_code = form.discount_code.data.strip() if form.discount_code.data else None
             product.notes = form.notes.data.strip() if form.notes.data else None
             product.weight_kg = form.weight_kg.data
@@ -238,10 +243,6 @@ def edit_product(product_id):
             product.lead_time_days = form.lead_time_days.data or 0
             product.is_active = form.is_active.data
             
-            # Update legacy fields (for backward compatibility)
-            product.sku = form.sku.data.strip() if form.sku.data else None
-            product.name = form.name.data.strip() if form.name.data else None
-            product.unit_price = form.unit_price.data
             
             product.save()
             
@@ -435,6 +436,23 @@ def import_products():
                     if row.get('Series'):
                         product.series = row['Series'].strip()
                     
+                    # New schema fields
+                    if row.get('Pack'):
+                        product.pack = row['Pack'].strip()
+                    
+                    if row.get('Carton Qty'):
+                        try:
+                            product.carton_qty = int(row['Carton Qty']) if row['Carton Qty'] else 1
+                        except (ValueError, TypeError):
+                            product.carton_qty = 1
+                    
+                    if row.get('List price'):
+                        try:
+                            product.list_price = Decimal(row['List price']) if row['List price'] else None
+                        except (ValueError, TypeError):
+                            product.list_price = None
+                    
+                    
                     # Physical properties
                     if row.get('weight_kg'):
                         try:
@@ -474,17 +492,13 @@ def import_products():
                     is_active_str = row.get('is_active', 'true').strip().lower()
                     product.is_active = is_active_str in ['true', '1', 'yes', 'y']
                     
-                    # Legacy fields for backward compatibility
-                    product.sku = item_no  # Use Item No as SKU
-                    product.name = product.description  # Use Description as name
-                    product.unit_price = Decimal('0.00')  # Set default unit price
                     
                     product.save()
                     
                 except Exception as e:
                     # Provide more specific error messages for common issues
                     if "ConversionSyntax" in str(e):
-                        error_msg = f"Row {row_num}: Invalid number format in CSV data. Check price fields (List price, Nett) for non-numeric values like '$', commas, or text."
+                        error_msg = f"Row {row_num}: Invalid number format in CSV data. Check price fields (List price) for non-numeric values like '$', commas, or text."
                     elif "ValueError" in str(e):
                         error_msg = f"Row {row_num}: Invalid data format - {str(e)}"
                     elif "TypeError" in str(e):
@@ -553,8 +567,8 @@ def download_sample_csv():
                 with open(sample_path, 'r', encoding='utf-8') as f:
                     csv_content = f.read()
             else:
-                # Create a default sample if file doesn't exist
-                csv_content = "Category,SubCategory,Series,Item No,Description,Pack,Carton Qty,List price,Nett,Disc Code,Note,weight_kg,dimensions,lead_time_days,is_active\n"
+                # Create a default sample if file doesn't exist (new schema - 14 columns)
+                csv_content = "Category,SubCategory,Series,Item No,Description,Pack,Carton Qty,List price,Disc Code,Note,weight_kg,dimensions,lead_time_days,is_active\n"
         
         from flask import Response
         return Response(
@@ -582,28 +596,29 @@ def export_products():
         output = io.StringIO()
         writer = csv.writer(output)
         
-        # Write header
+        # Write header (new schema - 14 columns)
         writer.writerow([
-            'SKU', 'Name', 'Description', 'Unit Price', 'Category', 'SubCategory', 'Series',
-            'Item No', 'Weight (kg)', 'Dimensions', 'Lead Time (days)', 'Active', 'Notes'
+            'Category', 'SubCategory', 'Series', 'Item No', 'Description', 'Pack', 'Carton Qty',
+            'List price', 'Disc Code', 'Note', 'weight_kg', 'dimensions', 'lead_time_days', 'is_active'
         ])
         
-        # Write data
+        # Write data (new schema - 14 columns)
         for product in products:
             writer.writerow([
-                product.sku,
-                product.name,
-                product.description or '',
-                float(product.unit_price),
-                product.category,
+                product.category or '',
                 product.sub_category or '',
                 product.series or '',
                 product.item_no or '',
+                product.description or '',
+                product.pack or '',
+                product.carton_qty or 1,
+                float(product.list_price) if product.list_price else '',
+                product.discount_code or '',
+                product.notes or '',
                 float(product.weight_kg) if product.weight_kg else '',
                 product.dimensions or '',
-                product.lead_time_days,
-                'Yes' if product.is_active else 'No',
-                product.notes or ''
+                product.lead_time_days or 0,
+                'Yes' if product.is_active else 'No'
             ])
         
         # Create response
@@ -631,27 +646,27 @@ def api_search():
     if not search_term:
         return jsonify([])
     
-    products = Product.query.filter(
-        and_(
-            Product.is_active == True,
-            or_(
-                Product.name.ilike(f'%{search_term}%'),
-                Product.sku.ilike(f'%{search_term}%'),
-                Product.item_no.ilike(f'%{search_term}%'),
-                Product.description.ilike(f'%{search_term}%')
+        products = Product.query.filter(
+            and_(
+                Product.is_active == True,
+                or_(
+                    Product.item_no.ilike(f'%{search_term}%'),
+                    Product.description.ilike(f'%{search_term}%'),
+                    Product.category.ilike(f'%{search_term}%'),
+                    Product.sub_category.ilike(f'%{search_term}%'),
+                    Product.series.ilike(f'%{search_term}%')
+                )
             )
-        )
-    ).limit(limit).all()
+        ).limit(limit).all()
     
     results = []
     for product in products:
         results.append({
             'id': product.id,
-            'sku': product.sku,
-            'name': product.name,
             'item_no': product.item_no,
             'description': product.description,
-            'unit_price': float(product.unit_price),
+            'category': product.category,
+            'list_price': float(product.list_price) if product.list_price else 0.0,
             'is_active': product.is_active
         })
     
@@ -701,16 +716,31 @@ def debug_products():
         # Check if any products exist
         first_product = Product.query.first()
         
+        # Test the same query as list_products
+        test_query = Product.query
+        test_paginated = test_query.order_by(
+            func.coalesce(Product.item_no, ''),
+            func.coalesce(Product.description, ''),
+            Product.id
+        ).paginate(page=1, per_page=20, error_out=False)
+        
         # Get table info
         from sqlalchemy import text
         result = db.session.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'products'"))
         table_exists = result.fetchone() is not None
         
+        # Check for NULL values in required fields
+        null_item_no_count = db.session.execute(text("SELECT COUNT(*) FROM products WHERE item_no IS NULL")).scalar()
+        null_description_count = db.session.execute(text("SELECT COUNT(*) FROM products WHERE description IS NULL")).scalar()
+        
         debug_info = {
             'table_exists': table_exists,
             'total_products': total_products,
             'first_product': str(first_product) if first_product else None,
-            'dev_database_url': str(db.engine.url),
+            'paginated_items_count': len(test_paginated.items),
+            'null_item_no_count': null_item_no_count,
+            'null_description_count': null_description_count,
+            'database_url': str(db.engine.url),
         }
         
         return jsonify(debug_info)

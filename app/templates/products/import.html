@@ -115,7 +115,7 @@
                     <div class="alert alert-warning">
                         <h6><i class="fas fa-exclamation-triangle"></i> Important Notes</h6>
                         <ul class="mb-0">
-                            <li><strong>Item No</strong> is the primary identifier (replaces SKU)</li>
+                            <li><strong>Item No</strong> is the primary identifier</li>
                             <li><strong>Description</strong> is the main product name</li>
                             <li><strong>Category</strong> is required for all products</li>
                             <li><strong>SubCategory</strong> helps with organization</li>
@@ -140,7 +140,6 @@
                             <li>SubCategory</li>
                             <li>Series</li>
                             <li>List price</li>
-                            <li>Nett price</li>
                             <li>Disc Code</li>
                             <li>Note</li>
                             <li>weight_kg</li>
@@ -166,13 +165,7 @@
                     <h5 class="card-title mb-0">Migration from Old Format</h5>
                 </div>
                 <div class="card-body">
-                    <p class="small text-muted">If you have an old CSV format, the system will:</p>
-                    <ul class="small mb-0">
-                        <li>Map SKU → Item No</li>
-                        <li>Map Name → Description</li>
-                        <li>Map Unit Price → List Price</li>
-                        <li>Set defaults for new fields</li>
-                    </ul>
+                    <p class="small text-muted">The system will automatically set defaults for any missing fields.</p>
                 </div>
             </div>
         </div>

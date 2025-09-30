@@ -41,10 +41,21 @@ class ProductForm(FlaskForm):
         Length(max=2000, message='Description cannot exceed 2000 characters')
     ])
     
-    nett = DecimalField('Nett ($)', validators=[
+    pack = StringField('Pack', validators=[
         Optional(),
-        NumberRange(min=0, message='Nett price must be positive')
+        Length(max=50, message='Pack cannot exceed 50 characters')
     ])
+    
+    carton_qty = IntegerField('Carton Qty', validators=[
+        Optional(),
+        NumberRange(min=1, message='Carton quantity must be at least 1')
+    ])
+    
+    list_price = DecimalField('List Price ($)', validators=[
+        Optional(),
+        NumberRange(min=0, message='List price must be positive')
+    ])
+    
     
     discount_code = StringField('Disc Code', validators=[
         Optional(),
@@ -76,41 +87,6 @@ class ProductForm(FlaskForm):
     # Status
     is_active = BooleanField('Active')
     
-    # Legacy Fields (for backward compatibility)
-    sku = StringField('SKU (Legacy)', validators=[
-        Optional(),
-        Length(max=80, message='SKU cannot exceed 80 characters')
-    ])
-    
-    name = StringField('Product Name (Legacy)', validators=[
-        Optional(),
-        Length(max=200, message='Product name cannot exceed 200 characters')
-    ])
-    
-    unit_price = DecimalField('Unit Price (Legacy) ($)', validators=[
-        Optional(),
-        NumberRange(min=0, message='Unit price must be positive')
-    ])
-    
-    brand = StringField('Brand (Legacy)', validators=[
-        Optional(),
-        Length(max=100, message='Brand cannot exceed 100 characters')
-    ])
-    
-    model_number = StringField('Model Number (Legacy)', validators=[
-        Optional(),
-        Length(max=100, message='Model number cannot exceed 100 characters')
-    ])
-    
-    stock_quantity = IntegerField('Stock Quantity (Legacy)', validators=[
-        Optional(),
-        NumberRange(min=0, message='Stock quantity must be positive')
-    ])
-    
-    reorder_level = IntegerField('Reorder Level (Legacy)', validators=[
-        Optional(),
-        NumberRange(min=0, message='Reorder level must be positive')
-    ])
     
     def validate_item_no(self, field):
         """Validate that Item No is unique."""
@@ -121,17 +97,6 @@ class ProductForm(FlaskForm):
         if existing_product and existing_product.id != product_id:
             raise ValidationError('Item No must be unique. This Item No is already in use.')
     
-    def validate_sku(self, field):
-        """Validate that SKU is unique (legacy)."""
-        if not field.data:
-            return
-            
-        # Check if this is an edit operation
-        product_id = getattr(self, '_product_id', None)
-        
-        existing_product = Product.query.filter_by(sku=field.data).first()
-        if existing_product and existing_product.id != product_id:
-            raise ValidationError('SKU must be unique. This SKU is already in use.')
     
     def set_product_id(self, product_id):
         """Set the product ID for validation during edit operations."""
@@ -165,16 +130,9 @@ class ProductSearchForm(FlaskForm):
         Length(max=200, message='Item number cannot exceed 200 characters')
     ])
     
-    brand = StringField('Brand (Legacy)', validators=[
-        Optional(),
-        Length(max=100, message='Brand cannot exceed 100 characters')
-    ])
-    
     availability = SelectField('Availability', choices=[
         ('', 'All'),
-        ('in_stock', 'In Stock'),
-        ('low_stock', 'Low Stock'),
-        ('out_of_stock', 'Out of Stock'),
+        ('active', 'Active'),
         ('inactive', 'Inactive')
     ])
     

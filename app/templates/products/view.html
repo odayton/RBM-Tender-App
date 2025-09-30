@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}{{ product.item_no or product.description or product.name }} - RBM Tender App{% endblock %}
+{% block title %}{{ product.item_no or product.description }} - RBM Tender App{% endblock %}
 
 {% block page_content %}
 <div class="container-fluid">
@@ -10,11 +10,11 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ url_for('products.list_products') }}">Products</a></li>
-                    <li class="breadcrumb-item active">{{ product.item_no or product.sku or 'Unknown' }}</li>
+                    <li class="breadcrumb-item active">{{ product.item_no or 'Unknown' }}</li>
                 </ol>
             </nav>
-            <h1 class="h3 mb-0">{{ product.item_no or product.sku }}</h1>
-            <p class="text-muted mb-0">{{ product.description or product.name }}</p>
+            <h1 class="h3 mb-0">{{ product.item_no }}</h1>
+            <p class="text-muted mb-0">{{ product.description }}</p>
         </div>
         <div class="btn-group">
             {% if current_user.can_manage_users() %}
@@ -58,7 +58,7 @@
                             <table class="table table-sm table-borderless">
                                 <tr>
                                     <th width="40%" class="text-muted">Item No:</th>
-                                    <td><strong>{{ product.item_no or product.sku or '-' }}</strong></td>
+                                    <td><strong>{{ product.item_no or '-' }}</strong></td>
                                 </tr>
                                 <tr>
                                     <th class="text-muted">Category:</th>
@@ -109,16 +109,6 @@
                     <div class="row">
                         <div class="col-md-6">
                             <table class="table table-sm table-borderless">
-                                <tr>
-                                    <th width="40%" class="text-muted">Nett:</th>
-                                    <td>
-                                        {% if product.nett %}
-                                            <strong class="text-info">${{ "%.2f"|format(product.nett) }}</strong>
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
                                 <tr>
                                     <th class="text-muted">Disc Code:</th>
                                     <td><span class="badge bg-secondary">{{ product.discount_code or '-' }}</span></td>
@@ -194,58 +184,6 @@
                 </div>
             </div>
 
-            <!-- Legacy Information Card (if exists) -->
-            {% if product.sku or product.name or product.brand %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Legacy Information</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <table class="table table-sm table-borderless">
-                                {% if product.sku != product.item_no %}
-                                <tr>
-                                    <th width="40%" class="text-muted">SKU (Legacy):</th>
-                                    <td>{{ product.sku or '-' }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if product.name %}
-                                <tr>
-                                    <th class="text-mute.2%f"|format(product.unit_price) if product.unit_price }}</span>
-                                        {% else %}
-                                        <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <table class="table table-sm table-borderless">
-                                {% if product.brand %}
-                                <tr>
-                                    <th width="40%" class="text-muted">Brand:</th>
-                                    <td>{{ product.brand }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if product.model_number %}
-                                <tr>
-                                    <th class="text-muted">Model No:</th>
-                                    <td>{{ product.model_number }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if product.reorder_level %}
-                                <tr>
-                                    <th class="text-muted">Reorder Level:</th>
-                                    <td>{{ product.reorder_level }}</td>
-                                </tr>
-                                {% endif %}
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
         </div>
 
         <!-- Sidebar -->
@@ -274,8 +212,8 @@
                             </div>
                         </div>
                         <div class="col-6">
-                            <h5 class="mb-1">{{ product.stock_quantity }}</h5>
-                            <small class="text-muted">In Stock</small>
+                            <h5 class="mb-1">{{ product.carton_qty or 1 }}</h5>
+                            <small class="text-muted">Carton Qty</small>
                         </div>
                     </div>
                 </div>
@@ -320,8 +258,8 @@
                     {% for similar in similar_products %}
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div>
-                            <strong>{{ similar.item_no or similar.sku }}</strong>
-                            <br><small class="text-muted">{{ similar.description or similar.name }}</small>
+                            <strong>{{ similar.item_no }}</strong>
+                            <br><small class="text-muted">{{ similar.description }}</small>
                         </div>
                         <div class="text-end">
                             <small class="text-success">${{ "%.2f"|format(similar.get_effective_price()) }}</small>

@@ -10,12 +10,12 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ url_for('products.list_products') }}">Products</a></li>
-                    <li class="breadcrumb-item"><a href="{{ url_for('products.view_product', product_id=product.id) }}">{{ product.item_no or product.description or product.name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('products.view_product', product_id=product.id) }}">{{ product.item_no or product.description }}</a></li>
                     <li class="breadcrumb-item active">Edit</li>
                 </ol>
             </nav>
             <h1 class="h3 mb-0">Edit Product</h1>
-            <p class="text-muted">Update product information for {{ product.item_no or product.description or product.name }}</p>
+            <p class="text-muted">Update product information for {{ product.item_no or product.description }}</p>
         </div>
         <div>
             <a href="{{ url_for('products.view_product', product_id=product.id) }}" class="btn btn-outline-secondary">
@@ -107,21 +107,6 @@
                             <div class="col-md-6">
                                 <h6 class="mb-3">Pricing</h6>
                                 
-                                <div class="mb-3">
-                                    {{ form.nett.label(class="form-label") }}
-                                    <div class="input-group">
-                                        <span class="input-group-text">$</span>
-                                        {{ form.nett(class="form-control" + (" is-invalid" if form.nett.errors else '')) }}
-                                    </div>
-                                    {% if form.nett.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.nett.errors %}
-                                                {{ error }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted">Net/buying price</small>
-                                </div>
                                 
                                 <div class="mb-3">
                                     {{ form.discount_code.label(class="form-label") }}
@@ -211,45 +196,6 @@
                                         </div>
                                     {% endif %}
                                     <small class="form-text text-muted">Internal notes and comments</small>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="mb-3">Legacy Fields (Optional)</h6>
-                                <div class="alert alert-secondary">
-                                    <small>These fields are maintained for backward compatibility:</small>
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.sku.label(class="form-label") }}
-                                    {{ form.sku(class="form-control" + (" is-invalid" if form.sku.errors else "")) }}
-                                    {% if form.sku.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.sku.errors %}
-                                                {{ error }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.name.label(class="form-label") }}
-                                    {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
-                                    {% if form.name.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.name.errors %}
-                                                {{ error }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.unit_price.label(class="form-label") }}
-                                    {{ form.unit_price(class="form-control" + (" is-invalid" if form.unit_price.errors else "")) }}
-                                    {% if form.unit_price.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.unit_price.errors %}
-                                                {{ error }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
                                 </div>
                             </div>
                         </div>

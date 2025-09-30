@@ -6,24 +6,27 @@ from . import main_bp
 # Health check endpoint for Docker
 @main_bp.route('/health')
 def health():
-    """Simple health check endpoint without database dependency."""
+    """Ultra-simple health check endpoint with no dependencies."""
+    import json
+    from datetime import datetime
+    
     try:
-        from datetime import datetime
-        
-        return jsonify({
+        response_data = {
             'service': 'rbm-tender-app',
             'status': 'healthy',
             'timestamp': datetime.utcnow().isoformat() + 'Z',
             'message': 'Application is running'
-        }), 200
+        }
+        return json.dumps(response_data), 200, {'Content-Type': 'application/json'}
     
     except Exception as e:
-        return jsonify({
+        response_data = {
             'service': 'rbm-tender-app',
             'status': 'unhealthy',
             'timestamp': datetime.utcnow().isoformat() + 'Z',
             'error': str(e)
-        }), 503
+        }
+        return json.dumps(response_data), 503, {'Content-Type': 'application/json'}
 
 # Favicon route to prevent 404 errors
 @main_bp.route('/favicon.ico')
