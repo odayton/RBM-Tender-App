@@ -372,11 +372,14 @@ class TestForeignKeyIntegrity:
         db_session.add_all([company, contact])
         db_session.flush()
         
-        # Create a deal with the company and contact
+        # Create a deal
         deal = DealFactory()
-        deal.company_id = company.id
-        deal.contact_id = contact.id
         db_session.add(deal)
+        db_session.flush()
+        
+        # Add the company and contact to the deal using the many-to-many relationships
+        deal.companies.append(company)
+        deal.contacts.append(contact)
         db_session.commit()
         
         # Test that the relationships work
