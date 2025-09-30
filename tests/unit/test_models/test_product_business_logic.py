@@ -301,49 +301,28 @@ class TestProductBusinessLogic:
         assert 'usage_count' in product_dict
         assert product_dict['usage_count'] == 0  # No line items yet
     
-    def test_product_list_price_2025_fallback(self, db_session):
-        """Test product 2025 list price fallback."""
-        # Test with list_price_2025 set
+    def test_product_list_price_fallback(self, db_session):
+        """Test product list price fallback."""
+        # Test with list_price set
         product1 = ProductFactory(
             unit_price=Decimal('1000.00'),
-            list_price_2025=Decimal('1200.00')
+            list_price=Decimal('1200.00')
         )
         db_session.add(product1)
         db_session.commit()
         
-        assert product1.get_list_price_2025() == Decimal('1200.00')
+        assert product1.get_list_price() == Decimal('1200.00')
         
         # Test fallback to unit_price
         product2 = ProductFactory(
             unit_price=Decimal('1000.00'),
-            list_price_2025=None
+            list_price=None
         )
         db_session.add(product2)
         db_session.commit()
         
-        assert product2.get_list_price_2025() == Decimal('1000.00')
+        assert product2.get_list_price() == Decimal('1000.00')
     
-    def test_product_nett_buy_price_gst_fallback(self, db_session):
-        """Test product nett buy price GST fallback."""
-        # Test with nett_buy_price_gst set
-        product1 = ProductFactory(
-            unit_price=Decimal('1000.00'),
-            nett_buy_price_gst=Decimal('1100.00')
-        )
-        db_session.add(product1)
-        db_session.commit()
-        
-        assert product1.get_nett_buy_price_gst() == Decimal('1100.00')
-        
-        # Test fallback to unit_price
-        product2 = ProductFactory(
-            unit_price=Decimal('1000.00'),
-            nett_buy_price_gst=None
-        )
-        db_session.add(product2)
-        db_session.commit()
-        
-        assert product2.get_nett_buy_price_gst() == Decimal('1000.00')
     
     def test_product_dimensions_formatting(self, db_session):
         """Test product dimensions formatting."""
