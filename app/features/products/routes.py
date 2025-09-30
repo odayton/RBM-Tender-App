@@ -39,7 +39,7 @@ def list_products():
         category = request.args.get('category') or request.args.get('sub_category', '')
         series = request.args.get('series', '')
         item_no = request.args.get('item_no', '')
-        brand = request.args.get('brand', '')
+        # brand parameter removed as it's not in the new schema
         availability = request.args.get('availability', '')
         price_range = request.args.get('price_range', '')
         
@@ -57,10 +57,7 @@ def list_products():
                     Product.description.ilike(f'%{search_term}%'),
                     Product.category.ilike(f'%{search_term}%'),
                     Product.sub_category.ilike(f'%{search_term}%'),
-                    Product.series.ilike(f'%{search_term}%'),
-                    Product.sku.ilike(f'%{search_term}%'),  # Legacy
-                    Product.name.ilike(f'%{search_term}%'),  # Legacy
-                    Product.brand.ilike(f'%{search_term}%')  # Legacy
+                    Product.series.ilike(f'%{search_term}%')
                 )
             )
         
@@ -76,8 +73,7 @@ def list_products():
         if item_no:
             query = query.filter(Product.item_no.ilike(f'%{item_no}%'))
         
-        if brand:
-            query = query.filter(Product.brand.ilike(f'%{brand}%'))
+        # Note: brand filter removed as it's not in the new schema
         
         # Apply availability filter
         if availability:
@@ -116,11 +112,10 @@ def list_products():
             and_(Product.is_active == True, Product.stock_quantity == 0)
         ).count()
         
-        # Get unique categories, sub-categories, series, and brands for filters
+        # Get unique categories, sub-categories, and series for filters
         categories = db.session.query(Product.category).distinct().filter(Product.category.isnot(None)).all()
         sub_categories = db.session.query(Product.sub_category).distinct().filter(Product.sub_category.isnot(None)).all()
         series_list = db.session.query(Product.series).distinct().filter(Product.series.isnot(None)).all()
-        brands = db.session.query(Product.brand).distinct().filter(Product.brand.isnot(None)).all()
         
         # Log the results for debugging
         logger.info(f"Products page loaded: {total_products} total products, {len(products.items)} on current page")
@@ -134,13 +129,11 @@ def list_products():
                              sub_category=sub_category,
                              series=series,
                              item_no=item_no,
-                             brand=brand,
                              availability=availability,
                              price_range=price_range,
                              categories=[c[0] for c in categories],
                              sub_categories=[s[0] for s in sub_categories],
                              series_list=[s[0] for s in series_list],
-                             brands=[b[0] for b in brands],
                              stats={
                                  'total': total_products,
                                  'active': active_products,
@@ -158,12 +151,10 @@ def list_products():
                              category='',
                              series='',
                              item_no='',
-                             brand='',
                              availability='',
                              price_range='',
                              categories=[],
                              series_list=[],
-                             brands=[],
                              stats={
                                  'total': 0,
                                  'active': 0,
@@ -199,8 +190,6 @@ def create_product():
                 sku=form.sku.data.strip() if form.sku.data else None,
                 name=form.name.data.strip() if form.name.data else None,
                 unit_price=form.unit_price.data,
-                brand=form.brand.data.strip() if form.brand.data else None,
-                model_number=form.model_number.data.strip() if form.model_number.data else None,
                 stock_quantity=form.stock_quantity.data or 0,
                 reorder_level=form.reorder_level.data or 0
             )
@@ -266,8 +255,6 @@ def edit_product(product_id):
             product.sku = form.sku.data.strip() if form.sku.data else None
             product.name = form.name.data.strip() if form.name.data else None
             product.unit_price = form.unit_price.data
-            product.brand = form.brand.data.strip() if form.brand.data else None
-            product.model_number = form.model_number.data.strip() if form.model_number.data else None
             product.stock_quantity = form.stock_quantity.data or 0
             product.reorder_level = form.reorder_level.data or 0
             
@@ -529,8 +516,6 @@ def import_products():
                     product.unit_price = Decimal('0.00')  # Set default unit price
                     
                     # Set default values for legacy fields
-                    product.brand = None
-                    product.model_number = None
                     product.stock_quantity = 0
                     product.reorder_level = 0
                     
@@ -639,8 +624,8 @@ def export_products():
         
         # Write header
         writer.writerow([
-            'SKU', 'Name', 'Description', 'Unit Price', 'Category', 'Brand',
-            'Model Number', 'Weight (kg)', 'Dimensions', 'Stock Quantity',
+            'SKU', 'Name', 'Description', 'Unit Price', 'Category', 'SubCategory', 'Series',
+            'Item No', 'Weight (kg)', 'Dimensions', 'Stock Quantity',
             'Reorder Level', 'Lead Time (days)', 'Active', 'Notes'
         ])
         
@@ -652,8 +637,9 @@ def export_products():
                 product.description or '',
                 float(product.unit_price),
                 product.category,
-                product.brand or '',
-                product.model_number or '',
+                product.sub_category or '',
+                product.series or '',
+                product.item_no or '',
                 float(product.weight_kg) if product.weight_kg else '',
                 product.dimensions or '',
                 product.stock_quantity,
@@ -694,7 +680,8 @@ def api_search():
             or_(
                 Product.name.ilike(f'%{search_term}%'),
                 Product.sku.ilike(f'%{search_term}%'),
-                Product.brand.ilike(f'%{search_term}%')
+                Product.item_no.ilike(f'%{search_term}%'),
+                Product.description.ilike(f'%{search_term}%')
             )
         )
     ).limit(limit).all()
@@ -705,7 +692,8 @@ def api_search():
             'id': product.id,
             'sku': product.sku,
             'name': product.name,
-            'brand': product.brand,
+            'item_no': product.item_no,
+            'description': product.description,
             'unit_price': float(product.unit_price),
             'stock_quantity': product.stock_quantity,
             'availability': product.get_availability_status()
