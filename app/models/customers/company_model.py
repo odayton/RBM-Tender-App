@@ -70,4 +70,4 @@ class Company(BaseModel):
         return self.has_active_deals() or len(self.get_active_contacts()) > 0
 
     def __repr__(self) -> str:
-        return f"<Company(id={self.id}, name='{self.company_name}', active={self.is_active})>"
+        return f"<Company(id={self.id}, name='{self.company_name}')>"

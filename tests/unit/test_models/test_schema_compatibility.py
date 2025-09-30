@@ -81,9 +81,14 @@ class TestSchemaCompatibility:
     
     def test_quote_model_schema_compatibility(self, db_session):
         """Test that Quote model matches database schema."""
-        inspector = inspect(db_session.bind)
-        if inspector is None:
+        from sqlalchemy import inspect
+        
+        # Get the engine from the session
+        engine = db_session.bind
+        if engine is None:
             pytest.skip("No database engine available for inspection")
+            
+        inspector = inspect(engine)
         
         # Check if quotes table exists
         assert inspector.has_table('quotes'), "Quotes table does not exist"
@@ -103,9 +108,14 @@ class TestSchemaCompatibility:
     
     def test_quote_line_item_model_schema_compatibility(self, db_session):
         """Test that QuoteLineItem model matches database schema."""
-        inspector = inspect(db_session.bind)
-        if inspector is None:
+        from sqlalchemy import inspect
+        
+        # Get the engine from the session
+        engine = db_session.bind
+        if engine is None:
             pytest.skip("No database engine available for inspection")
+            
+        inspector = inspect(engine)
         
         # Check if quote_line_items table exists
         assert inspector.has_table('quote_line_items'), "Quote line items table does not exist"
@@ -125,9 +135,14 @@ class TestSchemaCompatibility:
     
     def test_company_model_schema_compatibility(self, db_session):
         """Test that Company model matches database schema."""
-        inspector = inspect(db_session.bind)
-        if inspector is None:
+        from sqlalchemy import inspect
+        
+        # Get the engine from the session
+        engine = db_session.bind
+        if engine is None:
             pytest.skip("No database engine available for inspection")
+            
+        inspector = inspect(engine)
         
         # Check if companies table exists
         assert inspector.has_table('companies'), "Companies table does not exist"
@@ -138,7 +153,7 @@ class TestSchemaCompatibility:
         # Define expected columns based on current model
         expected_columns = [
             'id', 'company_name', 'phone_number', 'domain',
-            'is_active', 'created_at', 'updated_at'
+            'created_at', 'updated_at'
         ]
         
         # Check for missing columns
@@ -147,9 +162,14 @@ class TestSchemaCompatibility:
     
     def test_contact_model_schema_compatibility(self, db_session):
         """Test that Contact model matches database schema."""
-        inspector = inspect(db_session.bind)
-        if inspector is None:
+        from sqlalchemy import inspect
+        
+        # Get the engine from the session
+        engine = db_session.bind
+        if engine is None:
             pytest.skip("No database engine available for inspection")
+            
+        inspector = inspect(engine)
         
         # Check if contacts table exists
         assert inspector.has_table('contacts'), "Contacts table does not exist"
@@ -170,9 +190,14 @@ class TestSchemaCompatibility:
     
     def test_user_model_schema_compatibility(self, db_session):
         """Test that User model matches database schema."""
-        inspector = inspect(db_session.bind)
-        if inspector is None:
+        from sqlalchemy import inspect
+        
+        # Get the engine from the session
+        engine = db_session.bind
+        if engine is None:
             pytest.skip("No database engine available for inspection")
+            
+        inspector = inspect(engine)
         
         # Check if users table exists
         assert inspector.has_table('users'), "Users table does not exist"
