@@ -103,13 +103,13 @@ class Product(BaseModel):
 
 
     def get_similar_products(self, limit: int = 5) -> List['Product']:
-        """Get similar products in the same category."""
-        if not self.category:
+        """Get similar products in the same series."""
+        if not self.series:
             return []
         
         from app.extensions import db
         return Product.query.filter(
-            Product.category == self.category,
+            Product.series == self.series,
             Product.id != self.id,
             Product.is_active == True
         ).limit(limit).all()

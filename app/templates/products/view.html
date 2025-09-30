@@ -124,17 +124,19 @@
                         <div class="col-md-6">
                             <table class="table table-sm table-borderless">
                                 <tr>
-                                    <th class="text-muted">Effective Price:</th>
+                                    <th class="text-muted">List Price:</th>
                                     <td>
-                                        <strong class="text-primary">${{ "%.2f"|format(product.get_effective_price()) }}</strong>
+                                        <strong class="text-primary">${{ "%.2f"|format(product.list_price or 0) }}</strong>
                                     </td>
                                 </tr>
+                                {% if product.discount and product.discount.is_valid() %}
                                 <tr>
                                     <th class="text-muted">Discounted Price:</th>
                                     <td>
                                         <strong class="text-success">${{ "%.2f"|format(product.get_discounted_price()) }}</strong>
                                     </td>
                                 </tr>
+                                {% endif %}
                             </table>
                         </div>
                     </div>
@@ -252,7 +254,7 @@
             {% if similar_products %}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Similar Products</h5>
+                    <h5 class="card-title mb-0">Products in Series {{ product.series }}</h5>
                 </div>
                 <div class="card-body">
                     {% for similar in similar_products %}
@@ -262,7 +264,7 @@
                             <br><small class="text-muted">{{ similar.description }}</small>
                         </div>
                         <div class="text-end">
-                            <small class="text-success">${{ "%.2f"|format(similar.get_effective_price()) }}</small>
+                            <small class="text-success">${{ "%.2f"|format(similar.list_price or 0) }}</small>
                             <br><a href="{{ url_for('products.view_product', product_id=similar.id) }}">View</a>
                         </div>
                     </div>
