@@ -407,6 +407,22 @@ jobs:
           
           # Verify SSH service is still working
           sudo systemctl is-enabled ssh || echo "WARNING: SSH service is not enabled"
+          
+          # Additional diagnostics from troubleshooting guide
+          echo "=== DIAGNOSTIC INFORMATION ==="
+          echo "Service status:"
+          sudo systemctl status rbm-tender-app --no-pager || true
+          echo ""
+          echo "Recent service logs:"
+          sudo journalctl -u rbm-tender-app --since "5 minutes ago" --no-pager || true
+          echo ""
+          echo "Port 5000 status:"
+          sudo ss -tlnp | grep :5000 || echo "Port 5000 not listening"
+          echo ""
+          echo "Nginx status:"
+          sudo systemctl status nginx --no-pager || true
+          echo ""
+          
           timeout 30 curl -f http://localhost:5000/health || echo "Health check timed out"
         '
 
