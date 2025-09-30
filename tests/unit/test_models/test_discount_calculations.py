@@ -15,7 +15,7 @@ class TestDiscountCalculations:
     def test_product_discount_calculation(self, db_session):
         """Test product discount price calculation."""
         # Create product with discount
-        product = ProductFactory(unit_price=Decimal('1000.00'))
+        product = ProductFactory(list_price=Decimal('1000.00'))
         discount = Discount(
             code='TEST10',
             percentage=Decimal('10.00'),
@@ -37,7 +37,7 @@ class TestDiscountCalculations:
     
     def test_product_no_discount_calculation(self, db_session):
         """Test product price when no discount applied."""
-        product = ProductFactory(unit_price=Decimal('1000.00'))
+        product = ProductFactory(list_price=Decimal('1000.00'))
         db_session.add(product)
         db_session.commit()
         
@@ -47,7 +47,7 @@ class TestDiscountCalculations:
     
     def test_product_inactive_discount_calculation(self, db_session):
         """Test product price when discount is inactive."""
-        product = ProductFactory(unit_price=Decimal('1000.00'))
+        product = ProductFactory(list_price=Decimal('1000.00'))
         discount = Discount(
             code='INACTIVE',
             percentage=Decimal('20.00'),
@@ -194,8 +194,8 @@ class TestDiscountCalculations:
         db_session.flush()
         
         # Create products for line items
-        product1 = Product(sku='GRAND-TOTAL-TEST-001', name='Grand Total Test Product 1', unit_price=Decimal('1000.00'), is_active=True)
-        product2 = Product(sku='GRAND-TOTAL-TEST-002', name='Grand Total Test Product 2', unit_price=Decimal('500.00'), is_active=True)
+        product1 = Product(item_no='GRAND-TOTAL-TEST-001', description='Grand Total Test Product 1', list_price=Decimal('1000.00'), category='Test', is_active=True)
+        product2 = Product(item_no='GRAND-TOTAL-TEST-002', description='Grand Total Test Product 2', list_price=Decimal('500.00'), category='Test', is_active=True)
         db_session.add_all([product1, product2])
         db_session.flush()
         
@@ -266,72 +266,24 @@ class TestDiscountCalculations:
             db_session.commit()
 
 
-class TestInventoryManagement:
-    """Test inventory management logic."""
+class TestProductStatus:
+    """Test product status logic."""
     
-    def test_low_stock_detection(self, db_session):
-        """Test low stock detection."""
-        product = ProductFactory(
-            stock_quantity=5,
-            reorder_level=10
-        )
+    def test_active_status(self, db_session):
+        """Test active product status."""
+        product = ProductFactory(is_active=True)
         db_session.add(product)
         db_session.commit()
         
-        assert product.is_low_stock() is True
-        assert product.is_out_of_stock() is False
+        assert product.is_active is True
     
-    def test_out_of_stock_detection(self, db_session):
-        """Test out of stock detection."""
-        product = ProductFactory(
-            stock_quantity=0,
-            reorder_level=5
-        )
+    def test_inactive_status(self, db_session):
+        """Test inactive product status."""
+        product = ProductFactory(is_active=False)
         db_session.add(product)
         db_session.commit()
         
-        assert product.is_out_of_stock() is True
-        assert product.is_low_stock() is True
-    
-    def test_availability_status(self, db_session):
-        """Test product availability status."""
-        # Available product
-        product = ProductFactory(
-            stock_quantity=10,
-            is_active=True
-        )
-        db_session.add(product)
-        db_session.commit()
-        
-        assert product.is_available() is True
-        
-        # Inactive product
-        product.is_active = False
-        db_session.commit()
-        
-        assert product.is_available() is False
-        
-        # Out of stock product
-        product.is_active = True
-        product.stock_quantity = 0
-        db_session.commit()
-        
-        assert product.is_available() is False
-    
-    def test_availability_status_display(self, db_session):
-        """Test availability status display."""
-        product = ProductFactory(stock_quantity=100, reorder_level=10)
-        db_session.add(product)
-        db_session.commit()
-        
-        status = product.get_availability_status()
-        assert 'In Stock' in status
-        
-        product.stock_quantity = 0
-        db_session.commit()
-        
-        status = product.get_availability_status()
-        assert 'Out of Stock' in status
+        assert product.is_active is False
 
 
 class TestBusinessLogicValidation:

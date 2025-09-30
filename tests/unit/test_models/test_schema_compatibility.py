@@ -34,13 +34,12 @@ class TestSchemaCompatibility:
         # Get actual columns from database
         actual_columns = [col['name'] for col in inspector.get_columns('products')]
         
-        # Define expected columns based on current model
+        # Define expected columns based on current model (14-column schema)
         expected_columns = [
-            'sku', 'name', 'unit_price', 'category', 'sub_category',
-            'series', 'item_no', 'description', 'discount_code',
+            'category', 'sub_category', 'series', 'item_no', 'description',
+            'pack', 'carton_qty', 'list_price', 'discount_code',
             'notes', 'weight_kg', 'dimensions', 'lead_time_days',
-            'is_active', 'brand', 'model_number', 'stock_quantity',
-            'reorder_level', 'id', 'created_at', 'updated_at'
+            'is_active', 'id', 'created_at', 'updated_at'
         ]
         
         # Check for missing columns
@@ -241,8 +240,8 @@ class TestModelMethodsFunctionality:
         from tests.factories import ProductFactory
         
         # Create test products
-        product1 = ProductFactory(category='HVAC', unit_price=100.00)
-        product2 = ProductFactory(category='Plumbing', unit_price=200.00)
+        product1 = ProductFactory(category='HVAC', list_price=100.00)
+        product2 = ProductFactory(category='Plumbing', list_price=200.00)
         db_session.add_all([product1, product2])
         db_session.commit()
         
@@ -253,10 +252,10 @@ class TestModelMethodsFunctionality:
         products = Product.query.filter(Product.category == 'HVAC').all()
         assert len(products) >= 1
         
-        products = Product.query.filter(Product.unit_price <= 150.00).all()
+        products = Product.query.filter(Product.list_price <= 150.00).all()
         assert len(products) >= 1
         
-        products = Product.query.filter(Product.name.ilike('%test%')).all()
+        products = Product.query.filter(Product.description.ilike('%test%')).all()
         assert len(products) >= 2
     
     def test_deal_model_methods_work(self, db_session):
@@ -306,9 +305,8 @@ class TestDatabaseConstraints:
         
         # Check for important constraints
         expected_constraints = [
-            'check_product_unit_price',
-            'check_product_stock_quantity',
-            'check_product_reorder_level',
+            'check_product_list_price',
+            'check_product_carton_qty',
             'check_product_lead_time'
         ]
         
@@ -319,9 +317,9 @@ class TestDatabaseConstraints:
         """Test that Product constraints actually work."""
         from tests.factories import ProductFactory
         
-        # Test negative unit price constraint
+        # Test negative list price constraint
         product = ProductFactory()
-        product.unit_price = -100.00
+        product.list_price = -100.00
         
         with pytest.raises(Exception):  # Should raise constraint violation
             db_session.add(product)
@@ -329,9 +327,9 @@ class TestDatabaseConstraints:
         
         db_session.rollback()
         
-        # Test negative stock quantity constraint
+        # Test negative carton quantity constraint
         product = ProductFactory()
-        product.stock_quantity = -10
+        product.carton_qty = -10
         
         with pytest.raises(Exception):  # Should raise constraint violation
             db_session.add(product)
@@ -407,7 +405,7 @@ class TestSchemaMigrationCompatibility:
         actual_columns = [col['name'] for col in inspector.get_columns('products')]
         
         # These columns should NOT exist (they were removed)
-        removed_columns = ['pack', 'carton_qty', 'list_price']
+        removed_columns = ['sku', 'name', 'unit_price', 'brand', 'model_number', 'stock_quantity', 'reorder_level']
         
         for column in removed_columns:
             assert column not in actual_columns, f"Old column '{column}' still exists in database"
@@ -421,11 +419,11 @@ class TestSchemaMigrationCompatibility:
         db_session.add(product)
         db_session.commit()
         
-        # Test that get_list_price() uses unit_price (not the removed list_price)
-        list_price = product.get_list_price()
-        assert list_price == product.unit_price, "get_list_price() should use unit_price"
+        # Test that list_price is available
+        assert product.list_price is not None, "list_price should be available"
         
         # Test that the product can be serialized without errors
         product_dict = product.to_dict()
-        assert 'unit_price' in product_dict
-        assert 'list_price' not in product_dict  # Should not reference removed column
+        assert 'list_price' in product_dict
+        assert 'item_no' in product_dict
+        assert 'description' in product_dict

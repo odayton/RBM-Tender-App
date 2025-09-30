@@ -68,8 +68,8 @@ class TestQuoteCalculations:
         db_session.flush()
         
         # Create products
-        product1 = Product(sku='QUOTE-TEST-1', name='Test Product 1', unit_price=Decimal('1000.00'), is_active=True)
-        product2 = Product(sku='QUOTE-TEST-2', name='Test Product 2', unit_price=Decimal('500.00'), is_active=True)
+        product1 = Product(item_no='QUOTE-TEST-1', description='Test Product 1', category='Test', list_price=Decimal('1000.00'), is_active=True)
+        product2 = Product(item_no='QUOTE-TEST-2', description='Test Product 2', category='Test', list_price=Decimal('500.00'), is_active=True)
         db_session.add_all([product1, product2])
         db_session.flush()
         
@@ -150,8 +150,8 @@ class TestQuoteCalculations:
         db_session.flush()
         
         # Create products
-        product1 = Product(sku='MULTI-TEST-1', name='Multi Test Product 1', unit_price=Decimal('1000.00'), is_active=True)
-        product2 = Product(sku='MULTI-TEST-2', name='Multi Test Product 2', unit_price=Decimal('750.00'), is_active=True)
+        product1 = Product(item_no='MULTI-TEST-1', description='Multi Test Product 1', category='Test', list_price=Decimal('1000.00'), is_active=True)
+        product2 = Product(item_no='MULTI-TEST-2', description='Multi Test Product 2', category='Test', list_price=Decimal('750.00'), is_active=True)
         db_session.add_all([product1, product2])
         db_session.flush()
         
@@ -248,7 +248,7 @@ class TestQuoteCalculations:
         db_session.flush()
         
         # Create product
-        product = Product(sku='GRAND-TEST-1', name='Grand Total Test Product', unit_price=Decimal('1000.00'), is_active=True)
+        product = Product(item_no='GRAND-TEST-1', description='Grand Total Test Product', category='Test', list_price=Decimal('1000.00'), is_active=True)
         db_session.add(product)
         db_session.flush()
         
@@ -406,9 +406,9 @@ class TestQuoteCalculations:
         db_session.flush()
         
         # Create products
-        product1 = Product(sku='DISPLAY-TEST-1', name='Display Test Product 1', unit_price=Decimal('100.00'), is_active=True)
-        product2 = Product(sku='DISPLAY-TEST-2', name='Display Test Product 2', unit_price=Decimal('200.00'), is_active=True)
-        product3 = Product(sku='DISPLAY-TEST-3', name='Display Test Product 3', unit_price=Decimal('300.00'), is_active=True)
+        product1 = Product(item_no='DISPLAY-TEST-1', description='Display Test Product 1', category='Test', list_price=Decimal('100.00'), is_active=True)
+        product2 = Product(item_no='DISPLAY-TEST-2', description='Display Test Product 2', category='Test', list_price=Decimal('200.00'), is_active=True)
+        product3 = Product(item_no='DISPLAY-TEST-3', description='Display Test Product 3', category='Test', list_price=Decimal('300.00'), is_active=True)
         db_session.add_all([product1, product2, product3])
         db_session.flush()
         
@@ -835,7 +835,7 @@ class TestQuoteCalculations:
         db_session.flush()
         
         # Create product
-        product = Product(sku='LINEITEM-NOTES-TEST-1', name='Line Item Notes Test Product', unit_price=Decimal('1000.00'), is_active=True)
+        product = Product(item_no='LINEITEM-NOTES-TEST-1', description='Line Item Notes Test Product', category='Test', list_price=Decimal('1000.00'), is_active=True)
         db_session.add(product)
         db_session.flush()
         
