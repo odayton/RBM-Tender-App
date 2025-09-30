@@ -75,14 +75,10 @@ def list_products():
         
         # Note: brand filter removed as it's not in the new schema
         
-        # Apply availability filter
+        # Apply availability filter (simplified - no stock tracking)
         if availability:
-            if availability == 'in_stock':
-                query = query.filter(and_(Product.is_active == True, Product.stock_quantity > Product.reorder_level))
-            elif availability == 'low_stock':
-                query = query.filter(and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level, Product.stock_quantity > 0))
-            elif availability == 'out_of_stock':
-                query = query.filter(and_(Product.is_active == True, Product.stock_quantity == 0))
+            if availability == 'active':
+                query = query.filter(Product.is_active == True)
             elif availability == 'inactive':
                 query = query.filter(Product.is_active == False)
         
@@ -102,15 +98,10 @@ def list_products():
             page=page, per_page=per_page, error_out=False
         )
         
-        # Get statistics - use base query for total count, filtered query for others
+        # Get statistics - simplified without stock tracking
         total_products = Product.query.count()  # Always get total from base query
         active_products = Product.query.filter(Product.is_active == True).count()
-        low_stock_products = Product.query.filter(
-            and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level)
-        ).count()
-        out_of_stock_products = Product.query.filter(
-            and_(Product.is_active == True, Product.stock_quantity == 0)
-        ).count()
+        inactive_products = Product.query.filter(Product.is_active == False).count()
         
         # Get unique categories, sub-categories, and series for filters
         categories = db.session.query(Product.category).distinct().filter(Product.category.isnot(None)).all()
@@ -120,7 +111,7 @@ def list_products():
         # Log the results for debugging
         logger.info(f"Products page loaded: {total_products} total products, {len(products.items)} on current page")
         logger.info(f"Query filters applied - search_term: '{search_term}', category: '{category}', sub_category: '{sub_category}'")
-        logger.info(f"Statistics - Total: {total_products}, Active: {active_products}, Low Stock: {low_stock_products}, Out of Stock: {out_of_stock_products}")
+        logger.info(f"Statistics - Total: {total_products}, Active: {active_products}, Inactive: {inactive_products}")
         
         return render_template('products/list.html',
                              products=products,
@@ -137,8 +128,7 @@ def list_products():
                              stats={
                                  'total': total_products,
                                  'active': active_products,
-                                 'low_stock': low_stock_products,
-                                 'out_of_stock': out_of_stock_products
+                                 'inactive': inactive_products
                              })
     
     except Exception as e:
@@ -158,8 +148,7 @@ def list_products():
                              stats={
                                  'total': 0,
                                  'active': 0,
-                                 'low_stock': 0,
-                                 'out_of_stock': 0
+                                 'inactive': 0
                              })
 
 @products_bp.route('/create', methods=['GET', 'POST'])
@@ -189,9 +178,7 @@ def create_product():
                 # Legacy fields (for backward compatibility)
                 sku=form.sku.data.strip() if form.sku.data else None,
                 name=form.name.data.strip() if form.name.data else None,
-                unit_price=form.unit_price.data,
-                stock_quantity=form.stock_quantity.data or 0,
-                reorder_level=form.reorder_level.data or 0
+                unit_price=form.unit_price.data
             )
             
             product.save()
@@ -255,8 +242,6 @@ def edit_product(product_id):
             product.sku = form.sku.data.strip() if form.sku.data else None
             product.name = form.name.data.strip() if form.name.data else None
             product.unit_price = form.unit_price.data
-            product.stock_quantity = form.stock_quantity.data or 0
-            product.reorder_level = form.reorder_level.data or 0
             
             product.save()
             
@@ -312,28 +297,7 @@ def toggle_product_status(product_id):
     
     return redirect(url_for('products.view_product', product_id=product.id))
 
-@products_bp.route('/<int:product_id>/update-stock', methods=['POST'])
-@login_required
-@roles_required('Admin', 'Manager')
-def update_stock(product_id):
-    """Update product stock quantity."""
-    product = Product.query.get_or_404(product_id)
-    
-    try:
-        quantity_change = int(request.form.get('quantity_change', 0))
-        product.update_stock(quantity_change)
-        product.save()
-        
-        logger.info(f"Stock updated for {product.sku}: {quantity_change} by {current_user.email}")
-        flash(f'Stock updated for "{product.name}"!', 'success')
-        
-    except ValueError:
-        flash('Invalid quantity value.', 'error')
-    except Exception as e:
-        logger.error(f"Error updating stock: {e}")
-        flash('An error occurred while updating stock.', 'error')
-    
-    return redirect(url_for('products.view_product', product_id=product.id))
+# Stock update route removed - not connected to warehouse system
 
 @products_bp.route('/bulk-action', methods=['POST'])
 @login_required
@@ -515,10 +479,6 @@ def import_products():
                     product.name = product.description  # Use Description as name
                     product.unit_price = Decimal('0.00')  # Set default unit price
                     
-                    # Set default values for legacy fields
-                    product.stock_quantity = 0
-                    product.reorder_level = 0
-                    
                     product.save()
                     
                 except Exception as e:
@@ -625,8 +585,7 @@ def export_products():
         # Write header
         writer.writerow([
             'SKU', 'Name', 'Description', 'Unit Price', 'Category', 'SubCategory', 'Series',
-            'Item No', 'Weight (kg)', 'Dimensions', 'Stock Quantity',
-            'Reorder Level', 'Lead Time (days)', 'Active', 'Notes'
+            'Item No', 'Weight (kg)', 'Dimensions', 'Lead Time (days)', 'Active', 'Notes'
         ])
         
         # Write data
@@ -642,8 +601,6 @@ def export_products():
                 product.item_no or '',
                 float(product.weight_kg) if product.weight_kg else '',
                 product.dimensions or '',
-                product.stock_quantity,
-                product.reorder_level,
                 product.lead_time_days,
                 'Yes' if product.is_active else 'No',
                 product.notes or ''
@@ -695,8 +652,7 @@ def api_search():
             'item_no': product.item_no,
             'description': product.description,
             'unit_price': float(product.unit_price),
-            'stock_quantity': product.stock_quantity,
-            'availability': product.get_availability_status()
+            'is_active': product.is_active
         })
     
     return jsonify(results)
@@ -705,15 +661,10 @@ def api_search():
 @login_required
 def dashboard():
     """Product management dashboard."""
-    # Get statistics
+    # Get statistics (simplified without stock tracking)
     total_products = Product.query.count()
     active_products = Product.query.filter(Product.is_active == True).count()
-    low_stock_products = Product.query.filter(
-        and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level)
-    ).count()
-    out_of_stock_products = Product.query.filter(
-        and_(Product.is_active == True, Product.stock_quantity == 0)
-    ).count()
+    inactive_products = Product.query.filter(Product.is_active == False).count()
     
     # Get products by category
     category_stats = db.session.query(
@@ -724,21 +675,20 @@ def dashboard():
     # Get recent products
     recent_products = Product.query.order_by(Product.created_at.desc()).limit(10).all()
     
-    # Get low stock products
-    low_stock_list = Product.query.filter(
-        and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level)
-    ).order_by(Product.stock_quantity.asc()).limit(10).all()
+    # Get inactive products
+    inactive_list = Product.query.filter(
+        Product.is_active == False
+    ).order_by(Product.item_no.asc()).limit(10).all()
     
     return render_template('products/dashboard.html',
                          stats={
                              'total': total_products,
                              'active': active_products,
-                             'low_stock': low_stock_products,
-                             'out_of_stock': out_of_stock_products
+                             'inactive': inactive_products
                          },
                          category_stats=category_stats,
                          recent_products=recent_products,
-                         low_stock_list=low_stock_list) 
+                         inactive_list=inactive_list) 
 
 @products_bp.route('/debug')
 @login_required
