@@ -90,13 +90,12 @@ def list_products():
             elif availability == 'inactive':
                 query = query.filter(Product.is_active == False)
         
-        # Apply price range filter (using list_price or nett as primary, fallback to unit_price)
+        # Apply price range filter (using list_price as primary, fallback to unit_price)
         if price_range:
             if price_range == '0-100':
                 query = query.filter(
                     or_(
                         Product.list_price <= 100,
-                        Product.nett <= 100,
                         Product.unit_price <= 100
                     )
                 )
@@ -104,7 +103,6 @@ def list_products():
                 query = query.filter(
                     or_(
                         and_(Product.list_price > 100, Product.list_price <= 500),
-                        and_(Product.nett > 100, Product.nett <= 500),
                         and_(Product.unit_price > 100, Product.unit_price <= 500)
                     )
                 )
@@ -112,7 +110,6 @@ def list_products():
                 query = query.filter(
                     or_(
                         and_(Product.list_price > 500, Product.list_price <= 1000),
-                        and_(Product.nett > 500, Product.nett <= 1000),
                         and_(Product.unit_price > 500, Product.unit_price <= 1000)
                     )
                 )
@@ -120,7 +117,6 @@ def list_products():
                 query = query.filter(
                     or_(
                         Product.list_price > 1000,
-                        Product.nett > 1000,
                         Product.unit_price > 1000
                     )
                 )
@@ -530,31 +526,12 @@ def import_products():
                         try:
                             list_price_str = str(row['List price']).replace('$', '').replace(',', '').replace(' ', '').strip()
                             if list_price_str and list_price_str.lower() not in ['', 'null', 'none', 'n/a']:
-                                product.list_price_2025 = Decimal(list_price_str)
+                                product.list_price = Decimal(list_price_str)
                             else:
-                                product.list_price_2025 = None
+                                product.list_price = None
                         except (ValueError, TypeError, decimal.InvalidOperation) as e:
                             errors.append(f"Row {row_num}: Invalid List price format '{row['List price']}' - must be a number")
-                            product.list_price_2025 = None
-                    
-                    # Calculate nett price based on list price and discount code
-                    if product.list_price_2025 and product.discount_code:
-                        try:
-                            # Get discount percentage from database
-                            from app.models.deals.deal_models import Discount
-                            discount = Discount.query.filter_by(code=product.discount_code).first()
-                            if discount:
-                                # Calculate nett price: list_price * (1 - discount_percentage/100)
-                                discount_factor = 1 - (discount.percentage / 100)
-                                product.nett_buy_price_gst = product.list_price_2025 * Decimal(str(discount_factor))
-                            else:
-                                product.nett_buy_price_gst = product.list_price_2025
-                        except Exception as e:
-                            errors.append(f"Row {row_num}: Error calculating nett price: {str(e)}")
-                            product.nett_buy_price_gst = product.list_price_2025
-                    else:
-                        # If no discount code, nett price equals list price
-                        product.nett_buy_price_gst = product.list_price_2025
+                            product.list_price = None
                     
                     # Physical properties
                     if row.get('weight_kg'):
@@ -598,8 +575,8 @@ def import_products():
                     # Legacy fields for backward compatibility
                     product.sku = item_no  # Use Item No as SKU
                     product.name = product.description  # Use Description as name
-                    if product.list_price_2025:
-                        product.unit_price = product.list_price_2025  # Use List Price as unit price
+                    if product.list_price:
+                        product.unit_price = product.list_price  # Use List Price as unit price
                     
                     # Set default values for legacy fields
                     product.brand = None
