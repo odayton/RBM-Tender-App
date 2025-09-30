@@ -127,5 +127,11 @@ class Product(BaseModel):
         """Get stock quantity (placeholder - no stock tracking)."""
         return 0  # No stock tracking in current system
 
+    def get_availability_status(self) -> str:
+        """Get availability status for display."""
+        if not self.is_active:
+            return "Inactive"
+        return "Active"
+
     def __repr__(self):
         return f"<Product(id={self.id}, item_no='{self.item_no}', description='{self.description}', active={self.is_active})>"

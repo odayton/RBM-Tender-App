@@ -436,57 +436,64 @@ def import_products():
                         product = Product()
                         imported_count += 1
                     
+                    # Helper function to safely get and strip values
+                    def safe_get_value(field_name, default=None):
+                        """Safely get and strip a value from CSV row, handling None values."""
+                        value = row.get(field_name)
+                        if value is None or value == '':
+                            return default
+                        return value.strip() if value else default
+                    
+                    # Helper function to update field only if CSV has value or it's a new product
+                    def update_field_if_provided(field_name, csv_field, transform_func=None, default_value=None):
+                        """Update field only if CSV has value or it's a new product."""
+                        csv_value = safe_get_value(csv_field)
+                        if csv_value is not None:
+                            if transform_func:
+                                try:
+                                    return transform_func(csv_value)
+                                except (ValueError, TypeError) as e:
+                                    errors.append(f"Row {row_num}: Invalid {csv_field} format '{csv_value}' - {str(e)}")
+                                    return None
+                            return csv_value
+                        elif not existing_product:
+                            # For new products, use default values
+                            return default_value
+                        else:
+                            # For existing products, keep current value if CSV is empty
+                            return getattr(existing_product, field_name, default_value)
+                    
                     # Map CSV columns to database fields using new schema
                     product.item_no = item_no
                     product.description = row['Description'].strip()
                     product.category = row['Category'].strip()
                     
-                    # Optional fields with validation
-                    if row.get('SubCategory'):
-                        product.sub_category = row['SubCategory'].strip()
+                    # Optional fields with smart updating
+                    product.sub_category = update_field_if_provided('sub_category', 'SubCategory')
+                    product.series = update_field_if_provided('series', 'Series')
+                    product.pack = update_field_if_provided('pack', 'Pack')
                     
-                    if row.get('Series'):
-                        product.series = row['Series'].strip()
+                    # Numeric fields with validation
+                    product.carton_qty = update_field_if_provided('carton_qty', 'Carton Qty', 
+                                                               lambda x: int(x) if x else 1) or 1
                     
-                    # New schema fields
-                    if row.get('Pack'):
-                        product.pack = row['Pack'].strip()
-                    
-                    if row.get('Carton Qty'):
-                        try:
-                            product.carton_qty = int(row['Carton Qty']) if row['Carton Qty'] else 1
-                        except (ValueError, TypeError):
-                            product.carton_qty = 1
-                    
-                    if row.get('List price'):
-                        try:
-                            product.list_price = Decimal(row['List price']) if row['List price'] else None
-                        except (ValueError, TypeError):
-                            product.list_price = None
-                    
+                    product.list_price = update_field_if_provided('list_price', 'List price',
+                                                                lambda x: Decimal(x) if x else None)
                     
                     # Physical properties
-                    if row.get('weight_kg'):
-                        try:
-                            product.weight_kg = Decimal(row['weight_kg']) if row['weight_kg'] else None
-                        except (ValueError, TypeError):
-                            errors.append(f"Row {row_num}: Invalid weight format '{row['weight_kg']}'")
+                    product.weight_kg = update_field_if_provided('weight_kg', 'weight_kg',
+                                                               lambda x: Decimal(x) if x else None)
                     
-                    if row.get('dimensions'):
-                        product.dimensions = row['dimensions'].strip()
+                    product.dimensions = update_field_if_provided('dimensions', 'dimensions')
                     
-                    if row.get('lead_time_days'):
-                        try:
-                            product.lead_time_days = int(row['lead_time_days']) if row['lead_time_days'] else None
-                        except (ValueError, TypeError):
-                            errors.append(f"Row {row_num}: Invalid lead time format '{row['lead_time_days']}'")
+                    product.lead_time_days = update_field_if_provided('lead_time_days', 'lead_time_days',
+                                                                    lambda x: int(x) if x else 0) or 0
                     
-                    # Notes and discount code
-                    if row.get('Note'):
-                        product.notes = row['Note'].strip()
+                    # Notes
+                    product.notes = update_field_if_provided('notes', 'Note')
                     
                     # Handle discount code with validation
-                    disc_code = row.get('Disc Code', '').strip()
+                    disc_code = safe_get_value('Disc Code')
                     if disc_code:
                         # Check if discount code exists in database
                         from app.models.deals.deal_models import Discount
@@ -498,11 +505,22 @@ def import_products():
                             errors.append(f"Row {row_num}: Discount code '{disc_code}' not found in database, skipping discount")
                             product.discount_code = None
                     else:
-                        product.discount_code = None
+                        # For existing products, keep current discount code if CSV is empty
+                        if existing_product:
+                            product.discount_code = existing_product.discount_code
+                        else:
+                            product.discount_code = None
                     
-                    # Active status
-                    is_active_str = row.get('is_active', 'true').strip().lower()
-                    product.is_active = is_active_str in ['true', '1', 'yes', 'y']
+                    # Active status - only update if CSV has value
+                    is_active_str = safe_get_value('is_active', 'true')
+                    if is_active_str is not None:
+                        product.is_active = is_active_str.lower() in ['true', '1', 'yes', 'y']
+                    elif not existing_product:
+                        # For new products, default to active
+                        product.is_active = True
+                    else:
+                        # For existing products, keep current status if CSV is empty
+                        product.is_active = existing_product.is_active
                     
                     
                     product.save()
