@@ -6,7 +6,7 @@ from .user_factory import UserFactory, AdminUserFactory, SalesUserFactory, Manag
 from .company_factory import CompanyFactory
 from .contact_factory import ContactFactory, PrimaryContactFactory
 from .deal_factory import DealFactory, HVACDealFactory, PlumbingDealFactory, HydronicHeatingDealFactory, ClosedWonDealFactory, SalesLeadDealFactory
-from .product_factory import ProductFactory, HVACProductFactory, PlumbingProductFactory, HydronicProductFactory, LowStockProductFactory, OutOfStockProductFactory
+from .product_factory import ProductFactory, HVACProductFactory, PlumbingProductFactory, HydronicProductFactory
 from .quote_factory import QuoteFactory, QuoteRecipientFactory, QuoteOptionFactory, QuoteLineItemFactory, MultiOptionQuoteFactory, SimpleQuoteFactory
 from .discount_factory import DiscountFactory
 
@@ -29,8 +29,6 @@ __all__ = [
     'HVACProductFactory',
     'PlumbingProductFactory',
     'HydronicProductFactory',
-    'LowStockProductFactory',
-    'OutOfStockProductFactory',
     'QuoteFactory',
     'QuoteRecipientFactory',
     'QuoteOptionFactory',
