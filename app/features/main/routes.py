@@ -6,25 +6,15 @@ from . import main_bp
 # Health check endpoint for Docker
 @main_bp.route('/health')
 def health():
-    """Simple health check endpoint with basic diagnostics."""
+    """Simple health check endpoint without database dependency."""
     try:
-        # Basic health check - just verify the app is running
         from datetime import datetime
-        
-        # Try to check if database is accessible (basic test)
-        db_status = "unknown"
-        try:
-            from app.extensions import db
-            db.session.execute("SELECT 1")
-            db_status = "healthy"
-        except Exception as e:
-            db_status = f"error: {str(e)[:50]}"
         
         return jsonify({
             'service': 'rbm-tender-app',
             'status': 'healthy',
             'timestamp': datetime.utcnow().isoformat() + 'Z',
-            'database': db_status
+            'message': 'Application is running'
         }), 200
     
     except Exception as e:
