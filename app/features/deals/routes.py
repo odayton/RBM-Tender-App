@@ -387,10 +387,13 @@ def create_deal():
             db.session.commit()
             
             # Record metrics
-            record_deal_created(
-                deal_type=new_deal.deal_type.value,
-                stage=new_deal.stage.value
-            )
+            try:
+                record_deal_created(
+                    deal_type=new_deal.deal_type.value,
+                    stage=new_deal.stage.value
+                )
+            except Exception as metrics_error:
+                logger.warning(f"Failed to record deal metrics: {metrics_error}")
             
             # Log business event
             log_business_event('deal_created', 
