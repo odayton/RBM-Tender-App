@@ -105,8 +105,13 @@ class BaseModel(db.Model):
         """
         for column in self.__table__.columns:
             if not column.nullable and getattr(self, column.name) is None:
-                if not column.primary_key: # Primary keys are often generated on commit
-                    raise ValidationError(f"Field '{column.name}' cannot be null.")
+                # Skip validation for fields that have database defaults or are auto-generated
+                if (column.primary_key or 
+                    column.default is not None or 
+                    column.server_default is not None or
+                    column.name in ['created_at', 'updated_at']):
+                    continue
+                raise ValidationError(f"Field '{column.name}' cannot be null.")
 
     def __repr__(self) -> str:
         """String representation of the model instance."""

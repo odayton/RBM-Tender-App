@@ -52,7 +52,7 @@ def get_user_choice():
     while True:
         try:
             choice = input("\nSelect mode (1-6): ").strip()
-            if choice in ['1', '2', '3', '4', '5', '6']:
+            if choice in ['1', '2', '3', '4', '5', '6']: 
                 return choice
             else:
                 print("❌ Invalid choice. Please enter 1, 2, 3, 4, 5, or 6.")
