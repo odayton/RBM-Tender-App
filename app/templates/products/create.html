@@ -96,67 +96,10 @@
                                 </div>
                             </div>
                             
-                            <!-- Pricing and Packaging -->
+                            <!-- Pricing -->
                             <div class="col-md-6">
-                                <h6 class="mb-3">Pricing & Packaging</h6>
+                                <h6 class="mb-3">Pricing</h6>
                                 
-                                <div class="mb-3">
-                                    {{ form.list_price.label(class="form-label") }}
-                                    <div class="input-group">
-                                        <span class="input-group-text">$</span>
-                                        {{ form.list_price(class="form-control" + (" is-invalid" if form.list_price.errors else "")) }}
-                                    </div>
-                                    {% if form.list_price.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.list_price.errors %}
-                                                {{ error }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted">Customer list price</small>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    {{ form.nett.label(class="form-label") }}
-                                    <div class="input-group">
-                                        <span class="input-group-text">$</span>
-                                        {{ form.nett(class="form-control" + (" is-invalid" if form.nett.errors else "")) }}
-                                    </div>
-                                    {% if form.nett.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.nett.errors %}
-                                                {{ error }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted">Net/buying price</small>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    {{ form.pack.label(class="form-label") }}
-                                    {{ form.pack(class="form-control" + (" is-invalid" if form.pack.errors else "")) }}
-                                    {% if form.pack.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.pack.errors %}
-                                                {{ error }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted">Pack quantity</small>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    {{ form.carton_qty.label(class="form-label") }}
-                                    {{ form.carton_qty(class="form-control" + (" is-invalid" if form.carton_qty.errors else "")) }}
-                                    {% if form.carton_qty.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.carton_qty.errors %}
-                                                {{ error }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted">Items per carton</small>
-                                </div>
                                 
                                 <div class="mb-3">
                                     {{ form.discount_code.label(class="form-label") }}
@@ -248,18 +191,6 @@
                                         </div>
                                     {% endif %}
                                     <small class="form-text text-muted">Internal notes and comments</small>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="alert alert-info">
-                                    <h6><i class="fas fa-info-circle"></i> Legacy Fields (Optional)</h6>
-                                    <p class="mb-2">For backward compatibility, these legacy fields are still available:</p>
-                                    <ul class="mb-0 small">
-                                        <li>{{ form.sku.label() }}</li>
-                                        <li>{{ form.name.label() }}</li>
-                                        <li>{{ form.unit_price.label() }}</li>
-                                    </ul>
-                                    <p class="mb-0 small mt-2">Leave blank to auto-generate from new fields.</p>
                                 </div>
                             </div>
                         </div>

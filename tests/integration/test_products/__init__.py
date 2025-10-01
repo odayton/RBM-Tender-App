@@ -1,0 +1,3 @@
+"""
+Product integration tests package
+"""

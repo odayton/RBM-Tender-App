@@ -14,30 +14,21 @@ class Product(BaseModel):
     """
     __tablename__ = 'products'
 
-    # Basic Information
-    sku = Column(String(80), unique=True, nullable=False, index=True)
-    name = Column(String(200), nullable=False, index=True)
-    description = Column(Text)
-    unit_price = Column(Numeric(10, 2), nullable=False, default=0.0)
-    
-    # User's Required Fields
-    category = Column(String(100), index=True)  # Category
-    series = Column(String(100))  # Series
-    item_no = Column(String(100))  # Item No
-    list_price_2025 = Column(Numeric(10, 2))  # 2025 List Price
-    discount_code = Column(String(10), ForeignKey('discounts.code'), nullable=True)  # Disc Code
-    nett_buy_price_gst = Column(Numeric(10, 2))  # Nett Buy Price (+GST)
-    
-    # Additional fields for better product management
-    brand = Column(String(100))
-    model_number = Column(String(100))
-    weight_kg = Column(Numeric(8, 3))  # Weight in kilograms
-    dimensions = Column(String(100))  # Format: "LxWxH cm"
-    is_active = Column(Boolean, default=True, nullable=False, index=True)
-    stock_quantity = Column(Integer, default=0)
-    reorder_level = Column(Integer, default=0)
-    lead_time_days = Column(Integer, default=0)
-    notes = Column(Text)
+    # New Schema Fields (14 columns total)
+    category = Column(String(100), index=True)  # 1. Category
+    sub_category = Column(String(100))  # 2. SubCategory
+    series = Column(String(100))  # 3. Series
+    item_no = Column(String(100))  # 4. Item No
+    description = Column(Text)  # 5. Description
+    pack = Column(String(50))  # 6. Pack
+    carton_qty = Column(Integer, default=1)  # 7. Carton Qty
+    list_price = Column(Numeric(10, 2))  # 8. List price
+    discount_code = Column(String(10), ForeignKey('discounts.code'), nullable=True)  # 9. Disc Code
+    notes = Column(Text)  # 10. Note
+    weight_kg = Column(Numeric(8, 3))  # 11. weight_kg
+    dimensions = Column(String(100))  # 12. dimensions
+    lead_time_days = Column(Integer, default=0)  # 13. lead_time_days
+    is_active = Column(Boolean, default=True, nullable=False, index=True)  # 14. is_active
 
     # Relationships
     discount = relationship("Discount", back_populates="products")
@@ -47,42 +38,31 @@ class Product(BaseModel):
 
     # Constraints and indexes
     __table_args__ = (
-        CheckConstraint('unit_price >= 0', name='check_product_unit_price'),
-        CheckConstraint('list_price_2025 >= 0', name='check_product_list_price'),
-        CheckConstraint('nett_buy_price_gst >= 0', name='check_product_nett_price'),
-        CheckConstraint('stock_quantity >= 0', name='check_product_stock_quantity'),
-        CheckConstraint('reorder_level >= 0', name='check_product_reorder_level'),
+        CheckConstraint('list_price >= 0', name='check_product_list_price'),
+        CheckConstraint('carton_qty >= 1', name='check_product_carton_qty'),
         CheckConstraint('lead_time_days >= 0', name='check_product_lead_time'),
+        CheckConstraint('weight_kg >= 0', name='check_product_weight'),
         Index('idx_product_category_active', 'category', 'is_active'),
         Index('idx_product_series', 'series'),
         Index('idx_product_item_no', 'item_no'),
-        Index('idx_product_sku_name', 'sku', 'name'),
+        Index('idx_product_sub_category', 'sub_category'),
     )
 
     def validate(self) -> None:
         """Custom validation for product data."""
         super().validate()
         
-        if not self.sku or len(self.sku.strip()) < 1:
-            raise ValidationError("SKU is required and cannot be empty.")
+        if not self.item_no or len(self.item_no.strip()) < 1:
+            raise ValidationError("Item No is required and cannot be empty.")
         
-        if not self.name or len(self.name.strip()) < 2:
-            raise ValidationError("Product name must be at least 2 characters long.")
+        if not self.description or len(self.description.strip()) < 2:
+            raise ValidationError("Description must be at least 2 characters long.")
         
-        if self.unit_price < 0:
-            raise ValidationError("Unit price cannot be negative.")
+        if self.list_price and self.list_price < 0:
+            raise ValidationError("List price cannot be negative.")
         
-        if self.list_price_2025 and self.list_price_2025 < 0:
-            raise ValidationError("2025 List Price cannot be negative.")
-        
-        if self.nett_buy_price_gst and self.nett_buy_price_gst < 0:
-            raise ValidationError("Nett Buy Price (+GST) cannot be negative.")
-        
-        if self.stock_quantity < 0:
-            raise ValidationError("Stock quantity cannot be negative.")
-        
-        if self.reorder_level < 0:
-            raise ValidationError("Reorder level cannot be negative.")
+        if self.carton_qty < 1:
+            raise ValidationError("Carton quantity must be at least 1.")
         
         if self.lead_time_days < 0:
             raise ValidationError("Lead time cannot be negative.")
@@ -95,59 +75,19 @@ class Product(BaseModel):
         data = super().to_dict()
         data['discount_percentage'] = self.discount.percentage if self.discount else 0
         data['discounted_price'] = float(self.get_discounted_price())
-        data['is_low_stock'] = self.is_low_stock()
-        data['is_out_of_stock'] = self.is_out_of_stock()
         data['usage_count'] = len(self.line_items)
         return data
 
     def get_discounted_price(self) -> Decimal:
         """Get the price after applying discount."""
-        if self.discount and self.discount.is_valid():
-            discount_amount = self.unit_price * (self.discount.percentage / Decimal('100'))
-            return self.unit_price - discount_amount
-        return self.unit_price
+        if self.discount and self.discount.is_valid() and self.list_price:
+            discount_amount = self.list_price * (self.discount.percentage / Decimal('100'))
+            return self.list_price - discount_amount
+        return self.list_price or Decimal('0.00')
 
-    def get_list_price_2025(self) -> Decimal:
-        """Get the 2025 list price, fallback to unit_price if not set."""
-        return self.list_price_2025 if self.list_price_2025 else self.unit_price
-
-    def get_nett_buy_price_gst(self) -> Decimal:
-        """Get the nett buy price including GST."""
-        return self.nett_buy_price_gst if self.nett_buy_price_gst else self.unit_price
-
-    def is_low_stock(self) -> bool:
-        """Check if product is low on stock (below reorder level)."""
-        return self.stock_quantity <= self.reorder_level
-
-    def is_out_of_stock(self) -> bool:
-        """Check if product is out of stock."""
-        return self.stock_quantity <= 0
-
-    def is_available(self) -> bool:
-        """Check if product is available for sale."""
-        return self.is_active and not self.is_out_of_stock()
-
-    def get_availability_status(self) -> str:
-        """Get the availability status of the product."""
-        if not self.is_active:
-            return "Inactive"
-        elif self.is_out_of_stock():
-            return "Out of Stock"
-        elif self.is_low_stock():
-            return "Low Stock"
-        else:
-            return "In Stock"
-
-    def update_stock(self, quantity_change: int) -> None:
-        """Update stock quantity (positive for additions, negative for reductions)."""
-        new_quantity = self.stock_quantity + quantity_change
-        if new_quantity < 0:
-            raise ValidationError("Stock quantity cannot go below 0.")
-        self.stock_quantity = new_quantity
-
-    def get_total_value(self) -> Decimal:
-        """Calculate total value of current stock."""
-        return self.unit_price * self.stock_quantity
+    def get_effective_price(self) -> Decimal:
+        """Get the effective price after applying discounts."""
+        return self.get_discounted_price()
 
     def get_usage_statistics(self) -> Dict[str, Any]:
         """Get usage statistics for this product."""
@@ -161,6 +101,7 @@ class Product(BaseModel):
             'average_quantity_per_use': total_quantity_sold / len(self.line_items) if self.line_items else 0
         }
 
+
     def get_similar_products(self, limit: int = 5) -> List['Product']:
         """Get similar products in the same category."""
         if not self.category:
@@ -173,5 +114,24 @@ class Product(BaseModel):
             Product.is_active == True
         ).limit(limit).all()
 
+    def is_out_of_stock(self) -> bool:
+        """Check if product is out of stock (placeholder - no stock tracking)."""
+        return False  # No stock tracking in current system
+    
+    def is_low_stock(self) -> bool:
+        """Check if product is low stock (placeholder - no stock tracking)."""
+        return False  # No stock tracking in current system
+    
+    @property
+    def stock_quantity(self) -> int:
+        """Get stock quantity (placeholder - no stock tracking)."""
+        return 0  # No stock tracking in current system
+
+    def get_availability_status(self) -> str:
+        """Get availability status for display."""
+        if not self.is_active:
+            return "Inactive"
+        return "Active"
+
     def __repr__(self):
-        return f"<Product(id={self.id}, sku='{self.sku}', name='{self.name}', active={self.is_active})>"
+        return f"<Product(id={self.id}, item_no='{self.item_no}', description='{self.description}', active={self.is_active})>"

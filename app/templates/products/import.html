@@ -4,6 +4,18 @@
 
 {% block page_content %}
 <div class="container-fluid">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -37,8 +49,8 @@
                             <h6><i class="fas fa-info-circle"></i> Updated CSV Format Required</h6>
                             <p class="mb-2">Your CSV must include these columns (in this order):</p>
                             <div class="bg-light p-3 rounded">
-                                <code class="d-block">
-                                    Category, SubCategory, Series, Item No, Description, Pack, Carton Qty, List price, Nett, Disc Code, Note, weight_kg, dimensions, lead_time_days, is_active
+                                <code class="d-block text-break">
+                                    Category, SubCategory, Series, Item No, Description, Pack, Carton Qty, List price, Disc Code, Note, weight_kg, dimensions, lead_time_days, is_active
                                 </code>
                             </div>
                         </div>
@@ -76,12 +88,12 @@
                         <div class="d-flex justify-content-between">
                             <div>
                                 <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times"></我> Cancel
+                                    <i class="fas fa-times"></i> Cancel
                                 </a>
                             </div>
                             <div>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-upload"></我> Import Products
+                                    <i class="fas fa-upload"></i> Import Products
                                 </button>
                                 <a href="{{ url_for('products.download_sample_csv') }}" 
                                    class="btn btn-outline-info ms-2">
@@ -103,7 +115,7 @@
                     <div class="alert alert-warning">
                         <h6><i class="fas fa-exclamation-triangle"></i> Important Notes</h6>
                         <ul class="mb-0">
-                            <li><strong>Item No</strong> is the primary identifier (replaces SKU)</li>
+                            <li><strong>Item No</strong> is the primary identifier</li>
                             <li><strong>Description</strong> is the main product name</li>
                             <li><strong>Category</strong> is required for all products</li>
                             <li><strong>SubCategory</strong> helps with organization</li>
@@ -128,7 +140,6 @@
                             <li>SubCategory</li>
                             <li>Series</li>
                             <li>List price</li>
-                            <li>Nett price</li>
                             <li>Disc Code</li>
                             <li>Note</li>
                             <li>weight_kg</li>
@@ -154,13 +165,7 @@
                     <h5 class="card-title mb-0">Migration from Old Format</h5>
                 </div>
                 <div class="card-body">
-                    <p class="small text-muted">If you have an old CSV format, the system will:</p>
-                    <ul class="small mb-0">
-                        <li>Map SKU → Item No</li>
-                        <li>Map Name → Description</li>
-                        <li>Map Unit Price → List Price</li>
-                        <li>Set defaults for new fields</li>
-                    </ul>
+                    <p class="small text-muted">The system will automatically set defaults for any missing fields.</p>
                 </div>
             </div>
         </div>
@@ -186,7 +191,6 @@
                                     <th>Pack</th>
                                     <th>Carton Qty</th>
                                     <th>List price</th>
-                                    <th>Nett</th>
                                     <th>Disc Code</th>
                                     <th>Note</th>
                                     <th>weight_kg</th>
@@ -205,7 +209,6 @@
                                     <td>1</td>
                                     <td>10</td>
                                     <td>45.50</td>
-                                    <td>30.00</td>
                                     <td>"P1"</td>
                                     <td>"High quality valve"</td>
                                     <td>0.5</td>

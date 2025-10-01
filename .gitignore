@@ -90,7 +90,8 @@ docs/config/secrets/
 # Data files (may contain sensitive business data)
 data/
 *.xlsx
-*.csv
+# Allow CSV files in other directories (like samples)
+# *.csv
 
 # Instance data (runtime files)
 instance/

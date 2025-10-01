@@ -8,8 +8,10 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from sqlalchemy import or_, and_, func
 from decimal import Decimal
+import decimal
 import csv
 import io
+import os
 from datetime import datetime
 
 from app.models.products.product_model import Product
@@ -37,7 +39,7 @@ def list_products():
         category = request.args.get('category') or request.args.get('sub_category', '')
         series = request.args.get('series', '')
         item_no = request.args.get('item_no', '')
-        brand = request.args.get('brand', '')
+        # brand parameter removed as it's not in the new schema
         availability = request.args.get('availability', '')
         price_range = request.args.get('price_range', '')
         
@@ -55,10 +57,7 @@ def list_products():
                     Product.description.ilike(f'%{search_term}%'),
                     Product.category.ilike(f'%{search_term}%'),
                     Product.sub_category.ilike(f'%{search_term}%'),
-                    Product.series.ilike(f'%{search_term}%'),
-                    Product.sku.ilike(f'%{search_term}%'),  # Legacy
-                    Product.name.ilike(f'%{search_term}%'),  # Legacy
-                    Product.brand.ilike(f'%{search_term}%')  # Legacy
+                    Product.series.ilike(f'%{search_term}%')
                 )
             )
         
@@ -74,78 +73,50 @@ def list_products():
         if item_no:
             query = query.filter(Product.item_no.ilike(f'%{item_no}%'))
         
-        if brand:
-            query = query.filter(Product.brand.ilike(f'%{brand}%'))
+        # Note: brand filter removed as it's not in the new schema
         
-        # Apply availability filter
+        # Apply availability filter (simplified - no stock tracking)
         if availability:
-            if availability == 'in_stock':
-                query = query.filter(and_(Product.is_active == True, Product.stock_quantity > Product.reorder_level))
-            elif availability == 'low_stock':
-                query = query.filter(and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level, Product.stock_quantity > 0))
-            elif availability == 'out_of_stock':
-                query = query.filter(and_(Product.is_active == True, Product.stock_quantity == 0))
+            if availability == 'active':
+                query = query.filter(Product.is_active == True)
             elif availability == 'inactive':
                 query = query.filter(Product.is_active == False)
         
-        # Apply price range filter (using list_price or nett as primary, fallback to unit_price)
+        # Apply price range filter (using list_price)
         if price_range:
             if price_range == '0-100':
-                query = query.filter(
-                    or_(
-                        Product.list_price <= 100,
-                        Product.nett <= 100,
-                        Product.unit_price <= 100
-                    )
-                )
+                query = query.filter(Product.list_price <= 100)
             elif price_range == '100-500':
-                query = query.filter(
-                    or_(
-                        and_(Product.list_price > 100, Product.list_price <= 500),
-                        and_(Product.nett > 100, Product.nett <= 500),
-                        and_(Product.unit_price > 100, Product.unit_price <= 500)
-                    )
-                )
+                query = query.filter(and_(Product.list_price > 100, Product.list_price <= 500))
             elif price_range == '500-1000':
-                query = query.filter(
-                    or_(
-                        and_(Product.list_price > 500, Product.list_price <= 1000),
-                        and_(Product.nett > 500, Product.nett <= 1000),
-                        and_(Product.unit_price > 500, Product.unit_price <= 1000)
-                    )
-                )
+                query = query.filter(and_(Product.list_price > 500, Product.list_price <= 1000))
             elif price_range == '1000+':
-                query = query.filter(
-                    or_(
-                        Product.list_price > 1000,
-                        Product.nett > 1000,
-                        Product.unit_price > 1000
-                    )
-                )
+                query = query.filter(Product.list_price > 1000)
         
-        # Get paginated results (order by item_no first, then description)
-        products = query.order_by(Product.item_no, Product.description).paginate(
+        # Get paginated results (order by item_no first, then description, then id)
+        # Use COALESCE to handle NULL values in ordering
+        products = query.order_by(
+            func.coalesce(Product.item_no, ''),
+            func.coalesce(Product.description, ''),
+            Product.id
+        ).paginate(
             page=page, per_page=per_page, error_out=False
         )
         
         # Get statistics
-        total_products = query.count()
-        active_products = query.filter(Product.is_active == True).count()
-        low_stock_products = query.filter(
-            and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level)
-        ).count()
-        out_of_stock_products = query.filter(
-            and_(Product.is_active == True, Product.stock_quantity == 0)
-        ).count()
+        total_products = Product.query.count()
+        active_products = Product.query.filter(Product.is_active == True).count()
+        inactive_products = Product.query.filter(Product.is_active == False).count()
         
-        # Get unique categories, sub-categories, series, and brands for filters
+        # Get unique categories, sub-categories, and series for filters
         categories = db.session.query(Product.category).distinct().filter(Product.category.isnot(None)).all()
         sub_categories = db.session.query(Product.sub_category).distinct().filter(Product.sub_category.isnot(None)).all()
         series_list = db.session.query(Product.series).distinct().filter(Product.series.isnot(None)).all()
-        brands = db.session.query(Product.brand).distinct().filter(Product.brand.isnot(None)).all()
         
         # Log the results for debugging
         logger.info(f"Products page loaded: {total_products} total products, {len(products.items)} on current page")
+        logger.info(f"Query filters applied - search_term: '{search_term}', category: '{category}', sub_category: '{sub_category}'")
+        logger.info(f"Statistics - Total: {total_products}, Active: {active_products}, Inactive: {inactive_products}")
         
         return render_template('products/list.html',
                              products=products,
@@ -154,18 +125,15 @@ def list_products():
                              sub_category=sub_category,
                              series=series,
                              item_no=item_no,
-                             brand=brand,
                              availability=availability,
                              price_range=price_range,
                              categories=[c[0] for c in categories],
                              sub_categories=[s[0] for s in sub_categories],
                              series_list=[s[0] for s in series_list],
-                             brands=[b[0] for b in brands],
                              stats={
                                  'total': total_products,
                                  'active': active_products,
-                                 'low_stock': low_stock_products,
-                                 'out_of_stock': out_of_stock_products
+                                 'inactive': inactive_products
                              })
     
     except Exception as e:
@@ -178,17 +146,14 @@ def list_products():
                              category='',
                              series='',
                              item_no='',
-                             brand='',
                              availability='',
                              price_range='',
                              categories=[],
                              series_list=[],
-                             brands=[],
                              stats={
                                  'total': 0,
                                  'active': 0,
-                                 'low_stock': 0,
-                                 'out_of_stock': 0
+                                 'inactive': 0
                              })
 
 @products_bp.route('/create', methods=['GET', 'POST'])
@@ -207,10 +172,9 @@ def create_product():
                 series=form.series.data.strip() if form.series.data else None,
                 item_no=form.item_no.data.strip(),
                 description=form.description.data.strip(),
-                pack=form.pack.data or 1,
+                pack=form.pack.data.strip() if form.pack.data else None,
                 carton_qty=form.carton_qty.data or 1,
                 list_price=form.list_price.data,
-                nett=form.nett.data,
                 discount_code=form.discount_code.data.strip() if form.discount_code.data else None,
                 notes=form.notes.data.strip() if form.notes.data else None,
                 weight_kg=form.weight_kg.data,
@@ -218,14 +182,6 @@ def create_product():
                 lead_time_days=form.lead_time_days.data or 0,
                 is_active=form.is_active.data,
                 
-                # Legacy fields (for backward compatibility)
-                sku=form.sku.data.strip() if form.sku.data else None,
-                name=form.name.data.strip() if form.name.data else None,
-                unit_price=form.unit_price.data,
-                brand=form.brand.data.strip() if form.brand.data else None,
-                model_number=form.model_number.data.strip() if form.model_number.data else None,
-                stock_quantity=form.stock_quantity.data or 0,
-                reorder_level=form.reorder_level.data or 0
             )
             
             product.save()
@@ -247,11 +203,23 @@ def view_product(product_id):
     """View product details."""
     product = Product.query.get_or_404(product_id)
     
-    # Get similar products
-    similar_products = product.get_similar_products(limit=5)
-    
-    # Get usage statistics
-    usage_stats = product.get_usage_statistics()
+    try:
+        # Get similar products
+        similar_products = product.get_similar_products(limit=5)
+        
+        # Get usage statistics
+        usage_stats = product.get_usage_statistics()
+        
+    except Exception as e:
+        logger.error(f"Error loading product details for product {product_id}: {e}")
+        # Provide fallback values to prevent 500 error
+        similar_products = []
+        usage_stats = {
+            'total_quantity_sold': 0,
+            'total_value_sold': 0.0,
+            'usage_count': 0,
+            'average_quantity_per_use': 0
+        }
     
     return render_template('products/view.html',
                          product=product,
@@ -266,7 +234,7 @@ def edit_product(product_id):
     product = Product.query.get_or_404(product_id)
     form = ProductForm(obj=product)
     
-    # Set product ID for SKU validation
+    # Set product ID for validation
     form.set_product_id(product_id)
     
     if form.validate_on_submit():
@@ -277,10 +245,9 @@ def edit_product(product_id):
             product.series = form.series.data.strip() if form.series.data else None
             product.item_no = form.item_no.data.strip()
             product.description = form.description.data.strip()
-            product.pack = form.pack.data or 1
+            product.pack = form.pack.data.strip() if form.pack.data else None
             product.carton_qty = form.carton_qty.data or 1
             product.list_price = form.list_price.data
-            product.nett = form.nett.data
             product.discount_code = form.discount_code.data.strip() if form.discount_code.data else None
             product.notes = form.notes.data.strip() if form.notes.data else None
             product.weight_kg = form.weight_kg.data
@@ -288,14 +255,6 @@ def edit_product(product_id):
             product.lead_time_days = form.lead_time_days.data or 0
             product.is_active = form.is_active.data
             
-            # Update legacy fields (for backward compatibility)
-            product.sku = form.sku.data.strip() if form.sku.data else None
-            product.name = form.name.data.strip() if form.name.data else None
-            product.unit_price = form.unit_price.data
-            product.brand = form.brand.data.strip() if form.brand.data else None
-            product.model_number = form.model_number.data.strip() if form.model_number.data else None
-            product.stock_quantity = form.stock_quantity.data or 0
-            product.reorder_level = form.reorder_level.data or 0
             
             product.save()
             
@@ -351,28 +310,7 @@ def toggle_product_status(product_id):
     
     return redirect(url_for('products.view_product', product_id=product.id))
 
-@products_bp.route('/<int:product_id>/update-stock', methods=['POST'])
-@login_required
-@roles_required('Admin', 'Manager')
-def update_stock(product_id):
-    """Update product stock quantity."""
-    product = Product.query.get_or_404(product_id)
-    
-    try:
-        quantity_change = int(request.form.get('quantity_change', 0))
-        product.update_stock(quantity_change)
-        product.save()
-        
-        logger.info(f"Stock updated for {product.sku}: {quantity_change} by {current_user.email}")
-        flash(f'Stock updated for "{product.name}"!', 'success')
-        
-    except ValueError:
-        flash('Invalid quantity value.', 'error')
-    except Exception as e:
-        logger.error(f"Error updating stock: {e}")
-        flash('An error occurred while updating stock.', 'error')
-    
-    return redirect(url_for('products.view_product', product_id=product.id))
+# Stock update route removed - not connected to warehouse system
 
 @products_bp.route('/bulk-action', methods=['POST'])
 @login_required
@@ -434,8 +372,24 @@ def import_products():
             update_existing = form.update_existing.data
             skip_errors = form.skip_errors.data
             
-            # Read CSV file
-            csv_data = csv_file.read().decode('utf-8')
+            # Read CSV file with encoding detection
+            csv_file.seek(0)  # Reset file pointer
+            raw_data = csv_file.read()
+            
+            # Try different encodings
+            encodings_to_try = ['utf-8', 'utf-8-sig', 'latin-1', 'cp1252', 'iso-8859-1']
+            csv_data = None
+            
+            for encoding in encodings_to_try:
+                try:
+                    csv_data = raw_data.decode(encoding)
+                    logger.info(f"Successfully decoded CSV with {encoding} encoding")
+                    break
+                except UnicodeDecodeError:
+                    continue
+            
+            if csv_data is None:
+                raise ValueError("Could not decode CSV file. Please save your file as UTF-8 encoding.")
             # Clean up trailing commas that might cause empty columns
             csv_lines = csv_data.strip().split('\n')
             cleaned_lines = []
@@ -453,12 +407,26 @@ def import_products():
             
             for row_num, row in enumerate(csv_reader, 2):  # Start from 2 to account for header
                 try:
-                    # Check if product exists
-                    existing_product = Product.query.filter_by(sku=row['sku']).first()
+                    # Validate required fields
+                    required_fields = ['Item No', 'Description', 'Category']
+                    missing_fields = []
+                    for field in required_fields:
+                        if not row.get(field) or not row[field].strip():
+                            missing_fields.append(field)
+                    
+                    if missing_fields:
+                        errors.append(f"Row {row_num}: Missing required fields: {', '.join(missing_fields)}")
+                        if not skip_errors:
+                            continue
+                    
+                    # Check if product exists by Item No
+                    item_no = row['Item No'].strip()
+                    existing_product = Product.query.filter_by(item_no=item_no).first()
                     
                     if existing_product and not update_existing:
-                        errors.append(f"Row {row_num}: SKU {row['sku']} already exists")
-                        continue
+                        errors.append(f"Row {row_num}: Item No '{item_no}' already exists")
+                        if not skip_errors:
+                            continue
                     
                     # Create or update product
                     if existing_product and update_existing:
@@ -468,53 +436,64 @@ def import_products():
                         product = Product()
                         imported_count += 1
                     
-                    # Update product fields - Map CSV columns to database fields
-                    # CSV Headers: Category | SubCategory | Series | Item No | Description | Pack | Carton Qty | 2025 List Price | Nett | Disc Code | Note | weight_kg | dimensions | lead_time_days | is_active
+                    # Helper function to safely get and strip values
+                    def safe_get_value(field_name, default=None):
+                        """Safely get and strip a value from CSV row, handling None values."""
+                        value = row.get(field_name)
+                        if value is None or value == '':
+                            return default
+                        return value.strip() if value else default
                     
-                    # Use Item No as SKU (primary identifier)
-                    product.sku = row['Item No'].strip()
+                    # Helper function to update field only if CSV has value or it's a new product
+                    def update_field_if_provided(field_name, csv_field, transform_func=None, default_value=None):
+                        """Update field only if CSV has value or it's a new product."""
+                        csv_value = safe_get_value(csv_field)
+                        if csv_value is not None:
+                            if transform_func:
+                                try:
+                                    return transform_func(csv_value)
+                                except (ValueError, TypeError) as e:
+                                    errors.append(f"Row {row_num}: Invalid {csv_field} format '{csv_value}' - {str(e)}")
+                                    return None
+                            return csv_value
+                        elif not existing_product:
+                            # For new products, use default values
+                            return default_value
+                        else:
+                            # For existing products, keep current value if CSV is empty
+                            return getattr(existing_product, field_name, default_value)
                     
-                    # Use Description as name
-                    product.name = row['Description'].strip()
-                    
-                    # Set description from Description field
+                    # Map CSV columns to database fields using new schema
+                    product.item_no = item_no
                     product.description = row['Description'].strip()
-                    
-                    # Map 2025 List Price to unit_price (remove $ and commas)
-                    list_price_str = row['2025 List Price'].replace('$', '').replace(',', '').strip()
-                    try:
-                        product.unit_price = Decimal(list_price_str) if list_price_str else Decimal('0')
-                    except (ValueError, TypeError) as e:
-                        logger.warning(f"Invalid price format '{row['2025 List Price']}' for SKU {row['Item No']}, using 0")
-                        product.unit_price = Decimal('0')
-                    
-                    # Map Category
                     product.category = row['Category'].strip()
                     
-                    # Map Series
-                    product.series = row['Series'].strip()
+                    # Optional fields with smart updating
+                    product.sub_category = update_field_if_provided('sub_category', 'SubCategory')
+                    product.series = update_field_if_provided('series', 'Series')
+                    product.pack = update_field_if_provided('pack', 'Pack')
                     
-                    # Map Item No
-                    product.item_no = row['Item No'].strip()
+                    # Numeric fields with validation
+                    product.carton_qty = update_field_if_provided('carton_qty', 'Carton Qty', 
+                                                               lambda x: int(x) if x else 1) or 1
                     
-                    # Map 2025 List Price to list_price_2025
-                    try:
-                        product.list_price_2025 = Decimal(list_price_str) if list_price_str else Decimal('0')
-                    except (ValueError, TypeError) as e:
-                        logger.warning(f"Invalid list price format '{row['2025 List Price']}' for SKU {row['Item No']}, using 0")
-                        product.list_price_2025 = Decimal('0')
+                    product.list_price = update_field_if_provided('list_price', 'List price',
+                                                                lambda x: Decimal(x) if x else None)
                     
-                    # Map SubCategory to a new field (if needed) or notes
-                    subcategory = row.get('SubCategory', '').strip()
+                    # Physical properties
+                    product.weight_kg = update_field_if_provided('weight_kg', 'weight_kg',
+                                                               lambda x: Decimal(x) if x else None)
                     
-                    # Map Pack information
-                    pack_info = row.get('Pack', '').strip()
+                    product.dimensions = update_field_if_provided('dimensions', 'dimensions')
                     
-                    # Map Carton Qty
-                    carton_qty = row.get('Carton Qty', '').strip()
+                    product.lead_time_days = update_field_if_provided('lead_time_days', 'lead_time_days',
+                                                                    lambda x: int(x) if x else 0) or 0
                     
-                    # Map Disc Code to discount_code - handle foreign key constraint
-                    disc_code = row['Disc Code'].strip() if row['Disc Code'].strip() else None
+                    # Notes
+                    product.notes = update_field_if_provided('notes', 'Note')
+                    
+                    # Handle discount code with validation
+                    disc_code = safe_get_value('Disc Code')
                     if disc_code:
                         # Check if discount code exists in database
                         from app.models.deals.deal_models import Discount
@@ -522,87 +501,118 @@ def import_products():
                         if existing_discount:
                             product.discount_code = disc_code
                         else:
-                            # Log warning but don't fail the import
-                            logger.warning(f"Discount code '{disc_code}' not found in database, skipping discount for SKU {product.sku}")
+                            # Log warning and skip discount code instead of failing
+                            errors.append(f"Row {row_num}: Discount code '{disc_code}' not found in database, skipping discount")
                             product.discount_code = None
                     else:
-                        product.discount_code = None
+                        # For existing products, keep current discount code if CSV is empty
+                        if existing_product:
+                            product.discount_code = existing_product.discount_code
+                        else:
+                            product.discount_code = None
                     
-                    # Map Nett to nett_buy_price_gst (remove $ and commas)
-                    nett_str = row['Nett'].replace('$', '').replace(',', '').strip()
-                    try:
-                        product.nett_buy_price_gst = Decimal(nett_str) if nett_str else Decimal('0')
-                    except (ValueError, TypeError) as e:
-                        logger.warning(f"Invalid nett price format '{row['Nett']}' for SKU {row['Item No']}, using 0")
-                        product.nett_buy_price_gst = Decimal('0')
-                    
-                    # Map Note field
-                    note_text = row.get('Note', '').strip()
-                    if note_text:
-                        # Combine subcategory, pack info, and notes if they exist
-                        combined_notes = []
-                        if subcategory:
-                            combined_notes.append(f"SubCategory: {subcategory}")
-                        if pack_info:
-                            combined_notes.append(f"Pack: {pack_info}")
-                        if carton_qty:
-                            combined_notes.append(f"Carton Qty: {carton_qty}")
-                        if note_text:
-                            combined_notes.append(note_text)
-                        product.notes = ' | '.join(combined_notes)
+                    # Active status - only update if CSV has value
+                    is_active_str = safe_get_value('is_active', 'true')
+                    if is_active_str is not None:
+                        product.is_active = is_active_str.lower() in ['true', '1', 'yes', 'y']
+                    elif not existing_product:
+                        # For new products, default to active
+                        product.is_active = True
                     else:
-                        product.notes = None
+                        # For existing products, keep current status if CSV is empty
+                        product.is_active = existing_product.is_active
                     
-                    # Map weight_kg from CSV
-                    weight_str = row.get('weight_kg', '').strip()
-                    try:
-                        product.weight_kg = Decimal(weight_str) if weight_str else None
-                    except (ValueError, TypeError):
-                        product.weight_kg = None
-                    
-                    # Map dimensions from CSV
-                    product.dimensions = row.get('dimensions', '').strip() or None
-                    
-                    # Map lead_time_days from CSV
-                    lead_time_str = row.get('lead_time_days', '').strip()
-                    try:
-                        product.lead_time_days = int(lead_time_str) if lead_time_str else 0
-                    except (ValueError, TypeError):
-                        product.lead_time_days = 0
-                    
-                    # Map is_active from CSV
-                    is_active_str = row.get('is_active', 'true').strip().lower()
-                    product.is_active = is_active_str in ('true', '1', 'yes', 'y')
-                    
-                    # Set default values for fields not in CSV
-                    product.brand = row.get('brand', '').strip() or None
-                    product.model_number = row.get('model_number', '').strip() or None
-                    product.stock_quantity = int(row.get('stock_quantity', 0)) if row.get('stock_quantity') else 0
-                    product.reorder_level = int(row.get('reorder_level', 0)) if row.get('reorder_level') else 0
                     
                     product.save()
                     
                 except Exception as e:
-                    error_msg = f"Row {row_num}: {str(e)}"
+                    # Provide more specific error messages for common issues
+                    if "ConversionSyntax" in str(e):
+                        error_msg = f"Row {row_num}: Invalid number format in CSV data. Check price fields (List price) for non-numeric values like '$', commas, or text."
+                    elif "ValueError" in str(e):
+                        error_msg = f"Row {row_num}: Invalid data format - {str(e)}"
+                    elif "TypeError" in str(e):
+                        error_msg = f"Row {row_num}: Data type error - {str(e)}"
+                    elif "ForeignKeyViolation" in str(e):
+                        error_msg = f"Row {row_num}: Database constraint error - {str(e)}"
+                    else:
+                        error_msg = f"Row {row_num}: {str(e)}"
+                    
                     errors.append(error_msg)
                     if not skip_errors:
                         raise e
             
-            # Show results
+            # Show results with detailed error messages
             if imported_count > 0:
-                flash(f'{imported_count} products imported successfully!', 'success')
+                flash(f'✅ {imported_count} products imported successfully!', 'success')
             if updated_count > 0:
-                flash(f'{updated_count} products updated successfully!', 'success')
+                flash(f'✅ {updated_count} products updated successfully!', 'success')
+            
             if errors:
-                flash(f'{len(errors)} errors occurred during import.', 'warning')
+                # Show detailed error messages instead of generic count
+                error_count = len(errors)
+                if error_count <= 5:
+                    # Show all errors if 5 or fewer
+                    for error in errors:
+                        flash(f'❌ {error}', 'error')
+                else:
+                    # Show first 3 errors and count if more
+                    for error in errors[:3]:
+                        flash(f'❌ {error}', 'error')
+                    flash(f'❌ ... and {error_count - 3} more errors. Check logs for details.', 'error')
             
             logger.info(f"Products imported: {imported_count} new, {updated_count} updated by {current_user.email}")
             
         except Exception as e:
             logger.error(f"Error importing products: {e}")
-            flash('An error occurred while importing products.', 'error')
+            # Provide more specific error messages
+            if "Could not decode CSV file" in str(e):
+                flash('❌ CSV file encoding issue. Please save your file as UTF-8 encoding in Excel/Google Sheets.', 'error')
+            elif "No such file or directory" in str(e):
+                flash('❌ CSV file not found or could not be read.', 'error')
+            elif "Permission denied" in str(e):
+                flash('❌ Permission denied accessing the CSV file.', 'error')
+            elif "Invalid CSV format" in str(e):
+                flash('❌ Invalid CSV format. Please check your file structure.', 'error')
+            else:
+                flash(f'❌ Import failed: {str(e)}', 'error')
     
     return render_template('products/import.html', form=form)
+
+@products_bp.route('/download-sample-csv')
+@login_required
+def download_sample_csv():
+    """Download sample CSV template."""
+    try:
+        # Try to read the sample CSV from the new location first
+        sample_path = os.path.join(current_app.root_path, 'static', 'samples', 'products.csv')
+        
+        if os.path.exists(sample_path):
+            with open(sample_path, 'r', encoding='utf-8') as f:
+                csv_content = f.read()
+        else:
+            # Fallback to old location
+            sample_path = os.path.join(current_app.root_path, '..', 'data', 'products.csv')
+            if os.path.exists(sample_path):
+                with open(sample_path, 'r', encoding='utf-8') as f:
+                    csv_content = f.read()
+            else:
+                # Create a default sample if file doesn't exist (new schema - 14 columns)
+                csv_content = "Category,SubCategory,Series,Item No,Description,Pack,Carton Qty,List price,Disc Code,Note,weight_kg,dimensions,lead_time_days,is_active\n"
+        
+        from flask import Response
+        return Response(
+            csv_content,
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': 'attachment; filename=products_sample.csv'
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error downloading sample CSV: {e}")
+        flash('Error downloading sample CSV.', 'error')
+        return redirect(url_for('products.import_products'))
 
 @products_bp.route('/export')
 @login_required
@@ -616,30 +626,29 @@ def export_products():
         output = io.StringIO()
         writer = csv.writer(output)
         
-        # Write header
+        # Write header (new schema - 14 columns)
         writer.writerow([
-            'SKU', 'Name', 'Description', 'Unit Price', 'Category', 'Brand',
-            'Model Number', 'Weight (kg)', 'Dimensions', 'Stock Quantity',
-            'Reorder Level', 'Lead Time (days)', 'Active', 'Notes'
+            'Category', 'SubCategory', 'Series', 'Item No', 'Description', 'Pack', 'Carton Qty',
+            'List price', 'Disc Code', 'Note', 'weight_kg', 'dimensions', 'lead_time_days', 'is_active'
         ])
         
-        # Write data
+        # Write data (new schema - 14 columns)
         for product in products:
             writer.writerow([
-                product.sku,
-                product.name,
+                product.category or '',
+                product.sub_category or '',
+                product.series or '',
+                product.item_no or '',
                 product.description or '',
-                float(product.unit_price),
-                product.category,
-                product.brand or '',
-                product.model_number or '',
+                product.pack or '',
+                product.carton_qty or 1,
+                float(product.list_price) if product.list_price else '',
+                product.discount_code or '',
+                product.notes or '',
                 float(product.weight_kg) if product.weight_kg else '',
                 product.dimensions or '',
-                product.stock_quantity,
-                product.reorder_level,
-                product.lead_time_days,
-                'Yes' if product.is_active else 'No',
-                product.notes or ''
+                product.lead_time_days or 0,
+                'Yes' if product.is_active else 'No'
             ])
         
         # Create response
@@ -671,9 +680,11 @@ def api_search():
         and_(
             Product.is_active == True,
             or_(
-                Product.name.ilike(f'%{search_term}%'),
-                Product.sku.ilike(f'%{search_term}%'),
-                Product.brand.ilike(f'%{search_term}%')
+                Product.item_no.ilike(f'%{search_term}%'),
+                Product.description.ilike(f'%{search_term}%'),
+                Product.category.ilike(f'%{search_term}%'),
+                Product.sub_category.ilike(f'%{search_term}%'),
+                Product.series.ilike(f'%{search_term}%')
             )
         )
     ).limit(limit).all()
@@ -682,12 +693,11 @@ def api_search():
     for product in products:
         results.append({
             'id': product.id,
-            'sku': product.sku,
-            'name': product.name,
-            'brand': product.brand,
-            'unit_price': float(product.unit_price),
-            'stock_quantity': product.stock_quantity,
-            'availability': product.get_availability_status()
+            'item_no': product.item_no,
+            'description': product.description,
+            'category': product.category,
+            'list_price': float(product.list_price) if product.list_price else 0.0,
+            'is_active': product.is_active
         })
     
     return jsonify(results)
@@ -696,15 +706,10 @@ def api_search():
 @login_required
 def dashboard():
     """Product management dashboard."""
-    # Get statistics
+    # Get statistics (simplified without stock tracking)
     total_products = Product.query.count()
     active_products = Product.query.filter(Product.is_active == True).count()
-    low_stock_products = Product.query.filter(
-        and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level)
-    ).count()
-    out_of_stock_products = Product.query.filter(
-        and_(Product.is_active == True, Product.stock_quantity == 0)
-    ).count()
+    inactive_products = Product.query.filter(Product.is_active == False).count()
     
     # Get products by category
     category_stats = db.session.query(
@@ -715,21 +720,22 @@ def dashboard():
     # Get recent products
     recent_products = Product.query.order_by(Product.created_at.desc()).limit(10).all()
     
-    # Get low stock products
-    low_stock_list = Product.query.filter(
-        and_(Product.is_active == True, Product.stock_quantity <= Product.reorder_level)
-    ).order_by(Product.stock_quantity.asc()).limit(10).all()
+    # Get inactive products
+    inactive_list = Product.query.filter(
+        Product.is_active == False
+    ).order_by(Product.item_no.asc()).limit(10).all()
     
     return render_template('products/dashboard.html',
                          stats={
                              'total': total_products,
                              'active': active_products,
-                             'low_stock': low_stock_products,
-                             'out_of_stock': out_of_stock_products
+                             'inactive': inactive_products,
+                             'low_stock': 0,  # No stock tracking in current system
+                             'out_of_stock': 0  # No stock tracking in current system
                          },
                          category_stats=category_stats,
                          recent_products=recent_products,
-                         low_stock_list=low_stock_list) 
+                         inactive_list=inactive_list) 
 
 @products_bp.route('/debug')
 @login_required
@@ -742,16 +748,31 @@ def debug_products():
         # Check if any products exist
         first_product = Product.query.first()
         
+        # Test the same query as list_products
+        test_query = Product.query
+        test_paginated = test_query.order_by(
+            func.coalesce(Product.item_no, ''),
+            func.coalesce(Product.description, ''),
+            Product.id
+        ).paginate(page=1, per_page=20, error_out=False)
+        
         # Get table info
         from sqlalchemy import text
         result = db.session.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'products'"))
         table_exists = result.fetchone() is not None
         
+        # Check for NULL values in required fields
+        null_item_no_count = db.session.execute(text("SELECT COUNT(*) FROM products WHERE item_no IS NULL")).scalar()
+        null_description_count = db.session.execute(text("SELECT COUNT(*) FROM products WHERE description IS NULL")).scalar()
+        
         debug_info = {
             'table_exists': table_exists,
             'total_products': total_products,
             'first_product': str(first_product) if first_product else None,
-            'dev_database_url': str(db.engine.url),
+            'paginated_items_count': len(test_paginated.items),
+            'null_item_no_count': null_item_no_count,
+            'null_description_count': null_description_count,
+            'database_url': str(db.engine.url),
         }
         
         return jsonify(debug_info)

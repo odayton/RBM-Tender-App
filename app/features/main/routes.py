@@ -6,12 +6,27 @@ from . import main_bp
 # Health check endpoint for Docker
 @main_bp.route('/health')
 def health():
-    """Health check endpoint for Docker and load balancers."""
-    return jsonify({
-        'status': 'healthy',
-        'service': 'rbm-tender-app',
-        'timestamp': '2025-08-08T01:00:00Z'
-    }), 200
+    """Ultra-simple health check endpoint with no dependencies."""
+    import json
+    from datetime import datetime
+    
+    try:
+        response_data = {
+            'service': 'rbm-tender-app',
+            'status': 'healthy',
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'message': 'Application is running'
+        }
+        return json.dumps(response_data), 200, {'Content-Type': 'application/json'}
+    
+    except Exception as e:
+        response_data = {
+            'service': 'rbm-tender-app',
+            'status': 'unhealthy',
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'error': str(e)
+        }
+        return json.dumps(response_data), 503, {'Content-Type': 'application/json'}
 
 # Favicon route to prevent 404 errors
 @main_bp.route('/favicon.ico')
@@ -36,5 +51,9 @@ def home():
             'contacts': Contact.query.all(),
             'products': Product.query.all()
         }
+        
+        # Log dashboard data for debugging
+        from app.core.core_logging import logger
+        logger.info(f"Home page dashboard data - Products: {len(dashboard_data['products'])}, Deals: {len(dashboard_data['deals'])}, Companies: {len(dashboard_data['companies'])}, Contacts: {len(dashboard_data['contacts'])}")
     
     return render_template('home.html', **dashboard_data)

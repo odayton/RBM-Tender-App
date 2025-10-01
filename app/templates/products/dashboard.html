@@ -125,10 +125,10 @@
                         <a href="{{ url_for('products.view_product', product_id=product.id) }}" 
                            class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ product.item_no or product.sku }}</h6>
+                                <h6 class="mb-1">{{ product.item_no }}</h6>
                                 <small class="text-muted">{{ product.created_at.strftime('%m/%d') }}</small>
                             </div>
-                            <small class="text-muted">{{ product.description or product.name }} • ${{ "%.2f"|format(product.get_effective_price()) }}</small>
+                            <small class="text-muted">{{ product.description }} • ${{ "%.2f"|format(product.list_price or 0) }}</small>
                         </a>
                         {% endfor %}
                     </div>
@@ -140,66 +140,6 @@
         </div>
     </div>
 
-    <!-- Low Stock Alert -->
-    {% if low_stock_list %}
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header bg-warning text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-exclamation-triangle"></i> Low Stock Alert
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Item No</th>
-                                    <th>Current Stock</th>
-                                    <th>Reorder Level</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for product in low_stock_list %}
-                                <tr>
-                                    <td>
-                                        <a href="{{ url_for('products.view_product', product_id=product.id) }}" 
-                                           class="text-decoration-none">{{ product.description or product.name }}</a>
-                                    </td>
-                                    <td>{{ product.item_no or product.sku }}</td>
-                                    <td>
-                                        <span class="badge bg-{% if product.stock_quantity == 0 %}danger{% else %}warning{% endif %}">
-                                            {{ product.stock_quantity }}
-                                        </span>
-                                    </td>
-                                    <td>{{ product.reorder_level }}</td>
-                                    <td>
-                                        {% if product.stock_quantity == 0 %}
-                                        <span class="badge bg-danger">Out of Stock</span>
-                                        {% else %}
-                                        <span class="badge bg-warning">Low Stock</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{{ url_for('products.edit_product', product_id=product.id) }}" 
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-edit"></i> Update Stock
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
 
     <!-- Quick Actions -->
     <div class="row">

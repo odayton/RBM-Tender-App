@@ -14,47 +14,42 @@ class ProductFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = Product
         sqlalchemy_session_persistence = 'flush'
     
-    sku = factory.Sequence(lambda n: f'TEST-{n:03d}')
-    name = factory.Sequence(lambda n: f'Test Product {n}')
-    description = factory.Faker('text', max_nb_chars=100)
-    unit_price = FuzzyFloat(100.0, 5000.0)
+    # New 14-column schema
     category = factory.Faker('word')
-    brand = factory.Faker('company')
-    model_number = factory.Sequence(lambda n: f'MODEL-{n}')
+    sub_category = factory.Faker('word')
+    series = factory.Sequence(lambda n: f'SERIES-{n}')
+    item_no = factory.Sequence(lambda n: f'ITEM-{n:03d}')
+    description = factory.Sequence(lambda n: f'Test Product {n}')
+    pack = factory.Faker('word')
+    carton_qty = FuzzyInteger(1, 10)
+    list_price = FuzzyFloat(100.0, 5000.0)
+    discount_code = None
+    notes = factory.Faker('text', max_nb_chars=100)
     weight_kg = FuzzyFloat(1.0, 100.0)
     dimensions = factory.LazyAttribute(lambda obj: f'{obj.weight_kg * 10:.0f}x{obj.weight_kg * 5:.0f}x{obj.weight_kg * 2:.0f}cm')
-    is_active = True
-    stock_quantity = FuzzyInteger(0, 100)
-    reorder_level = FuzzyInteger(5, 20)
     lead_time_days = FuzzyInteger(1, 30)
+    is_active = True
 
 
 class HVACProductFactory(ProductFactory):
     """Factory for creating HVAC products."""
     category = 'HVAC'
-    name = factory.Sequence(lambda n: f'HVAC Unit {n}')
-    sku = factory.Sequence(lambda n: f'HVAC-{n:03d}')
+    sub_category = 'Units'
+    description = factory.Sequence(lambda n: f'HVAC Unit {n}')
+    item_no = factory.Sequence(lambda n: f'HVAC-{n:03d}')
 
 
 class PlumbingProductFactory(ProductFactory):
     """Factory for creating plumbing products."""
     category = 'Plumbing'
-    name = factory.Sequence(lambda n: f'Plumbing Fixture {n}')
-    sku = factory.Sequence(lambda n: f'PLUMB-{n:03d}')
+    sub_category = 'Fixtures'
+    description = factory.Sequence(lambda n: f'Plumbing Fixture {n}')
+    item_no = factory.Sequence(lambda n: f'PLUMB-{n:03d}')
 
 
 class HydronicProductFactory(ProductFactory):
     """Factory for creating hydronic heating products."""
     category = 'Hydronic Heating'
-    name = factory.Sequence(lambda n: f'Hydronic Component {n}')
-    sku = factory.Sequence(lambda n: f'HYDRO-{n:03d}')
-
-
-class LowStockProductFactory(ProductFactory):
-    """Factory for creating low stock products."""
-    stock_quantity = factory.LazyAttribute(lambda obj: obj.reorder_level - 1)
-
-
-class OutOfStockProductFactory(ProductFactory):
-    """Factory for creating out of stock products."""
-    stock_quantity = 0
+    sub_category = 'Components'
+    description = factory.Sequence(lambda n: f'Hydronic Component {n}')
+    item_no = factory.Sequence(lambda n: f'HYDRO-{n:03d}')

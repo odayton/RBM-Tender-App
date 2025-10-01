@@ -12,82 +12,65 @@ from tests.factories import ProductFactory
 class TestProductBusinessLogic:
     """Test product business logic."""
     
-    def test_product_sku_uniqueness(self, db_session):
-        """Test that product SKUs must be unique."""
-        # Create first product with unique SKU
-        product1 = Product(
-            sku='UNIQUE-SKU-TEST-1',
-            name='Test Product 1',
-            unit_price=Decimal('100.00'),
+    def test_product_item_no_validation(self, db_session):
+        """Test that product item numbers are validated."""
+        # Test valid item number
+        product = Product(
+            item_no='VALID-ITEM-TEST-1',
+            description='Test Product',
+            category='Test',
+            list_price=Decimal('100.00'),
             is_active=True
         )
-        db_session.add(product1)
-        db_session.commit()
-        
-        # Try to create second product with same SKU - should fail
-        product2 = Product(
-            sku='UNIQUE-SKU-TEST-1',  # Same SKU - should fail
-            name='Test Product 2',
-            unit_price=Decimal('200.00'),
-            is_active=True
-        )
-        db_session.add(product2)
-        with pytest.raises(Exception):  # Should raise integrity error
-            db_session.commit()
-    
-    def test_product_name_validation(self, db_session):
-        """Test product name validation."""
-        # Test valid product name
-        product = ProductFactory(name='Valid Product Name')
         db_session.add(product)
         db_session.commit()
         
-        assert product.name == 'Valid Product Name'
+        assert product.item_no == 'VALID-ITEM-TEST-1'
         
-        # Test empty name (should fail validation)
-        product.name = ''
+        # Test empty item number (should fail validation)
+        product.item_no = ''
+        with pytest.raises(Exception):  # Should raise ValidationError
+            product.validate()
+    
+    def test_product_description_validation(self, db_session):
+        """Test product description validation."""
+        # Test valid product description
+        product = ProductFactory(description='Valid Product Description')
+        db_session.add(product)
+        db_session.commit()
+        
+        assert product.description == 'Valid Product Description'
+        
+        # Test empty description (should fail validation)
+        product.description = ''
         with pytest.raises(Exception):  # Should raise ValidationError
             product.validate()
     
     def test_product_price_validation(self, db_session):
         """Test product price validation."""
         # Test valid price
-        product = ProductFactory(unit_price=Decimal('100.00'))
+        product = ProductFactory(list_price=Decimal('100.00'))
         db_session.add(product)
         db_session.commit()
         
-        assert product.unit_price == Decimal('100.00')
+        assert product.list_price == Decimal('100.00')
         
         # Test negative price (should fail validation)
-        product.unit_price = Decimal('-50.00')
+        product.list_price = Decimal('-50.00')
         with pytest.raises(Exception):  # Should raise ValidationError
             product.validate()
     
-    def test_product_stock_quantity_validation(self, db_session):
-        """Test product stock quantity validation."""
-        # Test valid stock quantity
-        product = ProductFactory(stock_quantity=100)
+    def test_product_carton_qty_validation(self, db_session):
+        """Test product carton quantity validation."""
+        # Test valid carton quantity
+        product = ProductFactory(carton_qty=10)
         db_session.add(product)
         db_session.commit()
         
-        assert product.stock_quantity == 100
+        assert product.carton_qty == 10
         
-        # Test negative stock quantity (should fail validation)
-        product.stock_quantity = -10
-        with pytest.raises(Exception):  # Should raise ValidationError
-            product.validate()
-    
-    def test_product_reorder_level_validation(self, db_session):
-        """Test product reorder level validation."""
-        # Test valid reorder level
-        product = ProductFactory(reorder_level=10)
-        db_session.add(product)
-        db_session.commit()
-        
-        assert product.reorder_level == 10
-        
-        # Test negative reorder level (should fail validation)
-        product.reorder_level = -5
+        # Test negative carton quantity (should fail validation)
+        product.carton_qty = -5
         with pytest.raises(Exception):  # Should raise ValidationError
             product.validate()
     
@@ -135,41 +118,44 @@ class TestProductBusinessLogic:
         plumbing_products = db_session.query(Product).filter_by(category='Plumbing').all()
         assert len(plumbing_products) == 1
     
-    def test_product_brand_indexing(self, db_session):
-        """Test product brand indexing."""
-        product1 = ProductFactory(brand='Brand A')
-        product2 = ProductFactory(brand='Brand B')
-        product3 = ProductFactory(brand='Brand A')
+    def test_product_series_indexing(self, db_session):
+        """Test product series indexing."""
+        product1 = ProductFactory(series='Series A')
+        product2 = ProductFactory(series='Series B')
+        product3 = ProductFactory(series='Series A')
         
         db_session.add_all([product1, product2, product3])
         db_session.commit()
         
-        # Test brand filtering
-        brand_a_products = db_session.query(Product).filter_by(brand='Brand A').all()
-        assert len(brand_a_products) == 2
+        # Test series filtering
+        series_a_products = db_session.query(Product).filter_by(series='Series A').all()
+        assert len(series_a_products) == 2
         
-        brand_b_products = db_session.query(Product).filter_by(brand='Brand B').all()
-        assert len(brand_b_products) == 1
+        series_b_products = db_session.query(Product).filter_by(series='Series B').all()
+        assert len(series_b_products) == 1
     
     def test_product_active_status_indexing(self, db_session):
         """Test product active status indexing."""
         # Create products with specific active status
         product1 = Product(
-            sku='ACTIVE-TEST-1',
-            name='Active Product 1',
-            unit_price=Decimal('100.00'),
+            item_no='ACTIVE-TEST-1',
+            description='Active Product 1',
+            category='Test',
+            list_price=Decimal('100.00'),
             is_active=True
         )
         product2 = Product(
-            sku='INACTIVE-TEST-1',
-            name='Inactive Product 1',
-            unit_price=Decimal('200.00'),
+            item_no='INACTIVE-TEST-1',
+            description='Inactive Product 1',
+            category='Test',
+            list_price=Decimal('200.00'),
             is_active=False
         )
         product3 = Product(
-            sku='ACTIVE-TEST-2',
-            name='Active Product 2',
-            unit_price=Decimal('300.00'),
+            item_no='ACTIVE-TEST-2',
+            description='Active Product 2',
+            category='Test',
+            list_price=Decimal('300.00'),
             is_active=True
         )
 
@@ -177,7 +163,7 @@ class TestProductBusinessLogic:
         db_session.commit()
 
         # Test active status filtering - should only find our 2 active products
-        active_products = db_session.query(Product).filter_by(is_active=True).filter(Product.sku.like('ACTIVE-TEST-%')).all()
+        active_products = db_session.query(Product).filter_by(is_active=True).filter(Product.item_no.like('ACTIVE-TEST-%')).all()
         assert len(active_products) == 2
         
         inactive_products = db_session.query(Product).filter_by(is_active=False).all()
@@ -187,9 +173,10 @@ class TestProductBusinessLogic:
         """Test product usage count calculation."""
         # Create product directly
         product = Product(
-            sku='USAGE-TEST-1',
-            name='Usage Test Product',
-            unit_price=Decimal('100.00'),
+            item_no='USAGE-TEST-1',
+            description='Usage Test Product',
+            category='Test',
+            list_price=Decimal('100.00'),
             is_active=True
         )
         db_session.add(product)
@@ -255,7 +242,7 @@ class TestProductBusinessLogic:
             option_id=option.id,
             product_id=product.id,
             quantity=1,
-            unit_price=product.unit_price
+            unit_price=product.list_price
         )
         db_session.add(line_item)
         db_session.commit()
@@ -275,10 +262,8 @@ class TestProductBusinessLogic:
         db_session.flush()
         
         product = ProductFactory(
-            unit_price=Decimal('1000.00'),
-            discount_code=discount.code,
-            stock_quantity=5,
-            reorder_level=10
+            list_price=Decimal('1000.00'),
+            discount_code=discount.code
         )
         db_session.add(product)
         db_session.commit()
@@ -292,58 +277,31 @@ class TestProductBusinessLogic:
         assert 'discounted_price' in product_dict
         assert product_dict['discounted_price'] == 800.0  # 1000 - 20%
         
-        assert 'is_low_stock' in product_dict
-        assert product_dict['is_low_stock'] is True  # 5 <= 10
-        
-        assert 'is_out_of_stock' in product_dict
-        assert product_dict['is_out_of_stock'] is False  # 5 > 0
+        # Stock-related fields removed from new schema
         
         assert 'usage_count' in product_dict
         assert product_dict['usage_count'] == 0  # No line items yet
     
-    def test_product_list_price_2025_fallback(self, db_session):
-        """Test product 2025 list price fallback."""
-        # Test with list_price_2025 set
+    def test_product_list_price(self, db_session):
+        """Test product list price."""
+        # Test list price
         product1 = ProductFactory(
-            unit_price=Decimal('1000.00'),
-            list_price_2025=Decimal('1200.00')
+            list_price=Decimal('1000.00')
         )
         db_session.add(product1)
         db_session.commit()
         
-        assert product1.get_list_price_2025() == Decimal('1200.00')
+        assert product1.list_price == Decimal('1000.00')
         
-        # Test fallback to unit_price
+        # Test with different list price
         product2 = ProductFactory(
-            unit_price=Decimal('1000.00'),
-            list_price_2025=None
+            list_price=Decimal('500.00')
         )
         db_session.add(product2)
         db_session.commit()
         
-        assert product2.get_list_price_2025() == Decimal('1000.00')
+        assert product2.list_price == Decimal('500.00')
     
-    def test_product_nett_buy_price_gst_fallback(self, db_session):
-        """Test product nett buy price GST fallback."""
-        # Test with nett_buy_price_gst set
-        product1 = ProductFactory(
-            unit_price=Decimal('1000.00'),
-            nett_buy_price_gst=Decimal('1100.00')
-        )
-        db_session.add(product1)
-        db_session.commit()
-        
-        assert product1.get_nett_buy_price_gst() == Decimal('1100.00')
-        
-        # Test fallback to unit_price
-        product2 = ProductFactory(
-            unit_price=Decimal('1000.00'),
-            nett_buy_price_gst=None
-        )
-        db_session.add(product2)
-        db_session.commit()
-        
-        assert product2.get_nett_buy_price_gst() == Decimal('1000.00')
     
     def test_product_dimensions_formatting(self, db_session):
         """Test product dimensions formatting."""
@@ -353,13 +311,13 @@ class TestProductBusinessLogic:
         
         assert product.dimensions == '100x50x25cm'
     
-    def test_product_model_number_formatting(self, db_session):
-        """Test product model number formatting."""
-        product = ProductFactory(model_number='MODEL-123')
+    def test_product_pack_formatting(self, db_session):
+        """Test product pack formatting."""
+        product = ProductFactory(pack='PACK-123')
         db_session.add(product)
         db_session.commit()
         
-        assert product.model_number == 'MODEL-123'
+        assert product.pack == 'PACK-123'
     
     def test_product_notes_functionality(self, db_session):
         """Test product notes functionality."""

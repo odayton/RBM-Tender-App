@@ -317,7 +317,7 @@ class QuoteLineItem(BaseModel):
     
     # Relationships
     option = relationship("QuoteOption", back_populates="line_items")
-    product = relationship("Product")
+    product = relationship("Product", back_populates="line_items")
     
     # Indexes and constraints
     __table_args__ = (
@@ -338,14 +338,14 @@ class QuoteLineItem(BaseModel):
     def product_name(self) -> str:
         """Get the product name (from product or custom)."""
         if self.product:
-            return self.product.name
+            return self.product.description
         return self.custom_name or "Custom Item"
     
     @property
     def product_sku(self) -> str:
         """Get the product SKU (from product or custom)."""
         if self.product:
-            return self.product.sku
+            return self.product.item_no
         return self.custom_sku or "CUSTOM"
     
     def validate(self) -> None:

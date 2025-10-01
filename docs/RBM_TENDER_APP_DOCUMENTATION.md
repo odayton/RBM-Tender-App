@@ -27,7 +27,7 @@ The RBM Tender App is a comprehensive internal tool for managing sales opportuni
 - **Deal Management**: Complete sales pipeline tracking
 - **Quote Generation**: Multi-level quote system with PDF export
 - **Customer Management**: Company and contact tracking
-- **Product Catalog**: SKU-based product management
+- **Product Catalog**: Item-based product management with 14-column schema
 - **Admin Panel**: User management and system administration
 
 ---
@@ -477,12 +477,20 @@ For more detailed information, see the complete [Migration Guide](MIGRATION_GUID
 **Purpose**: Represents sellable products and services.
 
 **Key Fields**:
-- `sku`: Unique product SKU
-- `name`: Product name
+- `item_no`: Unique product identifier
 - `description`: Product description
-- `unit_price`: Product price
+- `category`: Product category
+- `sub_category`: Product sub-category
+- `series`: Product series
+- `list_price`: Product list price
 - `discount_code`: Foreign key to Discount model
-- `pump_assembly_id`: Foreign key to PumpAssembly model
+- `pack`: Product packaging information
+- `carton_qty`: Quantity per carton
+- `weight_kg`: Product weight
+- `dimensions`: Product dimensions
+- `lead_time_days`: Lead time in days
+- `notes`: Additional notes
+- `is_active`: Product status
 
 ### Quote System Models
 
@@ -674,32 +682,32 @@ owner_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
 
 #### 5. **Product Model** (`app/models/products/product_model.py`)
 
-**Purpose**: Manages the product catalog with pricing, inventory, and discount support.
+**Purpose**: Manages the product catalog with pricing and discount support using a 14-column schema.
 
 **Key Features**:
-- Category and brand organization
-- Stock management
+- Category and sub-category organization
+- Series-based product grouping
 - Discount application
-- Usage statistics
+- Weight and dimension tracking
+- Lead time management
 
 **Enhanced Fields**:
 ```python
-sku = Column(String(80), unique=True, nullable=False, index=True)
-name = Column(String(200), nullable=False, index=True)
-description = Column(Text)
-unit_price = Column(Numeric(10, 2), nullable=False, default=0.0)
-
-# Additional Management
+# Primary Fields
 category = Column(String(100), index=True)
-brand = Column(String(100))
-model_number = Column(String(100))
+sub_category = Column(String(100))
+series = Column(String(100))
+item_no = Column(String(100))
+description = Column(Text)
+pack = Column(String(50))
+carton_qty = Column(Integer, default=1)
+list_price = Column(Numeric(10, 2))
+discount_code = Column(String(10), ForeignKey('discounts.code'), nullable=True)
+notes = Column(Text)
 weight_kg = Column(Numeric(8, 3))
 dimensions = Column(String(100))
-is_active = Column(Boolean, default=True, nullable=False, index=True)
-stock_quantity = Column(Integer, default=0)
-reorder_level = Column(Integer, default=0)
 lead_time_days = Column(Integer, default=0)
-notes = Column(Text)
+is_active = Column(Boolean, default=True, nullable=False, index=True)
 ```
 
 **Relationships**:
@@ -709,10 +717,9 @@ notes = Column(Text)
 
 **Key Business Logic Methods**:
 - `get_discounted_price()`: Price after discount
-- `is_low_stock()`: Stock level checking
-- `update_stock()`: Inventory management
-- `get_usage_statistics()`: Sales analytics
-- `get_availability_status()`: Stock status
+- `validate()`: Product validation
+- `to_dict()`: Convert to dictionary
+- `__repr__()`: String representation
 
 ### 🔗 **Relationships Summary**
 
@@ -737,14 +744,14 @@ notes = Column(Text)
 - ✅ Discount percentages: 0-100%
 - ✅ Deal probabilities: 0-100%
 - ✅ Product prices: >= 0
-- ✅ Stock quantities: >= 0
+- ✅ Carton quantities: >= 1
 - ✅ Line item quantities: > 0
 
 #### **Unique Constraints**
 - ✅ User username and email
 - ✅ Company name
 - ✅ Contact email
-- ✅ Product SKU
+- ✅ Product item_no
 - ✅ Deal project name
 - ✅ User employee ID
 
@@ -769,10 +776,10 @@ notes = Column(Text)
 - Permission checking
 
 #### **Product Management**
-- Inventory tracking
+- Category organization
 - Discount application
-- Availability checking
-- Usage analytics
+- Weight and dimension tracking
+- Lead time management
 
 #### **Customer Management**
 - Engagement tracking
@@ -805,10 +812,10 @@ notes = Column(Text)
 - Non-negative amounts
 
 #### **Product Validation**
-- SKU requirement
-- Name minimum length (2 characters)
+- Item No requirement
+- Description minimum length (2 characters)
 - Non-negative prices and quantities
-- Stock level constraints
+- Category requirement
 
 ### 🚀 **Usage Examples**
 
@@ -880,7 +887,7 @@ line_item = QuoteLineItem(
     option_id=option.id,
     product_id=product.id,
     quantity=2,
-    unit_price=product.unit_price
+    unit_price=product.list_price
 )
 ```
 
@@ -1192,10 +1199,10 @@ Phase 2 establishes a solid foundation for comprehensive customer relationship m
 - **Financial Tracking**: Quote value calculations (GST removed)
 
 **Product Catalog**
-- **Product Model**: SKU-based product management
-- **Pricing System**: Unit pricing with discount support
+- **Product Model**: Item-based product management with 14-column schema
+- **Pricing System**: List pricing with discount support
 - **Assembly Support**: Pump assembly integration
-- **Validation**: Price validation and SKU uniqueness
+- **Validation**: Price validation and item number uniqueness
 
 ### 🏗️ Architecture Improvements
 
