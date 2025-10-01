@@ -166,12 +166,26 @@ class CorrelationIDManager:
     @staticmethod
     def get_correlation_id() -> Optional[str]:
         """Get the current correlation ID from Flask's g object."""
-        return getattr(g, 'correlation_id', None)
+        try:
+            from flask import has_request_context
+            if has_request_context():
+                return getattr(g, 'correlation_id', None)
+            else:
+                return None
+        except RuntimeError:
+            # Working outside of application context
+            return None
     
     @staticmethod
     def set_correlation_id(correlation_id: str):
         """Set the correlation ID in Flask's g object."""
-        g.correlation_id = correlation_id
+        try:
+            from flask import has_request_context
+            if has_request_context():
+                g.correlation_id = correlation_id
+        except RuntimeError:
+            # Working outside of application context - ignore
+            pass
 
 # Global instances
 performance_monitor = PerformanceMonitor()
