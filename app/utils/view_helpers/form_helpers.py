@@ -1,6 +1,6 @@
 from typing import Dict, Any, List, Optional
 from werkzeug.datastructures import MultiDict
-from flask_wtf import FlaskForm
+from app.core.core_forms import FlaskForm
 from wtforms import SelectField
 
 def populate_form_choices(form: FlaskForm, field_name: str, choices: List[tuple]) -> None:
