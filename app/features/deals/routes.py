@@ -23,7 +23,7 @@ from flask_login import login_required, current_user
 from app.core.core_monitoring import performance_timer, log_business_event
 from app.core.core_metrics import track_business_operation, record_deal_created, record_quote_generated
 from app.core.core_caching import cache_deal_data, cache_quote_data, invalidate_deal_cache, invalidate_quote_cache
-from app.core.core_circuit_breaker import pdf_generation_circuit_breaker, database_circuit_breaker
+from app.core.core_circuit_breaker import pdf_generation_circuit_breaker
 
 from . import deals_bp
 from app.models import User, UserRole
@@ -344,7 +344,6 @@ def search_for_modal():
 @login_required
 @performance_timer('deal_create')
 @invalidate_deal_cache()
-@database_circuit_breaker(fallback=lambda: {"error": "Database temporarily unavailable. Please try again later."})
 def create_deal():
     """Creates a new deal from the form on the main deals page."""
     form = DealForm()
