@@ -141,10 +141,10 @@
                     {% for item in option.line_items %}
                     <tr>
                         <td>
-                            <strong>{{ item.product.description or item.product.name if item.product else item.custom_name }}</strong>
-                            {% if item.product and (item.product.item_no or item.product.sku) %}<br><small>Item No: {{ item.product.item_no or item.product.sku }}</small>{% endif %}
-                            {% if item.custom_sku and (not item.product or not item.product.sku) %}<br><small>SKU: {{ item.custom_sku }}</small>{% endif %}
-                            {% if item.notes and item.notes != (item.product.description or item.product.name if item.product else item.custom_name) %}<br><small>{{ item.notes }}</small>{% endif %}
+                            <strong>{{ item.product.description if item.product else item.custom_name }}</strong>
+                            {% if item.product and item.product.item_no %}<br><small>Item No: {{ item.product.item_no }}</small>{% endif %}
+                            {% if item.custom_sku and not item.product %}<br><small>SKU: {{ item.custom_sku }}</small>{% endif %}
+                            {% if item.notes and item.notes != (item.product.description if item.product else item.custom_name) %}<br><small>{{ item.notes }}</small>{% endif %}
                         </td>
                         <td class="text-right">{{ item.quantity }}</td>
                         <td class="text-right">{{ item.unit_price|format_currency }}</td>

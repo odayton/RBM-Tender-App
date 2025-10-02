@@ -270,7 +270,7 @@ def check_critical_endpoints_functionality():
         try:
             # Test product search query (used in product search)
             products = Product.query.filter(
-                Product.name.ilike('%test%')
+                Product.description.ilike('%test%')
             ).limit(5).all()
             endpoints_tested += 1
             

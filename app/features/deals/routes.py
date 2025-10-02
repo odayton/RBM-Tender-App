@@ -812,17 +812,17 @@ def search_products():
 
     products = Product.query.filter(
         or_(
-            Product.name.ilike(f'%{search_term}%'),
-            Product.sku.ilike(f'%{search_term}%')
+            Product.description.ilike(f'%{search_term}%'),
+            Product.item_no.ilike(f'%{search_term}%')
         )
     ).limit(10).all()
     
     results = [
         {
             'id': p.id,
-            'sku': p.sku,
-            'name': p.name,
-            'unit_price': str(p.unit_price),
+            'sku': p.item_no,
+            'name': p.description,
+            'unit_price': str(p.list_price),
             'discount': float(p.discount.percentage) if p.discount else 0.0
         }
         for p in products
@@ -856,7 +856,7 @@ def update_line_item_field(item_id):
         deal.update_total_amount()
         db.session.commit()
         
-        return jsonify({'success': True, 'message': 'Field updated.', 'newState': {'sku': item.custom_sku or (item.product.sku if item.product else 'N/A')}})
+        return jsonify({'success': True, 'message': 'Field updated.', 'newState': {'sku': item.custom_sku or (item.product.item_no if item.product else 'N/A')}})
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error updating line item {item_id}: {e}")

@@ -249,8 +249,8 @@
                                                                 {% for item in option.line_items %}
                                                                     <tr data-item-id="{{ item.id }}">
                                                                         <td class="drag-handle"><i class="fas fa-grip-vertical"></i></td>
-                                                                        <td data-field="sku">{{ item.product.item_no or item.product.sku if item.product else 'CUSTOM' }}</td>
-                                                                        <td class="editable" data-model="line_item" data-id="{{ item.id }}" data-field="custom_name">{{ item.product.description or item.product.name if item.product else item.custom_name }}</td>
+                                                                        <td data-field="sku">{{ item.product.item_no if item.product else 'CUSTOM' }}</td>
+                                                                        <td class="editable" data-model="line_item" data-id="{{ item.id }}" data-field="custom_name">{{ item.product.description if item.product else item.custom_name }}</td>
                                                                         <td class="editable" data-model="line_item" data-id="{{ item.id }}" data-field="notes">{{ item.notes }}</td>
                                                                         <td class="editable text-center" data-model="line_item" data-id="{{ item.id }}" data-field="quantity">{{ item.quantity }}</td>
                                                                         <td class="editable text-right" data-model="line_item" data-id="{{ item.id }}" data-field="unit_price">{{ '{:,.2f}'.format(item.unit_price or 0) }}</td>
