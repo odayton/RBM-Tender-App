@@ -157,7 +157,6 @@ def deal_details(deal_id):
 
 @deals_bp.route('/option/<int:option_id>/view/pdf', methods=['GET'])
 @login_required
-@pdf_generation_circuit_breaker(fallback=lambda: "PDF generation temporarily unavailable. Please try again later.")
 def view_quote_pdf(option_id):
     """
     Generates the quote PDF and serves it inline in the browser with PDF controls.

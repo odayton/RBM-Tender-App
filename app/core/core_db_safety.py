@@ -54,7 +54,7 @@ class DatabaseSchemaValidator:
                 'users.email',
                 'deals.owner_id',
                 'quotes.deal_id',
-                'products.sku'
+                'products.item_no'
             ]
         }
     
