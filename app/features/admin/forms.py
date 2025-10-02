@@ -1,4 +1,4 @@
-from flask_wtf import FlaskForm
+from app.core.core_forms import FlaskForm
 # Add FileRequired to this import statement
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import (

@@ -1,4 +1,4 @@
-from flask_wtf import FlaskForm
+from app.core.core_forms import FlaskForm
 from wtforms import SubmitField, SelectField, SelectMultipleField, FloatField
 from wtforms.validators import Optional
 

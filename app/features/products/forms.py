@@ -4,7 +4,7 @@ Product Management Forms
 This module contains forms for managing products in the RBM Tender App.
 """
 
-from flask_wtf import FlaskForm
+from app.core.core_forms import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, TextAreaField, DecimalField, IntegerField, SelectField, BooleanField
 from wtforms.validators import DataRequired, Length, NumberRange, Optional, Email, ValidationError

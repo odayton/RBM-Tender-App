@@ -1,6 +1,6 @@
 # app/features/crm/forms.py
 
-from flask_wtf import FlaskForm
+from app.core.core_forms import FlaskForm
 from wtforms import (
     StringField, TextAreaField, SelectField, DateTimeField, 
     IntegerField, BooleanField, HiddenField, FieldList, FormField
