@@ -73,6 +73,9 @@ def create_app(config_class=None):
                 static_folder='static',
                 static_url_path='/static')
     
+    # Set WTF_I18N_ENABLED immediately to prevent app context issues
+    app.config['WTF_I18N_ENABLED'] = False
+    
     # Load configuration
     if config_class:
         logger.info(f"Loading configuration from: {config_class.__name__}")
