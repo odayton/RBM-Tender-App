@@ -44,20 +44,28 @@ class ActivityForm(FlaskForm):
         self.activity_type.choices = [(t.value, t.value) for t in ActivityType]
         self.status.choices = [(s.value, s.value) for s in ActivityStatus]
         
-        # Populate company choices
-        from app.models import Company
-        companies = Company.query.order_by(Company.company_name).all()
-        self.company_id.choices = [('', 'Select Company')] + [(str(c.id), c.company_name) for c in companies]
-        
-        # Populate contact choices
-        from app.models import Contact
-        contacts = Contact.query.join(Company).order_by(Contact.name).all()
-        self.contact_id.choices = [('', 'Select Contact')] + [(str(c.id), f"{c.name} ({c.company.company_name})") for c in contacts]
-        
-        # Populate deal choices
-        from app.models import Deal
-        deals = Deal.query.order_by(Deal.project_name).all()
-        self.deal_id.choices = [('', 'Select Deal')] + [(str(d.id), d.project_name) for d in deals]
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            # Populate company choices
+            from app.models import Company
+            companies = Company.query.order_by(Company.company_name).all()
+            self.company_id.choices = [('', 'Select Company')] + [(str(c.id), c.company_name) for c in companies]
+            
+            # Populate contact choices
+            from app.models import Contact
+            contacts = Contact.query.join(Company).order_by(Contact.name).all()
+            self.contact_id.choices = [('', 'Select Contact')] + [(str(c.id), f"{c.name} ({c.company.company_name})") for c in contacts]
+            
+            # Populate deal choices
+            from app.models import Deal
+            deals = Deal.query.order_by(Deal.project_name).all()
+            self.deal_id.choices = [('', 'Select Deal')] + [(str(d.id), d.project_name) for d in deals]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass
 
 class TaskForm(FlaskForm):
     """Form for creating/editing tasks."""

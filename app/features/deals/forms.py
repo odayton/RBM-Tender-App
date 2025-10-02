@@ -40,9 +40,18 @@ class UpdateDealForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(UpdateDealForm, self).__init__(*args, **kwargs)
-        # Populate owner choices dynamically - exclude admin users
-        non_admin_users = User.query.filter(User.role != UserRole.ADMIN).order_by(User.username).all()
-        self.owner_id.choices = [(u.id, u.full_name) for u in non_admin_users]
+        
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            # Populate owner choices dynamically - exclude admin users
+            non_admin_users = User.query.filter(User.role != UserRole.ADMIN).order_by(User.username).all()
+            self.owner_id.choices = [(u.id, u.full_name) for u in non_admin_users]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass
 
 
 class QuoteOptionForm(FlaskForm):
