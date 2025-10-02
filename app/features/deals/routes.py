@@ -281,6 +281,13 @@ def view_quote_pdf(option_id):
             response.headers['Content-Type'] = 'text/html; charset=utf-8'
             response.headers['Content-Disposition'] = 'inline; filename=quote.html'
             return response
+        elif isinstance(pdf_data, bytes) and len(pdf_data) < 1000:
+            # PDF is too small, likely empty - return HTML instead
+            logger.warning(f"PDF generated but too small ({len(pdf_data)} bytes), returning HTML instead")
+            response = make_response(html_content.encode('utf-8'))
+            response.headers['Content-Type'] = 'text/html; charset=utf-8'
+            response.headers['Content-Disposition'] = 'inline; filename=quote.html'
+            return response
         else:
             # Record metrics for successful PDF generation
             record_quote_generated(
