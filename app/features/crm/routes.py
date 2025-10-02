@@ -897,9 +897,18 @@ def create_note():
             db.session.flush()  # Get the activity ID
             
             # Create note record
+            # Map form values to enum values
+            note_type_mapping = {
+                'GENERAL': NoteType.GENERAL,
+                'TECHNICAL': NoteType.TECHNICAL,
+                'COMMERCIAL': NoteType.COMMERCIAL,
+                'FOLLOW_UP': NoteType.FOLLOW_UP,
+                'INTERNAL': NoteType.INTERNAL
+            }
+            
             note = Note(
                 activity_id=activity.id,
-                note_type=NoteType(note_type),
+                note_type=note_type_mapping.get(note_type, NoteType.GENERAL),
                 content=content,
                 is_internal=is_internal,
                 is_important=is_important,
