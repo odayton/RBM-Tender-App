@@ -211,6 +211,7 @@ def view_quote_pdf(option_id):
     company_contacts = [contact for contact in deal.contacts if contact.company_id == quote.recipient.company_id]
     
     # Generate the HTML content for the quote
+    html_content = None
     try:
         html_content = render_template(
             template_name,
@@ -255,10 +256,18 @@ def view_quote_pdf(option_id):
         logger.error(f"Failed to render quote template: {e}", exc_info=True)
         return "Error rendering quote template", 500
     
+    # Check if HTML content was generated successfully
+    if not html_content:
+        logger.error("HTML content is empty or None")
+        return "Error: No HTML content generated", 500
+    
     # Log some debugging info
     logger.info(f"Generated HTML for PDF: deal_id={deal.id}, option_id={option.id}, line_items_count={len(option.line_items)}")
     logger.info(f"CSS content length: {len(css_content)}")
     logger.info(f"Logo data URL length: {len(logo_data_url) if logo_data_url else 0}")
+    logger.info(f"HTML content length: {len(html_content) if html_content else 0}")
+    logger.info(f"Template used: {template_name}")
+    logger.info(f"Deal type: {deal.deal_type.name if deal.deal_type else 'None'}")
 
     # Generate PDF using Playwright with fallback
     try:
@@ -965,6 +974,7 @@ def reorder_line_items(option_id):
 def _generate_pdf_fallback(html_content):
     """Generate PDF from HTML content using weasyprint or return HTML as fallback."""
     try:
+        logger.info(f"Starting WeasyPrint fallback PDF generation with HTML content length: {len(html_content)}")
         # Try to import weasyprint for PDF generation
         from weasyprint import HTML, CSS
         from weasyprint.text.fonts import FontConfiguration
@@ -980,8 +990,10 @@ def _generate_pdf_fallback(html_content):
             stylesheets=[],
             font_config=font_config
         )
+        logger.info(f"WeasyPrint PDF generated successfully, size: {len(pdf_data)} bytes")
         return pdf_data
     except ImportError:
+        logger.warning("WeasyPrint not available, returning HTML content as fallback")
         # If weasyprint is not available, return HTML content
         # This will be displayed in the browser instead of PDF
         return html_content.encode('utf-8')
@@ -993,6 +1005,7 @@ def _generate_pdf_fallback(html_content):
 async def _generate_pdf(html_content):
     """Async helper function to launch browser and create PDF using Playwright."""
     try:
+        logger.info(f"Starting Playwright PDF generation with HTML content length: {len(html_content)}")
         async with async_playwright() as p:
             browser = await p.chromium.launch()
             page = await browser.new_page()
@@ -1002,18 +1015,21 @@ async def _generate_pdf(html_content):
             html_encoded = base64.b64encode(html_content.encode('utf-8')).decode('utf-8')
             data_url = f"data:text/html;base64,{html_encoded}"
             
+            logger.info(f"Navigating to data URL (first 100 chars): {data_url[:100]}...")
             # Navigate to the data URL
             await page.goto(data_url)
             
             # Wait for the page to load completely
             await page.wait_for_load_state('networkidle')
             
+            logger.info("Page loaded, generating PDF...")
             pdf_data = await page.pdf(
                 format='A4',
                 print_background=True,
                 margin={'top': '20px', 'right': '20px', 'bottom': '20px', 'left': '20px'}
             )
             await browser.close()
+            logger.info(f"PDF generated successfully, size: {len(pdf_data)} bytes")
             return pdf_data
     except Exception as e:
         logger.warning(f"Playwright PDF generation failed: {e}")
