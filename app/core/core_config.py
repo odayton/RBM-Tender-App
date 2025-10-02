@@ -58,6 +58,9 @@ class Config:
     CACHE_DEFAULT_TIMEOUT = 300
     CACHE_KEY_PREFIX = 'rbm_cache:'
     REDIS_URL = os.environ.get('REDIS_URL')
+    
+    # Flask-WTF configuration
+    WTF_I18N_ENABLED = False  # Disable internationalization to prevent app context issues
 
     # Logging configuration
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO').upper()
@@ -122,6 +125,7 @@ class DevelopmentConfig(Config):
     
     # Development-specific settings - SECURITY: Keep CSRF enabled for security testing
     WTF_CSRF_ENABLED = False  # Temporarily disabled for debugging
+    WTF_I18N_ENABLED = False  # Disable internationalization to prevent app context issues
     SESSION_COOKIE_SECURE = False  # Allow HTTP in development
     REMEMBER_COOKIE_SECURE = False  # Allow HTTP in development
     ENABLE_AUTO_LOGIN = False  # Disable auto-login for normal development
@@ -143,6 +147,7 @@ class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
     WTF_CSRF_ENABLED = False  # Temporarily disabled for debugging
+    WTF_I18N_ENABLED = False  # Disable internationalization to prevent app context issues
     SESSION_COOKIE_SECURE = False  # Temporarily disabled for HTTP testing
     REMEMBER_COOKIE_SECURE = True
     
