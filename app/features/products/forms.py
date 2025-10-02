@@ -90,12 +90,20 @@ class ProductForm(FlaskForm):
     
     def validate_item_no(self, field):
         """Validate that Item No is unique."""
-        # Check if this is an edit operation
-        product_id = getattr(self, '_product_id', None)
-        
-        existing_product = Product.query.filter_by(item_no=field.data).first()
-        if existing_product and existing_product.id != product_id:
-            raise ValidationError('Item No must be unique. This Item No is already in use.')
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip validation if no app context
+            
+            # Check if this is an edit operation
+            product_id = getattr(self, '_product_id', None)
+            
+            existing_product = Product.query.filter_by(item_no=field.data).first()
+            if existing_product and existing_product.id != product_id:
+                raise ValidationError('Item No must be unique. This Item No is already in use.')
+        except RuntimeError:
+            # Skip validation if we're outside application context
+            pass
     
     
     def set_product_id(self, product_id):

@@ -76,9 +76,18 @@ class ContactForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Populate company choices
-        companies = Company.query.order_by(Company.company_name).all()
-        self.company_id.choices = [('', 'Select Company')] + [(str(c.id), c.company_name) for c in companies]
+        
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            # Populate company choices
+            companies = Company.query.order_by(Company.company_name).all()
+            self.company_id.choices = [('', 'Select Company')] + [(str(c.id), c.company_name) for c in companies]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass
 
 class DealOwnerForm(FlaskForm):
     """A simple form to create a new Deal Owner (User) for development."""

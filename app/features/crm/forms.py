@@ -102,9 +102,18 @@ class TaskForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.task_type.choices = [(t.value, t.value) for t in TaskType]
-        self.priority.choices = [(p.value, p.value) for p in TaskPriority]
-        self.status.choices = [(s.value, s.value) for s in TaskStatus]
+        
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            self.task_type.choices = [(t.value, t.value) for t in TaskType]
+            self.priority.choices = [(p.value, p.value) for p in TaskPriority]
+            self.status.choices = [(s.value, s.value) for s in TaskStatus]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass
 
 class CallForm(FlaskForm):
     """Form for logging calls."""
@@ -124,8 +133,17 @@ class CallForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.direction.choices = [(d.value, d.value) for d in CallDirection]
-        self.outcome.choices = [(o.value, o.value) for o in CallOutcome]
+        
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            self.direction.choices = [(d.value, d.value) for d in CallDirection]
+            self.outcome.choices = [(o.value, o.value) for o in CallOutcome]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass
 
 class EmailForm(FlaskForm):
     """Form for logging emails."""
@@ -145,7 +163,16 @@ class EmailForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.direction.choices = [(d.value, d.value) for d in EmailDirection]
+        
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            self.direction.choices = [(d.value, d.value) for d in EmailDirection]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass
 
 class MeetingForm(FlaskForm):
     """Form for logging meetings."""
@@ -168,7 +195,16 @@ class MeetingForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.meeting_type.choices = [(t.value, t.value) for t in MeetingType]
+        
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            self.meeting_type.choices = [(t.value, t.value) for t in MeetingType]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass
 
 class NoteForm(FlaskForm):
     """Form for creating notes."""
@@ -182,7 +218,16 @@ class NoteForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.note_type.choices = [(t.value, t.value) for t in NoteType]
+        
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            self.note_type.choices = [(t.value, t.value) for t in NoteType]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass
 
 class ActivitySearchForm(FlaskForm):
     """Form for searching activities."""
@@ -198,28 +243,37 @@ class ActivitySearchForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.activity_type.choices = [('', 'All Types')] + [(t.value, t.value) for t in ActivityType]
-        self.status.choices = [('', 'All Statuses')] + [(s.value, s.value) for s in ActivityStatus]
         
-        # Populate assigned_to choices
-        from app.models import User
-        users = User.query.order_by(User.username).all()
-        self.assigned_to_id.choices = [('', 'All Users')] + [(str(u.id), u.username) for u in users]
-        
-        # Populate company choices
-        from app.models import Company
-        companies = Company.query.order_by(Company.company_name).all()
-        self.company_id.choices = [('', 'All Companies')] + [(str(c.id), c.company_name) for c in companies]
-        
-        # Populate contact choices
-        from app.models import Contact
-        contacts = Contact.query.join(Company).order_by(Contact.name).all()
-        self.contact_id.choices = [('', 'All Contacts')] + [(str(c.id), f"{c.name} ({c.company.company_name})") for c in contacts]
-        
-        # Populate deal choices
-        from app.models import Deal
-        deals = Deal.query.order_by(Deal.project_name).all()
-        self.deal_id.choices = [('', 'All Deals')] + [(str(d.id), d.project_name) for d in deals]
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            self.activity_type.choices = [('', 'All Types')] + [(t.value, t.value) for t in ActivityType]
+            self.status.choices = [('', 'All Statuses')] + [(s.value, s.value) for s in ActivityStatus]
+            
+            # Populate assigned_to choices
+            from app.models import User
+            users = User.query.order_by(User.username).all()
+            self.assigned_to_id.choices = [('', 'All Users')] + [(str(u.id), u.username) for u in users]
+            
+            # Populate company choices
+            from app.models import Company
+            companies = Company.query.order_by(Company.company_name).all()
+            self.company_id.choices = [('', 'All Companies')] + [(str(c.id), c.company_name) for c in companies]
+            
+            # Populate contact choices
+            from app.models import Contact
+            contacts = Contact.query.join(Company).order_by(Contact.name).all()
+            self.contact_id.choices = [('', 'All Contacts')] + [(str(c.id), f"{c.name} ({c.company.company_name})") for c in contacts]
+            
+            # Populate deal choices
+            from app.models import Deal
+            deals = Deal.query.order_by(Deal.project_name).all()
+            self.deal_id.choices = [('', 'All Deals')] + [(str(d.id), d.project_name) for d in deals]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass
 
 class TaskSearchForm(FlaskForm):
     """Form for searching tasks."""
@@ -236,6 +290,15 @@ class TaskSearchForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.task_type.choices = [('', 'All Types')] + [(t.value, t.value) for t in TaskType]
-        self.priority.choices = [('', 'All Priorities')] + [(p.value, p.value) for p in TaskPriority]
-        self.status.choices = [('', 'All Statuses')] + [(s.value, s.value) for s in TaskStatus] 
+        
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            self.task_type.choices = [('', 'All Types')] + [(t.value, t.value) for t in TaskType]
+            self.priority.choices = [('', 'All Priorities')] + [(p.value, p.value) for p in TaskPriority]
+            self.status.choices = [('', 'All Statuses')] + [(s.value, s.value) for s in TaskStatus]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass 

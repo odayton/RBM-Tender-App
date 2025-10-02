@@ -22,17 +22,14 @@ class UpdateDealForm(FlaskForm):
     )
     deal_type = SelectField(
         'Category',
-        choices=[(t.name, t.value) for t in DealType],
         validators=[DataRequired()]
     )
     stage = SelectField(
         'Stage',
-        choices=[(s.name, s.value) for s in DealStage],
         validators=[DataRequired()]
     )
     state = SelectField(
         'State',
-        choices=[(s.name, s.value) for s in AustralianState],
         validators=[DataRequired()]
     )
     owner_id = SelectField('Deal Owner', coerce=int, validators=[DataRequired()])
@@ -45,6 +42,11 @@ class UpdateDealForm(FlaskForm):
             from flask import current_app
             if not current_app:
                 return  # Skip population if no app context
+            
+            # Set choices for enum fields
+            self.deal_type.choices = [(t.name, t.value) for t in DealType]
+            self.stage.choices = [(s.name, s.value) for s in DealStage]
+            self.state.choices = [(s.name, s.value) for s in AustralianState]
             
             # Populate owner choices dynamically - exclude admin users
             non_admin_users = User.query.filter(User.role != UserRole.ADMIN).order_by(User.username).all()
@@ -79,8 +81,23 @@ class DealForm(FlaskForm):
         'Deal Name',
         validators=[DataRequired(), unique_deal_name]
     )
-    deal_type = SelectField('Category', choices=[(t.name, t.value) for t in DealType])
-    state = SelectField('State', choices=[(s.name, s.value) for s in AustralianState])
+    deal_type = SelectField('Category')
+    state = SelectField('State')
     contact_id = IntegerField('Contact ID', validators=[Optional()])
     company_id = IntegerField('Company ID', validators=[Optional()])
     submit = SubmitField('Create Deal')
+    
+    def __init__(self, *args, **kwargs):
+        super(DealForm, self).__init__(*args, **kwargs)
+        
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            # Set choices for enum fields
+            self.deal_type.choices = [(t.name, t.value) for t in DealType]
+            self.state.choices = [(s.name, s.value) for s in AustralianState]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass

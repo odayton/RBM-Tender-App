@@ -37,25 +37,55 @@ class RegistrationForm(FlaskForm):
     phone_number = StringField('Phone Number', validators=[
         Length(max=20, message='Phone number must be less than 20 characters')
     ])
-    role = SelectField('Role', choices=[
-        (UserRole.SALES.value, 'Sales'),
-        (UserRole.MANAGER.value, 'Manager'),
-        (UserRole.ADMIN.value, 'Admin'),
-        (UserRole.VIEWER.value, 'Viewer')
-    ], validators=[DataRequired(message='Role is required')])
+    role = SelectField('Role', validators=[DataRequired(message='Role is required')])
     submit = SubmitField('Create User')
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip population if no app context
+            
+            # Set role choices
+            self.role.choices = [
+                (UserRole.SALES.value, 'Sales'),
+                (UserRole.MANAGER.value, 'Manager'),
+                (UserRole.ADMIN.value, 'Admin'),
+                (UserRole.VIEWER.value, 'Viewer')
+            ]
+        except RuntimeError:
+            # Skip population if we're outside application context
+            pass
 
     def validate_email(self, field):
         """Check if email is already registered."""
-        user = User.query.filter_by(email=field.data).first()
-        if user:
-            raise ValidationError('Email address is already registered.')
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip validation if no app context
+            
+            user = User.query.filter_by(email=field.data).first()
+            if user:
+                raise ValidationError('Email address is already registered.')
+        except RuntimeError:
+            # Skip validation if we're outside application context
+            pass
 
     def validate_username(self, field):
         """Check if username is already taken."""
-        user = User.query.filter_by(username=field.data).first()
-        if user:
-            raise ValidationError('Username is already taken.')
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip validation if no app context
+            
+            user = User.query.filter_by(username=field.data).first()
+            if user:
+                raise ValidationError('Username is already taken.')
+        except RuntimeError:
+            # Skip validation if we're outside application context
+            pass
 
 class ChangePasswordForm(FlaskForm):
     """Form for changing user password."""
@@ -133,15 +163,31 @@ class EditProfileForm(FlaskForm):
 
     def validate_email(self, field):
         """Check if email is already registered by another user."""
-        user = User.query.filter_by(email=field.data).first()
-        if user and user.id != self.current_user.id:
-            raise ValidationError('Email address is already registered by another user.')
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip validation if no app context
+            
+            user = User.query.filter_by(email=field.data).first()
+            if user and user.id != self.current_user.id:
+                raise ValidationError('Email address is already registered by another user.')
+        except RuntimeError:
+            # Skip validation if we're outside application context
+            pass
 
     def validate_username(self, field):
         """Check if username is already taken by another user."""
-        user = User.query.filter_by(username=field.data).first()
-        if user and user.id != self.current_user.id:
-            raise ValidationError('Username is already taken by another user.')
+        try:
+            from flask import current_app
+            if not current_app:
+                return  # Skip validation if no app context
+            
+            user = User.query.filter_by(username=field.data).first()
+            if user and user.id != self.current_user.id:
+                raise ValidationError('Username is already taken by another user.')
+        except RuntimeError:
+            # Skip validation if we're outside application context
+            pass
 
 
 class TwoFactorSetupForm(FlaskForm):
