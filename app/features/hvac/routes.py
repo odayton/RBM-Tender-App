@@ -1,12 +1,18 @@
 # app/features/hvac/routes.py
 
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from app.extensions import db
-from sqlalchemy import or_
+from sqlalchemy import or_, func, desc
+from flask_login import login_required
 
 # This form is correctly imported from the local hvac forms file
 from .forms import PumpSearchForm
 from app.models import QuoteOption, Product, QuoteLineItem
+from app.models.pumps import (
+    Pump, PumpSeries, PumpDutyPoint, PumpSelectionHistory,
+    InertiaBase, SeismicSpring, RubberMount, Crossbar,
+    MotorProtection, DripTripTray, PumpBOM
+)
 
 # Import the existing blueprint from the __init__.py file in this folder
 from . import hvac_bp
@@ -39,6 +45,164 @@ def get_or_create_product_for_assembly(assembly_name, pump_model):
     db.session.add(new_product)
     db.session.commit()
     return new_product
+
+
+@hvac_bp.route('/dashboard')
+@login_required
+def pump_dashboard():
+    """
+    Pump Management Dashboard
+    Central hub for viewing all pump-related data
+    """
+    # Get statistics
+    stats = {
+        'total_pumps': Pump.query.filter_by(is_active=True).count(),
+        'total_series': PumpSeries.query.filter_by(is_active=True).count(),
+        'total_duty_points': PumpDutyPoint.query.count(),
+        'total_selections': PumpSelectionHistory.query.count(),
+        'total_inertia_bases': InertiaBase.query.filter_by(is_active=True).count(),
+        'total_springs': SeismicSpring.query.filter_by(is_active=True).count(),
+        'total_rubber_mounts': RubberMount.query.filter_by(is_active=True).count(),
+        'total_crossbars': Crossbar.query.filter_by(is_active=True).count(),
+    }
+    
+    # Get series breakdown
+    series_breakdown = db.session.query(
+        PumpSeries.series_code,
+        PumpSeries.series_name,
+        func.count(Pump.id).label('pump_count')
+    ).outerjoin(Pump).group_by(PumpSeries.id, PumpSeries.series_code, PumpSeries.series_name).all()
+    
+    # Get recent duty points
+    recent_duty_points = PumpDutyPoint.query.order_by(desc(PumpDutyPoint.created_at)).limit(10).all()
+    
+    # Get top selected pumps
+    top_pumps = db.session.query(
+        Pump,
+        func.count(PumpSelectionHistory.id).label('selection_count')
+    ).join(PumpSelectionHistory).group_by(Pump.id).order_by(desc('selection_count')).limit(10).all()
+    
+    return render_template('hvac/pump_dashboard.html',
+                         stats=stats,
+                         series_breakdown=series_breakdown,
+                         recent_duty_points=recent_duty_points,
+                         top_pumps=top_pumps)
+
+
+@hvac_bp.route('/pumps')
+@login_required
+def view_all_pumps():
+    """View all pumps with filtering and pagination"""
+    page = request.args.get('page', 1, type=int)
+    series_filter = request.args.get('series', type=int)
+    search_query = request.args.get('q', '').strip()
+    
+    pump_query = Pump.query.filter_by(is_active=True)
+    
+    # Apply filters
+    if series_filter:
+        pump_query = pump_query.filter(Pump.series_id == series_filter)
+    
+    if search_query:
+        search_filter = or_(
+            Pump.name.ilike(f'%{search_query}%'),
+            Pump.part_number.ilike(f'%{search_query}%'),
+            Pump.item_number.ilike(f'%{search_query}%')
+        )
+        pump_query = pump_query.filter(search_filter)
+    
+    # Paginate
+    pagination = pump_query.order_by(Pump.name).paginate(page=page, per_page=50, error_out=False)
+    
+    # Get all series for filter dropdown
+    all_series = PumpSeries.query.filter_by(is_active=True).order_by(PumpSeries.series_code).all()
+    
+    return render_template('hvac/view_pumps.html',
+                         pumps=pagination.items,
+                         pagination=pagination,
+                         all_series=all_series,
+                         current_series=series_filter,
+                         search_query=search_query)
+
+
+@hvac_bp.route('/duty-points')
+@login_required
+def view_duty_points():
+    """View all duty points with selection history"""
+    page = request.args.get('page', 1, type=int)
+    
+    # Get duty points with selection counts
+    duty_points = db.session.query(
+        PumpDutyPoint,
+        func.count(PumpSelectionHistory.id).label('selection_count')
+    ).outerjoin(PumpSelectionHistory).group_by(PumpDutyPoint.id).order_by(
+        desc('selection_count')
+    ).paginate(page=page, per_page=30, error_out=False)
+    
+    return render_template('hvac/view_duty_points.html',
+                         duty_points=duty_points.items,
+                         pagination=duty_points)
+
+
+@hvac_bp.route('/accessories')
+@login_required
+def view_accessories():
+    """View all pump accessories and components"""
+    # Get all accessories
+    inertia_bases = InertiaBase.query.filter_by(is_active=True).order_by(InertiaBase.part_number).all()
+    seismic_springs = SeismicSpring.query.filter_by(is_active=True).order_by(SeismicSpring.part_number).all()
+    rubber_mounts = RubberMount.query.filter_by(is_active=True).order_by(RubberMount.sku).all()
+    crossbars = Crossbar.query.filter_by(is_active=True).order_by(Crossbar.sku).all()
+    
+    return render_template('hvac/view_accessories.html',
+                         inertia_bases=inertia_bases,
+                         seismic_springs=seismic_springs,
+                         rubber_mounts=rubber_mounts,
+                         crossbars=crossbars)
+
+
+@hvac_bp.route('/boms')
+@login_required
+def view_boms():
+    """View pump BOMs and component relationships"""
+    # Aggregate BOM data by pump (one row per pump)
+    pump_bom_data = []
+    pumps_with_bom = Pump.query.filter(Pump.is_active == True).join(PumpBOM).distinct().order_by(Pump.part_number).all()
+    
+    for pump in pumps_with_bom:
+        pump_data = {
+            'pump_id': pump.id,
+            'pump_part': pump.part_number,
+            'pump_name': pump.name,
+            'series_code': pump.series.series_code if pump.series else '',
+            'inertia_pn': None,
+            'inertia_size': None,
+            'spring_pn': None,
+            'spring_qty': None
+        }
+        
+        # Get BOM items for this pump
+        for bom_item in pump.bom_items:
+            if bom_item.component_type == 'inertia_base':
+                base = InertiaBase.query.get(bom_item.component_id)
+                if base:
+                    pump_data['inertia_pn'] = base.part_number
+                    if base.length_mm and base.width_mm and base.depth_mm:
+                        pump_data['inertia_size'] = f"{base.length_mm} x {base.width_mm} x {base.depth_mm}"
+            
+            elif bom_item.component_type == 'seismic_spring':
+                spring = SeismicSpring.query.get(bom_item.component_id)
+                if spring:
+                    pump_data['spring_pn'] = spring.part_number
+                    pump_data['spring_qty'] = bom_item.quantity
+        
+        pump_bom_data.append(pump_data)
+    
+    all_series = PumpSeries.query.filter_by(is_active=True).order_by(PumpSeries.series_code).all()
+    
+    return render_template('hvac/view_boms.html',
+                         pump_bom_data=pump_bom_data,
+                         all_series=all_series)
 
 
 @hvac_bp.route('/search_pumps', methods=['GET', 'POST'])

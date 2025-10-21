@@ -91,7 +91,7 @@ validate_backup() {
     
     # Check if backup contains essential files
     local essential_files=(
-        "app_runner.py"
+        "wsgi.py"
         "app/"
         "requirements/"
         "migrations/"

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def index():
     """Renders the main hydronic heating page."""
     logger.info('Rendering hydronic heating page')
-    return render_template('hydronic_heating/hydronic_heating.html')
+    return render_template('hydronic_heating/hydronics.html')
 
 @hydronic_heating_bp.route('/buffer-tanks')
 def buffer_tanks():

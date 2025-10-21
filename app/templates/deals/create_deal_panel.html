@@ -1,53 +1,112 @@
 {# /app/templates/deals/create_deal_panel.html #}
-<form id="createDealForm" method="POST" action="{{ url_for('deals.create_deal') }}" novalidate>
+<form id="createDealForm" method="POST" action="{{ url_for('deals.create_deal') }}" novalidate class="space-y-6">
     {{ form.hidden_tag() }}
 
-    {# Row 1: Deal Name #}
-    <div class="form-group">
-        {{ form.project_name.label(class="form-control-label") }}
-        {{ form.project_name(class="form-control", required=True, placeholder="e.g., Central Tower HVAC Upgrade") }}
+    {# Deal Name #}
+    <div class="space-y-2">
+        <label for="{{ form.project_name.id }}" class="block text-sm font-medium text-gray-300">
+            <i class="fas fa-briefcase text-blue-400 mr-2"></i>
+            {{ form.project_name.label.text }}
+            <span class="text-red-400">*</span>
+        </label>
+        {{ form.project_name(class="w-full px-4 py-3 bg-gray-700/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all", required=True, placeholder="e.g., Central Tower HVAC Upgrade") }}
+        <p class="text-xs text-gray-500 flex items-center gap-1">
+            <i class="fas fa-info-circle"></i>
+            <span>Enter a descriptive name for the deal</span>
+        </p>
     </div>
 
-    {# Row 2: Category & State #}
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            {{ form.deal_type.label(class="form-control-label") }}
-            {{ form.deal_type(class="form-control", required=True) }}
+    {# Category & State #}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-2">
+            <label for="{{ form.deal_type.id }}" class="block text-sm font-medium text-gray-300">
+                <i class="fas fa-tag text-green-400 mr-2"></i>
+                {{ form.deal_type.label.text }}
+                <span class="text-red-400">*</span>
+            </label>
+            {{ form.deal_type(class="w-full px-4 py-3 bg-gray-700 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all", required=True, style="color-scheme: dark;") }}
         </div>
-        <div class="form-group col-md-6">
-            {{ form.state.label(class="form-control-label") }}
-            {{ form.state(class="form-control", required=True) }}
+        <div class="space-y-2">
+            <label for="{{ form.state.id }}" class="block text-sm font-medium text-gray-300">
+                <i class="fas fa-map-marker-alt text-purple-400 mr-2"></i>
+                {{ form.state.label.text }}
+                <span class="text-red-400">*</span>
+            </label>
+            {{ form.state(class="w-full px-4 py-3 bg-gray-700 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all", required=True, style="color-scheme: dark;") }}
         </div>
     </div>
     
-    <hr>
+    {# Divider #}
+    <div class="relative">
+        <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-700"></div>
+        </div>
+        <div class="relative flex justify-center text-xs">
+            <span class="px-3 bg-gray-800/50 text-gray-500 uppercase tracking-wider">Link to Contact or Company</span>
+        </div>
+    </div>
     
-    {# Row 3: Smart Search for Contact (Visible by default) #}
-    <div id="contact-search-section">
-        <div class="form-group search-container">
-            <label for="contact-search-input">Contact</label>
-            <input type="text" id="contact-search-input" class="form-control" placeholder="Start typing a contact's name or email...">
-            {{ form.contact_id(type="hidden") }} {# Hidden field to store the selected ID #}
-            <ul id="contact-search-results" class="search-results-list d-none"></ul>
+    {# Smart Search for Contact (Visible by default) #}
+    <div id="contact-search-section" class="space-y-3">
+        <div class="space-y-2 search-container relative">
+            <label for="contact-search-input" class="block text-sm font-medium text-gray-300">
+                <i class="fas fa-user text-blue-400 mr-2"></i>
+                Contact
+            </label>
+            <div class="relative">
+                <input type="text" id="contact-search-input" 
+                       class="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" 
+                       placeholder="Start typing a contact's name or email...">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2">
+                    <i class="fas fa-search text-gray-500"></i>
+                </div>
+            </div>
+            {{ form.contact_id(type="hidden") }}
+            <ul id="contact-search-results" class="search-results-list hidden absolute z-50 w-full mt-1 bg-gray-700 border border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto"></ul>
         </div>
-        <small><a href="#" id="toggle-search-mode">No specific contact? Link to a company directly.</a></small>
+        <div class="flex items-center gap-2 text-sm">
+            <i class="fas fa-exchange-alt text-gray-500"></i>
+            <a href="#" id="toggle-search-mode" class="text-blue-400 hover:text-blue-300 transition-colors">
+                No specific contact? Link to a company directly.
+            </a>
+        </div>
     </div>
 
-    {# Row 4: Search for Company (Hidden by default) #}
-    <div id="company-search-section" class="d-none">
-        <div class="form-group search-container">
-            <label for="company-search-input">Company</label>
-            <input type="text" id="company-search-input" class="form-control" placeholder="Start typing a company name...">
-            {{ form.company_id(type="hidden") }} {# Hidden field to store the selected ID #}
-            <ul id="company-search-results" class="search-results-list d-none"></ul>
+    {# Search for Company (Hidden by default) #}
+    <div id="company-search-section" class="hidden space-y-3">
+        <div class="space-y-2 search-container relative">
+            <label for="company-search-input" class="block text-sm font-medium text-gray-300">
+                <i class="fas fa-building text-green-400 mr-2"></i>
+                Company
+            </label>
+            <div class="relative">
+                <input type="text" id="company-search-input" 
+                       class="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" 
+                       placeholder="Start typing a company name...">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2">
+                    <i class="fas fa-search text-gray-500"></i>
+                </div>
+            </div>
+            {{ form.company_id(type="hidden") }}
+            <ul id="company-search-results" class="search-results-list hidden absolute z-50 w-full mt-1 bg-gray-700 border border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto"></ul>
         </div>
-        <small><a href="#" id="toggle-search-mode-2">Link to a specific contact instead.</a></small>
+        <div class="flex items-center gap-2 text-sm">
+            <i class="fas fa-exchange-alt text-gray-500"></i>
+            <a href="#" id="toggle-search-mode-2" class="text-blue-400 hover:text-blue-300 transition-colors">
+                Link to a specific contact instead.
+            </a>
+        </div>
     </div>
-
 
     {# Modal Footer with Submit Button #}
-    <div class="modal-footer mt-4">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Create Deal</button>
+    <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-800">
+        <button type="button" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg border border-gray-700 transition-all duration-200" data-dismiss="modal">
+            <i class="fas fa-times"></i>
+            <span>Cancel</span>
+        </button>
+        <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            <i class="fas fa-check"></i>
+            <span>Create Deal</span>
+        </button>
     </div>
 </form>

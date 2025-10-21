@@ -5,333 +5,639 @@
 {% block title %}Deal: {{ deal.project_name }}{% endblock %}
 
 {% block breadcrumbs %}
-    <li class="breadcrumb-item">
-        <a href="{{ url_for('deals.list_deals') }}">
-            <i class="fas fa-clipboard-list mr-1"></i>Deals
+    <li class="flex items-center text-gray-400">
+        <span class="mx-2 text-gray-600">&gt;</span>
+        <a href="{{ url_for('deals.list_deals') }}" class="text-blue-400 hover:text-blue-300 no-underline flex items-center gap-2 transition-colors">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Deals</span>
         </a>
     </li>
-    <li class="breadcrumb-item active">{{ deal.project_name }}</li>
+    <li class="flex items-center">
+        <span class="mx-2 text-gray-600">&gt;</span>
+        <span class="text-white font-semibold">{{ deal.project_name }}</span>
+    </li>
 {% endblock %}
 
 {% block page_content %}
     <div data-deal-id="{{ deal.id }}">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="mb-0 d-inline-block">{{ deal.project_name }}</h1>
-            <span class="deal-stage-badge ml-2">{{ deal.stage.value }}</span>
-        </div>
-        <div class="actions">
-            <div class="btn-group">
-                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-cog"></i> Actions
+    <!-- Page Header -->
+    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl  p-4 mb-4 shadow-xl">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex-1">
+                <div class="flex items-center gap-3 mb-1">
+                    <h1 class="text-2xl font-bold text-white">{{ deal.project_name }}</h1>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                        {% if deal.stage.value == 'Sales Lead' %}bg-purple-500/20 text-purple-400 border border-purple-500/30
+                        {% elif deal.stage.value == 'Tender' %}bg-blue-500/20 text-blue-400 border border-blue-500/30
+                        {% elif deal.stage.value == 'Proposal' %}bg-yellow-500/20 text-yellow-400 border border-yellow-500/30
+                        {% elif deal.stage.value == 'Negotiation' %}bg-orange-500/20 text-orange-400 border border-orange-500/30
+                        {% elif deal.stage.value == 'Closed Won' %}bg-green-500/20 text-green-400 border border-green-500/30
+                        {% elif deal.stage.value == 'Closed Lost' %}bg-red-500/20 text-red-400 border border-red-500/30
+                        {% else %}bg-gray-500/20 text-gray-400 border border-gray-500/30
+                        {% endif %}">
+                        <i class="fas fa-circle text-xs mr-1.5"></i>
+                        {{ deal.stage.value }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-4 text-sm text-gray-400">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fas fa-hashtag text-gray-500"></i>
+                        Deal ID: <span class="text-white font-medium">{{ deal.id }}</span>
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <i class="fas fa-tag text-gray-500"></i>
+                        <span class="text-white font-medium">{{ deal.deal_type.value }}</span>
+                    </span>
+                    {% if deal.owner %}
+                    <span class="flex items-center gap-1.5">
+                        <i class="fas fa-user text-gray-500"></i>
+                        Owner: <span class="text-white font-medium">{{ deal.owner.full_name }}</span>
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="relative dropdown">
+                <button type="button" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-cog"></i>
+                    <span>Actions</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right">
                     <button class="dropdown-item" type="button" data-toggle="modal" data-target="#editDealModal">
-                        Edit Deal Details
+                        <i class="fas fa-edit mr-2"></i>Edit Deal Details
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-lg-7">
-            <div class="card h-100">
-                <div class="card-header"><h4>Key Details</h4></div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <strong>Category:</strong><p class="text-light">{{ deal.deal_type.value }}</p>
-                            <strong>State:</strong><p class="text-light">{{ deal.state.value }}</p>
+    <!-- Key Details and Parties Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-4">
+        <!-- Key Details Card -->
+        <div class="lg:col-span-7">
+            <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl  p-4 h-full shadow-lg">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="flex items-center justify-center w-8 h-8 bg-blue-600/20 rounded-lg">
+                        <i class="fas fa-info-circle text-blue-400 text-sm"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white">Key Details</h4>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <!-- Category -->
+                    <div class="group relative overflow-hidden bg-gray-700/30 rounded-lg p-3  hover:bg-gray-700/50 transition-all">
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center justify-center w-10 h-10 bg-green-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                                <i class="fas fa-tag text-green-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Category</p>
+                                <p class="text-white font-semibold">{{ deal.deal_type.value }}</p>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <strong>Owner:</strong><p class="text-light">{{ deal.owner.full_name if deal.owner else 'N/A' }}</p>
-                            <strong>Total Value:</strong><p class="text-light">$ {{ '{:,.2f}'.format(deal.total_amount or 0) }}</p>
+                    </div>
+                    
+                    <!-- State -->
+                    <div class="group relative overflow-hidden bg-gray-700/30 rounded-lg p-3  hover:bg-gray-700/50 transition-all">
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center justify-center w-10 h-10 bg-purple-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                                <i class="fas fa-map-marker-alt text-purple-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">State</p>
+                                <p class="text-white font-semibold">{{ deal.state.value }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Owner -->
+                    <div class="group relative overflow-hidden bg-gray-700/30 rounded-lg p-3  hover:bg-gray-700/50 transition-all">
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center justify-center w-10 h-10 bg-blue-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                                <i class="fas fa-user text-blue-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Owner</p>
+                                <p class="text-white font-semibold">{{ deal.owner.full_name if deal.owner else 'N/A' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Value -->
+                    <div class="group relative overflow-hidden bg-gradient-to-br from-green-900/20 to-green-800/20 rounded-lg p-3 hover:bg-green-800/30 transition-all">
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center justify-center w-10 h-10 bg-green-500/20 rounded-lg group-hover:scale-110 transition-transform">
+                                <i class="fas fa-dollar-sign text-green-400"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Total Value</p>
+                                <p class="text-green-400 text-xl font-bold">${{ '{:,.2f}'.format(deal.total_amount or 0) }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-5">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between">
-                    <h4>Parties Involved</h4>
-                    <button class="btn btn-sm btn-outline-secondary manage-parties-btn" data-toggle="modal" data-target="#managePartiesModal">Manage</button>
+        
+        <!-- Parties Involved Card -->
+        <div class="lg:col-span-5">
+            <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl  p-4 h-full shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center justify-center w-8 h-8 bg-green-600/20 rounded-lg">
+                            <i class="fas fa-users text-green-400 text-sm"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-white">Parties Involved</h4>
+                    </div>
+                    <button class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-lg  transition-all" data-toggle="modal" data-target="#managePartiesModal">
+                        <i class="fas fa-edit text-xs"></i>
+                        <span>Manage</span>
+                    </button>
                 </div>
-                <div class="card-body">
-                    <strong>Companies:</strong>
-                    <ul class="list-unstyled">
-                    {% for company in deal.companies %}
-                        <li><i class="fas fa-building mr-2 text-secondary"></i>{{ company.company_name }}</li>
-                    {% else %}
-                        <li class="text-secondary">No companies associated.</li>
-                    {% endfor %}
-                    </ul>
-                    <hr>
-                    <strong>Contacts:</strong>
-                    <ul class="list-unstyled">
-                    {% for contact in deal.contacts %}
-                        <li><i class="fas fa-user mr-2 text-secondary"></i>{{ contact.name }} ({{ contact.company.company_name }})</li>
-                    {% else %}
-                        <li class="text-secondary">No contacts associated.</li>
-                    {% endfor %}
-                    </ul>
+                
+                <!-- Companies Section -->
+                <div class="mb-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-building text-green-400"></i>
+                        <h5 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Companies</h5>
+                    </div>
+                    <div class="space-y-2">
+                        {% for company in deal.companies %}
+                        <div class="flex items-center gap-2 p-2 bg-gray-700/30 rounded-lg  hover:bg-gray-700/50 transition-colors group">
+                            <div class="flex items-center justify-center w-8 h-8 bg-green-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                                <i class="fas fa-building text-green-400 text-xs"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-white font-medium truncate">{{ company.company_name }}</p>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="flex flex-col items-center justify-center py-6 text-gray-500">
+                            <i class="fas fa-building text-2xl mb-2 opacity-30"></i>
+                            <p class="text-sm">No companies associated</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Divider -->
+                <div class="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent my-4"></div>
+                
+                <!-- Contacts Section -->
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-user text-blue-400"></i>
+                        <h5 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Contacts</h5>
+                    </div>
+                    <div class="space-y-2">
+                        {% for contact in deal.contacts %}
+                        <div class="flex items-center gap-2 p-2 bg-gray-700/30 rounded-lg  hover:bg-gray-700/50 transition-colors group">
+                            <div class="flex items-center justify-center w-8 h-8 bg-blue-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                                <i class="fas fa-user text-blue-400 text-xs"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-white font-medium truncate">{{ contact.name }}</p>
+                                <p class="text-xs text-gray-500 truncate">{{ contact.company.company_name }}</p>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="flex flex-col items-center justify-center py-6 text-gray-500">
+                            <i class="fas fa-user text-2xl mb-2 opacity-30"></i>
+                            <p class="text-sm">No contacts associated</p>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notes Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4><i class="fas fa-sticky-note mr-2"></i>Deal Notes</h4>
-                    <div>
-                        <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addNoteModal">
-                            <i class="fas fa-plus"></i> Add Note
-                        </button>
-                        <a href="{{ url_for('crm.activities_list', deal_id=deal.id) }}" class="btn btn-sm btn-outline-secondary">
-                            <i class="fas fa-external-link-alt"></i> View All Activities
-                        </a>
-                    </div>
+    <!-- Quote Streams Section -->
+    <div class="mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+                <div class="flex items-center justify-center w-8 h-8 bg-blue-600/20 rounded-lg">
+                    <i class="fas fa-file-invoice-dollar text-blue-400 text-sm"></i>
                 </div>
-                <div class="card-body">
-                    {% if deal.activities %}
-                        <div class="notes-container">
-                            {% for activity in deal.activities|sort(attribute='created_at', reverse=true) %}
-                                {% if activity.activity_type.value == 'Note' %}
-                                    <div class="note-item mb-3 p-3 border rounded {% if activity.note and activity.note.is_important %}important{% endif %} {% if activity.note and activity.note.is_internal %}internal{% endif %}">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-1">
-                                                    <i class="fas fa-sticky-note text-primary mr-2"></i>
-                                                    {{ activity.title }}
-                                                    {% if activity.note and activity.note.is_important %}
-                                                        <span class="badge badge-warning ml-2">Important</span>
-                                                    {% endif %}
-                                                </h6>
-                                                <p class="text-muted small mb-2">
-                                                    <i class="fas fa-user mr-1"></i>{{ activity.user.full_name if activity.user else 'Unknown' }} • 
-                                                    <i class="fas fa-calendar mr-1"></i>{{ activity.created_at.strftime('%Y-%m-%d %H:%M') }}
-                                                    {% if activity.note and activity.note.note_type %}
-                                                        • <span class="badge badge-info">{{ activity.note.note_type.value }}</span>
-                                                    {% endif %}
-                                                </p>
-                                                <div class="note-content">
-                                                    {% if activity.note %}
-                                                        {{ activity.note.content|nl2br }}
-                                                    {% else %}
-                                                        {{ activity.description|nl2br if activity.description else 'No content' }}
-                                                    {% endif %}
-                                                </div>
-                                                {% if activity.note and activity.note.tags %}
-                                                    <div class="mt-2">
-                                                        {% for tag in activity.note.get_tags_list() %}
-                                                            <span class="badge badge-secondary mr-1">{{ tag }}</span>
-                                                        {% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                            <div class="ml-3">
-                                                <a href="{{ url_for('crm.view_activity', activity_id=activity.id) }}" class="btn btn-sm btn-outline-primary" title="View Details">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            {% else %}
-                                <div class="text-center text-muted py-4">
-                                    <i class="fas fa-sticky-note fa-3x mb-3"></i>
-                                    <p>No notes have been added to this deal yet.</p>
-                                    <p class="small">Click "Add Note" to start tracking important information.</p>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="text-center text-muted py-4">
-                            <i class="fas fa-sticky-note fa-3x mb-3"></i>
-                            <p>No notes have been added to this deal yet.</p>
-                            <p class="small">Click "Add Note" to start tracking important information.</p>
-                        </div>
-                    {% endif %}
-                </div>
+                <h4 class="text-lg font-bold text-white">Quote Streams</h4>
+            </div>
+            <div class="flex gap-2">
+                <button class="inline-flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-lg  transition-all" id="expand-all-btn">
+                    <i class="fas fa-plus-square"></i>
+                    <span>Expand All</span>
+                </button>
+                <button class="inline-flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-lg  transition-all" id="collapse-all-btn">
+                    <i class="fas fa-minus-square"></i>
+                    <span>Collapse All</span>
+                </button>
             </div>
         </div>
-    </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h4>Quote Streams</h4>
-        <div>
-            <button class="btn btn-sm btn-secondary" id="expand-all-btn"><i class="fas fa-plus-square"></i> Expand All</button>
-            <button class="btn btn-sm btn-secondary" id="collapse-all-btn"><i class="fas fa-minus-square"></i> Collapse All</button>
-        </div>
-    </div>
-
-    <div class="accordion" id="quote-streams-accordion">
-        {% for recipient in deal.recipients %}
-            <div class="card mb-3 quote-stream-panel">
-                <div class="card-header" id="stream-heading-{{ recipient.id }}">
-                    <div class="d-flex justify-content-between align-items-center">
-                         <h5 class="mb-0 flex-grow-1">
-                            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#stream-collapse-{{ recipient.id }}" aria-expanded="true" aria-controls="stream-collapse-{{ recipient.id }}">
-                                <i class="fas fa-file-invoice-dollar mr-2"></i>Quotes for: <strong>{{ recipient.company.company_name }}</strong>
+        <div class="accordion" id="quote-streams-accordion">
+            {% for recipient in deal.recipients %}
+                <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl  mb-3 shadow-lg quote-stream-panel">
+                    <div class="card-header bg-gray-700/30  rounded-t-xl" id="stream-heading-{{ recipient.id }}">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-2">
+                            <button class="flex items-center gap-2 text-left flex-1 text-white hover:text-blue-400 transition-colors font-medium stream-toggle-btn" type="button" data-stream-id="{{ recipient.id }}">
+                                <i class="fas fa-chevron-right transition-transform duration-200 stream-chevron text-blue-400"></i>
+                                <i class="fas fa-file-invoice-dollar text-blue-400"></i>
+                                <span>Quotes for: <strong>{{ recipient.company.company_name }}</strong></span>
                             </button>
-                        </h5>
-                        <div>
-                            <button class="btn btn-sm btn-primary add-revision-btn" data-toggle="modal" data-target="#addRevisionModal" data-recipient-id="{{ recipient.id }}" data-recipient-name="{{ recipient.company.company_name }}">
-                                <i class="fas fa-plus"></i> Add New Revision
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger delete-revision-btn" data-toggle="modal" data-target="#deleteRevisionModal" data-recipient-id="{{ recipient.id }}">
-                                <i class="fas fa-trash-alt"></i> Delete Revision
-                            </button>
+                            <div class="flex gap-2">
+                                <button class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs font-medium rounded-lg transition-all add-revision-btn" data-toggle="modal" data-target="#addRevisionModal" data-recipient-id="{{ recipient.id }}" data-recipient-name="{{ recipient.company.company_name }}">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add Revision</span>
+                                </button>
+                                <button class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600/80 hover:bg-red-600 text-white text-xs font-medium rounded-lg  transition-all delete-revision-btn" data-toggle="modal" data-target="#deleteRevisionModal" data-recipient-id="{{ recipient.id }}">
+                                    <i class="fas fa-trash-alt"></i>
+                                    <span>Delete</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div id="stream-collapse-{{ recipient.id }}" class="collapse show" aria-labelledby="stream-heading-{{ recipient.id }}" data-parent="#quote-streams-accordion">
-                    <div class="card-body">
-                        {% if recipient.quotes %}
-                            <ul class="nav nav-tabs" role="tablist">
-                                {% for quote in recipient.quotes|sort(attribute='revision') %}
-                                    <li class="nav-item" role="presentation">
-                                        <a class="nav-link {% if loop.first %}active{% endif %}" id="rev-tab-{{quote.id}}" data-toggle="tab" href="#rev-pane-{{quote.id}}" role="tab" aria-controls="rev-pane-{{quote.id}}" aria-selected="true" data-recipient-id="{{ recipient.id }}" data-quote-id="{{ quote.id }}">
+                    <div id="stream-content-{{ recipient.id }}" class="stream-content" style="display: block;">
+                        <div class="card-body">
+                            {% if recipient.quotes %}
+                                <div class="flex space-x-1 border-b border-gray-600">
+                                    {% for quote in recipient.quotes|sort(attribute='revision') %}
+                                        <button 
+                                            class="revision-tab px-4 py-2 text-sm font-medium transition-all duration-200 rounded-t-lg border-none {% if loop.first %}text-white bg-gradient-to-b from-blue-600 to-blue-700{% else %}text-gray-400 hover:text-white hover:bg-blue-600/20{% endif %}" 
+                                            id="rev-tab-{{quote.id}}" 
+                                            data-toggle="tab" 
+                                            data-target="#rev-pane-{{quote.id}}" 
+                                            data-recipient-id="{{ recipient.id }}" 
+                                            data-quote-id="{{ quote.id }}"
+                                            role="tab"
+                                            aria-controls="rev-pane-{{quote.id}}"
+                                            aria-selected="{% if loop.first %}true{% else %}false{% endif %}">
                                             Revision #{{ quote.revision }}
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            <div class="tab-content pt-3">
-                                {% for quote in recipient.quotes|sort(attribute='revision') %}
-                                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="rev-pane-{{quote.id}}" role="tabpanel" aria-labelledby="rev-tab-{{quote.id}}">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h5 class="mb-0 text-muted">Created on {{ quote.created_at.strftime('%Y-%m-%d') }}</h5>
-                                            <div>
-                                                <button class="btn btn-sm btn-success add-option-btn" data-toggle="modal" data-target="#addOptionModal" data-quote-id="{{ quote.id }}"><i class="fas fa-plus-circle"></i> Add Option</button>
-                                                <button class="btn btn-sm btn-warning delete-option-btn" data-toggle="modal" data-target="#deleteOptionModal" data-quote-id="{{ quote.id }}"><i class="fas fa-minus-circle"></i> Delete Option</button>
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                                <div class="tab-content pt-3">
+                                    {% for quote in recipient.quotes|sort(attribute='revision') %}
+                                        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="rev-pane-{{quote.id}}" role="tabpanel" aria-labelledby="rev-tab-{{quote.id}}">
+                                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                                                <p class="text-sm text-gray-400 flex items-center gap-2">
+                                                    <i class="fas fa-calendar text-gray-500"></i>
+                                                    <span>Created on {{ quote.created_at.strftime('%Y-%m-%d') }}</span>
+                                                </p>
+                                                <div class="flex gap-2">
+                                                    <button class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-all add-option-btn" data-toggle="modal" data-target="#addOptionModal" data-quote-id="{{ quote.id }}">
+                                                        <i class="fas fa-plus-circle"></i>
+                                                        <span>Add Option</span>
+                                                    </button>
+                                                    <button class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-all delete-option-btn" data-toggle="modal" data-target="#deleteOptionModal" data-quote-id="{{ quote.id }}">
+                                                        <i class="fas fa-minus-circle"></i>
+                                                        <span>Delete Option</span>
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div class="accordion" id="option-accordion-{{ quote.id }}">
-                                            {% for option in quote.options %}
-                                                <div class="card option-card mb-3">
-                                                    <div class="card-header" id="option-heading-{{option.id}}">
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <h2 class="mb-0 flex-grow-1">
-                                                                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#option-collapse-{{option.id}}" aria-expanded="true" aria-controls="option-collapse-{{option.id}}">
-                                                                    <strong class="editable" data-model="quote_option" data-id="{{ option.id }}" data-field="name">{{ option.name }}</strong>
-                                                                </button>
-                                                            </h2>
-                                                            <div>
-                                                                <button class="btn btn-xs btn-outline-primary add-item-btn ml-2" data-toggle="modal" data-target="#addItemModal" data-option-id="{{ option.id }}" title="Add Manual Item"><i class="fas fa-plus"></i> Add Item</button>
-                                                                <a href="{{ url_for('hvac.search_pumps', option_id=option.id) }}" class="btn btn-xs btn-outline-info ml-2" title="Add Pump Assembly"><i class="fas fa-cog"></i> Add Pump</a>
+                                            <div class="accordion" id="option-accordion-{{ quote.id }}">
+                                                {% for option in quote.options %}
+                                                    <div class="card option-card mb-3">
+                                                        <div class="card-header" id="option-heading-{{option.id}}">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <h2 class="mb-0 flex-grow-1">
+                                                                    <button class="btn btn-link btn-block text-left option-toggle-btn" type="button" data-option-id="{{option.id}}">
+                                                                        <strong class="editable" data-model="quote_option" data-id="{{ option.id }}" data-field="name">{{ option.name }}</strong>
+                                                                    </button>
+                                                                </h2>
+                                                                <div class="flex gap-1">
+                                                                    <button class="inline-flex items-center gap-1 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-all add-item-btn" data-toggle="modal" data-target="#addItemModal" data-option-id="{{ option.id }}" title="Add Manual Item">
+                                                                        <i class="fas fa-plus"></i>
+                                                                        <span>Add Item</span>
+                                                                    </button>
+                                                                    <button class="inline-flex items-center gap-1 px-2 py-1 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-medium rounded transition-all" data-toggle="modal" data-target="#addPumpModal" data-option-id="{{ option.id }}" title="Add Pump Assembly">
+                                                                        <i class="fas fa-cog"></i>
+                                                                        <span>Add Pump</span>
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <div id="option-collapse-{{option.id}}" class="collapse show" aria-labelledby="option-heading-{{option.id}}">
-                                                        <div class="card-body p-0">
-                                                            <table class="table table-sm table-hover line-items-table resizable mb-0" data-option-id="{{ option.id }}">
-                                                                <thead class="thead-light">
-                                                                    <tr>
-                                                                        <th style="width: 20px;"></th>
-                                                                        <th data-field="sku">Item No</th>
-                                                                        <th data-field="name">Description</th>
-                                                                        <th data-field="notes">Notes</th>
-                                                                        <th class="text-center" style="width: 80px;">Qty</th>
-                                                                        <th class="text-right" style="width: 120px;">Unit Price</th>
-                                                                        <th class="text-right discount-header" style="width: 100px;">Discount (%)</th>
-                                                                        <th class="text-right">Total Price</th>
-                                                                        <th class="text-right">Actions</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody class="sortable-items">
-                                                                {% for item in option.line_items %}
-                                                                    <tr data-item-id="{{ item.id }}">
-                                                                        <td class="drag-handle"><i class="fas fa-grip-vertical"></i></td>
-                                                                        <td data-field="sku">{{ item.product.item_no if item.product else 'CUSTOM' }}</td>
-                                                                        <td class="editable" data-model="line_item" data-id="{{ item.id }}" data-field="custom_name">{{ item.product.description if item.product else item.custom_name }}</td>
-                                                                        <td class="editable" data-model="line_item" data-id="{{ item.id }}" data-field="notes">{{ item.notes }}</td>
-                                                                        <td class="editable text-center" data-model="line_item" data-id="{{ item.id }}" data-field="quantity">{{ item.quantity }}</td>
-                                                                        <td class="editable text-right" data-model="line_item" data-id="{{ item.id }}" data-field="unit_price">{{ '{:,.2f}'.format(item.unit_price or 0) }}</td>
-                                                                        <td class="editable text-right" data-model="line_item" data-id="{{ item.id }}" data-field="discount">{{ '{:,.2f}'.format(item.discount or 0) }}</td>
-                                                                        <td class="line-total text-right"></td>
-                                                                        <td class="text-right">
-                                                                            <form action="{{ url_for('deals.delete_line_item', item_id=item.id) }}" method="POST" class="d-inline delete-item-form">
-                                                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                                                                <button type="submit" class="btn btn-xs btn-danger"><i class="fas fa-trash-alt"></i></button>
-                                                                            </form>
-                                                                        </td>
-                                                                    </tr>
-                                                                {% endfor %}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                        <div class="card-footer option-totals">
-                                                            <div class="row justify-content-end">
-                                                                <div class="col-md-5">
-                                                                    <div class="d-flex justify-content-between">
-                                                                        <strong>Subtotal:</strong>
-                                                                        <span class="subtotal-value">$0.00</span>
-                                                                    </div>
-                                                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                                                        <strong>Freight:</strong>
-                                                                        <span class="freight-value editable" data-model="quote_option" data-id="{{ option.id }}" data-field="freight_charge">{{ '{:,.2f}'.format(option.freight_charge or 0) }}</span>
-                                                                    </div>
-                                                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                                                        <strong>Lead-time:</strong>
-                                                                        <div class="d-flex align-items-center">
-                                                                            <div class="form-check form-check-inline mr-2">
-                                                                                <input class="form-check-input lead-time-ex-stock" type="checkbox" data-option-id="{{ option.id }}" 
-                                                                                       {% if option.is_ex_stock_brisbane %}checked{% endif %} 
-                                                                                       title="Ex-Stock Brisbane">
-                                                                                <label class="form-check-label small">Ex-Stock Brisbane</label>
-                                                                            </div>
-                                                                                                                                                         <div class="lead-time-custom {% if option.is_ex_stock_brisbane %}d-none{% endif %}">
-                                                                                 <input type="text" class="form-control form-control-sm d-inline-block lead-time-value" 
-                                                                                        style="width: 80px;"
-                                                                                        value="{{ option.lead_time_value or '' }}"
-                                                                                        data-option-id="{{ option.id }}" 
-                                                                                        placeholder="8 or 3-4">
-                                                                                 <select class="form-control form-control-sm d-inline-block lead-time-unit ml-1" 
-                                                                                         style="width: 80px;" data-option-id="{{ option.id }}">
-                                                                                     <option value="weeks" {% if option.lead_time_unit == 'weeks' %}selected{% endif %}>weeks</option>
-                                                                                     <option value="days" {% if option.lead_time_unit == 'days' %}selected{% endif %}>days</option>
-                                                                                 </select>
-                                                                             </div>
+                                                        <div id="option-content-{{option.id}}" class="option-content" style="display: block;">
+                                                            <div class="bg-gray-800/30 rounded-lg overflow-hidden">
+                                                                <div class="overflow-x-auto">
+                                                                    <table class="w-full line-items-table" data-option-id="{{ option.id }}">
+                                                                        <thead class="bg-gray-700/50 border-b border-gray-600">
+                                                                            <tr class="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                                                                <th class="px-3 py-3 text-left" style="width: 40px;"></th>
+                                                                                <th class="px-4 py-3 text-left" data-field="sku">Item No</th>
+                                                                                <th class="px-4 py-3 text-left" data-field="name">Description</th>
+                                                                                <th class="px-4 py-3 text-left" data-field="notes">Notes</th>
+                                                                                <th class="px-3 py-3 text-center" style="width: 80px;">Qty</th>
+                                                                                <th class="px-3 py-3 text-right" style="width: 120px;">List Price</th>
+                                                                                <th class="px-3 py-3 text-right discount-header" style="width: 100px;">Discount</th>
+                                                                                <th class="px-3 py-3 text-right" style="width: 120px;">Unit Price</th>
+                                                                                <th class="px-3 py-3 text-right">Total Price</th>
+                                                                                <th class="px-3 py-3 text-center" style="width: 80px;">Actions</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody class="sortable-items divide-y divide-gray-700">
+                                                                        {% set ns = namespace(in_assembly=false, assembly_id=none, row_index=0) %}
+                                                                        {% for item in option.line_items %}
+                                                                            {% set is_sub_item = item.custom_name and item.custom_name.startswith('  •') %}
+                                                                            {% set is_pump_assembly = item.custom_name and ':' in item.custom_name and not item.custom_name.startswith('  •') and loop.nextitem and loop.nextitem.custom_name and loop.nextitem.custom_name.startswith('  •') %}
+                                                                            
+                                                                            {% if is_pump_assembly %}
+                                                                                {# Start new pump assembly group #}
+                                                                                {% set ns.in_assembly = true %}
+                                                                                {% set ns.assembly_id = item.id %}
+                                                                                {% set ns.row_index = ns.row_index + 1 %}
+                                                                                <tr data-item-id="{{ item.id }}" class="pump-assembly-header bg-blue-500/10 hover:bg-blue-500/20 transition-colors border-l-4 border-blue-500" 
+                                                                                   style="{% if ns.row_index % 2 == 0 %}background-color: rgba(55, 65, 81, 0.6);{% else %}background-color: rgba(17, 24, 39, 0.3);{% endif %}" 
+                                                                                   data-assembly-id="asm-{{ item.id }}" data-total-price="{{ '{:,.2f}'.format(item.unit_price or 0) }}">
+                                                                                    <td class="px-3 py-3 drag-handle cursor-move">
+                                                                                        <i class="fas fa-grip-vertical text-blue-400" title="Drag to reorder"></i>
+                                                                                    </td>
+                                                                                    <td class="px-4 py-3 font-medium text-blue-100" data-field="sku">
+                                                                                        <div class="flex items-center justify-between">
+                                                                                            <span>{{ item.custom_sku if item.custom_sku else (item.product.item_no if item.product else 'CUSTOM') }}</span>
+                                                                                            <i class="fas fa-chevron-right assembly-toggle cursor-pointer text-blue-400 hover:text-blue-300 transition-colors ml-2" title="Expand/Collapse"></i>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td class="px-4 py-3 editable text-white font-medium" data-model="line_item" data-id="{{ item.id }}" data-field="custom_name">
+                                                                                        {{ item.product.description if item.product else item.custom_name }}
+                                                                                    </td>
+                                                                                    <td class="px-4 py-3 editable text-gray-300" data-model="line_item" data-id="{{ item.id }}" data-field="notes">{{ item.notes }}</td>
+                                                                                    <td class="px-3 py-3 text-center editable text-white" data-model="line_item" data-id="{{ item.id }}" data-field="quantity">{{ item.quantity }}</td>
+                                                                                    <td class="px-3 py-3 text-right editable text-gray-400 font-medium" data-model="line_item" data-id="{{ item.id }}" data-field="list_price">{% if item.custom_name and (item.custom_name.startswith('  •') or ':' in item.custom_name) %}
+{# Pump components and pump assemblies don't use list price #}
+{% else %}
+${{ '{:,.2f}'.format((item.list_price if item.list_price is not none else item.unit_price) or 0) }}
+{% endif %}</td>
+                                                                                    <td class="px-3 py-3 text-right editable text-yellow-400" data-model="line_item" data-id="{{ item.id }}" data-field="discount">{{ '{:,.1f}'.format(item.discount or 0) }}%</td>
+                                                                                    <td class="px-3 py-3 text-right editable assembly-unit-price text-green-400 font-medium" data-model="line_item" data-id="{{ item.id }}" data-field="unit_price" data-total-price="{{ '{:,.2f}'.format(item.unit_price or 0) }}">${{ '{:,.2f}'.format(item.unit_price or 0) }}</td>
+                                                                                    <td class="px-3 py-3 text-right line-total text-green-400 font-bold"></td>
+                                                                                    <td class="px-3 py-3 text-center">
+                                                                                        <div class="flex items-center gap-1 justify-center">
+                                                                                            <button type="button" class="inline-flex items-center justify-center w-7 h-7 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors view-pump-btn" 
+                                                                                                    data-assembly-id="{{ item.id }}"
+                                                                                                    title="View/Edit Pump Assembly">
+                                                                                                <i class="fas fa-eye text-xs"></i>
+                                                                                            </button>
+                                                                                            <form action="{{ url_for('deals.delete_line_item', item_id=item.id) }}" method="POST" class="inline delete-item-form">
+                                                                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                                                                <button type="submit" class="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded transition-colors" 
+                                                                                                        onclick="return confirm('Are you sure you want to delete this pump assembly and all its components? This action cannot be undone.');">
+                                                                                                    <i class="fas fa-trash-alt text-xs"></i>
+                                                                                                </button>
+                                                                                            </form>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            {% elif is_sub_item and ns.in_assembly %}
+                                                                                {# Sub-item of pump assembly - hidden by default #}
+                                                                                {% set ns.row_index = ns.row_index + 1 %}
+                                                                                <tr data-item-id="{{ item.id }}" class="pump-assembly-item bg-gray-800/20 hover:bg-gray-800/30 transition-colors" 
+                                                                                   style="display: none; {% if ns.row_index % 2 == 0 %}background-color: rgba(55, 65, 81, 0.6);{% else %}background-color: rgba(17, 24, 39, 0.3);{% endif %}" 
+                                                                                   data-assembly-id="asm-{{ ns.assembly_id }}">
+                                                                                    <td class="px-3 py-2">
+                                                                                        <i class="fas fa-grip-vertical text-gray-500 ml-4" title="Sub-item (drag parent to move)"></i>
+                                                                                    </td>
+                                                                                    <td class="px-4 py-2 text-gray-400 text-sm" data-field="sku">{{ item.custom_sku if item.custom_sku else (item.product.item_no if item.product else '-') }}</td>
+                                                                                    <td class="px-4 py-2 editable text-gray-300 text-sm ml-6" data-model="line_item" data-id="{{ item.id }}" data-field="custom_name">
+                                                                                        {{ item.product.description if item.product else item.custom_name }}
+                                                                                    </td>
+                                                                                    <td class="px-4 py-2 editable text-gray-400 text-sm" data-model="line_item" data-id="{{ item.id }}" data-field="notes">{{ item.notes }}</td>
+                                                                                    <td class="px-3 py-2 text-center editable text-gray-300 text-sm" data-model="line_item" data-id="{{ item.id }}" data-field="quantity">{{ item.quantity }}</td>
+                                                                                    <td class="px-3 py-2 text-right editable text-gray-400 text-sm" data-model="line_item" data-id="{{ item.id }}" data-field="list_price">
+                                                                                        {% if item.custom_name and item.custom_name.startswith('  •') %}
+                                                                                            {# Pump components don't use list price #}
+                                                                                        {% else %}
+                                                                                            {% if item.custom_name and (item.custom_name.startswith('  •') or ':' in item.custom_name) %}
+{# Pump components and pump assemblies don't use list price #}
+{% else %}
+${{ '{:,.2f}'.format((item.list_price if item.list_price is not none else item.unit_price) or 0) }}
+{% endif %}
+                                                                                        {% endif %}
+                                                                                    </td>
+                                                                                    <td class="px-3 py-2 text-right editable text-gray-400 text-sm" data-model="line_item" data-id="{{ item.id }}" data-field="discount">{{ '{:,.1f}'.format(item.discount or 0) }}%</td>
+                                                                                    <td class="px-3 py-2 text-right editable text-gray-400 text-sm" data-model="line_item" data-id="{{ item.id }}" data-field="unit_price">${{ '{:,.2f}'.format(item.unit_price or 0) }}</td>
+                                                                                    <td class="px-3 py-2 text-right line-total text-gray-400 text-sm font-medium"></td>
+                                                                                    <td class="px-3 py-2 text-center">
+                                                                                        <form action="{{ url_for('deals.delete_line_item', item_id=item.id) }}" method="POST" class="inline delete-item-form">
+                                                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                                                            <button type="submit" class="inline-flex items-center justify-center w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded transition-colors">
+                                                                                                <i class="fas fa-trash-alt text-xs"></i>
+                                                                                            </button>
+                                                                                        </form>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            {% else %}
+                                                                                {# Regular item or end of assembly group #}
+                                                                                {% set ns.in_assembly = false %}
+                                                                                {% set ns.row_index = ns.row_index + 1 %}
+                                                                                <tr data-item-id="{{ item.id }}" class="hover:bg-blue-500/20 transition-colors" 
+                                                                                   style="{% if ns.row_index % 2 == 0 %}background-color: rgba(55, 65, 81, 0.6);{% else %}background-color: rgba(17, 24, 39, 0.3);{% endif %}">
+                                                                                    <td class="px-3 py-3 drag-handle cursor-move">
+                                                                                        <i class="fas fa-grip-vertical text-gray-500" title="Drag to reorder"></i>
+                                                                                    </td>
+                                                                                    <td class="px-4 py-3 font-medium text-gray-200" data-field="sku">{{ item.custom_sku if item.custom_sku else (item.product.item_no if item.product else 'CUSTOM') }}</td>
+                                                                                    <td class="px-4 py-3 editable text-white" data-model="line_item" data-id="{{ item.id }}" data-field="custom_name">{{ item.product.description if item.product else item.custom_name }}</td>
+                                                                                    <td class="px-4 py-3 editable text-gray-300" data-model="line_item" data-id="{{ item.id }}" data-field="notes">{{ item.notes }}</td>
+                                                                                    <td class="px-3 py-3 text-center editable text-white font-medium" data-model="line_item" data-id="{{ item.id }}" data-field="quantity">{{ item.quantity }}</td>
+                                                                                    <td class="px-3 py-3 text-right editable text-gray-400 font-medium" data-model="line_item" data-id="{{ item.id }}" data-field="list_price">{% if item.custom_name and (item.custom_name.startswith('  •') or ':' in item.custom_name) %}
+{# Pump components and pump assemblies don't use list price #}
+{% else %}
+${{ '{:,.2f}'.format((item.list_price if item.list_price is not none else item.unit_price) or 0) }}
+{% endif %}</td>
+                                                                                    <td class="px-3 py-3 text-right editable text-yellow-400" data-model="line_item" data-id="{{ item.id }}" data-field="discount">{{ '{:,.1f}'.format(item.discount or 0) }}%</td>
+                                                                                    <td class="px-3 py-3 text-right editable text-green-400 font-medium" data-model="line_item" data-id="{{ item.id }}" data-field="unit_price">${{ '{:,.2f}'.format(item.unit_price or 0) }}</td>
+                                                                                    <td class="px-3 py-3 text-right line-total text-green-400 font-bold"></td>
+                                                                                    <td class="px-3 py-3 text-center">
+                                                                                        <form action="{{ url_for('deals.delete_line_item', item_id=item.id) }}" method="POST" class="inline delete-item-form">
+                                                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                                                            <button type="submit" class="inline-flex items-center justify-center w-7 h-7 bg-red-600 hover:bg-red-700 text-white rounded transition-colors">
+                                                                                                <i class="fas fa-trash-alt text-xs"></i>
+                                                                                            </button>
+                                                                                        </form>
+                                                                                    </td>
+                                                                                </tr>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    </tbody>
+                                                                </table>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <!-- Totals Section -->
+                                                            <div class="bg-gray-800/50 border-t border-gray-700 px-6 py-4">
+                                                                <div class="flex justify-end">
+                                                                    <div class="w-full max-w-md space-y-3">
+                                                                        <div class="flex justify-between items-center">
+                                                                            <span class="text-gray-300 font-medium">Subtotal:</span>
+                                                                            <span class="subtotal-value text-green-400 font-bold text-lg">$0.00</span>
                                                                         </div>
+                                                                        <div class="flex justify-between items-center">
+                                                                            <span class="text-gray-300 font-medium">Freight:</span>
+                                                                            <span class="freight-value editable text-green-400 font-medium" data-model="quote_option" data-id="{{ option.id }}" data-field="freight_charge">${{ '{:,.2f}'.format(option.freight_charge or 0) }}</span>
+                                                                        </div>
+                                                                        <div class="flex justify-between items-center">
+                                                                            <span class="text-gray-300 font-medium">Lead-time:</span>
+                                                                            <div class="flex items-center gap-2">
+                                                                                <label class="flex items-center gap-2 text-sm">
+                                                                                    <input class="lead-time-ex-stock w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" 
+                                                                                           type="checkbox" data-option-id="{{ option.id }}" 
+                                                                                           {% if option.is_ex_stock_brisbane %}checked{% endif %} 
+                                                                                           title="Ex-Stock Brisbane">
+                                                                                    <span class="text-gray-300">Ex-Stock Brisbane</span>
+                                                                                </label>
+                                                                                <div class="lead-time-custom {% if option.is_ex_stock_brisbane %}hidden{% endif %}">
+                                                                                    <input type="text" class="w-16 px-2 py-1 text-sm bg-gray-700 border border-gray-600 text-white rounded lead-time-value" 
+                                                                                           value="{{ option.lead_time_value or '' }}"
+                                                                                           data-option-id="{{ option.id }}" 
+                                                                                           placeholder="8">
+                                                                                    <select class="w-16 px-2 py-1 text-sm bg-gray-700 border border-gray-600 text-white rounded ml-1 lead-time-unit" 
+                                                                                            data-option-id="{{ option.id }}">
+                                                                                        <option value="weeks" {% if option.lead_time_unit == 'weeks' %}selected{% endif %}>weeks</option>
+                                                                                        <option value="days" {% if option.lead_time_unit == 'days' %}selected{% endif %}>days</option>
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <div class="border-t border-gray-600 pt-3">
+                                                                            <div class="flex justify-between items-center">
+                                                                                <span class="text-white font-bold text-lg">Total Price:</span>
+                                                                                <span class="total-value text-green-400 font-bold text-xl">$0.00</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <a href="{{ url_for('deals.view_quote_pdf', option_id=option.id) }}" 
+                                                                           class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors mt-4" 
+                                                                           target="_blank">
+                                                                            <i class="fas fa-file-pdf"></i>
+                                                                            <span>Create Quote for this Option</span>
+                                                                        </a>
                                                                     </div>
-                                                                    <hr>
-                                                                    <div class="d-flex justify-content-between h5">
-                                                                        <strong>Total Price:</strong>
-                                                                        <strong class="total-value">$0.00</strong>
-                                                                    </div>
-                                                                    <a href="{{ url_for('deals.view_quote_pdf', option_id=option.id) }}" class="btn btn-success btn-block mt-3" target="_blank">
-                                                                        <i class="fas fa-file-pdf mr-1"></i> Create Quote for this Option
-                                                                    </a>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            {% endfor %}
+                                                {% endfor %}
+                                            </div>
                                         </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <p class="text-center text-secondary">No quotes have been created for this company yet.</p>
-                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-center text-secondary">No quotes have been created for this company yet.</p>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
+
+    <!-- Notes Section (AT THE VERY BOTTOM) -->
+    <div class="mb-4 mt-6">
+        <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl  p-4 shadow-lg">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center justify-center w-8 h-8 bg-yellow-600/20 rounded-lg">
+                        <i class="fas fa-sticky-note text-yellow-400 text-sm"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white">Deal Notes</h4>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105" data-toggle="modal" data-target="#addNoteModal">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Note</span>
+                    </button>
+                    <a href="{{ url_for('crm.activities_list', deal_id=deal.id) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-lg  transition-all">
+                        <i class="fas fa-external-link-alt"></i>
+                        <span>View All Activities</span>
+                    </a>
+                </div>
+            </div>
+            <div>
+                {% if deal.activities %}
+                    <div class="space-y-3">
+                        {% for activity in deal.activities|sort(attribute='created_at', reverse=true) %}
+                            {% if activity.activity_type.value == 'Note' %}
+                                <div class="group bg-gray-700/30 rounded-lg p-4  hover:bg-gray-700/50 transition-all {% if activity.note and activity.note.is_important %}ring-2 ring-yellow-500/30{% endif %}">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-start gap-3 mb-3">
+                                                <div class="flex items-center justify-center w-10 h-10 bg-yellow-500/10 rounded-lg flex-shrink-0">
+                                                    <i class="fas fa-sticky-note text-yellow-400"></i>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                                        <h6 class="text-white font-semibold">{{ activity.title }}</h6>
+                                                        {% if activity.note and activity.note.is_important %}
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                                                                <i class="fas fa-exclamation-circle mr-1"></i>Important
+                                                            </span>
+                                                        {% endif %}
+                                                        {% if activity.note and activity.note.note_type %}
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                                                                {{ activity.note.note_type.value }}
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="flex items-center gap-3 text-xs text-gray-500">
+                                                        <span class="flex items-center gap-1">
+                                                            <i class="fas fa-user"></i>
+                                                            {{ activity.user.full_name if activity.user else 'Unknown' }}
+                                                        </span>
+                                                        <span class="flex items-center gap-1">
+                                                            <i class="fas fa-calendar"></i>
+                                                            {{ activity.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-gray-300 text-sm leading-relaxed ml-13">
+                                                {% if activity.note %}
+                                                    {{ activity.note.content|nl2br }}
+                                                {% else %}
+                                                    {{ activity.description|nl2br if activity.description else 'No content' }}
+                                                {% endif %}
+                                            </div>
+                                            {% if activity.note and activity.note.tags %}
+                                                <div class="flex flex-wrap gap-2 mt-3 ml-13">
+                                                    {% for tag in activity.note.get_tags_list() %}
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-600 text-gray-300">
+                                                            <i class="fas fa-hashtag text-xs mr-1"></i>{{ tag }}
+                                                        </span>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <a href="{{ url_for('crm.view_activity', activity_id=activity.id) }}" class="inline-flex items-center justify-center w-8 h-8 bg-gray-600 hover:bg-blue-600 text-white rounded-lg transition-colors flex-shrink-0" title="View Details">
+                                            <i class="fas fa-eye text-sm"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+                                <i class="fas fa-sticky-note text-5xl mb-4 opacity-30"></i>
+                                <p class="text-lg font-medium">No notes have been added yet</p>
+                                <p class="text-sm">Click "Add Note" to start tracking important information</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+                        <i class="fas fa-sticky-note text-5xl mb-4 opacity-30"></i>
+                        <p class="text-lg font-medium">No notes have been added yet</p>
+                        <p class="text-sm">Click "Add Note" to start tracking important information</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
     </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pump_selection.css') }}">
     {% include 'deals/partials/_add_revision_modal.html' %}
     {% include 'deals/partials/_delete_revision_modal.html' %}
     {% include 'deals/partials/_add_item_modal.html' %}
@@ -340,6 +646,7 @@
     {% include 'deals/partials/_delete_option_modal.html' %}
     {% include 'deals/partials/_edit_deal_modal.html' %}
     {% include 'deals/partials/_manage_parties_modal.html' %}
+    {% include 'deals/partials/_add_pump_modal.html' %}
     {% include 'deals/partials/_add_note_modal.html' %}
     <script src="{{ url_for('static', filename='js/sortable.min.js') }}?v=1.0"></script>
     <script>
@@ -351,4 +658,5 @@
         }
     </script>
     <script src="{{ url_for('static', filename='js/pages/deal_details.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/pages/pump_selection.js') }}"></script>
 {% endblock %}

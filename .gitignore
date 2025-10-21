@@ -1,18 +1,3 @@
-# Environment variables and secrets
-.env
-.env.local
-.env.production
-.env.staging
-*.env
-
-# GitHub Actions workflows - now using secrets (secure)
-# .github/workflows/ - removed this line since we're using secrets now
-
-# Database files
-*.db
-*.sqlite
-*.sqlite3
-
 # Python
 __pycache__/
 *.py[cod]
@@ -35,12 +20,20 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments
+# Virtual Environment
+.venv/
 venv/
-env/
 ENV/
-env.bak/
-venv.bak/
+env/
+
+# Flask
+instance/
+.webassets-cache
+*.db
+
+# Environment variables
+.env
+config/.env
 
 # IDE
 .vscode/
@@ -49,53 +42,31 @@ venv.bak/
 *.swo
 *~
 
+# Node / NPM
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Tailwind Output (generated file)
+app/static/css/output.css
+
 # OS
 .DS_Store
 Thumbs.db
 
 # Logs
 *.log
-logs/
+app/instance/logs/
 
-# Temporary files
-*.tmp
-*.temp
-
-# Backup files
+# Backups
+backups/database/*.sql
+backups/instance/*
 *.bak
-*.backup
-backups/
-backup_*/
 
-# Configuration files with secrets
-config/secrets.yml
-config/production.yml
-config/staging.yml
-config/.env.development
-config/.env.production
-config/.env.staging
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Test files that might contain sensitive data
-tests/fixtures/
-tests/secrets/
-
-# Deployment scripts with hardcoded paths
-scripts/deployment/production/
-scripts/deployment/staging/
-
-# Documentation that might contain sensitive info
-docs/deployment/secrets/
-docs/config/secrets/
-
-# Data files (may contain sensitive business data)
-data/
-*.xlsx
-# Allow CSV files in other directories (like samples)
-# *.csv
-
-# Instance data (runtime files)
-instance/
-app/instance/
-
-# SSH and deployment files
-SSH_TROUBLESHOOTING.md
+# Production
+*.pid

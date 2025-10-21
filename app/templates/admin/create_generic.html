@@ -1,147 +1,293 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Create {% if item_type == 'company' %}Company{% elif item_type == 'contact' %}Contact{% else %}{{ config.display_name[:-1] }}{% endif %}{% endblock %}
+{% block title %}{% if item %}Edit{% else %}Create{% endif %} {% if item_type == 'company' %}Company{% elif item_type == 'contact' %}Contact{% else %}{{ config.display_name[:-1] }}{% endif %}{% endblock %}
 
 {% block breadcrumbs %}
-    <li class="breadcrumb-item">
-        <a href="{{ url_for('admin.dashboard') }}">
-            <i class="fas fa-cogs mr-1"></i>Admin
+    <li class="flex items-center">
+        <i class="fas fa-chevron-right text-slate-600 text-[10px] mx-1"></i>
+        <a href="{{ url_for('admin.dashboard') }}" class="text-blue-400 hover:text-blue-300 no-underline flex items-center gap-1.5 px-2 py-0.5 rounded-lg hover:bg-slate-700/30 transition-all duration-200">
+            <i class="fas fa-cogs text-[10px]"></i>
+            <span class="font-medium">Admin</span>
         </a>
     </li>
-    <li class="breadcrumb-item">
-        <a href="{{ url_for('admin.manage_items', item_type=item_type) }}">
-            <i class="fas fa-list mr-1"></i>{{ config.display_name }}
+    <li class="flex items-center">
+        <i class="fas fa-chevron-right text-slate-600 text-[10px] mx-1"></i>
+        <a href="{{ url_for('admin.manage_items', item_type=item_type) }}" class="text-blue-400 hover:text-blue-300 no-underline flex items-center gap-1.5 px-2 py-0.5 rounded-lg hover:bg-slate-700/30 transition-all duration-200">
+            <i class="fas fa-list text-[10px]"></i>
+            <span class="font-medium">{{ config.display_name }}</span>
         </a>
     </li>
-    <li class="breadcrumb-item active">Create {{ config.display_name[:-1] }}</li>
+    <li class="flex items-center">
+        <i class="fas fa-chevron-right text-slate-600 text-[10px] mx-1"></i>
+        <span class="text-slate-300 px-2 py-0.5 font-medium">{% if item %}Edit{% else %}Create{% endif %}</span>
+    </li>
 {% endblock %}
 
 {% block head_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_forms.css') }}">
+<style>
+    /* Light theme for form inputs with dark text */
+    input,
+    textarea,
+    select,
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="password"],
+    input[type="search"],
+    input[type="date"],
+    input[type="time"] {
+        background-color: #ffffff !important;
+        color: #1f2937 !important;
+        border-color: #d1d5db !important;
+    }
+    
+    input:focus,
+    textarea:focus,
+    select:focus {
+        background-color: #ffffff !important;
+        color: #1f2937 !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    }
+    
+    input::placeholder,
+    textarea::placeholder {
+        color: #9ca3af !important;
+        opacity: 1 !important;
+    }
+    
+    /* Light theme for select dropdowns and options */
+    select,
+    select option {
+        background-color: #ffffff !important;
+        color: #1f2937 !important;
+    }
+    
+    /* Black icons inside input fields */
+    .input-icon {
+        color: #374151 !important;
+    }
+    
+    /* Autofill styling - keep white background with dark text */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus {
+        -webkit-text-fill-color: #1f2937 !important;
+        -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+        box-shadow: 0 0 0px 1000px #ffffff inset !important;
+    }
+</style>
 {% endblock %}
 
 {% block page_content %}
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="display-5 mb-2">
-                <i class="fas fa-plus text-primary mr-3"></i>Create New {% if item_type == 'company' %}Company{% elif item_type == 'contact' %}Contact{% else %}{{ config.display_name[:-1] }}{% endif %}
-            </h1>
-            <p class="text-muted lead mb-0">Add a new {% if item_type == 'company' %}company{% elif item_type == 'contact' %}contact{% else %}{{ config.display_name[:-1].lower() }}{% endif %} to your database</p>
-        </div>
-        <div class="header-actions">
-            <a href="{{ url_for('admin.manage_items', item_type=item_type) }}" class="btn btn-outline-secondary">
-                <i class="fas fa-list mr-2"></i>View All {{ config.display_name }}
+<div class="max-w-5xl mx-auto">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-start gap-4">
+                <!-- Icon -->
+                <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    {% if item_type == 'company' %}
+                        <i class="fas fa-building text-white text-xl"></i>
+                    {% elif item_type == 'contact' %}
+                        <i class="fas fa-user-circle text-white text-xl"></i>
+                    {% elif item_type == 'seismic-spring' %}
+                        <i class="fas fa-compress-arrows-alt text-white text-xl"></i>
+                    {% elif item_type == 'pump' %}
+                        <i class="fas fa-cog text-white text-xl"></i>
+                    {% elif item_type == 'inertia-base' %}
+                        <i class="fas fa-cube text-white text-xl"></i>
+                    {% else %}
+                        <i class="fas fa-plus text-white text-xl"></i>
+                    {% endif %}
+                </div>
+                
+                <!-- Title & Description -->
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-2">
+                        {% if item %}Edit{% else %}Create New{% endif %}
+                        {% if item_type == 'company' %}Company{% elif item_type == 'contact' %}Contact{% else %}{{ config.display_name[:-1] }}{% endif %}
+                    </h1>
+                    <p class="text-slate-400 text-sm">
+                        {% if item %}
+                            Update the information below to modify this {{ config.display_name[:-1].lower() }}
+                        {% else %}
+                            Fill in the details below to add a new {{ config.display_name[:-1].lower() }} to your database
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Action Button -->
+            <a href="{{ url_for('admin.manage_items', item_type=item_type) }}" 
+               class="px-4 py-2.5 bg-slate-700/50 hover:bg-slate-700 text-white rounded-lg border border-slate-600 hover:border-slate-500 transition-all duration-200 flex items-center gap-2 text-sm font-medium shadow-lg">
+                <i class="fas fa-list text-xs"></i>
+                <span>View All</span>
             </a>
         </div>
     </div>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-10 col-xl-8">
-            <div class="card {% if item_type == 'company' %}company-form-card{% elif item_type == 'contact' %}contact-form-card{% else %}admin-form-card{% endif %}">
-                <div class="card-header">
-                    <div class="d-flex align-items-center">
-                        <div class="header-icon">
-                            {% if item_type == 'company' %}
-                                <i class="fas fa-building"></i>
-                            {% elif item_type == 'contact' %}
-                                <i class="fas fa-user-circle"></i>
-                            {% else %}
-                                <i class="fas fa-plus"></i>
-                            {% endif %}
-                        </div>
-                        <div class="header-content">
-                            <h4 class="mb-1">{% if item_type == 'company' %}Company{% elif item_type == 'contact' %}Contact{% else %}{{ config.display_name[:-1] }}{% endif %} Information</h4>
-                            <p class="text-muted mb-0">Fill in the details below to create a new {% if item_type == 'company' %}company{% elif item_type == 'contact' %}contact{% else %}{{ config.display_name[:-1].lower() }}{% endif %}</p>
-                        </div>
-                    </div>
+    <!-- Form Card -->
+    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl overflow-hidden">
+        <!-- Card Header -->
+        <div class="bg-gradient-to-r from-slate-800/80 to-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 px-6 py-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                    <i class="fas fa-edit text-blue-400"></i>
                 </div>
-                <div class="card-body">
-                    <form method="POST" class="needs-validation {% if item_type == 'company' %}company-form{% elif item_type == 'contact' %}contact-form{% else %}admin-form{% endif %}" novalidate>
-                        {{ form.hidden_tag() }}
-                        
-                        <!-- Form Fields Section -->
-                        <div class="form-section">
-                            <h5 class="section-title">
-                                <i class="fas fa-edit text-primary mr-2"></i>{% if item_type == 'company' %}Company{% elif item_type == 'contact' %}Contact{% else %}{{ config.display_name[:-1] }}{% endif %} Details
-                            </h5>
-                            
-                            {% for field in form if field.widget.input_type != 'hidden' and field.name != 'submit' %}
-                                <div class="row">
-                                    <div class="col-md-12 mb-4">
-                                        <label for="{{ field.id }}" class="form-label fw-bold">
-                                            {{ field.label }}
-                                            {% if field.flags.required %}<span class="text-danger">*</span>{% endif %}
-                                        </label>
-                                        
-                                        {% if field.type == 'TextAreaField' %}
-                                            <div class="input-group">
-                                                <span class="input-group-text">
-                                                    <i class="fas fa-sticky-note"></i>
-                                                </span>
-                                                {{ field(class="form-control", rows="4", placeholder="Enter " + field.label.text.lower() + "...") }}
-                                            </div>
-                                        {% elif field.type == 'SelectField' %}
-                                            <div class="input-group">
-                                                <span class="input-group-text">
-                                                    <i class="fas fa-list"></i>
-                                                </span>
-                                                {{ field(class="form-control") }}
-                                            </div>
-                                        {% else %}
-                                            <div class="input-group {% if field.flags.required %}input-group-lg{% endif %}">
-                                                <span class="input-group-text">
-                                                    {% if 'email' in field.name %}
-                                                        <i class="fas fa-envelope"></i>
-                                                    {% elif 'phone' in field.name %}
-                                                        <i class="fas fa-phone"></i>
-                                                    {% elif 'name' in field.name %}
-                                                        <i class="fas fa-user"></i>
-                                                    {% elif 'website' in field.name %}
-                                                        <i class="fas fa-globe"></i>
-                                                    {% elif 'domain' in field.name %}
-                                                        <i class="fas fa-at"></i>
-                                                    {% else %}
-                                                        <i class="fas fa-edit"></i>
-                                                    {% endif %}
-                                                </span>
-                                                {{ field(class="form-control", placeholder="Enter " + field.label.text.lower()) }}
-                                            </div>
-                                        {% endif %}
-                                        
-                                        {% if field.description %}
-                                            <div class="form-text">
-                                                <i class="fas fa-info-circle text-info mr-1"></i>
-                                                {{ field.description }}
-                                            </div>
-                                        {% endif %}
-                                        
-                                        {% if field.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in field.errors %}
-                                                    <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white">{% if item_type == 'company' %}Company{% elif item_type == 'contact' %}Contact{% else %}{{ config.display_name[:-1] }}{% endif %} Information</h3>
+                    <p class="text-slate-400 text-xs mt-0.5">All fields marked with <span class="text-red-400">*</span> are required</p>
+                </div>
+            </div>
+        </div>
 
-                        <!-- Submit Buttons -->
-                        <div class="form-actions">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <a href="{{ url_for('admin.manage_items', item_type=item_type) }}" class="btn btn-outline-secondary btn-lg">
-                                    <i class="fas fa-arrow-left mr-2"></i>Cancel
-                                </a>
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-save mr-2"></i>{{ form.submit.label if form.submit else 'Save ' + ('Company' if item_type == 'company' else 'Contact' if item_type == 'contact' else config.display_name[:-1]) }}
-                                </button>
+        <!-- Form Body -->
+        <form method="POST" class="p-6 space-y-6">
+            {{ form.hidden_tag() }}
+            
+            <!-- Form Fields Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for field in form if field.widget.input_type != 'hidden' and field.name != 'submit' %}
+                    <div>
+                        <!-- Field Label -->
+                        <label for="{{ field.id }}" class="block text-sm font-semibold text-slate-200 mb-2">
+                            {{ field.label.text }}
+                            {% if field.flags.required %}<span class="text-red-400 ml-1">*</span>{% endif %}
+                        </label>
+                        
+                        <!-- Field Input -->
+                        {% if field.type == 'BooleanField' %}
+                            <!-- Checkbox/Toggle Field -->
+                            <div class="flex items-center gap-3 px-4 py-3 bg-white rounded-lg border border-gray-300 h-12">
+                                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                                    {{ field(class="sr-only peer") }}
+                                    <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                                <div class="flex-1">
+                                    <span class="text-sm font-medium text-gray-900">{{ field.label.text }}</span>
+                                    {% if field.description %}
+                                        <p class="text-xs text-gray-600 mt-0.5">{{ field.description }}</p>
+                                    {% endif %}
+                                </div>
                             </div>
-                        </div>
-                    </form>
-                </div>
+                        
+                        {% elif field.type == 'TextAreaField' %}
+                            <!-- Textarea Field -->
+                            <div class="relative">
+                                <div class="absolute left-4 top-4 input-icon pointer-events-none z-10">
+                                    <i class="fas fa-align-left text-sm"></i>
+                                </div>
+                                {{ field(class="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none", rows="4", placeholder="Enter " + field.label.text.lower() + "...") }}
+                            </div>
+                        
+                        {% elif field.type == 'SelectField' %}
+                            <!-- Select Field -->
+                            <div class="relative">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 input-icon pointer-events-none z-10">
+                                    <i class="fas fa-list text-sm"></i>
+                                </div>
+                                {{ field(class="w-full pl-12 pr-10 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer h-12") }}
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 input-icon pointer-events-none">
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                        
+                        {% else %}
+                            <!-- Text/Number/Other Input Fields -->
+                            <div class="relative">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 input-icon pointer-events-none z-10">
+                                    {% if 'email' in field.name %}
+                                        <i class="fas fa-envelope text-sm"></i>
+                                    {% elif 'phone' in field.name or 'mobile' in field.name %}
+                                        <i class="fas fa-phone text-sm"></i>
+                                    {% elif 'name' in field.name %}
+                                        <i class="fas fa-user text-sm"></i>
+                                    {% elif 'website' in field.name %}
+                                        <i class="fas fa-globe text-sm"></i>
+                                    {% elif 'domain' in field.name %}
+                                        <i class="fas fa-at text-sm"></i>
+                                    {% elif 'price' in field.name or 'cost' in field.name %}
+                                        <i class="fas fa-dollar-sign text-sm"></i>
+                                    {% elif 'number' in field.name or 'part' in field.name or 'sku' in field.name %}
+                                        <i class="fas fa-hashtag text-sm"></i>
+                                    {% elif 'weight' in field.name %}
+                                        <i class="fas fa-weight text-sm"></i>
+                                    {% elif 'size' in field.name or 'dimension' in field.name or 'length' in field.name or 'width' in field.name or 'height' in field.name or 'depth' in field.name %}
+                                        <i class="fas fa-ruler text-sm"></i>
+                                    {% elif 'load' in field.name %}
+                                        <i class="fas fa-weight-hanging text-sm"></i>
+                                    {% elif 'deflection' in field.name or 'constant' in field.name %}
+                                        <i class="fas fa-compress-arrows-alt text-sm"></i>
+                                    {% elif 'color' in field.name or 'stripe' in field.name %}
+                                        <i class="fas fa-palette text-sm"></i>
+                                    {% elif 'url' in field.name %}
+                                        <i class="fas fa-link text-sm"></i>
+                                    {% else %}
+                                        <i class="fas fa-edit text-sm"></i>
+                                    {% endif %}
+                                </div>
+                                {{ field(class="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all h-12", placeholder="Enter " + field.label.text.lower()) }}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Field Description -->
+                        {% if field.description and field.type != 'BooleanField' %}
+                            <p class="mt-2 text-xs text-slate-400 flex items-start gap-1.5">
+                                <i class="fas fa-info-circle mt-0.5 text-blue-400"></i>
+                                <span>{{ field.description }}</span>
+                            </p>
+                        {% endif %}
+                        
+                        <!-- Field Errors -->
+                        {% if field.errors %}
+                            <div class="mt-2 text-xs text-red-400 space-y-1">
+                                {% for error in field.errors %}
+                                    <p class="flex items-start gap-1.5">
+                                        <i class="fas fa-exclamation-circle mt-0.5"></i>
+                                        <span>{{ error }}</span>
+                                    </p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-between pt-6 border-t border-slate-700/50">
+                <a href="{{ url_for('admin.manage_items', item_type=item_type) }}" 
+                   class="px-6 py-3 bg-slate-700/50 hover:bg-slate-700 text-white rounded-lg border border-slate-600 hover:border-slate-500 transition-all duration-200 flex items-center gap-2 font-medium">
+                    <i class="fas fa-arrow-left text-sm"></i>
+                    <span>Cancel</span>
+                </a>
+                
+                <button type="submit" 
+                        class="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-200 flex items-center gap-2 font-semibold hover:scale-105 active:scale-95">
+                    <i class="fas fa-save text-sm"></i>
+                    <span>{{ form.submit.label.text if form.submit else ('Update' if item else 'Create') + ' ' + config.display_name[:-1] }}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Section (Optional) -->
+    <div class="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+        <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                <i class="fas fa-lightbulb text-blue-400 text-sm"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="text-sm font-semibold text-blue-400 mb-1">Quick Tip</h4>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Make sure all required fields are filled in before submitting. You can always come back to edit this information later from the management page.
+                </p>
             </div>
         </div>
     </div>
@@ -149,6 +295,24 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/admin_forms.js') }}"></script>
-<script src="{{ url_for('static', filename='js/admin_forms_enhanced.js') }}"></script>
+<script>
+// Auto-focus first input field
+document.addEventListener('DOMContentLoaded', function() {
+    const firstInput = document.querySelector('input[type="text"]:not([readonly]), input[type="email"]:not([readonly]), textarea:not([readonly])');
+    if (firstInput) {
+        firstInput.focus();
+    }
+    
+    // Add smooth animations to form fields on focus
+    const formInputs = document.querySelectorAll('input, textarea, select');
+    formInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('ring-2', 'ring-blue-500/50');
+        });
+        input.addEventListener('blur', function() {
+            this.parentElement.classList.remove('ring-2', 'ring-blue-500/50');
+        });
+    });
+});
+</script>
 {% endblock %}

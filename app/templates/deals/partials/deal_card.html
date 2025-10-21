@@ -1,6 +1,5 @@
 {# /app/templates/deals/partials/deal_card.html #}
-<div class="deal-card
-    {# --- NEW: Add a class based on the deal type --- #}
+<div class="deal-card group relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-800 hover:border-gray-700 p-3 mb-2 cursor-grab active:cursor-grabbing transition-all duration-200 hover:shadow-xl hover:-translate-y-1 overflow-hidden
     {% if deal.deal_type.value == 'HVAC' %}
         deal-card--hvac
     {% elif deal.deal_type.value == 'Plumbing' %}
@@ -8,32 +7,106 @@
     {% elif deal.deal_type.value == 'Hydronic Heating' %}
         deal-card--hydronic-heating
     {% endif %}"
-    {# --------------------------------------------- #}
     draggable="true" data-deal-id="{{ deal.id }}">
     
-    <a href="{{ url_for('deals.deal_details', deal_id=deal.id) }}" class="stretched-link" title="{{ deal.project_name }}"></a>
+    <!-- Colored accent bar on left side -->
+    <div class="absolute left-0 top-0 bottom-0 w-1 
+        {% if deal.deal_type.value == 'HVAC' %}
+            bg-gradient-to-b from-green-500 to-green-600
+        {% elif deal.deal_type.value == 'Plumbing' %}
+            bg-gradient-to-b from-blue-500 to-blue-600
+        {% elif deal.deal_type.value == 'Hydronic Heating' %}
+            bg-gradient-to-b from-red-500 to-red-600
+        {% else %}
+            bg-gradient-to-b from-gray-500 to-gray-600
+        {% endif %}"></div>
     
-    <div>
-        <p class="deal-card-title mb-1">{{ deal.project_name | truncate(40) }}</p>
-        {% if deal.company %}
-        <p class="deal-card-company">{{ deal.company.name }}</p>
+    <!-- Hover glow effect -->
+    <div class="absolute inset-0 bg-gradient-to-br 
+        {% if deal.deal_type.value == 'HVAC' %}
+            from-green-500/0 to-green-500/0 group-hover:from-green-500/5 group-hover:to-green-500/10
+        {% elif deal.deal_type.value == 'Plumbing' %}
+            from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/10
+        {% elif deal.deal_type.value == 'Hydronic Heating' %}
+            from-red-500/0 to-red-500/0 group-hover:from-red-500/5 group-hover:to-red-500/10
+        {% else %}
+            from-gray-500/0 to-gray-500/0 group-hover:from-gray-500/5 group-hover:to-gray-500/10
         {% endif %}
-    </div>
-
-    <div class="deal-card-footer mt-3">
-        <div>
-            <span class="deal-card-amount">$ {{ '{:,.0f}'.format(deal.total_amount or 0) }}</span>
-        </div>
-        <div class="d-flex align-items-center">
-            <span class="mr-2" title="Close Date: {{ deal.close_date.strftime('%Y-%m-%d') if deal.close_date else 'N/A' }}">
-                <i class="fas fa-calendar-alt mr-1"></i>
-                {% if deal.close_date %}{{ deal.close_date.strftime('%b %d') }}{% else %}N/A{% endif %}
+        transition-all duration-200 rounded-lg pointer-events-none"></div>
+    
+    <a href="{{ url_for('deals.deal_details', deal_id=deal.id) }}" class="absolute inset-0 z-10" title="{{ deal.project_name }}"></a>
+    
+    <div class="relative z-0">
+        <!-- Deal Type Badge -->
+        <div class="flex items-center justify-between mb-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium
+                {% if deal.deal_type.value == 'HVAC' %}
+                    bg-green-500/20 text-green-400 border border-green-500/30
+                {% elif deal.deal_type.value == 'Plumbing' %}
+                    bg-blue-500/20 text-blue-400 border border-blue-500/30
+                {% elif deal.deal_type.value == 'Hydronic Heating' %}
+                    bg-red-500/20 text-red-400 border border-red-500/30
+                {% else %}
+                    bg-gray-500/20 text-gray-400 border border-gray-500/30
+                {% endif %}">
+                {% if deal.deal_type.value == 'HVAC' %}
+                    <i class="fas fa-wind mr-1 text-xs"></i>
+                {% elif deal.deal_type.value == 'Plumbing' %}
+                    <i class="fas fa-faucet mr-1 text-xs"></i>
+                {% elif deal.deal_type.value == 'Hydronic Heating' %}
+                    <i class="fas fa-fire mr-1 text-xs"></i>
+                {% endif %}
+                <span class="truncate">{{ deal.deal_type.value }}</span>
             </span>
-            {% if deal.owner %}
-            <div class="deal-card-owner-avatar" title="Owner: {{ deal.owner.full_name }}">
-                {{ deal.owner.first_name[0]|upper if deal.owner.first_name else (deal.owner.username[0]|upper if deal.owner.username else '?') }}
+            <span class="text-xs text-gray-500 font-medium">#{{ deal.id }}</span>
+        </div>
+        
+        <!-- Project Name -->
+        <h4 class="text-white font-semibold text-sm mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+            {{ deal.project_name | truncate(30) }}
+        </h4>
+        
+        <!-- Company -->
+        {% if deal.company %}
+        <p class="text-gray-400 text-xs mb-2 flex items-center gap-1">
+            <i class="fas fa-building text-gray-500 text-xs"></i>
+            <span class="truncate">{{ deal.company.name }}</span>
+        </p>
+        {% endif %}
+        
+        <!-- Divider -->
+        <div class="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent my-2"></div>
+        
+        <!-- Footer: Amount, Date, Owner -->
+        <div class="flex items-center justify-between">
+            <!-- Amount -->
+            <div>
+                <p class="text-xs text-gray-500 mb-0.5">Value</p>
+                <p class="text-green-400 font-bold text-sm">
+                    ${{ '{:,.0f}'.format(deal.total_amount or 0) }}
+                </p>
             </div>
-            {% endif %}
+            
+            <!-- Right side: Date and Owner -->
+            <div class="flex items-center gap-2">
+                <!-- Close Date -->
+                <div class="text-right" title="Close Date: {{ deal.close_date.strftime('%Y-%m-%d') if deal.close_date else 'N/A' }}">
+                    <p class="text-xs text-gray-500 mb-0.5">Close</p>
+                    <p class="text-gray-300 text-xs font-medium flex items-center gap-1">
+                        <i class="fas fa-calendar-alt text-gray-500 text-xs"></i>
+                        {% if deal.close_date %}{{ deal.close_date.strftime('%b %d') }}{% else %}N/A{% endif %}
+                    </p>
+                </div>
+                
+                <!-- Owner Avatar -->
+                {% if deal.owner %}
+                <div class="flex flex-col items-center" title="Owner: {{ deal.owner.full_name }}">
+                    <div class="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-xs shadow-lg ring-1 ring-gray-700">
+                        {{ deal.owner.first_name[0]|upper if deal.owner.first_name else (deal.owner.username[0]|upper if deal.owner.username else '?') }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

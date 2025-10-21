@@ -207,7 +207,7 @@ jobs:
         python3 -m pip install --user --upgrade pip
         python3 -m pip install --user -r requirements/base_requirements.txt
         python3 -m pip install --user -r requirements/prod_requirements.txt
-        export FLASK_APP=app_runner.py
+        export FLASK_APP=wsgi.py
         export FLASK_ENV=production
         export FLASK_CONFIG=production
         python3 -c 'from app import create_app; create_app(); print("App OK")'
@@ -358,7 +358,7 @@ jobs:
           echo "Python in use: $($PYBIN -V)"
           echo "Flask version: $($PYBIN -c "import flask; print(flask.__version__)")"
 
-          export FLASK_APP=app_runner.py
+          export FLASK_APP=wsgi.py
           export FLASK_ENV=production
           export FLASK_CONFIG=production
           export SECRET_KEY="${{ secrets.PROD_SECRET_KEY }}"
@@ -378,7 +378,7 @@ jobs:
           timeout 120 $FLASK db upgrade || echo "Database upgrade timed out"
 
           if [ -f /etc/systemd/system/rbm-tender-app.service ]; then
-            sudo sed -i "s|^ExecStart=.*|ExecStart=/opt/rbm-tender-app/venv/bin/python /opt/rbm-tender-app/app_runner.py|" /etc/systemd/system/rbm-tender-app.service
+            sudo sed -i "s|^ExecStart=.*|ExecStart=/opt/rbm-tender-app/venv/bin/python /opt/rbm-tender-app/wsgi.py|" /etc/systemd/system/rbm-tender-app.service
           fi
 
           # Environment variables are now loaded from .env file, no need to modify service file

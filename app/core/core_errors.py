@@ -143,9 +143,40 @@ def register_error_handlers(app: Flask):
             # Let Flask handle static file errors normally
             raise error
         
-        # This is a fallback for unexpected errors.
-        # We log the actual exception but return a generic error message to the user.
-        logger.critical(f"Unhandled Exception: {error}", exc_info=True)
+        # Capture detailed context for debugging production issues
+        error_context = {
+            'url': request.url,
+            'method': request.method,
+            'endpoint': request.endpoint,
+            'user_agent': request.headers.get('User-Agent', 'Unknown'),
+            'ip_address': request.remote_addr,
+            'timestamp': datetime.utcnow().isoformat(),
+        }
+        
+        # Add user info if available (without exposing sensitive data)
+        try:
+            from flask_login import current_user
+            if current_user and current_user.is_authenticated:
+                error_context['user_id'] = current_user.id
+                error_context['user_email'] = current_user.email
+        except Exception:
+            pass  # User info not available
+        
+        # Add form data if available (don't log passwords!)
+        if request.form:
+            safe_form = {k: v for k, v in request.form.items() 
+                        if 'password' not in k.lower() and 'secret' not in k.lower()}
+            if safe_form:
+                error_context['form_data'] = safe_form
+        
+        # Log with full context and stack trace
+        logger.critical(
+            f"UNHANDLED EXCEPTION: {error.__class__.__name__}: {str(error)} | "
+            f"URL: {request.url} | Method: {request.method} | "
+            f"Endpoint: {request.endpoint} | User: {error_context.get('user_email', 'Anonymous')}",
+            extra=error_context,
+            exc_info=True
+        )
         
         app_error = AppError(
             message="An unexpected internal server error occurred.",

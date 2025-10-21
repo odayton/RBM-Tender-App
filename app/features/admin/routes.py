@@ -5,10 +5,27 @@ from app.core.core_security import admin_required, rate_limit, security_manager
 from app.core.core_rate_limiting import admin_rate_limit, security_rate_limit
 from app.core.core_logging import logger
 from app.models import User, UserRole, Company, Contact
-from app.features.admin.forms import CreateUserForm, EditUserForm, CompanyForm, ContactForm
+from app.models.deals.deal_models import Discount
+from app.models.pumps import (
+    PumpSeries, Pump, InertiaBase, SeismicSpring, RubberMount,
+    Crossbar, MotorProtection, DripTripTray, PumpDutyPoint,
+    PumpBOM, PumpComponent
+)
+from app.features.admin.forms import (
+    CreateUserForm, EditUserForm, CompanyForm, ContactForm, DiscountForm,
+    PumpSeriesForm, PumpForm, InertiaBaseForm, SeismicSpringForm, RubberMountForm,
+    CrossbarForm, MotorProtectionForm, DripTripTrayForm, PumpDutyPointForm,
+    PumpBOMForm, PumpComponentForm, BOMImportForm, SeismicSpringImportForm
+)
 from app.utils.db_utils.organization.db_companies import CompanyManager
 from app.utils.db_utils.organization.db_contacts import ContactManager
 from app.utils.db_utils.organization.db_deal_owners import DealOwnerManager
+from app.utils.bom_import_export import export_bom_to_csv, import_bom_from_csv, generate_sample_csv
+from app.utils.seismic_spring_import_export import (
+    export_seismic_springs_to_csv, 
+    import_seismic_springs_from_csv, 
+    generate_seismic_spring_sample_csv
+)
 
 # Import helpers to register additional routes
 from . import helpers
@@ -19,19 +36,105 @@ MANAGEMENT_ITEMS = {
         'display_name': 'Companies',
         'model': Company,
         'form': CompanyForm,
-        'columns': ['company_name', 'phone_number', 'domain']
+        'columns': ['company_name', 'phone_number', 'domain'],
+        'category': 'general'
     },
     'contact': {
         'display_name': 'Contacts',
         'model': Contact,
         'form': ContactForm,
-        'columns': ['name', 'email', 'phone_number', 'position']
+        'columns': ['name', 'email', 'phone_number', 'position'],
+        'category': 'general'
+    },
+    'discount': {
+        'display_name': 'Discounts',
+        'model': Discount,
+        'form': DiscountForm,
+        'columns': ['code', 'percentage', 'is_active'],
+        'category': 'general'
+    },
+    # HVAC Management Items
+    'pump-series': {
+        'display_name': 'Pump Series',
+        'model': PumpSeries,
+        'form': PumpSeriesForm,
+        'columns': ['series_code', 'series_name', 'is_active'],
+        'category': 'hvac'
+    },
+    'pump': {
+        'display_name': 'Pumps',
+        'model': Pump,
+        'form': PumpForm,
+        'columns': ['part_number', 'name', 'series.series_code', 'list_price', 'is_active'],
+        'category': 'hvac'
+    },
+    'inertia-base': {
+        'display_name': 'Inertia Bases',
+        'model': InertiaBase,
+        'form': InertiaBaseForm,
+        'columns': ['part_number', 'description', 'list_price', 'is_active'],
+        'category': 'hvac'
+    },
+    'seismic-spring': {
+        'display_name': 'Seismic Springs',
+        'model': SeismicSpring,
+        'form': SeismicSpringForm,
+        'columns': ['part_number', 'description', 'max_load_kg', 'is_active'],
+        'category': 'hvac'
+    },
+    'rubber-mount': {
+        'display_name': 'Rubber Mounts',
+        'model': RubberMount,
+        'form': RubberMountForm,
+        'columns': ['sku', 'item_description', 'list_price', 'is_active'],
+        'category': 'hvac'
+    },
+    'crossbar': {
+        'display_name': 'Crossbars',
+        'model': Crossbar,
+        'form': CrossbarForm,
+        'columns': ['sku', 'description', 'list_price', 'is_active'],
+        'category': 'hvac'
+    },
+    'motor-protection': {
+        'display_name': 'Motor Protection',
+        'model': MotorProtection,
+        'form': MotorProtectionForm,
+        'columns': ['description', 'nett_cost', 'is_active'],
+        'category': 'hvac'
+    },
+    'drip-trip-tray': {
+        'display_name': 'Drip Trip Trays',
+        'model': DripTripTray,
+        'form': DripTripTrayForm,
+        'columns': ['series.series_code', 'description', 'nett_cost', 'is_standard', 'is_active'],
+        'category': 'hvac'
+    },
+    'duty-point': {
+        'display_name': 'Duty Points',
+        'model': PumpDutyPoint,
+        'form': PumpDutyPointForm,
+        'columns': ['flow_rate_lps', 'head_pressure_kpa', 'series.series_code', 'tolerance_percentage'],
+        'category': 'hvac'
+    },
+    'pump-bom': {
+        'display_name': 'Pump BOM (Bill of Materials)',
+        'model': PumpBOM,
+        'form': PumpBOMForm,
+        'columns': ['pump.part_number', 'pump.name', 'component_type', 'component_id', 'quantity', 'is_optional'],
+        'category': 'hvac'
+    },
+    'pump-component': {
+        'display_name': 'Generic Components',
+        'model': PumpComponent,
+        'form': PumpComponentForm,
+        'columns': ['component_type', 'part_number', 'description', 'list_price', 'is_active'],
+        'category': 'hvac'
     }
 }
 
 # Import additional models and forms for specific routes
-from app.models import User, UserRole, Company, Contact
-from app.features.admin.forms import CompanyForm, ContactForm, DealOwnerForm
+from app.features.admin.forms import DealOwnerForm
 from app.core.core_security import security_manager
 from app.core.core_errors import ValidationError
 import secrets
@@ -557,6 +660,58 @@ def manage_items(item_type):
     pagination = model_class.query.paginate(page=page, per_page=10, error_out=False)
     items = pagination.items
     
+    # Special template for BOM management with component references
+    if item_type == 'pump-bom':
+        # Load all component types for reference
+        inertia_bases = InertiaBase.query.filter_by(is_active=True).order_by(InertiaBase.part_number).all()
+        seismic_springs = SeismicSpring.query.filter_by(is_active=True).order_by(SeismicSpring.part_number).all()
+        rubber_mounts = RubberMount.query.filter_by(is_active=True).order_by(RubberMount.sku).all()
+        crossbars = Crossbar.query.filter_by(is_active=True).order_by(Crossbar.sku).all()
+        
+        # Aggregate BOM data by pump (one row per pump)
+        pump_bom_data = []
+        pumps_with_bom = Pump.query.join(PumpBOM).distinct().order_by(Pump.part_number).all()
+        
+        for pump in pumps_with_bom:
+            pump_data = {
+                'pump_id': pump.id,
+                'pump_part': pump.part_number,
+                'pump_name': pump.name,
+                'series_code': pump.series.series_code if pump.series else '',
+                'inertia_pn': None,
+                'inertia_size': None,
+                'spring_pn': None,
+                'spring_qty': None
+            }
+            
+            # Get BOM items for this pump
+            for bom_item in pump.bom_items:
+                if bom_item.component_type == 'inertia_base':
+                    base = InertiaBase.query.get(bom_item.component_id)
+                    if base:
+                        pump_data['inertia_pn'] = base.part_number
+                        if base.length_mm and base.width_mm and base.depth_mm:
+                            pump_data['inertia_size'] = f"{base.length_mm} x {base.width_mm} x {base.depth_mm}"
+                
+                elif bom_item.component_type == 'seismic_spring':
+                    spring = SeismicSpring.query.get(bom_item.component_id)
+                    if spring:
+                        pump_data['spring_pn'] = spring.part_number
+                        pump_data['spring_qty'] = bom_item.quantity
+            
+            pump_bom_data.append(pump_data)
+        
+        return render_template('admin/manage_pump_bom.html',
+                             items=items,
+                             item_type=item_type,
+                             config=config,
+                             pagination=pagination,
+                             pump_bom_data=pump_bom_data,
+                             inertia_bases=inertia_bases,
+                             seismic_springs=seismic_springs,
+                             rubber_mounts=rubber_mounts,
+                             crossbars=crossbars)
+    
     return render_template('admin/manage_base.html', 
                          items=items, 
                          item_type=item_type, 
@@ -622,3 +777,192 @@ def delete_item(item_type, item_id):
         flash(f'Error deleting {config["display_name"].rstrip("s")}.', 'error')
     
     return redirect(url_for('admin.manage_items', item_type=item_type))
+
+@admin_bp.route('/bom/export')
+@login_required
+@admin_required
+@rate_limit(max_requests=10, window_seconds=60)
+def export_bom():
+    """Export BOM data to CSV"""
+    try:
+        from flask import make_response
+        from datetime import datetime
+        
+        csv_data = export_bom_to_csv()
+        
+        response = make_response(csv_data)
+        response.headers['Content-Type'] = 'text/csv'
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        response.headers['Content-Disposition'] = f'attachment; filename=pump_bom_export_{timestamp}.csv'
+        
+        logger.info(f"Admin {current_user.email} exported BOM data")
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error exporting BOM: {e}", exc_info=True)
+        flash('An error occurred while exporting BOM data.', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+@admin_bp.route('/bom/export-sample')
+@login_required
+@admin_required
+@rate_limit(max_requests=10, window_seconds=60)
+def export_bom_sample():
+    """Export sample BOM CSV template"""
+    try:
+        from flask import make_response
+        
+        csv_data = generate_sample_csv()
+        
+        response = make_response(csv_data)
+        response.headers['Content-Type'] = 'text/csv'
+        response.headers['Content-Disposition'] = 'attachment; filename=pump_bom_sample_template.csv'
+        
+        logger.info(f"Admin {current_user.email} downloaded BOM sample template")
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error generating sample BOM: {e}", exc_info=True)
+        flash('An error occurred while generating sample template.', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+@admin_bp.route('/bom/import', methods=['GET', 'POST'])
+@login_required
+@admin_required
+@rate_limit(max_requests=5, window_seconds=300)
+def import_bom():
+    """Import BOM data from CSV"""
+    form = BOMImportForm()
+    
+    if form.validate_on_submit():
+        try:
+            # Read file content
+            file = form.file.data
+            file_content = file.read().decode('utf-8')
+            
+            # Process import
+            successful, failed, errors = import_bom_from_csv(
+                file_content,
+                overwrite_existing=form.overwrite_existing.data,
+                create_missing_components=form.create_missing_components.data
+            )
+            
+            # Show results
+            if successful > 0:
+                flash(f'Successfully imported {successful} pump(s) with BOM data!', 'success')
+            
+            if failed > 0:
+                flash(f'Failed to import {failed} pump(s). See errors below.', 'warning')
+            
+            if errors:
+                for error in errors[:10]:  # Show first 10 errors
+                    flash(error, 'error')
+                if len(errors) > 10:
+                    flash(f'... and {len(errors) - 10} more errors', 'error')
+            
+            logger.info(f"Admin {current_user.email} imported BOM data: {successful} successful, {failed} failed")
+            
+            if successful > 0:
+                return redirect(url_for('admin.manage_items', item_type='pump-bom'))
+                
+        except Exception as e:
+            logger.error(f"Error importing BOM: {e}", exc_info=True)
+            flash(f'An error occurred while importing: {str(e)}', 'error')
+    
+    return render_template('admin/import_bom.html', form=form)
+
+
+@admin_bp.route('/seismic-springs/export')
+@login_required
+@admin_required
+@rate_limit(max_requests=10, window_seconds=60)
+def export_seismic_springs():
+    """Export seismic spring data to CSV"""
+    try:
+        from flask import make_response
+        from datetime import datetime
+        
+        csv_data = export_seismic_springs_to_csv()
+        
+        response = make_response(csv_data)
+        response.headers['Content-Type'] = 'text/csv'
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        response.headers['Content-Disposition'] = f'attachment; filename=seismic_springs_export_{timestamp}.csv'
+        
+        logger.info(f"Admin {current_user.email} exported seismic spring data")
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error exporting seismic springs: {e}", exc_info=True)
+        flash('An error occurred while exporting seismic spring data.', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+
+@admin_bp.route('/seismic-springs/export-sample')
+@login_required
+@admin_required
+@rate_limit(max_requests=10, window_seconds=60)
+def export_seismic_springs_sample():
+    """Export sample seismic spring CSV template"""
+    try:
+        from flask import make_response
+        
+        csv_data = generate_seismic_spring_sample_csv()
+        
+        response = make_response(csv_data)
+        response.headers['Content-Type'] = 'text/csv'
+        response.headers['Content-Disposition'] = 'attachment; filename=seismic_springs_sample_template.csv'
+        
+        logger.info(f"Admin {current_user.email} downloaded seismic spring sample template")
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error generating seismic spring sample: {e}", exc_info=True)
+        flash('An error occurred while generating sample template.', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+
+@admin_bp.route('/seismic-springs/import', methods=['GET', 'POST'])
+@login_required
+@admin_required
+@rate_limit(max_requests=5, window_seconds=300)
+def import_seismic_springs():
+    """Import seismic spring data from CSV"""
+    form = SeismicSpringImportForm()
+    
+    if form.validate_on_submit():
+        try:
+            # Read file content
+            file = form.file.data
+            file_content = file.read().decode('utf-8')
+            
+            # Process import
+            successful, failed, errors = import_seismic_springs_from_csv(
+                file_content,
+                overwrite_existing=form.overwrite_existing.data,
+                update_existing=form.update_existing.data
+            )
+            
+            # Show results
+            if successful > 0:
+                flash(f'Successfully imported {successful} seismic spring(s)!', 'success')
+            
+            if failed > 0:
+                flash(f'Failed to import {failed} seismic spring(s). See errors below.', 'warning')
+            
+            if errors:
+                for error in errors[:10]:  # Show first 10 errors
+                    flash(error, 'error')
+                if len(errors) > 10:
+                    flash(f'... and {len(errors) - 10} more errors', 'error')
+            
+            logger.info(f"Admin {current_user.email} imported seismic spring data: {successful} successful, {failed} failed")
+            
+            if successful > 0:
+                return redirect(url_for('admin.manage_items', item_type='seismic-spring'))
+                
+        except Exception as e:
+            logger.error(f"Error importing seismic springs: {e}", exc_info=True)
+            flash(f'An error occurred while importing: {str(e)}', 'error')
+    
+    return render_template('admin/import_seismic_springs.html', form=form)

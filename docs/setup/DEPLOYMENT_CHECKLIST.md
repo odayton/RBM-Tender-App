@@ -65,6 +65,7 @@
   ```
 - [ ] Verify database is accessible
 - [ ] Test connection from application
+- [ ] Review [Database Migration Workflow](../database/DATABASE_MIGRATION_WORKFLOW.md) for migration procedures
 
 ### 7. SSL Certificate (Optional)
 - [ ] If using custom domain, SSL will be automatically configured
@@ -72,21 +73,28 @@
 
 ## 🚀 Deployment Process (GitHub Actions)
 
-### 1. Automated Deployment via GitHub Actions
+### 1. Pre-Deployment (If Schema Changes)
+- [ ] **If you have database migrations**, review [Migration Checklist](../database/MIGRATION_CHECKLIST.md)
+- [ ] Validate migrations: `flask migrate validate`
+- [ ] Test migrations locally: `flask migrate upgrade` then `flask migrate rollback`
+- [ ] Run migration pre-check: `py scripts/development/check_migration.py`
+
+### 2. Automated Deployment via GitHub Actions
 - [ ] Test production config locally first
-- [ ] Push your code to `main` branch
+- [ ] Push your code to `main` branch (migrations will run automatically on deployment)
 - [ ] Go to GitHub Actions tab
 - [ ] Monitor the CI/CD pipeline automatically
-- [ ] Verify deployment success
+- [ ] Verify deployment success (includes automatic migration execution)
 - [ ] Check health endpoints
 
-### 2. Post-Deployment Verification
+### 3. Post-Deployment Verification
 - [ ] Check application health: `https://your-domain.com/health`
 - [ ] Test login functionality
 - [ ] Verify monitoring dashboard: `https://your-domain.com/monitoring/dashboard`
 - [ ] Check metrics endpoint: `https://your-domain.com/metrics`
+- [ ] If migrations ran, verify migration status: `flask migrate status`
 
-### 3. Monitoring Setup
+### 4. Monitoring Setup
 - [ ] Access monitoring dashboard
 - [ ] Verify all metrics are collecting
 - [ ] Test health check automation
@@ -194,6 +202,14 @@ Your deployment is successful when:
 4. **Set up SSL Certificate Renewal** (automated)
 5. **Configure Firewall Rules** (already set up)
 6. **Test Rollback Procedures** (important!)
+7. **Review Migration Workflow** - See [Database Migration Workflow](../database/DATABASE_MIGRATION_WORKFLOW.md) for future schema changes
+
+## 📚 Additional Resources
+
+- **[Database Migration Workflow](../database/DATABASE_MIGRATION_WORKFLOW.md)** - Comprehensive migration guide
+- **[Migration Checklist](../database/MIGRATION_CHECKLIST.md)** - Quick reference for migrations
+- **[Production Deployment Guide](../deployment/PRODUCTION_DEPLOYMENT_GUIDE.md)** - Detailed deployment procedures
+- **[GitHub Actions Summary](../deployment/GITHUB_ACTIONS_DEPLOYMENT_SUMMARY.md)** - CI/CD pipeline details
 
 ---
 

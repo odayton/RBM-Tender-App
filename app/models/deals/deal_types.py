@@ -27,8 +27,6 @@ class DealStage(enum.Enum):
     TENDER = "Tender"
     PROPOSAL = "Proposal"
     NEGOTIATION = "Negotiation"
-    WON = "Won"
-    LOST = "Lost"
     ABANDONED = "Abandoned"
     CLOSED_WON = "Closed Won"
     CLOSED_LOST = "Closed Lost"

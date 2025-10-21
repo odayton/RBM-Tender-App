@@ -1,108 +1,151 @@
-<div class="sidebar-container">
-    <div class="sidebar-header">
-        <a href="{{ url_for('main.home') }}" class="sidebar-brand">RBM Tender App</a>
+<div class="h-full flex flex-col">
+    <!-- Sidebar Header with Logo -->
+    <div class="sidebar-header bg-gradient-to-br from-blue-500 to-blue-700 !py-2">
+        <a href="{{ url_for('main.home') }}">
+            <div class="icon-wrapper !w-8 !h-8">
+                <i class="fas fa-layer-group text-lg"></i>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-base font-bold tracking-tight">RBM Intranet</span>
+            </div>
+        </a>
     </div>
-    <ul class="sidebar-nav">
-        <li class="nav-item">
+    
+    <!-- Navigation -->
+    <nav class="sidebar-nav" id="sidebar-navigation">
+        <!-- Core Section -->
+        <div class="nav-section">
+            <span class="nav-group-title">
+                <i class="fas fa-circle text-[6px]"></i>
+                Core
+            </span>
+            
             <a href="{{ url_for('main.home') }}" class="nav-link">
-                <i class="nav-icon fas fa-home"></i>
-                Home
+                <div class="nav-icon-bg">
+                    <i class="nav-icon fas fa-home"></i>
+                </div>
+                <span>Dashboard</span>
             </a>
-        </li>
-        <li class="nav-item">
+            
             <a href="{{ url_for('deals.list_deals') }}" class="nav-link">
-                <i class="nav-icon fas fa-clipboard-list"></i>
-                Deals
+                <div class="nav-icon-bg">
+                    <i class="nav-icon fas fa-handshake"></i>
+                </div>
+                <span>Deals</span>
             </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('products.list_products') }}" class="nav-link">
-                <i class="nav-icon fas fa-box"></i>
-                Products
+            
+            <!-- Products with submenu -->
+            <div class="nav-link flex items-center">
+                <a href="{{ url_for('products.dashboard') }}" class="flex items-center gap-3 flex-1">
+                    <div class="nav-icon-bg">
+                        <i class="nav-icon fas fa-boxes"></i>
+                    </div>
+                    <span>Products</span>
+                </a>
+                <button class="submenu-toggle ml-2 p-1 hover:bg-white/10 rounded transition-colors" data-submenu="products">
+                    <i class="fas fa-chevron-down text-xs transition-transform duration-300"></i>
+                </button>
+            </div>
+            <ul class="submenu hidden" id="submenu-products">
+                <li><a href="{{ url_for('products.list_products') }}" class="submenu-link">All Products</a></li>
+                <li><a href="{{ url_for('products.dashboard') }}" class="submenu-link">Dashboard</a></li>
+                <li><a href="{{ url_for('products.create_product') }}" class="submenu-link">Add New</a></li>
+                <li><a href="{{ url_for('products.import_products') }}" class="submenu-link">Import CSV</a></li>
+            </ul>
+        </div>
+        
+        <!-- Tools Section -->
+        <div class="nav-section">
+            <span class="nav-group-title">
+                <i class="fas fa-circle text-[6px]"></i>
+                Calculators
+            </span>
+            
+            <a href="{{ url_for('hvac.pump_dashboard') }}" class="nav-link">
+                <div class="nav-icon-bg" style="background-color: rgba(121, 146, 133, 0.2);">
+                    <i class="nav-icon fas fa-fan" style="color: #8db39a;"></i>
+                </div>
+                <span>HVAC / Pumps</span>
             </a>
-        </li>
-        <li class="nav-item nav-item-group">
-            <span class="nav-group-title">Calculators & Tools</span>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('hvac.search_pumps') }}" class="nav-link">
-                <i class="nav-icon fas fa-wind"></i>
-                HVAC
-            </a>
-        </li>
-        <li class="nav-item">
+            
             <a href="{{ url_for('plumbing.index') }}" class="nav-link">
-                <i class="nav-icon fas fa-faucet"></i>
-                Plumbing
+                <div class="nav-icon-bg" style="background-color: rgba(55, 119, 158, 0.2);">
+                    <i class="nav-icon fas fa-tint" style="color: #4a8eb5;"></i>
+                </div>
+                <span>Plumbing</span>
             </a>
-        </li>
-        <li class="nav-item">
+            
             <a href="{{ url_for('hydronic_heating.index') }}" class="nav-link">
-                <i class="nav-icon fas fa-temperature-high"></i>
-                Hydronic Heating
+                <div class="nav-icon-bg" style="background-color: rgba(152, 45, 49, 0.2);">
+                    <i class="nav-icon fas fa-fire" style="color: #c23a3e;"></i>
+                </div>
+                <span>Hydronic</span>
             </a>
-        </li>
+        </div>
 
-        <li class="nav-item nav-item-group">
-            <span class="nav-group-title">CRM Tools</span>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('crm.customers_dashboard') }}" class="nav-link">
-                <i class="nav-icon fas fa-users"></i>
-                Customers
-            </a>
-        </li>
-        <li class="nav-item">
+        <!-- CRM Section -->
+        <div class="nav-section">
+            <span class="nav-group-title">
+                <i class="fas fa-circle text-[6px]"></i>
+                Customer Relations
+            </span>
+            
             <a href="{{ url_for('crm.dashboard') }}" class="nav-link">
-                <i class="nav-icon fas fa-chart-line"></i>
-                CRM Dashboard
+                <div class="nav-icon-bg bg-purple-500/20">
+                    <i class="nav-icon fas fa-chart-pie text-purple-400"></i>
+                </div>
+                <span>CRM Dashboard</span>
             </a>
-        </li>
-        <li class="nav-item">
+            
+            <a href="{{ url_for('crm.customers_dashboard') }}" class="nav-link">
+                <div class="nav-icon-bg bg-green-500/20">
+                    <i class="nav-icon fas fa-users text-green-400"></i>
+                </div>
+                <span>Customers</span>
+            </a>
+            
             <a href="{{ url_for('crm.activities_list') }}" class="nav-link">
-                <i class="nav-icon fas fa-calendar-check"></i>
-                Activities
+                <div class="nav-icon-bg bg-yellow-500/20">
+                    <i class="nav-icon fas fa-calendar-alt text-yellow-400"></i>
+                </div>
+                <span>Activities</span>
             </a>
-        </li>
-        <li class="nav-item">
+            
             <a href="{{ url_for('crm.tasks_list') }}" class="nav-link">
-                <i class="nav-icon fas fa-tasks"></i>
-                Tasks
+                <div class="nav-icon-bg bg-pink-500/20">
+                    <i class="nav-icon fas fa-tasks text-pink-400"></i>
+                </div>
+                <span>Tasks</span>
             </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('crm.log_call') }}" class="nav-link">
-                <i class="nav-icon fas fa-phone"></i>
-                Log Call
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('crm.log_email') }}" class="nav-link">
-                <i class="nav-icon fas fa-envelope"></i>
-                Log Email
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('crm.log_meeting') }}" class="nav-link">
-                <i class="nav-icon fas fa-users"></i>
-                Log Meeting
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('crm.create_note') }}" class="nav-link">
-                <i class="nav-icon fas fa-sticky-note"></i>
-                Create Note
-            </a>
-        </li>
+        </div>
 
-        <li class="nav-item nav-item-group">
-            <span class="nav-group-title">Admin</span>
-        </li>
-        <li class="nav-item">
-            <a href="{{ url_for('admin.dashboard') }}" class="nav-link">
-                <i class="nav-icon fas fa-tachometer-alt"></i>
-                Admin Dashboard
-            </a>
-        </li>
-    </ul>
+        <!-- Admin Section -->
+        {% if current_user.is_authenticated and current_user.can_view_admin_panel() %}
+        <div class="nav-section">
+            <span class="nav-group-title">
+                <i class="fas fa-circle text-[6px]"></i>
+                System
+            </span>
+            
+            <div class="nav-link flex items-center">
+                <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 flex-1">
+                    <div class="nav-icon-bg bg-red-500/20">
+                        <i class="nav-icon fas fa-shield-alt text-red-400"></i>
+                    </div>
+                    <span>Administration</span>
+                </a>
+                <button class="submenu-toggle ml-2 p-1 hover:bg-white/10 rounded transition-colors" data-submenu="admin">
+                    <i class="fas fa-chevron-down text-xs transition-transform duration-300"></i>
+                </button>
+            </div>
+            <ul class="submenu hidden" id="submenu-admin">
+                <li><a href="{{ url_for('admin.dashboard') }}" class="submenu-link">Dashboard</a></li>
+                <li><a href="{{ url_for('admin.manage_users') }}" class="submenu-link">Users</a></li>
+                <li><a href="{{ url_for('admin.manage_companies') }}" class="submenu-link">Companies</a></li>
+                <li><a href="{{ url_for('admin.manage_contacts') }}" class="submenu-link">Contacts</a></li>
+                <li><a href="{{ url_for('admin.system_info') }}" class="submenu-link">System Info</a></li>
+            </ul>
+        </div>
+        {% endif %}
+    </nav>
 </div>

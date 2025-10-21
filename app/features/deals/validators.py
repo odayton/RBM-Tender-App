@@ -45,11 +45,11 @@ def validate_project_name_unique(project_name: str, deal_id: int = None) -> bool
 def validate_deal_stage_transition(old_stage: DealStage, new_stage: DealStage) -> bool:
     allowed_transitions = {
         DealStage.SALES_LEAD: [DealStage.TENDER, DealStage.ABANDONED],
-        DealStage.TENDER: [DealStage.PROPOSAL, DealStage.LOST, DealStage.ABANDONED],
-        DealStage.PROPOSAL: [DealStage.NEGOTIATION, DealStage.LOST, DealStage.ABANDONED],
-        DealStage.NEGOTIATION: [DealStage.WON, DealStage.LOST, DealStage.ABANDONED],
-        DealStage.WON: [],
-        DealStage.LOST: [DealStage.SALES_LEAD],
+    DealStage.TENDER: [DealStage.PROPOSAL, DealStage.CLOSED_LOST, DealStage.ABANDONED],
+    DealStage.PROPOSAL: [DealStage.NEGOTIATION, DealStage.CLOSED_LOST, DealStage.ABANDONED],
+    DealStage.NEGOTIATION: [DealStage.CLOSED_WON, DealStage.CLOSED_LOST, DealStage.ABANDONED],
+    DealStage.CLOSED_WON: [],
+    DealStage.CLOSED_LOST: [DealStage.SALES_LEAD],
         DealStage.ABANDONED: [DealStage.SALES_LEAD]
     }
     if new_stage not in allowed_transitions.get(old_stage, []):
@@ -61,7 +61,7 @@ def validate_total_amount(form, field):
         raise ValidationError("Total amount must be greater than 0")
 
 def validate_quote_revision(quote: Quote) -> bool:
-    if quote.deal.stage in [DealStage.WON, DealStage.LOST, DealStage.ABANDONED]:
+    if quote.deal.stage in [DealStage.CLOSED_WON, DealStage.CLOSED_LOST, DealStage.ABANDONED]:
         raise AppValidationError("Cannot revise quote in current deal stage")
     return True
 
@@ -79,12 +79,12 @@ def validate_created_date(date: datetime) -> bool:
     return True
 
 def validate_deal_editable(deal: Deal) -> bool:
-    if deal.stage in [DealStage.WON, DealStage.LOST]:
+    if deal.stage in [DealStage.CLOSED_WON, DealStage.CLOSED_LOST]:
         raise AppValidationError("Cannot edit deal in current stage")
     return True
 
 def validate_quote_deletable(quote: Quote) -> bool:
-    if quote.deal.stage in [DealStage.WON, DealStage.LOST, DealStage.ABANDONED]:
+    if quote.deal.stage in [DealStage.CLOSED_WON, DealStage.CLOSED_LOST, DealStage.ABANDONED]:
         raise AppValidationError("Cannot delete quote in current deal stage")
     if len(quote.deal.quotes) <= 1:
         raise AppValidationError("Cannot delete the only quote in a deal")

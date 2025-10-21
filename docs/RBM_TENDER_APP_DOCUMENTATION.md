@@ -222,6 +222,14 @@ You can also set these environment variables for more control:
 
 The RBM Tender App uses a robust migration system built on Flask-Migrate and Alembic with enhanced safety features, automatic backups, and comprehensive validation.
 
+### 📚 Complete Migration Documentation
+
+For comprehensive migration workflows, best practices, and detailed procedures:
+
+- **[Database Migration Workflow](database/DATABASE_MIGRATION_WORKFLOW.md)** - Complete guide with rules, testing procedures, and troubleshooting
+- **[Migration Checklist](database/MIGRATION_CHECKLIST.md)** - Quick reference checklist for daily use
+- **[Migration Workflow Diagram](database/MIGRATION_WORKFLOW_DIAGRAM.md)** - Visual flowcharts and decision trees
+
 ### Key Features
 
 - ✅ **Automatic Backups**: Creates database backups before migrations
@@ -230,6 +238,7 @@ The RBM Tender App uses a robust migration system built on Flask-Migrate and Ale
 - ✅ **Rollback Capabilities**: Easy rollback to previous versions
 - ✅ **CLI Commands**: User-friendly command-line interface
 - ✅ **Error Recovery**: Robust error handling and recovery mechanisms
+- ✅ **Pre-Commit Checks**: Optional Git hook for automatic validation
 
 ### Quick Start
 
@@ -244,6 +253,7 @@ flask migrate create "Add new feature"
 
 # 3. Validate the migration
 flask migrate validate
+py scripts/development/check_migration.py
 
 # 4. Run migrations
 flask migrate upgrade
@@ -721,6 +731,74 @@ is_active = Column(Boolean, default=True, nullable=False, index=True)
 - `to_dict()`: Convert to dictionary
 - `__repr__()`: String representation
 
+#### 6. **QuoteLineItem Model** (`app/models/deals/deal_models.py`)
+
+**Purpose**: Represents individual product line items within a quote option, tracking pricing, discounts, and quantities.
+
+**Key Features**:
+- Product or custom item support
+- Price and discount tracking
+- Quantity management
+- Drag-and-drop ordering
+- Total price calculation
+
+**Enhanced Fields**:
+```python
+# Core References
+option_id = Column(Integer, ForeignKey('quote_options.id'), nullable=False, index=True)
+product_id = Column(Integer, ForeignKey('products.id'), nullable=True)
+
+# Pricing Fields (Updated: 2025-10-14)
+quantity = Column(Integer, nullable=False, default=1)
+list_price = Column(Numeric(10, 2), nullable=True)  # Original list price before discount
+unit_price = Column(Numeric(10, 2), nullable=False)  # Final price after discount applied
+discount = Column(Numeric(5, 2), nullable=False, default=0.0)  # Discount percentage (0-100)
+
+# Additional Information
+notes = Column(Text)
+display_order = Column(Integer, nullable=False, default=0)
+
+# Custom Product Fields (when product_id is null)
+custom_sku = Column(String(80))
+custom_name = Column(String(200))
+custom_description = Column(Text)
+```
+
+**Relationships**:
+- `option`: Many-to-one with QuoteOption
+- `product`: Many-to-one with Product (optional)
+
+**Key Business Logic Methods**:
+- `total_price` (property): Calculates total as `unit_price × quantity`
+- `product_name` (property): Returns product description or custom name
+- `product_sku` (property): Returns product item_no or custom SKU
+- `validate()`: Ensures data integrity
+
+**Pricing Logic**:
+```python
+# When adding a line item:
+# 1. list_price = original product price
+# 2. discount = discount percentage (0-100)
+# 3. unit_price = list_price - (list_price × discount / 100)
+# 4. total_price = unit_price × quantity
+
+# Example:
+# list_price: $100.00
+# discount: 10%
+# unit_price: $90.00 (calculated)
+# quantity: 5
+# total_price: $450.00 (90 × 5)
+```
+
+**Database Constraints**:
+- ✅ `quantity > 0` (must be at least 1)
+- ✅ `unit_price >= 0` (cannot be negative)
+- ✅ `discount >= 0 AND discount <= 100` (percentage range)
+- ✅ Either `product_id` or `custom_name` must be provided
+
+**Indexes**:
+- `idx_line_item_option_order`: Composite index on (option_id, display_order) for efficient ordering
+
 ### 🔗 **Relationships Summary**
 
 #### **Core Relationships**
@@ -887,7 +965,9 @@ line_item = QuoteLineItem(
     option_id=option.id,
     product_id=product.id,
     quantity=2,
-    unit_price=product.list_price
+    list_price=product.list_price,  # Original price
+    discount=10.0,  # 10% discount
+    unit_price=product.list_price * 0.9  # Price after discount
 )
 ```
 

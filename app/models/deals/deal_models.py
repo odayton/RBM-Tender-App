@@ -305,7 +305,8 @@ class QuoteLineItem(BaseModel):
     product_id = Column(Integer, ForeignKey('products.id'), nullable=True)
     
     quantity = Column(Integer, nullable=False, default=1)
-    unit_price = Column(Numeric(10, 2), nullable=False)
+    list_price = Column(Numeric(10, 2), nullable=True)  # Original list price before discount
+    unit_price = Column(Numeric(10, 2), nullable=False)  # Final price after discount
     notes = Column(Text)
     discount = Column(Numeric(5, 2), nullable=False, default=0.0)
     display_order = Column(Integer, nullable=False, default=0)
@@ -315,9 +316,12 @@ class QuoteLineItem(BaseModel):
     custom_name = Column(String(200))
     custom_description = Column(Text)
     
+    # Assembly metadata (for pump assemblies - stores configuration as JSON)
+    assembly_metadata = Column(Text, nullable=True)  # Stores JSON configuration for pump assemblies
+    
     # Relationships
     option = relationship("QuoteOption", back_populates="line_items")
-    product = relationship("Product", back_populates="line_items")
+    product = relationship("Product")
     
     # Indexes and constraints
     __table_args__ = (
@@ -329,10 +333,10 @@ class QuoteLineItem(BaseModel):
     
     @property
     def total_price(self) -> Decimal:
-        """Calculate total price for this line item."""
-        subtotal = self.unit_price * self.quantity
-        discount_amount = subtotal * (self.discount / Decimal('100'))
-        return subtotal - discount_amount
+        """Calculate total price for this line item.
+        Unit price already has discount applied, so just multiply by quantity.
+        """
+        return self.unit_price * self.quantity
     
     @property
     def product_name(self) -> str:

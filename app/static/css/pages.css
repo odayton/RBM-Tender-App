@@ -1,6 +1,39 @@
 /* /static/css/pages.css */
 
 /* --- Deals Page (Kanban Board) Styles --- */
+
+/* Custom Scrollbar for Kanban Columns */
+.kanban-cards-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.kanban-cards-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.kanban-cards-container::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.5);
+    border-radius: 3px;
+}
+
+.kanban-cards-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.7);
+}
+
+/* Smooth scrolling for kanban board */
+.kanban-cards-container {
+    scroll-behavior: smooth;
+}
+
+/* Line clamp utility for truncating text */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .deals-page-header {
     display: flex;
     justify-content: space-between;
@@ -55,120 +88,71 @@
     color: #6c757d !important;
 }
 
+/* Updated Kanban Board styles to work with Tailwind */
 .kanban-board-container {
-    display: flex;
-    gap: 1rem;
-    overflow-x: auto;
-    padding-bottom: 1rem;
+    /* Keeping this for backwards compatibility, but using Tailwind classes in template */
 }
 
 .kanban-column {
-    flex: 0 0 320px;
-    max-width: 320px;
-    background-color: var(--bg-dark-inset);
-    border-radius: var(--border-radius);
-    display: flex;
-    flex-direction: column;
+    /* Keeping this for backwards compatibility, but using Tailwind classes in template */
 }
 
 .kanban-column-header {
-    padding: 0.75rem 1rem;
-    font-weight: 600;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    /* Keeping this for backwards compatibility, but using Tailwind classes in template */
 }
 
 .kanban-column-title {
-    color: var(--text-light);
+    /* Keeping this for backwards compatibility, but using Tailwind classes in template */
 }
 
 .kanban-deal-count {
-    font-size: 0.9rem;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-light);
-    padding: 0.1rem 0.5rem;
-    border-radius: 50px;
+    /* Keeping this for backwards compatibility, but using Tailwind classes in template */
 }
 
 .kanban-cards-container {
-    flex-grow: 1;
-    padding: 0.75rem;
-    overflow-y: auto;
-    min-height: 400px;
-    max-height: 70vh;
+    /* Most styling now in Tailwind classes, keeping minimal CSS here */
 }
 
 /* --- Deal Card Styles (Inside Kanban) --- */
+/* Most styling now in Tailwind classes, keeping legacy classes for JS compatibility */
 .deal-card {
-    display: block;
-    background-color: var(--bg-dark);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    margin-bottom: 1rem;
-    cursor: grab;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-    position: relative;
-    border-left: 5px solid var(--border-color); /* Default to grey */
+    /* Styling moved to Tailwind classes in template */
 }
+
 .deal-card--hvac {
-    border-left-color: var(--deal-type-hvac);
+    /* Used for JS targeting, actual styling in Tailwind */
 }
+
 .deal-card--plumbing {
-    border-left-color: var(--deal-type-plumbing);
+    /* Used for JS targeting, actual styling in Tailwind */
 }
+
 .deal-card--hydronic-heating {
-    border-left-color: var(--deal-type-heating);
-}
-
-
-.deal-card:hover {
-    background-color: #4a4a4c;
-    border-color: #666;
+    /* Used for JS targeting, actual styling in Tailwind */
 }
 
 .deal-card:active {
-    cursor: grabbing;
+    cursor: grabbing !important;
 }
 
 .deal-card-title {
-    font-weight: 600;
-    color: var(--text-light);
-    margin-bottom: 0.25rem;
+    /* Styling moved to Tailwind classes in template */
 }
 
 .deal-card-company {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.75rem;
+    /* Styling moved to Tailwind classes in template */
 }
 
 .deal-card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
+    /* Styling moved to Tailwind classes in template */
 }
 
 .deal-card-amount {
-    font-weight: 600;
-    color: var(--success-color);
+    /* Styling moved to Tailwind classes in template */
 }
 
 .deal-card-owner-avatar {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    color: var(--text-light);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: 600;
-    font-size: 0.8rem;
+    /* Styling moved to Tailwind classes in template */
 }
 
 /* --- Create Deal Form / Smart Search Styles --- */
@@ -176,26 +160,98 @@
     position: relative;
 }
 
+/* Quote Streams custom toggle */
+.stream-chevron {
+    transition: transform 0.2s ease;
+}
+
+.stream-content {
+    transition: opacity 0.2s ease;
+}
+
+/* Smooth expand/collapse for quote streams */
+.stream-content {
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.stream-content.hidden {
+    opacity: 0;
+    max-height: 0;
+    padding: 0;
+    margin: 0;
+}
+
+/* Zebra striping for line items table */
+.line-items-table tbody tr:nth-child(even) {
+    background-color: rgba(55, 65, 81, 0.6); /* gray-700/60 - very distinct */
+}
+
+.line-items-table tbody tr:nth-child(odd) {
+    background-color: rgba(17, 24, 39, 0.3); /* gray-900/30 - noticeable contrast */
+}
+
+/* Ensure hover effects work with zebra striping */
+.line-items-table tbody tr:hover {
+    background-color: rgba(59, 130, 246, 0.4) !important; /* blue-500/40 - blue hover for distinct interaction */
+}
+
+/* Special handling for pump assembly headers */
+.pump-assembly-header:hover {
+    background-color: rgba(59, 130, 246, 0.2) !important; /* blue-500/20 */
+}
+
+/* Special handling for sub-items */
+.pump-assembly-item:hover {
+    background-color: rgba(31, 41, 55, 0.4) !important; /* gray-800/40 */
+}
+
+/* Custom styling for select dropdowns in modals */
+#createDealForm select,
+#createDealModal select,
+.modal-content select {
+    background-color: #374151 !important; /* gray-700 */
+    color: #ffffff !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239CA3AF' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E") !important;
+    background-position: right 0.5rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.5em 1.5em !important;
+    padding-right: 2.5rem !important;
+}
+
+#createDealForm select option,
+#createDealModal select option,
+.modal-content select option {
+    background-color: #1f2937 !important; /* gray-800 */
+    color: #ffffff !important;
+    padding: 12px 16px !important;
+}
+
+/* Firefox specific */
+@-moz-document url-prefix() {
+    #createDealForm select option,
+    #createDealModal select option,
+    .modal-content select option {
+        background-color: #1f2937 !important;
+        color: #ffffff !important;
+    }
+}
+
 .search-results-list {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 1050; /* Needs to be higher than the modal z-index */
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-dark);
     list-style: none;
     padding: 0;
-    margin-top: 2px;
-    border-radius: var(--border-radius);
-    max-height: 200px;
-    overflow-y: auto;
+    margin: 0;
 }
 
 .search-results-list li {
-    padding: 0.75rem 1.25rem;
+    padding: 0.75rem 1rem;
     cursor: pointer;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid #4b5563;
+    color: #d1d5db;
+    transition: all 0.2s;
 }
 
 .search-results-list li:last-child {
@@ -203,21 +259,25 @@
 }
 
 .search-results-list li:hover {
-    background-color: var(--primary-color);
-    color: var(--text-light);
+    background-color: #3b82f6;
+    color: #ffffff;
 }
 
 .search-results-list .no-results {
     padding: 1rem;
     text-align: center;
-    color: var(--text-secondary);
+    color: #9ca3af;
     cursor: default;
 }
 
 .search-results-list .create-new-button {
-    background-color: var(--success-color);
-    color: var(--text-light);
+    background-color: #10b981;
+    color: #ffffff;
     font-weight: 600;
+}
+
+.search-results-list .create-new-button:hover {
+    background-color: #059669;
 }
 
 /* --- Individual Deal Page Styles --- */
@@ -231,17 +291,7 @@
     vertical-align: middle;
 }
 
-.nav-tabs .nav-link {
-    color: var(--text-secondary);
-    border-color: var(--border-color);
-    background-color: transparent;
-}
-
-.nav-tabs .nav-link.active {
-    color: var(--text-light);
-    background-color: var(--bg-dark-inset);
-    border-bottom-color: var(--bg-dark-inset);
-}
+/* Legacy nav-tabs CSS removed - now using pure Tailwind for revision tabs */
 
 /* =================================== */
 /* Deal Details Page - Quote Streams  */

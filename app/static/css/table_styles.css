@@ -127,3 +127,80 @@
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.2rem rgba(55, 119, 158, 0.25);
 }
+
+/* --- PUMP ASSEMBLY COLLAPSE/EXPAND STYLES --- */
+
+/* Pump assembly header row styling */
+.pump-assembly-header {
+    background-color: rgba(0, 123, 255, 0.08) !important;
+    border-left: 3px solid #007bff;
+}
+
+.pump-assembly-header:hover {
+    background-color: rgba(0, 123, 255, 0.15) !important;
+    cursor: pointer;
+}
+
+/* Assembly toggle icon styling */
+.assembly-toggle {
+    transition: transform 0.2s ease;
+    display: inline-block;
+    width: 16px;
+    text-align: center;
+}
+
+.assembly-toggle:hover {
+    color: #0056b3 !important;
+    transform: scale(1.1);
+}
+
+/* Pump assembly sub-items styling */
+.pump-assembly-item {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.pump-assembly-item:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.pump-assembly-item td {
+    border-top: 1px dashed rgba(255, 255, 255, 0.1) !important;
+    font-size: 0.9em;
+}
+
+/* Indent the description column for sub-items */
+.pump-assembly-item .pl-5 {
+    padding-left: 3rem !important;
+}
+
+/* Style the drag handle for pump assembly items */
+.pump-assembly-header .drag-handle {
+    cursor: pointer;
+    width: 40px;
+    text-align: center;
+}
+
+.pump-assembly-item .drag-handle {
+    opacity: 0.5;
+}
+
+.pump-assembly-item .drag-handle:hover {
+    opacity: 1;
+}
+
+/* Make the toggle icon more prominent */
+.pump-assembly-header .assembly-toggle {
+    font-size: 16px;
+    margin: 0;
+    padding: 5px;
+}
+
+.pump-assembly-header .assembly-toggle:hover {
+    color: #0056b3 !important;
+    transform: scale(1.2);
+}
+
+/* Hide the grip icon in the drag handle column for pump assembly headers (replaced with toggle) */
+.pump-assembly-header .drag-handle .fa-grip-vertical {
+    display: none;
+}

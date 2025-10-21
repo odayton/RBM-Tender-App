@@ -10,10 +10,13 @@
 ### **Before Starting:**
 - [ ] All tests pass locally
 - [ ] Code reviewed and approved
-- [ ] Database migrations tested
+- [ ] Database migrations tested (see [Migration Checklist](../database/MIGRATION_CHECKLIST.md))
+- [ ] Migration pre-check passed: `py scripts/development/check_migration.py`
 - [ ] Staging environment verified
 - [ ] Team notified of deployment
 - [ ] Backup created (if needed)
+
+**📚 For Schema Changes**: Review [Database Migration Workflow](../database/DATABASE_MIGRATION_WORKFLOW.md) before deploying
 
 ---
 
@@ -76,8 +79,11 @@ git pull origin main
 # Install dependencies
 pip install -r requirements/base_requirements.txt
 
-# Run database migrations
+# Run database migrations (GitHub Actions does this automatically)
 flask migrate upgrade
+
+# Verify migration status
+flask migrate status
 
 # Restart application
 sudo systemctl restart rbm-tender-app
@@ -106,6 +112,7 @@ sudo journalctl -u rbm-tender-app -n 20
 - [ ] Verify all features work
 - [ ] Check error logs
 - [ ] Monitor performance
+- [ ] If migrations ran, verify: `flask migrate status`
 - [ ] Update deployment log
 - [ ] Notify team of successful deployment
 
@@ -211,6 +218,7 @@ curl http://54.253.118.23:5000/health
 ### **Before Deployment:**
 - Always test in staging first
 - Create database backups
+- **If schema changes**: Follow [Migration Workflow](../database/DATABASE_MIGRATION_WORKFLOW.md)
 - Notify team of deployment
 - Have rollback plan ready
 
@@ -225,6 +233,15 @@ curl http://54.253.118.23:5000/health
 - Check user feedback
 - Update documentation
 - Plan next improvements
+
+---
+
+## 📚 **Additional Resources**
+
+- **[Database Migration Workflow](../database/DATABASE_MIGRATION_WORKFLOW.md)** - Complete migration guide
+- **[Migration Checklist](../database/MIGRATION_CHECKLIST.md)** - Quick migration reference
+- **[Production Deployment Guide](../deployment/PRODUCTION_DEPLOYMENT_GUIDE.md)** - Detailed procedures
+- **[GitHub Actions Summary](../deployment/GITHUB_ACTIONS_DEPLOYMENT_SUMMARY.md)** - CI/CD details
 
 ---
 

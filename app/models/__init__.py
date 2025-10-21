@@ -9,7 +9,13 @@ from .user_model import User, UserRole
 # --- NEW: Import the Product model ---
 from .products.product_model import Product
 
-# Pump models removed - no longer needed
+# --- Import Pump models ---
+from .pumps import (
+    PumpSeries, Pump, PumpComponent, PumpBOM,
+    InertiaBase, SeismicSpring, RubberMount, Crossbar,
+    MotorProtection, DripTripTray,
+    PumpDutyPoint, PumpSelectionHistory, PumpConfidenceScore
+)
 
 
 
@@ -42,8 +48,22 @@ __all__ = [
     # --- NEW: Export the Product model ---
     'Product',
     
-    # Pump models removed - no longer needed
-    # --- NEW: Export CRM models ---
+    # --- Export Pump models ---
+    'PumpSeries',
+    'Pump',
+    'PumpComponent',
+    'PumpBOM',
+    'InertiaBase',
+    'SeismicSpring',
+    'RubberMount',
+    'Crossbar',
+    'MotorProtection',
+    'DripTripTray',
+    'PumpDutyPoint',
+    'PumpSelectionHistory',
+    'PumpConfidenceScore',
+    
+    # --- Export CRM models ---
     'Activity',
     'ActivityType',
     'ActivityStatus',

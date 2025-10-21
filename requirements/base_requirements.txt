@@ -1,64 +1,67 @@
 # Flask
-Flask>=2.2.0
+Flask>=3.1.2
 
 # Database
 Flask-SQLAlchemy>=3.0.0
-Flask-Migrate
+Flask-Migrate>=4.0.0
 
 # Security and Authentication
-Flask-Login
-Flask-Security-Too
-email_validator
+Flask-Login>=0.6.0
+Flask-Security-Too>=5.6.2
+email_validator>=2.3.0
 pyotp>=2.8.0
 qrcode[pil]>=7.0.0
 
 # Security Scanning
 bandit>=1.7.0
-safety>=2.3.0
+safety>=3.6.2
 
 # Secrets Management
-cryptography>=41.0.0
+cryptography>=46.0.2
 
 # Rate Limiting
-Flask-Limiter>=3.0.0
+Flask-Limiter>=4.0.0
 
 # Error Tracking and Monitoring
-sentry-sdk[flask]>=1.0.0
+sentry-sdk[flask]>=2.40.0
 structlog>=23.0.0
 
 # Metrics and Monitoring
-prometheus-client>=0.16.0
+prometheus-client>=0.23.1
 # flask-monitoring-dashboard>=3.1.0  # Package not available, using built-in monitoring instead
 
 # API Documentation
 flask-restx>=1.0.0
-pyyaml>=6.0
+pyyaml>=6.0.3
 
 # Forms
-Flask-WTF
+Flask-WTF>=1.2.0
+WTForms-SQLAlchemy>=0.4.2
 
 # Caching
-Flask-Caching
-redis
+Flask-Caching>=2.0.0
+redis>=6.4.0
 
 # Utilities
-python-dotenv
-psycopg2-binary
-PyYAML
-openpyxl
-pandas
-XlsxWriter
-numpy
-scipy
-matplotlib
-tqdm
-psutil>=5.9.0
+python-dotenv>=1.0.0
+psycopg2-binary>=2.9.0
+PyYAML>=6.0.3
+openpyxl>=3.1.0
+pandas>=2.3.3
+XlsxWriter>=3.2.9
+numpy>=2.3.3
+scipy>=1.16.2
+matplotlib>=3.10.6
+tqdm>=4.65.0
+psutil>=7.1.0
 
 # PDF Generation
-playwright>=1.40.0
+playwright>=1.55.0
 weasyprint>=60.0
 
-Flask-Security-Too==5.6.2
+# JWT
 PyJWT>=2.10.1
-WTForms-SQLAlchemy==0.3
+
+# HTTP
 urllib3>=2.5.0
+requests>=2.32.5

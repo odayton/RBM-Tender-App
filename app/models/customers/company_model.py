@@ -12,6 +12,7 @@ class Company(BaseModel):
     company_name = Column(String(120), unique=True, nullable=False, index=True)
     phone_number = Column(String(30))
     domain = Column(String(100), index=True)  # Company email domain for auto-assignment
+    is_active = Column(Boolean, default=True, nullable=False)  # Track active/inactive companies
     
     # Relationships
     contacts = relationship("Contact", back_populates="company", cascade="all, delete-orphan")

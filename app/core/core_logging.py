@@ -112,6 +112,15 @@ class CoreLogger:
                     'level': 'ERROR',
                     'delay': True  # Delay file opening to prevent immediate file creation
                 },
+                'critical_file': {
+                    'class': 'logging.handlers.RotatingFileHandler',
+                    'formatter': 'detailed',
+                    'filename': str(log_dir / 'critical.log'),
+                    'maxBytes': 2 * 1024 * 1024,  # 2MB for critical errors
+                    'backupCount': 5,  # Keep more critical error history
+                    'level': 'CRITICAL',  # ONLY critical errors
+                    'delay': True
+                },
                  'request_file': {
                     'class': 'logging.handlers.TimedRotatingFileHandler',
                     'formatter': 'request',
@@ -124,7 +133,7 @@ class CoreLogger:
             },
             'loggers': {
                 'app': {
-                    'handlers': ['console', 'app_file', 'error_file'] if self.app.debug else ['app_file', 'error_file'],
+                    'handlers': ['console', 'app_file', 'error_file', 'critical_file'] if self.app.debug else ['app_file', 'error_file', 'critical_file'],
                     'level': log_level,
                     'propagate': False
                 },
