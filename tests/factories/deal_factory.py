@@ -19,7 +19,7 @@ class DealFactory(factory.alchemy.SQLAlchemyModelFactory):
     project_name = factory.Sequence(lambda n: f'Test Project {n}')
     deal_type = FuzzyChoice([DealType.HVAC, DealType.PLUMBING, DealType.HYDRONIC_HEATING])
     state = FuzzyChoice([AustralianState.NSW, AustralianState.VIC, AustralianState.QLD, AustralianState.WA])
-    stage = FuzzyChoice([DealStage.SALES_LEAD, DealStage.PROPOSAL, DealStage.NEGOTIATION, DealStage.WON])
+    stage = FuzzyChoice([DealStage.SALES_LEAD, DealStage.PROPOSAL, DealStage.NEGOTIATION, DealStage.CLOSED_WON])
     total_amount = FuzzyFloat(10000.0, 100000.0)
     probability = FuzzyFloat(10.0, 90.0)
     description = factory.Faker('text', max_nb_chars=200)
@@ -71,7 +71,7 @@ class HydronicHeatingDealFactory(DealFactory):
 
 class ClosedWonDealFactory(DealFactory):
     """Factory for creating closed won deals."""
-    stage = DealStage.WON
+    stage = DealStage.CLOSED_WON
     probability = 100.0
 
 

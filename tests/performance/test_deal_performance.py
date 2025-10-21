@@ -146,7 +146,7 @@ class TestDealPerformance:
         
         # Create deals with different stages
         from app.models import DealStage
-        stages = [DealStage.SALES_LEAD, DealStage.PROPOSAL, DealStage.NEGOTIATION, DealStage.WON]
+        stages = [DealStage.SALES_LEAD, DealStage.PROPOSAL, DealStage.NEGOTIATION, DealStage.CLOSED_WON]
         
         deals = []
         for i in range(100):
