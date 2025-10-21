@@ -1,0 +1,577 @@
+/* RBM Tender App - Tailwind CSS Input File */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply font-main bg-dark text-white;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium text-white;
+  }
+  
+  a {
+    @apply text-primary no-underline hover:underline;
+  }
+  
+  /* Remove spinner from number inputs */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+  }
+  
+  input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  
+  /* Card Component */
+  .card {
+    @apply bg-dark-inset border border-gray-700 rounded mb-6;
+  }
+  
+  .card-header {
+    @apply px-5 py-3 bg-black/20 border-b border-gray-700;
+  }
+  
+  .card-body {
+    @apply p-5;
+  }
+  
+  .card-footer {
+    @apply px-5 py-3 bg-dark-inset border-t border-gray-700;
+  }
+  
+  .card-title {
+    @apply mb-3 text-lg font-semibold;
+  }
+  
+  /* Button Styles - Bootstrap Compatible */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded transition-colors duration-200;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-dark;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-600 text-white hover:bg-gray-700;
+  }
+  
+  .btn-success {
+    @apply bg-green-600 text-white hover:bg-green-700;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
+  
+  .btn-warning {
+    @apply bg-yellow-500 text-white hover:bg-yellow-600;
+  }
+  
+  .btn-info {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+  }
+  
+  .btn-outline-primary {
+    @apply border border-primary text-primary hover:bg-primary hover:text-white;
+  }
+  
+  .btn-outline-secondary {
+    @apply border border-gray-500 text-gray-300 hover:bg-gray-600 hover:text-white;
+  }
+  
+  .btn-outline-danger {
+    @apply border border-red-500 text-red-400 hover:bg-red-600 hover:text-white;
+  }
+  
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  
+  .btn-xs {
+    @apply px-2 py-1 text-xs;
+  }
+  
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+  
+  .btn-block {
+    @apply w-full;
+  }
+  
+  /* Badge Styles */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .badge-primary {
+    @apply bg-primary/20 text-primary border border-primary/30;
+  }
+  
+  .badge-success {
+    @apply bg-green-500/20 text-green-400 border border-green-500/30;
+  }
+  
+  .badge-warning {
+    @apply bg-yellow-500/20 text-yellow-400 border border-yellow-500/30;
+  }
+  
+  .badge-danger {
+    @apply bg-red-500/20 text-red-400 border border-red-500/30;
+  }
+  
+  .badge-info {
+    @apply bg-blue-500/20 text-blue-400 border border-blue-500/30;
+  }
+  
+  .badge-secondary {
+    @apply bg-gray-500/20 text-gray-400 border border-gray-500/30;
+  }
+  
+  /* Alert Styles */
+  .alert {
+    @apply px-4 py-3 rounded mb-4 border;
+  }
+  
+  .alert-success {
+    @apply bg-green-50 text-green-800 border-green-200;
+  }
+  
+  .alert-danger {
+    @apply bg-red-50 text-red-800 border-red-200;
+  }
+  
+  .alert-warning {
+    @apply bg-yellow-50 text-yellow-800 border-yellow-200;
+  }
+  
+  .alert-info {
+    @apply bg-blue-50 text-blue-800 border-blue-200;
+  }
+  
+  /* Form Styles */
+  .form-control {
+    @apply w-full px-3 py-2 bg-dark-inset text-white border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium text-gray-300 mb-2;
+  }
+  
+  /* Table Styles */
+  .table {
+    @apply w-full text-sm text-left;
+  }
+  
+  .table thead {
+    @apply bg-gray-900/40 border-b border-gray-700;
+  }
+  
+  .table th {
+    @apply px-4 py-3 text-white font-medium;
+  }
+  
+  .table td {
+    @apply px-4 py-3 text-gray-300;
+  }
+  
+  .table-hover tbody tr:hover {
+    @apply bg-gray-700/50;
+  }
+  
+  .table-striped tbody tr:nth-of-type(odd) {
+    @apply bg-dark;
+  }
+  
+  /* Modal Styles */
+  .modal-content {
+    @apply bg-dark text-white border border-gray-700 rounded-lg;
+  }
+  
+  .modal-header {
+    @apply px-6 py-4 border-b border-gray-700;
+  }
+  
+  .modal-body {
+    @apply px-6 py-4;
+  }
+  
+  .modal-footer {
+    @apply px-6 py-4 border-t border-gray-700;
+  }
+  
+  /* ============================================
+     SIDEBAR STYLES - Integrated with Layout System
+     Note: Width and positioning handled by layout-variables.css
+     ============================================ */
+  aside.sidebar,
+  .sidebar {
+    @apply flex-shrink-0 overflow-hidden;
+    @apply bg-gradient-to-b from-slate-800 to-slate-900;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3) !important;
+    /* Width and transitions handled by layout-variables.css */
+  }
+  
+  /* Override the hardcoded width in Tailwind classes */
+  .sidebar {
+    width: var(--sidebar-w) !important;
+    min-width: var(--sidebar-w) !important;
+    max-width: var(--sidebar-w) !important;
+  }
+  
+  /* Sidebar Header - Aligned with Navbar */
+  .sidebar .sidebar-header,
+  .sidebar-header,
+  aside .sidebar-header,
+  #sidebar .sidebar-header {
+    @apply relative;
+    @apply bg-gradient-to-br from-blue-500 to-blue-700;
+    height: 72px !important;
+    min-height: 72px !important;
+    max-height: 72px !important;
+    padding: 0 1rem !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+    box-sizing: border-box !important;
+  }
+  
+  .sidebar .sidebar-header::after,
+  .sidebar-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    @apply bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600;
+    opacity: 0.6;
+  }
+  
+  .sidebar-header a {
+    @apply flex items-center gap-2 text-white no-underline hover:no-underline transition-all duration-300;
+  }
+  
+  .sidebar-header a:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+  }
+  
+  .sidebar-header i {
+    @apply drop-shadow-lg;
+  }
+  
+  .sidebar-header .icon-wrapper {
+    @apply w-8 h-8 rounded-lg flex items-center justify-center bg-white/10 backdrop-blur-sm;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sidebar .sidebar-nav,
+  .sidebar-nav {
+    @apply list-none flex-grow overflow-y-auto py-4;
+    padding-left: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Custom scrollbar for sidebar */
+  .sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .sidebar-nav::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  .sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+  }
+  
+  .sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+  
+  .nav-item {
+    @apply block;
+  }
+  
+  .sidebar-nav .nav-link,
+  .nav-link {
+    @apply flex items-center gap-3 px-5 py-3 mx-2 my-0.5 text-gray-300 no-underline transition-all duration-200 rounded-lg relative;
+    text-decoration: none !important;
+  }
+  
+  /* When collapsed, center the nav links and reduce padding */
+  body.sidebar-collapsed .sidebar-nav .nav-link,
+  body.sidebar-collapsed .nav-link {
+    @apply justify-center px-2 mx-1;
+  }
+  
+  /* For nav-links that contain both link and dropdown button */
+  .nav-link a {
+    @apply text-gray-300 no-underline transition-colors duration-200;
+  }
+  
+  .nav-link a:hover {
+    @apply text-white;
+  }
+  
+  
+  .sidebar-nav .nav-link:hover,
+  .nav-link:hover {
+    @apply text-white bg-white/10 transform translate-x-1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-decoration: none !important;
+  }
+  
+  .sidebar-nav .nav-link.active,
+  .nav-link.active {
+    @apply text-white font-semibold shadow-lg;
+    @apply bg-gradient-to-r from-blue-600 to-blue-800;
+  }
+  
+  .nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    @apply bg-gradient-to-b from-blue-400 to-blue-600;
+    border-radius: 2px;
+  }
+  
+  .nav-icon {
+    @apply w-5 h-5 flex items-center justify-center transition-all duration-300;
+  }
+  
+  .nav-link:hover .nav-icon {
+    @apply transform scale-125 rotate-6;
+    filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.3));
+  }
+  
+  .nav-group-title {
+    @apply text-xs font-bold text-gray-500 uppercase tracking-widest px-5 pt-6 pb-2 flex items-center gap-2;
+  }
+  
+  .nav-group-title::before {
+    content: '';
+    width: 20px;
+    height: 2px;
+    @apply bg-gradient-to-r from-blue-500 to-transparent;
+  }
+  
+  /* Submenu Styles */
+  .submenu {
+    @apply list-none p-0 m-0 mb-2 overflow-hidden transition-all duration-300;
+    max-height: 0;
+  }
+  
+  .submenu:not(.hidden) {
+    max-height: 500px;
+  }
+  
+  .submenu .nav-link {
+    @apply text-sm py-2 px-5 ml-6 text-gray-400 bg-transparent;
+    border-left: 2px solid rgba(99, 102, 241, 0.3);
+  }
+  
+  .submenu .nav-link:hover {
+    @apply text-white bg-white/5 translate-x-0;
+    border-left-color: #6366f1;
+  }
+  
+  .submenu .nav-link.active {
+    @apply bg-indigo-600/30 text-white border-l-indigo-400;
+    box-shadow: none;
+  }
+  
+  .submenu-toggle {
+    @apply cursor-pointer;
+  }
+  
+  .nav-link .submenu-toggle {
+    @apply text-gray-400 hover:text-white transition-colors duration-200;
+  }
+  
+  .submenu-toggle .fa-chevron-down {
+    @apply transition-transform duration-300;
+  }
+  
+  /* Navigation sections */
+  .nav-section {
+    @apply mb-6;
+  }
+  
+  /* Icon backgrounds with colored glow */
+  .nav-icon-bg {
+    @apply w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 transition-all duration-300;
+  }
+  
+  .nav-link:hover .nav-icon-bg {
+    @apply bg-white/10 shadow-lg;
+  }
+  
+  .nav-link.active .nav-icon-bg {
+    @apply bg-white/20;
+  }
+  
+  /* Badge for notifications */
+  .nav-badge {
+    @apply px-2 py-0.5 text-[10px] font-bold rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white uppercase tracking-wide;
+    box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
+  }
+  
+  /* Submenu links */
+  .submenu-link {
+    @apply block py-2 px-5 ml-6 text-sm text-gray-400 no-underline transition-all duration-200 border-l-2 border-indigo-500/30 hover:text-white hover:bg-white/5 hover:border-l-indigo-400;
+  }
+  
+  .submenu-link.active {
+    @apply bg-indigo-600/30 text-white border-l-indigo-400;
+  }
+  
+  /* Deal Cards */
+  .deal-card {
+    @apply block bg-dark border border-gray-700 rounded p-4 mb-4 cursor-grab transition-all hover:bg-dark-lighter hover:border-gray-600 active:cursor-grabbing;
+  }
+  
+  .deal-card--hvac {
+    @apply border-l-4 border-l-deal-hvac;
+  }
+  
+  .deal-card--plumbing {
+    @apply border-l-4 border-l-deal-plumbing;
+  }
+  
+  .deal-card--hydronic-heating {
+    @apply border-l-4 border-l-deal-heating;
+  }
+  
+  /* Kanban Board */
+  .kanban-column {
+    @apply flex-shrink-0 w-80 max-w-80 bg-dark-inset rounded flex flex-col;
+  }
+  
+  .kanban-column-header {
+    @apply px-4 py-3 font-semibold border-b border-gray-700 flex justify-between items-center;
+  }
+  
+  .kanban-cards-container {
+    @apply flex-grow p-3 overflow-y-auto min-h-96 max-h-[70vh];
+  }
+  
+  /* Notes */
+  .note-item {
+    @apply mb-3 p-3 border rounded bg-gray-100 border-l-4 border-l-blue-500 transition-all hover:bg-gray-200 hover:translate-x-0.5;
+  }
+  
+  .note-item.important {
+    @apply border-l-yellow-400 bg-yellow-50 hover:bg-yellow-100;
+  }
+  
+  .note-item.internal {
+    @apply border-l-gray-500 bg-gray-50;
+  }
+  
+  /* Inline Editing */
+  .editable {
+    @apply cursor-pointer border-b border-dashed border-gray-500 hover:bg-gray-700 transition-colors;
+  }
+  
+  /* Pump Assembly */
+  .pump-assembly-header {
+    @apply cursor-pointer;
+  }
+  
+  .pump-assembly-item {
+    @apply hidden;
+  }
+  
+  /* Drag Handle */
+  .drag-handle {
+    @apply cursor-grab text-gray-500 text-center align-middle active:cursor-grabbing;
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .transition-smooth {
+    transition: all 0.3s ease-in-out;
+  }
+}
+
+/* Legacy Bootstrap Support - Map Bootstrap classes to Tailwind */
+.container-fluid {
+  @apply w-full px-4;
+}
+
+.row {
+  @apply flex flex-wrap -mx-2;
+}
+
+.col, [class*="col-"] {
+  @apply px-2;
+}
+
+/* Bootstrap display utilities */
+.d-flex { @apply flex; }
+.d-inline { @apply inline; }
+.d-inline-block { @apply inline-block; }
+.d-block { @apply block; }
+.d-none { @apply hidden; }
+
+/* Bootstrap flexbox utilities */
+.justify-content-between { @apply justify-between; }
+.justify-content-center { @apply justify-center; }
+.justify-content-end { @apply justify-end; }
+
+.align-items-center { @apply items-center; }
+.align-items-start { @apply items-start; }
+.align-items-end { @apply items-end; }
+
+/* Bootstrap text utilities */
+.text-muted { @apply text-gray-400; }
+.text-light { @apply text-gray-300; }
+
+.flex-grow-1 { @apply flex-grow; }
+
+.small { @apply text-sm; }
+.lead { @apply text-lg; }
+
+.font-weight-bold { @apply font-bold; }
+.font-weight-normal { @apply font-normal; }
+
+.h-100 { @apply h-full; }
+.w-100 { @apply w-full; }
+
+/* Note: Most Bootstrap utilities (mb-*, mt-*, text-center, etc.) 
+   already exist in Tailwind with the same names, so we don't need to redefine them */
+

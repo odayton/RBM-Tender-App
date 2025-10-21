@@ -1,0 +1,205 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Pump Accessories{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">
+        <a href="{{ url_for('hvac.pump_dashboard') }}">
+            <i class="fas fa-tachometer-alt mr-1"></i>Pump Dashboard
+        </a>
+    </li>
+    <li class="breadcrumb-item active">Accessories</li>
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-cog mr-2"></i>Pump Accessories & Components</h1>
+        <a href="{{ url_for('hvac.pump_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Inertia Bases -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-square mr-2"></i>Inertia Bases ({{ inertia_bases|length }})</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Part Number</th>
+                            <th>Dimensions (LxWxD)</th>
+                            <th>Weight (kg)</th>
+                            <th class="text-right">List Price</th>
+                            <th class="text-right">Nett Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for base in inertia_bases %}
+                        <tr>
+                            <td><code>{{ base.part_number }}</code></td>
+                            <td>{{ base.dimensions_display }}</td>
+                            <td>{{ '{:.2f}'.format(base.weight_kg) if base.weight_kg else '-' }}</td>
+                            <td class="text-right">
+                                {% if base.list_price %}
+                                ${{ '{:,.2f}'.format(base.list_price) }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">
+                                {% if base.nett_cost %}
+                                ${{ '{:,.2f}'.format(base.nett_cost) }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seismic Springs -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-compress-arrows-alt mr-2"></i>Seismic Springs ({{ seismic_springs|length }})</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Part Number / Type</th>
+                            <th>Description</th>
+                            <th>Max Load (kg)</th>
+                            <th>Static Deflection (mm)</th>
+                            <th>Stripe Colors</th>
+                            <th class="text-right">Nett Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for spring in seismic_springs %}
+                        <tr>
+                            <td><code>{{ spring.part_number }}</code></td>
+                            <td>{{ spring.description or '-' }}</td>
+                            <td>{{ spring.max_load_kg if spring.max_load_kg else '-' }}</td>
+                            <td>{{ spring.static_deflection_mm if spring.static_deflection_mm else '-' }}</td>
+                            <td>
+                                {% if spring.stripe_1_color %}
+                                <span class="badge badge-secondary">{{ spring.stripe_1_color }}</span>
+                                {% endif %}
+                                {% if spring.stripe_2_color and spring.stripe_2_color != '-' %}
+                                <span class="badge badge-secondary">{{ spring.stripe_2_color }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">
+                                {% if spring.nett_price %}
+                                ${{ '{:,.2f}'.format(spring.nett_price) }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rubber Mounts -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-circle mr-2"></i>Rubber Mounts ({{ rubber_mounts|length }})</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Description</th>
+                            <th>Static Deflection (mm)</th>
+                            <th class="text-right">List Price</th>
+                            <th class="text-right">Nett Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mount in rubber_mounts %}
+                        <tr>
+                            <td><code>{{ mount.sku }}</code></td>
+                            <td>{{ mount.item_description or '-' }}</td>
+                            <td>{{ mount.static_deflection_mm if mount.static_deflection_mm else '-' }}</td>
+                            <td class="text-right">
+                                {% if mount.list_price %}
+                                ${{ '{:,.2f}'.format(mount.list_price) }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">
+                                {% if mount.nett_price %}
+                                ${{ '{:,.2f}'.format(mount.nett_price) }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crossbars -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-minus mr-2"></i>Crossbars ({{ crossbars|length }})</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Description</th>
+                            <th class="text-right">List Price</th>
+                            <th class="text-right">Nett Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for crossbar in crossbars %}
+                        <tr>
+                            <td><code>{{ crossbar.sku }}</code></td>
+                            <td>{{ crossbar.description or '-' }}</td>
+                            <td class="text-right">
+                                {% if crossbar.list_price %}
+                                ${{ '{:,.2f}'.format(crossbar.list_price) }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">
+                                {% if crossbar.nett_price %}
+                                ${{ '{:,.2f}'.format(crossbar.nett_price) }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

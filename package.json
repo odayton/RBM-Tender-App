@@ -1,0 +1,19 @@
+{
+  "name": "rbm-tender-app",
+  "version": "1.0.0",
+  "description": "RBM Tender Application - Tailwind CSS Build",
+  "scripts": {
+    "build:css": "tailwindcss -i ./app/static/css/input.css -o ./app/static/css/output.css --minify",
+    "watch:css": "tailwindcss -i ./app/static/css/input.css -o ./app/static/css/output.css --watch",
+    "dev": "npm run watch:css"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10"
+  },
+  "keywords": ["flask", "tailwind", "rbm"],
+  "author": "RBM Team",
+  "license": "MIT"
+}
+

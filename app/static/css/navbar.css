@@ -1,0 +1,244 @@
+/* ============================================
+   NAVBAR SPECIFIC STYLES
+   Note: Core layout handled by layout-variables.css
+   ============================================ */
+
+/* ============================================
+   BOOTSTRAP DROPDOWN OVERRIDE (Scoped to Navbar)
+   ============================================ */
+.navbar .dropdown-menu {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Navbar Dropdown Inner Panel */
+.navbar-dropdown {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid rgba(71, 85, 105, 0.5);
+    border-radius: 1rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+    padding: 0;
+    min-width: 280px;
+    margin-top: 0.5rem;
+    backdrop-filter: blur(16px);
+    animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.navbar-dropdown .dropdown-divider {
+    border-top: 1px solid rgba(71, 85, 105, 0.3);
+    margin: 0.5rem 0;
+}
+
+.navbar-dropdown-item {
+    display: flex !important;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem !important;
+    color: #e2e8f0 !important;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.navbar-dropdown-item:hover {
+    background: rgba(59, 130, 246, 0.1) !important;
+    color: #ffffff !important;
+    transform: translateX(4px);
+}
+
+.navbar-dropdown-item:active {
+    transform: translateX(4px) scale(0.98);
+}
+
+/* Notification Badge Pulse Animation */
+@keyframes bellShake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(15deg); }
+    75% { transform: rotate(-15deg); }
+}
+
+.navbar button:hover .fa-bell {
+    animation: bellShake 0.5s ease-in-out;
+}
+
+/* Search Bar Focus Effects */
+.navbar input:focus {
+    outline: none;
+}
+
+/* Avatar Hover Effect */
+.navbar .relative .w-10 {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar .group:hover .w-10 {
+    transform: scale(1.05);
+}
+
+/* Status Indicator Pulse */
+@keyframes statusPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.navbar .bg-green-500 {
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+/* Glassmorphism Effect */
+.navbar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        rgba(59, 130, 246, 0.03) 0%, 
+        rgba(147, 51, 234, 0.03) 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Ensure navbar content is above the glassmorphism effect */
+.navbar-container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Button Hover Glow Effect */
+.navbar button:hover {
+    position: relative;
+}
+
+.navbar button:hover::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(45deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2));
+    filter: blur(8px);
+    z-index: -1;
+    opacity: 0;
+    animation: glowPulse 0.6s ease-out forwards;
+}
+
+@keyframes glowPulse {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .navbar-dropdown {
+        min-width: 260px;
+        right: 0;
+    }
+    
+    .navbar .px-6 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Custom Scrollbar for Dropdown (if needed) */
+.navbar-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.navbar-dropdown::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.3);
+    border-radius: 10px;
+}
+
+.navbar-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(71, 85, 105, 0.5);
+    border-radius: 10px;
+}
+
+.navbar-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(71, 85, 105, 0.7);
+}
+
+/* Keyboard Shortcut Badge */
+kbd {
+    font-family: ui-monospace, monospace;
+    font-size: 0.75rem;
+}
+
+/* Smooth Transitions for Interactive Elements */
+.navbar button,
+.navbar a,
+.navbar input {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus Visible for Accessibility */
+.navbar button:focus-visible,
+.navbar a:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Enhanced Shadow on Scroll */
+.navbar.scrolled {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Breadcrumb Styles */
+.breadcrumb-separator {
+    color: #64748b;
+    margin: 0 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Breadcrumb Link Hover Effects */
+[aria-label="breadcrumb"] a {
+    position: relative;
+    overflow: hidden;
+}
+
+[aria-label="breadcrumb"] a::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    transition: width 0.3s ease;
+}
+
+[aria-label="breadcrumb"] a:hover::before {
+    width: 100%;
+}
+
+/* Breadcrumb Current Page */
+[aria-label="breadcrumb"] li:last-child {
+    color: #94a3b8;
+}
+
+/* Responsive Breadcrumb */
+@media (max-width: 640px) {
+    [aria-label="breadcrumb"] ol {
+        flex-wrap: wrap;
+    }
+}
+

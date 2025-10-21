@@ -1,0 +1,347 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Manage Pump BOM (Bill of Materials){% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">
+        <a href="{{ url_for('admin.dashboard') }}">
+            <i class="fas fa-cogs mr-1"></i>Admin
+        </a>
+    </li>
+    <li class="breadcrumb-item active">
+        <i class="fas fa-link mr-1"></i>Pump BOM
+    </li>
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-link mr-2"></i>Manage Pump BOM (Bill of Materials)</h1>
+        <a href="{{ url_for('admin.add_item', item_type='pump-bom') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Link Component to Pump
+        </a>
+    </div>
+
+    <!-- Quick Reference Cards -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle mr-2"></i>How to Use BOM Management</h5>
+                <p class="mb-2">The Bill of Materials (BOM) links pumps to their required components (inertia bases, springs, mounts, etc.).</p>
+                <p class="mb-0"><strong>Workflow:</strong></p>
+                <ol class="mb-0">
+                    <li>First, find the component ID from the component management pages below</li>
+                    <li>Click "Link Component to Pump" to create a new BOM entry</li>
+                    <li>Select the pump, component type, and enter the component ID</li>
+                    <li>Set the quantity and whether it's optional</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Component Reference Tables -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-cube mr-2"></i>Inertia Bases</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="thead-light sticky-top">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Part Number</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for base in inertia_bases %}
+                                <tr>
+                                    <td><strong>{{ base.id }}</strong></td>
+                                    <td>{{ base.part_number }}</td>
+                                    <td>{{ base.description or '-' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="3" class="text-center text-muted">No inertia bases found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('admin.manage_items', item_type='inertia-base') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-cog mr-1"></i>Manage Inertia Bases
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-compress-arrows-alt mr-2"></i>Seismic Springs</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="thead-light sticky-top">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Part Number</th>
+                                    <th>Max Load (kg)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for spring in seismic_springs %}
+                                <tr>
+                                    <td><strong>{{ spring.id }}</strong></td>
+                                    <td>{{ spring.part_number }}</td>
+                                    <td>{{ spring.max_load_kg or '-' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="3" class="text-center text-muted">No seismic springs found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('admin.manage_items', item_type='seismic-spring') }}" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-cog mr-1"></i>Manage Seismic Springs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-circle mr-2"></i>Rubber Mounts</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="thead-light sticky-top">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>SKU</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mount in rubber_mounts %}
+                                <tr>
+                                    <td><strong>{{ mount.id }}</strong></td>
+                                    <td>{{ mount.sku }}</td>
+                                    <td>{{ mount.item_description or '-' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="3" class="text-center text-muted">No rubber mounts found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('admin.manage_items', item_type='rubber-mount') }}" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-cog mr-1"></i>Manage Rubber Mounts
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-minus mr-2"></i>Crossbars</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="thead-light sticky-top">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>SKU</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for crossbar in crossbars %}
+                                <tr>
+                                    <td><strong>{{ crossbar.id }}</strong></td>
+                                    <td>{{ crossbar.sku }}</td>
+                                    <td>{{ crossbar.description or '-' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="3" class="text-center text-muted">No crossbars found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('admin.manage_items', item_type='crossbar') }}" class="btn btn-sm btn-outline-warning">
+                        <i class="fas fa-cog mr-1"></i>Manage Crossbars
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-0">
+                        <label for="bomSearch" class="font-weight-bold">Search Pumps:</label>
+                        <input type="text" id="bomSearch" class="form-control" placeholder="Search by pump part number or name...">
+                    </div>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="form-group mb-0 w-100">
+                        <label for="seriesFilter" class="font-weight-bold">Filter by Series:</label>
+                        <select id="seriesFilter" class="form-control">
+                            <option value="">All Series</option>
+                            {% set series_list = [] %}
+                            {% for item in items %}
+                                {% if item.pump and item.pump.series and item.pump.series.series_code not in series_list %}
+                                    {% set _ = series_list.append(item.pump.series.series_code) %}
+                                {% endif %}
+                            {% endfor %}
+                            {% for series in series_list|sort %}
+                                <option value="{{ series }}">{{ series }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configured BOMs -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Configured BOMs (<span id="pumpCount">{{ pump_bom_data|length }}</span> pumps)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" id="bomTable">
+                    <thead>
+                        <tr>
+                            <th>Item No</th>
+                            <th>Name</th>
+                            <th>Inertia PN</th>
+                            <th>Inertia Size</th>
+                            <th>Standard Spring PN</th>
+                            <th>Qty of Springs</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pump_data in pump_bom_data %}
+                        <tr class="bom-row" 
+                            data-pump-part="{{ pump_data.pump_part }}" 
+                            data-pump-name="{{ pump_data.pump_name|lower }}"
+                            data-series="{{ pump_data.series_code }}">
+                            <td><strong>{{ pump_data.pump_part }}</strong></td>
+                            <td>{{ pump_data.pump_name }}</td>
+                            <td>{{ pump_data.inertia_pn or '-' }}</td>
+                            <td>{{ pump_data.inertia_size or '-' }}</td>
+                            <td>{{ pump_data.spring_pn or '-' }}</td>
+                            <td>{{ pump_data.spring_qty or '-' }}</td>
+                            <td class="text-right">
+                                <a href="{{ url_for('admin.manage_items', item_type='pump-bom') }}?pump_id={{ pump_data.pump_id }}" 
+                                   class="btn btn-sm btn-info" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">No BOM entries found. Start linking components to pumps!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            {% if pagination %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.manage_items', item_type='pump-bom', page=pagination.prev_num) }}">Previous</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                    {% endif %}
+
+                    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('admin.manage_items', item_type='pump-bom', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.manage_items', item_type='pump-bom', page=pagination.next_num) }}">Next</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('bomSearch');
+    const seriesFilter = document.getElementById('seriesFilter');
+    const tableRows = document.querySelectorAll('.bom-row');
+    const pumpCount = document.getElementById('pumpCount');
+    
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedSeries = seriesFilter.value;
+        let visibleCount = 0;
+        
+        tableRows.forEach(function(row) {
+            const pumpPart = row.getAttribute('data-pump-part').toLowerCase();
+            const pumpName = row.getAttribute('data-pump-name');
+            const series = row.getAttribute('data-series');
+            
+            const matchesSearch = pumpPart.includes(searchTerm) || pumpName.includes(searchTerm);
+            const matchesSeries = !selectedSeries || series === selectedSeries;
+            
+            if (matchesSearch && matchesSeries) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        pumpCount.textContent = visibleCount;
+    }
+    
+    searchInput.addEventListener('keyup', filterTable);
+    seriesFilter.addEventListener('change', filterTable);
+});
+</script>
+{% endblock %}
+

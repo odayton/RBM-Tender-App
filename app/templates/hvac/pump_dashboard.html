@@ -1,0 +1,287 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Pump Management Dashboard{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item active">
+        <i class="fas fa-tachometer-alt mr-1"></i>Pump Dashboard
+    </li>
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-tachometer-alt mr-2"></i>Pump Management Dashboard</h1>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Pumps</h6>
+                            <h2 class="mb-0">{{ stats.total_pumps }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-cogs fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('hvac.view_all_pumps') }}" class="text-white small">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Pump Series</h6>
+                            <h2 class="mb-0">{{ stats.total_series }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-layer-group fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                    <small class="text-white">NBG, CR, MAGNA, etc.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Duty Points</h6>
+                            <h2 class="mb-0">{{ stats.total_duty_points }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-chart-line fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('hvac.view_duty_points') }}" class="text-white small">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Selections</h6>
+                            <h2 class="mb-0">{{ stats.total_selections }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-history fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                    <small class="text-white">Historical data points</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Cards -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-th-large mr-2"></i>Quick Access</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('hvac.view_all_pumps') }}" class="btn btn-outline-primary btn-block btn-lg">
+                                <i class="fas fa-cogs fa-2x d-block mb-2"></i>
+                                View All Pumps
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('hvac.view_duty_points') }}" class="btn btn-outline-info btn-block btn-lg">
+                                <i class="fas fa-chart-line fa-2x d-block mb-2"></i>
+                                Duty Points
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('hvac.view_accessories') }}" class="btn btn-outline-success btn-block btn-lg">
+                                <i class="fas fa-cog fa-2x d-block mb-2"></i>
+                                Accessories
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('hvac.view_boms') }}" class="btn btn-outline-warning btn-block btn-lg">
+                                <i class="fas fa-list-alt fa-2x d-block mb-2"></i>
+                                BOMs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Series Breakdown and Recent Activity -->
+    <div class="row mb-4">
+        <!-- Series Breakdown -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-layer-group mr-2"></i>Pumps by Series</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Series</th>
+                                    <th class="text-right">Pump Count</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for series_code, series_name, pump_count in series_breakdown %}
+                                <tr>
+                                    <td><strong>{{ series_code }}</strong></td>
+                                    <td class="text-right">{{ pump_count }}</td>
+                                    <td class="text-right">
+                                        <a href="{{ url_for('hvac.view_all_pumps', series=series_code) }}" class="btn btn-sm btn-outline-primary">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Selected Pumps -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-star mr-2"></i>Most Selected Pumps</h5>
+                </div>
+                <div class="card-body">
+                    {% if top_pumps %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Pump</th>
+                                    <th class="text-right">Selections</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pump, count in top_pumps %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ pump.name }}</strong><br>
+                                        <small class="text-muted">{{ pump.series.series_code if pump.series }}</small>
+                                    </td>
+                                    <td class="text-right">
+                                        <span class="badge badge-success">{{ count }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No selection history yet. Start using the pump selection feature to build historical data!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Duty Points -->
+    {% if recent_duty_points %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clock mr-2"></i>Recent Duty Points</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Flow Rate (L/s)</th>
+                                    <th>Head Pressure (kPa)</th>
+                                    <th>Series</th>
+                                    <th>Created</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for duty_point in recent_duty_points %}
+                                <tr>
+                                    <td>{{ duty_point.flow_rate_lps }}</td>
+                                    <td>{{ duty_point.head_pressure_kpa }}</td>
+                                    <td>{{ duty_point.series.series_code if duty_point.series else 'All' }}</td>
+                                    <td>{{ duty_point.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td class="text-right">
+                                        <a href="{{ url_for('hvac.view_duty_points') }}" class="btn btn-sm btn-outline-info">
+                                            Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="{{ url_for('hvac.view_duty_points') }}" class="btn btn-sm btn-primary">View All Duty Points</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Component Summary -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-boxes mr-2"></i>Component Inventory</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h3>{{ stats.total_inertia_bases }}</h3>
+                            <p class="text-muted">Inertia Bases</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3>{{ stats.total_springs }}</h3>
+                            <p class="text-muted">Seismic Springs</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3>{{ stats.total_rubber_mounts }}</h3>
+                            <p class="text-muted">Rubber Mounts</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3>{{ stats.total_crossbars }}</h3>
+                            <p class="text-muted">Crossbars</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('hvac.view_accessories') }}" class="btn btn-primary">View All Accessories</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
