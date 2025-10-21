@@ -333,10 +333,12 @@ class QuoteLineItem(BaseModel):
     
     @property
     def total_price(self) -> Decimal:
-        """Calculate total price for this line item.
-        Unit price already has discount applied, so just multiply by quantity.
+        """Calculate total price for this line item including discount.
+        Applies the discount percentage to the subtotal (unit_price * quantity).
         """
-        return self.unit_price * self.quantity
+        subtotal = self.unit_price * self.quantity
+        discount_amount = subtotal * (self.discount / Decimal('100'))
+        return subtotal - discount_amount
     
     @property
     def product_name(self) -> str:
