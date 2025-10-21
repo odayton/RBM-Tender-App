@@ -86,7 +86,7 @@ def import_seismic_springs_from_csv(
         
         for row_num, row in enumerate(reader, start=2):  # Start at 2 to account for header
             try:
-                part_number = row.get('Part Number', '').strip()
+                part_number = (row.get('Part Number', '') or '').strip()
                 
                 if not part_number:
                     errors.append(f"Row {row_num}: Missing part number")
@@ -107,17 +107,17 @@ def import_seismic_springs_from_csv(
                     continue
                 
                 # Parse data
-                description = row.get('Description', '').strip()
-                max_load_kg = _parse_decimal(row.get('Max Load (kg)', '').strip())
-                static_deflection_mm = _parse_decimal(row.get('Static Deflection (mm)', '').strip())
-                spring_constant = _parse_decimal(row.get('Spring Constant', '').strip())
-                stripe_1_color = row.get('Stripe 1 Color', '').strip()
-                stripe_2_color = row.get('Stripe 2 Color', '').strip()
-                list_price = _parse_decimal(row.get('List Price', '').strip())
-                nett_price = _parse_decimal(row.get('Nett Price', '').strip())
+                description = (row.get('Description', '') or '').strip()
+                max_load_kg = _parse_decimal((row.get('Max Load (kg)', '') or '').strip())
+                static_deflection_mm = _parse_decimal((row.get('Static Deflection (mm)', '') or '').strip())
+                spring_constant = _parse_decimal((row.get('Spring Constant', '') or '').strip())
+                stripe_1_color = (row.get('Stripe 1 Color', '') or '').strip()
+                stripe_2_color = (row.get('Stripe 2 Color', '') or '').strip()
+                list_price = _parse_decimal((row.get('List Price', '') or '').strip())
+                nett_price = _parse_decimal((row.get('Nett Price', '') or '').strip())
                 
                 # Parse active status
-                active_str = row.get('Active', 'Yes').strip().lower()
+                active_str = (row.get('Active', 'Yes') or 'Yes').strip().lower()
                 is_active = active_str in ['yes', 'true', '1', 'y', 'active']
                 
                 if existing_spring:
@@ -270,12 +270,12 @@ def _parse_decimal(value: str) -> Optional[float]:
     Returns:
         Float value or None if empty/invalid
     """
-    if not value or value.strip() == '':
+    if not value or (isinstance(value, str) and value.strip() == ''):
         return None
     
     try:
-        return float(value.strip())
-    except ValueError:
+        return float(str(value).strip())
+    except (ValueError, TypeError):
         return None
 
 

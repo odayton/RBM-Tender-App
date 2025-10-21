@@ -1062,11 +1062,12 @@ def export_component_csv(item_type):
         flash(f'Invalid component type: {item_type}', 'error')
         return redirect(url_for('admin.bulk_data_manager'))
     
+    config = COMPONENT_TYPES[item_type]
+    
     try:
         from flask import make_response
         from datetime import datetime
         
-        config = COMPONENT_TYPES[item_type]
         csv_data = config['export_func']()
         
         response = make_response(csv_data)

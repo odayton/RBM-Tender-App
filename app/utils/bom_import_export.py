@@ -114,7 +114,8 @@ def import_bom_from_csv(
         
         for row_num, row in enumerate(reader, start=2):  # Start at 2 to account for header
             try:
-                pump_part = row.get('Pump Part Number', '').strip()
+                pump_part = row.get('Pump Part Number', '') or ''
+                pump_part = pump_part.strip()
                 
                 if not pump_part:
                     errors.append(f"Row {row_num}: Missing pump part number")
@@ -150,7 +151,7 @@ def import_bom_from_csv(
                 components_added = 0
                 
                 # Inertia Base (default mounting - can be swapped for crossbar during config)
-                inertia_part = row.get('Inertia Base Part Number', '').strip()
+                inertia_part = (row.get('Inertia Base Part Number', '') or '').strip()
                 # Normalize part number
                 inertia_part = str(inertia_part).rstrip('.0') if inertia_part and '.' in str(inertia_part) else str(inertia_part) if inertia_part else ''
                 if inertia_part:
@@ -167,15 +168,15 @@ def import_bom_from_csv(
                         components_added += 1
                     elif create_missing_components:
                         # Create inertia base
-                        dims = row.get('Inertia Base Dimensions', '').strip()
+                        dims = (row.get('Inertia Base Dimensions', '') or '').strip()
                         length, width, depth = None, None, None
                         if dims and 'x' in dims:
                             parts = dims.split('x')
                             if len(parts) == 3:
                                 try:
-                                    length = int(parts[0].strip())
-                                    width = int(parts[1].strip())
-                                    depth = int(parts[2].strip())
+                                    length = int(parts[0].strip()) if parts[0].strip() else None
+                                    width = int(parts[1].strip()) if parts[1].strip() else None
+                                    depth = int(parts[2].strip()) if parts[2].strip() else None
                                 except ValueError:
                                     pass
                         
@@ -203,10 +204,10 @@ def import_bom_from_csv(
                         errors.append(f"Row {row_num}: Inertia base '{inertia_part}' not found")
                 
                 # Seismic Springs
-                spring_part = row.get('Spring Part Number', '').strip()
+                spring_part = (row.get('Spring Part Number', '') or '').strip()
                 # Normalize part number
                 spring_part = str(spring_part).rstrip('.0') if spring_part and '.' in str(spring_part) else str(spring_part) if spring_part else ''
-                spring_qty_str = row.get('Spring Quantity', '1').strip()
+                spring_qty_str = (row.get('Spring Quantity', '1') or '1').strip()
                 if spring_part:
                     try:
                         spring_qty = int(spring_qty_str) if spring_qty_str else 1

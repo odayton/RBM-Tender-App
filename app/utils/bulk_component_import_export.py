@@ -133,28 +133,39 @@ def import_pump_series_from_csv(file_content: str, update_existing: bool = True)
 
 def export_pumps_to_csv() -> str:
     """Export all pumps to CSV"""
-    output = io.StringIO()
-    writer = csv.writer(output)
-    
-    writer.writerow([
-        'Part Number', 'Name', 'Series Code', 'KW Rating', 'Poles',
-        'List Price', 'Nett Price', 'Active'
-    ])
-    
-    pumps = Pump.query.order_by(Pump.part_number).all()
-    for pump in pumps:
+    try:
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
         writer.writerow([
-            pump.part_number or '',
-            pump.name or '',
-            pump.series.series_code if pump.series else '',
-            pump.kw_rating or '',
-            pump.poles or '',
-            pump.list_price or '',
-            pump.nett_price or '',
-            'Yes' if pump.is_active else 'No'
+            'Part Number', 'Name', 'Series Code', 'KW Rating', 'Poles',
+            'List Price', 'Nett Price', 'Active'
         ])
-    
-    return output.getvalue()
+        
+        pumps = Pump.query.order_by(Pump.part_number).all()
+        logger.info(f"Found {len(pumps)} pumps to export")
+        
+        for pump in pumps:
+            try:
+                writer.writerow([
+                    pump.part_number or '',
+                    pump.name or '',
+                    pump.series.series_code if pump.series else '',
+                    pump.kw_rating or '',
+                    pump.poles or '',
+                    pump.list_price or '',
+                    pump.nett_price or '',
+                    'Yes' if pump.is_active else 'No'
+                ])
+            except Exception as e:
+                logger.error(f"Error processing pump {pump.part_number}: {e}")
+                # Skip this pump and continue
+                continue
+        
+        return output.getvalue()
+    except Exception as e:
+        logger.error(f"Error in export_pumps_to_csv: {e}", exc_info=True)
+        raise
 
 
 def import_pumps_from_csv(file_content: str, update_existing: bool = True) -> Tuple[int, int, List[str]]:
@@ -224,29 +235,40 @@ def import_pumps_from_csv(file_content: str, update_existing: bool = True) -> Tu
 
 def export_inertia_bases_to_csv() -> str:
     """Export all inertia bases to CSV"""
-    output = io.StringIO()
-    writer = csv.writer(output)
-    
-    writer.writerow([
-        'Part Number', 'Description', 'Length (mm)', 'Width (mm)', 'Depth (mm)',
-        'Weight (kg)', 'List Price', 'Nett Cost', 'Active'
-    ])
-    
-    bases = InertiaBase.query.order_by(InertiaBase.part_number).all()
-    for base in bases:
+    try:
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
         writer.writerow([
-            base.part_number or '',
-            base.description or '',
-            base.length_mm or '',
-            base.width_mm or '',
-            base.depth_mm or '',
-            base.weight_kg or '',
-            base.list_price or '',
-            base.nett_cost or '',
-            'Yes' if base.is_active else 'No'
+            'Part Number', 'Description', 'Length (mm)', 'Width (mm)', 'Depth (mm)',
+            'Weight (kg)', 'List Price', 'Nett Cost', 'Active'
         ])
-    
-    return output.getvalue()
+        
+        bases = InertiaBase.query.order_by(InertiaBase.part_number).all()
+        logger.info(f"Found {len(bases)} inertia bases to export")
+        
+        for base in bases:
+            try:
+                writer.writerow([
+                    base.part_number or '',
+                    base.description or '',
+                    base.length_mm or '',
+                    base.width_mm or '',
+                    base.depth_mm or '',
+                    base.weight_kg or '',
+                    base.list_price or '',
+                    base.nett_cost or '',
+                    'Yes' if base.is_active else 'No'
+                ])
+            except Exception as e:
+                logger.error(f"Error processing inertia base {base.part_number}: {e}")
+                # Skip this base and continue
+                continue
+        
+        return output.getvalue()
+    except Exception as e:
+        logger.error(f"Error in export_inertia_bases_to_csv: {e}", exc_info=True)
+        raise
 
 
 def import_inertia_bases_from_csv(file_content: str, update_existing: bool = True) -> Tuple[int, int, List[str]]:
@@ -629,24 +651,35 @@ def import_drip_trays_from_csv(file_content: str, update_existing: bool = True) 
 
 def export_duty_points_to_csv() -> str:
     """Export all duty points to CSV"""
-    output = io.StringIO()
-    writer = csv.writer(output)
-    
-    writer.writerow([
-        'Series Code', 'Flow Rate (L/s)', 'Head Pressure (kPa)',
-        'Tolerance (%)'
-    ])
-    
-    points = PumpDutyPoint.query.order_by(PumpDutyPoint.series_id, PumpDutyPoint.flow_rate_lps).all()
-    for point in points:
+    try:
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
         writer.writerow([
-            point.series.series_code if point.series else '',
-            point.flow_rate_lps or '',
-            point.head_pressure_kpa or '',
-            point.tolerance_percentage or ''
+            'Series Code', 'Flow Rate (L/s)', 'Head Pressure (kPa)',
+            'Tolerance (%)'
         ])
-    
-    return output.getvalue()
+        
+        points = PumpDutyPoint.query.order_by(PumpDutyPoint.series_id, PumpDutyPoint.flow_rate_lps).all()
+        logger.info(f"Found {len(points)} duty points to export")
+        
+        for point in points:
+            try:
+                writer.writerow([
+                    point.series.series_code if point.series else '',
+                    point.flow_rate_lps or '',
+                    point.head_pressure_kpa or '',
+                    point.tolerance_percentage or ''
+                ])
+            except Exception as e:
+                logger.error(f"Error processing duty point: {e}")
+                # Skip this point and continue
+                continue
+        
+        return output.getvalue()
+    except Exception as e:
+        logger.error(f"Error in export_duty_points_to_csv: {e}", exc_info=True)
+        raise
 
 
 def import_duty_points_from_csv(file_content: str, update_existing: bool = True) -> Tuple[int, int, List[str]]:
