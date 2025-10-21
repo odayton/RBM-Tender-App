@@ -8,12 +8,11 @@ from flask_login import login_required
 # This form is correctly imported from the local hvac forms file
 from .forms import PumpSearchForm
 from app.models import QuoteOption, Product, QuoteLineItem
-# TODO: Uncomment when pump models are implemented
-# from app.models.pumps import (
-#     Pump, PumpSeries, PumpDutyPoint, PumpSelectionHistory,
-#     InertiaBase, SeismicSpring, RubberMount, Crossbar,
-#     MotorProtection, DripTripTray, PumpBOM
-# )
+from app.models.pumps import (
+    Pump, PumpSeries, PumpDutyPoint, PumpSelectionHistory,
+    InertiaBase, SeismicSpring, RubberMount, Crossbar,
+    MotorProtection, DripTripTray, PumpBOM
+)
 
 # Import the existing blueprint from the __init__.py file in this folder
 from . import hvac_bp
