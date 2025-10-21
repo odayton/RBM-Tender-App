@@ -21,12 +21,13 @@ from app.features.admin.forms import (
 from app.utils.db_utils.organization.db_companies import CompanyManager
 from app.utils.db_utils.organization.db_contacts import ContactManager
 from app.utils.db_utils.organization.db_deal_owners import DealOwnerManager
-from app.utils.bom_import_export import export_bom_to_csv, import_bom_from_csv, generate_sample_csv
-from app.utils.seismic_spring_import_export import (
-    export_seismic_springs_to_csv, 
-    import_seismic_springs_from_csv, 
-    generate_seismic_spring_sample_csv
-)
+# TODO: Uncomment when BOM and seismic spring import/export modules are implemented
+# from app.utils.bom_import_export import export_bom_to_csv, import_bom_from_csv, generate_sample_csv
+# from app.utils.seismic_spring_import_export import (
+#     export_seismic_springs_to_csv, 
+#     import_seismic_springs_from_csv, 
+#     generate_seismic_spring_sample_csv
+# )
 
 # Import helpers to register additional routes
 from . import helpers
