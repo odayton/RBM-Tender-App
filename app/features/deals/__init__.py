@@ -11,4 +11,5 @@ deals_bp = Blueprint(
 # This import is at the bottom to avoid circular dependencies.
 # It makes the routes in routes.py aware of the deals_bp object.
 from . import routes
-from . import pump_routes
+# TODO: Uncomment when pump_routes.py is implemented
+# from . import pump_routes

@@ -1,6 +1,7 @@
 from typing import Dict, Any, List, Optional
-from app.models.pumps.pump_model import Pump, PumpSeries
-from app.models.pumps.pump_assembly import PumpAssembly
+from app.models.pumps import Pump, PumpSeries
+# TODO: Uncomment when PumpAssembly is implemented
+# from app.models.pumps import PumpAssembly
 from app.core.core_errors import ValidationError
 import pandas as pd
 from datetime import datetime

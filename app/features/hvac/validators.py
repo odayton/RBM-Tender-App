@@ -2,7 +2,7 @@ from typing import Dict, Any, Optional
 from wtforms.validators import ValidationError
 from app.core.core_errors import ValidationError as AppValidationError
 import re
-from app.models.pumps.pump_model import Pump, PumpSeries
+from app.models.pumps import Pump, PumpSeries
 
 def validate_flow_rate(form: Any, field: Any) -> None:
     """
