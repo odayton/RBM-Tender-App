@@ -6,11 +6,12 @@ from app.core.core_rate_limiting import admin_rate_limit, security_rate_limit
 from app.core.core_logging import logger
 from app.models import User, UserRole, Company, Contact
 from app.models.deals.deal_models import Discount
-from app.models.pumps import (
-    PumpSeries, Pump, InertiaBase, SeismicSpring, RubberMount,
-    Crossbar, MotorProtection, DripTripTray, PumpDutyPoint,
-    PumpBOM, PumpComponent
-)
+# TODO: Uncomment when pump models are implemented
+# from app.models.pumps import (
+#     PumpSeries, Pump, InertiaBase, SeismicSpring, RubberMount,
+#     Crossbar, MotorProtection, DripTripTray, PumpDutyPoint,
+#     PumpBOM, PumpComponent
+# )
 from app.features.admin.forms import (
     CreateUserForm, EditUserForm, CompanyForm, ContactForm, DiscountForm,
     PumpSeriesForm, PumpForm, InertiaBaseForm, SeismicSpringForm, RubberMountForm,

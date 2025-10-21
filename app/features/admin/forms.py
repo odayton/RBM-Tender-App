@@ -173,7 +173,7 @@ class PumpForm(FlaskForm):
             from app.models.pumps import PumpSeries
             series = PumpSeries.query.order_by(PumpSeries.series_code).all()
             self.series_id.choices = [('', 'Select Series')] + [(str(s.id), s.series_code) for s in series]
-        except RuntimeError:
+        except (RuntimeError, ModuleNotFoundError, ImportError):
             pass
 
 
@@ -262,7 +262,7 @@ class DripTripTrayForm(FlaskForm):
             from app.models.pumps import PumpSeries
             series = PumpSeries.query.order_by(PumpSeries.series_code).all()
             self.series_id.choices = [('', 'Select Series')] + [(str(s.id), s.series_code) for s in series]
-        except RuntimeError:
+        except (RuntimeError, ModuleNotFoundError, ImportError):
             pass
 
 
@@ -288,7 +288,7 @@ class PumpDutyPointForm(FlaskForm):
             from app.models.pumps import PumpSeries
             series = PumpSeries.query.order_by(PumpSeries.series_code).all()
             self.series_id.choices = [('', 'All Series')] + [(str(s.id), s.series_code) for s in series]
-        except RuntimeError:
+        except (RuntimeError, ModuleNotFoundError, ImportError):
             pass
 
 
@@ -326,7 +326,7 @@ class PumpBOMForm(FlaskForm):
             self.pump_id.choices = [('', 'Select Pump')] + [
                 (str(p.id), f"{p.part_number} - {p.name[:50]}") for p in pumps
             ]
-        except RuntimeError:
+        except (RuntimeError, ModuleNotFoundError, ImportError):
             pass
 
 
