@@ -10,12 +10,13 @@ from .user_model import User, UserRole
 from .products.product_model import Product
 
 # --- Import Pump models ---
-from .pumps import (
-    PumpSeries, Pump, PumpComponent, PumpBOM,
-    InertiaBase, SeismicSpring, RubberMount, Crossbar,
-    MotorProtection, DripTripTray,
-    PumpDutyPoint, PumpSelectionHistory, PumpConfidenceScore
-)
+# TODO: Uncomment when pump models are implemented
+# from .pumps import (
+#     PumpSeries, Pump, PumpComponent, PumpBOM,
+#     InertiaBase, SeismicSpring, RubberMount, Crossbar,
+#     MotorProtection, DripTripTray,
+#     PumpDutyPoint, PumpSelectionHistory, PumpConfidenceScore
+# )
 
 
 
@@ -49,19 +50,20 @@ __all__ = [
     'Product',
     
     # --- Export Pump models ---
-    'PumpSeries',
-    'Pump',
-    'PumpComponent',
-    'PumpBOM',
-    'InertiaBase',
-    'SeismicSpring',
-    'RubberMount',
-    'Crossbar',
-    'MotorProtection',
-    'DripTripTray',
-    'PumpDutyPoint',
-    'PumpSelectionHistory',
-    'PumpConfidenceScore',
+    # TODO: Uncomment when pump models are implemented
+    # 'PumpSeries',
+    # 'Pump',
+    # 'PumpComponent',
+    # 'PumpBOM',
+    # 'InertiaBase',
+    # 'SeismicSpring',
+    # 'RubberMount',
+    # 'Crossbar',
+    # 'MotorProtection',
+    # 'DripTripTray',
+    # 'PumpDutyPoint',
+    # 'PumpSelectionHistory',
+    # 'PumpConfidenceScore',
     
     # --- Export CRM models ---
     'Activity',
