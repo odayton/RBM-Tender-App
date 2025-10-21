@@ -1,0 +1,135 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Import {{ config.display_name }} - Admin{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.bulk_data_manager') }}">Bulk Data Manager</a></li>
+    <li class="breadcrumb-item active">Import {{ config.display_name }}</li>
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-upload mr-2"></i>Import {{ config.display_name }}</h1>
+                <p class="text-muted">Upload a CSV file to import multiple items at once</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Card -->
+    <div class="card mb-4" style="border-left: 4px solid var(--primary-color);">
+        <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, #2c5a7a 100%);">
+            <h3 class="mb-0"><i class="fas fa-list-ol mr-2"></i>Import Instructions</h3>
+        </div>
+        <div class="card-body">
+            <ol class="mb-0">
+                <li class="mb-2">Export current data first to see the required CSV format</li>
+                <li class="mb-2">Prepare your CSV file with the same column headers</li>
+                <li class="mb-2">Upload the file using the form below</li>
+                <li class="mb-2">Check "Update Existing Items" to update items that already exist</li>
+                <li class="mb-0">Review the import results and fix any errors if needed</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Export Template Button -->
+    <div class="mb-4 text-center">
+        <a href="{{ url_for('admin.export_component_csv', item_type=item_type) }}" 
+           class="btn btn-lg btn-success">
+            <i class="fas fa-file-download mr-2"></i>Download Current Data (CSV Template)
+        </a>
+    </div>
+
+    <!-- Import Form -->
+    <div class="card" style="border-left: 4px solid #28a745;">
+        <div class="card-header" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">
+            <h3 class="mb-0"><i class="fas fa-file-upload mr-2"></i>Upload CSV File</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <!-- File Upload -->
+                <div class="form-group mb-4">
+                    <label for="{{ form.file.id }}" class="form-label">
+                        <i class="fas fa-file-csv mr-2"></i>{{ form.file.label.text }}
+                    </label>
+                    <div class="custom-file">
+                        {{ form.file(class="custom-file-input", id="customFile", accept=".csv") }}
+                        <label class="custom-file-label" for="customFile">Choose CSV file...</label>
+                    </div>
+                    {% if form.file.description %}
+                    <small class="form-text text-muted mt-2 d-block">
+                        <i class="fas fa-info-circle mr-1"></i>{{ form.file.description }}
+                    </small>
+                    {% endif %}
+                    {% if form.file.errors %}
+                    <div class="invalid-feedback d-block mt-2">
+                        {% for error in form.file.errors %}
+                        <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Update Existing Checkbox -->
+                <div class="form-check mb-4">
+                    {{ form.update_existing(class="form-check-input") }}
+                    <label class="form-check-label" for="{{ form.update_existing.id }}">
+                        <strong>{{ form.update_existing.label.text }}</strong>
+                        {% if form.update_existing.description %}
+                        <br><small class="text-muted">{{ form.update_existing.description }}</small>
+                        {% endif %}
+                    </label>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="d-flex justify-content-between align-items-center pt-4 border-top">
+                    <a href="{{ url_for('admin.bulk_data_manager') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Bulk Manager
+                    </a>
+                    {{ form.submit(class="btn btn-primary btn-lg") }}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CSV Format Guidelines -->
+    <div class="card mt-4" style="border-left: 4px solid #17a2b8;">
+        <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+            <h3 class="mb-0"><i class="fas fa-question-circle mr-2"></i>CSV Format Guidelines</h3>
+        </div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li class="mb-2"><i class="fas fa-chevron-right text-info mr-2"></i>First row must contain column headers (exactly as shown in export)</li>
+                <li class="mb-2"><i class="fas fa-chevron-right text-info mr-2"></i>Use comma (,) as the delimiter between columns</li>
+                <li class="mb-2"><i class="fas fa-chevron-right text-info mr-2"></i>Enclose text containing commas in double quotes</li>
+                <li class="mb-2"><i class="fas fa-chevron-right text-info mr-2"></i>Use "Yes"/"No" or "True"/"False" for boolean fields</li>
+                <li class="mb-2"><i class="fas fa-chevron-right text-info mr-2"></i>Leave cells empty for optional fields (don't use "NULL" or "N/A")</li>
+                <li class="mb-2"><i class="fas fa-chevron-right text-info mr-2"></i>Ensure numbers are formatted without currency symbols or thousands separators</li>
+                <li class="mb-0"><i class="fas fa-chevron-right text-info mr-2"></i>Part numbers and codes must match exactly (case-sensitive)</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- File name display script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('customFile');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'Choose CSV file...';
+            const label = document.querySelector('.custom-file-label');
+            if (label) {
+                label.textContent = fileName;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

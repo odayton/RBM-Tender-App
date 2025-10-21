@@ -1,0 +1,181 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Bulk Data Manager - Admin{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a></li>
+    <li class="breadcrumb-item active">Bulk Data Manager</li>
+{% endblock %}
+
+{% block page_content %}
+<!-- Page Header -->
+<div class="mb-4">
+    <h1><i class="fas fa-database mr-2"></i>Bulk Data Manager</h1>
+    <p class="text-muted">Import and export pump component data in bulk using CSV files</p>
+</div>
+
+<!-- Instructions Card -->
+<div class="card mb-4" style="border-left: 4px solid var(--primary-color);">
+    <div class="card-header" style="background: linear-gradient(135deg, var(--primary-color) 0%, #2c5a7a 100%);">
+        <h3 class="mb-0"><i class="fas fa-info-circle mr-2"></i>How to Use</h3>
+    </div>
+    <div class="card-body">
+        <ul class="mb-0">
+            <li class="mb-2"><i class="fas fa-check-circle text-success mr-2"></i><strong>Export:</strong> Download current data as CSV to view, edit, or backup</li>
+            <li class="mb-2"><i class="fas fa-check-circle text-success mr-2"></i><strong>Import:</strong> Upload CSV file to add or update multiple items at once</li>
+            <li class="mb-2"><i class="fas fa-check-circle text-success mr-2"></i><strong>Update Mode:</strong> When importing, existing items will be updated with new data</li>
+            <li class="mb-0"><i class="fas fa-check-circle text-success mr-2"></i><strong>CSV Format:</strong> Export a file first to see the required column format</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Component Types Grid -->
+<div class="row mb-4">
+    {% for type_key, config in component_types.items() %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100" style="border-top: 4px solid var(--primary-color); transition: all 0.3s ease;">
+            <div class="card-body text-center">
+                <!-- Icon -->
+                <div class="mb-3">
+                    {% if type_key == 'pump-series' %}
+                        <i class="fas fa-layer-group fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    {% elif type_key == 'pump' %}
+                        <i class="fas fa-cogs fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    {% elif type_key == 'inertia-base' %}
+                        <i class="fas fa-cube fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    {% elif type_key == 'rubber-mount' %}
+                        <i class="fas fa-circle fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    {% elif type_key == 'crossbar' %}
+                        <i class="fas fa-minus fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    {% elif type_key == 'motor-protection' %}
+                        <i class="fas fa-shield-alt fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    {% elif type_key == 'drip-trip-tray' %}
+                        <i class="fas fa-tint fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    {% elif type_key == 'duty-point' %}
+                        <i class="fas fa-chart-line fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    {% elif type_key == 'pump-component' %}
+                        <i class="fas fa-puzzle-piece fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    {% else %}
+                        <i class="fas fa-database fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    {% endif %}
+                </div>
+                
+                <!-- Title -->
+                <h4 class="card-title">{{ config.display_name }}</h4>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2">
+                    <!-- Export Button -->
+                    <a href="{{ url_for('admin.export_component_csv', item_type=type_key) }}" 
+                       class="btn btn-success">
+                        <i class="fas fa-download mr-2"></i>Export CSV
+                    </a>
+
+                    <!-- Import Button -->
+                    <a href="{{ url_for('admin.import_component_csv', item_type=type_key) }}" 
+                       class="btn btn-primary">
+                        <i class="fas fa-upload mr-2"></i>Import CSV
+                    </a>
+
+                    <!-- Manage Link -->
+                    <a href="{{ url_for('admin.manage_items', item_type=type_key) }}" 
+                       class="btn btn-outline-secondary">
+                        <i class="fas fa-cog mr-2"></i>Manage Items
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    <!-- Legacy Import Tools - Now integrated into main grid -->
+    <!-- Pump BOM Card -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100" style="border-top: 4px solid var(--primary-color); transition: all 0.3s ease;">
+            <div class="card-body text-center">
+                <!-- Icon -->
+                <div class="mb-3">
+                    <i class="fas fa-link fa-3x mb-3" style="color: var(--primary-color);"></i>
+                </div>
+                
+                <!-- Title -->
+                <h4 class="card-title">Pump BOM</h4>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2">
+                    <!-- Import Button -->
+                    <a href="{{ url_for('admin.import_bom') }}" 
+                       class="btn btn-primary">
+                        <i class="fas fa-upload mr-2"></i>Import BOM
+                    </a>
+
+                    <!-- Export Button -->
+                    <a href="{{ url_for('admin.export_bom') }}" 
+                       class="btn btn-success">
+                        <i class="fas fa-download mr-2"></i>Export BOM
+                    </a>
+
+                    <!-- Sample Template -->
+                    <a href="{{ url_for('admin.export_bom_sample') }}" 
+                       class="btn btn-outline-secondary">
+                        <i class="fas fa-file-csv mr-2"></i>Sample Template
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Seismic Springs Card -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100" style="border-top: 4px solid var(--primary-color); transition: all 0.3s ease;">
+            <div class="card-body text-center">
+                <!-- Icon -->
+                <div class="mb-3">
+                    <i class="fas fa-compress-arrows-alt fa-3x mb-3" style="color: var(--primary-color);"></i>
+                </div>
+                
+                <!-- Title -->
+                <h4 class="card-title">Seismic Springs</h4>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2">
+                    <!-- Import Button -->
+                    <a href="{{ url_for('admin.import_seismic_springs') }}" 
+                       class="btn btn-primary">
+                        <i class="fas fa-upload mr-2"></i>Import Springs
+                    </a>
+
+                    <!-- Export Button -->
+                    <a href="{{ url_for('admin.export_seismic_springs') }}" 
+                       class="btn btn-success">
+                        <i class="fas fa-download mr-2"></i>Export Springs
+                    </a>
+
+                    <!-- Sample Template -->
+                    <a href="{{ url_for('admin.export_seismic_springs_sample') }}" 
+                       class="btn btn-outline-secondary">
+                        <i class="fas fa-file-csv mr-2"></i>Sample Template
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tips Section -->
+<div class="card" style="border-left: 4px solid #17a2b8;">
+    <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+        <h3 class="mb-0"><i class="fas fa-lightbulb mr-2"></i>Tips & Best Practices</h3>
+    </div>
+    <div class="card-body">
+        <ul class="mb-0">
+            <li class="mb-2"><i class="fas fa-arrow-right text-info mr-2"></i>Always export current data before importing to have a backup</li>
+            <li class="mb-2"><i class="fas fa-arrow-right text-info mr-2"></i>Test imports with a small CSV file first (2-3 rows) to verify format</li>
+            <li class="mb-2"><i class="fas fa-arrow-right text-info mr-2"></i>Ensure CSV files are UTF-8 encoded to avoid character encoding issues</li>
+            <li class="mb-2"><i class="fas fa-arrow-right text-info mr-2"></i>Part numbers and SKUs are case-sensitive and must match exactly</li>
+            <li class="mb-2"><i class="fas fa-arrow-right text-info mr-2"></i>For related data (e.g., pumps with series), import series first</li>
+            <li class="mb-0"><i class="fas fa-arrow-right text-info mr-2"></i>Watch for error messages after import - they indicate which rows failed</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
