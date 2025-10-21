@@ -1,0 +1,320 @@
+/* app/static/css/pump_selection.css */
+
+/* Pump Selection Modals Styling */
+
+.search-method-card {
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid #dee2e6;
+}
+
+.search-method-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+    transform: translateY(-2px);
+}
+
+.search-method-card.selected {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.search-method-card .card-body {
+    padding: 1.25rem;
+}
+
+.search-method-card input[type="radio"] {
+    cursor: pointer;
+}
+
+.search-method-card label {
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.pump-result-card {
+    transition: all 0.2s;
+}
+
+.pump-result-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.confidence-stars {
+    font-size: 1.2em;
+    color: #ffc107;
+}
+
+#manualSearchResults, #browseResults {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+#resultsContainer {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.pump-result-card .card-body h6 {
+    color: #007bff;
+    margin-bottom: 0.5rem;
+}
+
+/* Configuration modal styling - Updated for horizontal layout */
+#pumpConfigModal .modal-body {
+    /* Remove height restrictions to allow horizontal layout */
+    max-height: none !important;
+    overflow: visible !important;
+    display: block !important;
+}
+
+/* Ensure grid layout works properly */
+#pumpConfigModal .modal-body .grid {
+    display: grid !important;
+}
+
+#pumpConfigModal .modal-body .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+/* Remove white outlines from all form elements */
+#pumpConfigModal input[type="text"],
+#pumpConfigModal input[type="number"],
+#pumpConfigModal textarea,
+#pumpConfigModal select {
+    outline: none !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: none !important;
+}
+
+#pumpConfigModal input[type="text"]:focus,
+#pumpConfigModal input[type="number"]:focus,
+#pumpConfigModal textarea:focus,
+#pumpConfigModal select:focus {
+    outline: none !important;
+    border: 1px solid #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Remove outlines from radio buttons and checkboxes */
+#pumpConfigModal input[type="radio"],
+#pumpConfigModal input[type="checkbox"] {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#pumpConfigModal input[type="radio"]:focus,
+#pumpConfigModal input[type="checkbox"]:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Remove outlines from buttons */
+#pumpConfigModal button {
+    outline: none !important;
+    border: none !important;
+}
+
+#pumpConfigModal button:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Remove white outlines from component cards and labels */
+#pumpConfigModal .bg-gradient-to-r,
+#pumpConfigModal .rounded-lg,
+#pumpConfigModal .rounded-xl {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#pumpConfigModal label {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#pumpConfigModal label:focus,
+#pumpConfigModal label:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove outlines from radio button and checkbox containers */
+#pumpConfigModal .bg-slate-900\/50 {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#pumpConfigModal .bg-slate-900\/50:hover {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove any Bootstrap form-control outlines */
+#pumpConfigModal .form-control,
+#pumpConfigModal .form-check-input {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#pumpConfigModal .form-control:focus,
+#pumpConfigModal .form-check-input:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Remove white outlines from all component cards */
+#pumpConfigModal .border-indigo-500\/30,
+#pumpConfigModal .border-green-500\/30,
+#pumpConfigModal .border-purple-500\/30,
+#pumpConfigModal .border-blue-500\/30 {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus outlines from component cards */
+#pumpConfigModal .border-indigo-500\/30:focus,
+#pumpConfigModal .border-green-500\/30:focus,
+#pumpConfigModal .border-purple-500\/30:focus,
+#pumpConfigModal .border-blue-500\/30:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove any white borders that might be showing */
+#pumpConfigModal div[class*="border-"] {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#pumpConfigModal div[class*="border-"]:focus,
+#pumpConfigModal div[class*="border-"]:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Modal positioning to respect sidebar state */
+#pumpConfigModal {
+    z-index: 1300 !important; /* Above sidebar (1100) and dropdowns (1200) */
+}
+
+#pumpConfigModal .modal-dialog {
+    /* Ensure modal is centered and responsive to sidebar */
+    margin: 1.75rem auto;
+    max-width: 95vw;
+    width: 95vw;
+}
+
+/* Adjust modal width when sidebar is collapsed */
+body.sidebar-collapsed #pumpConfigModal .modal-dialog {
+    margin: 1.75rem auto;
+    max-width: 95vw;
+    width: 95vw;
+    left: 0;
+    right: 0;
+}
+
+/* Adjust modal width when sidebar is expanded */
+body:not(.sidebar-collapsed) #pumpConfigModal .modal-dialog {
+    margin: 1.75rem auto;
+    max-width: calc(95vw - var(--sidebar-w));
+    width: calc(95vw - var(--sidebar-w));
+    margin-left: calc(var(--sidebar-w) + 2.5vw);
+    margin-right: 2.5vw;
+}
+
+#pumpConfigModal .card-header {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #000000;
+}
+
+.form-check-label {
+    cursor: pointer;
+}
+
+/* Total cost highlight */
+#totalAssemblySell {
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* Loading state */
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+}
+
+.loading-spinner::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Pagination styling */
+#browsePagination .pagination {
+    justify-content: center;
+}
+
+/* Plant Reference Card Styling */
+.plant-reference-card {
+    border-width: 2px;
+    box-shadow: 0 2px 10px rgba(0, 123, 255, 0.15);
+}
+
+.plant-reference-card .card-header {
+    font-size: 1.05em;
+}
+
+.plant-reference-preview {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.plant-reference-preview .text-success {
+    font-size: 0.85em;
+}
+
+#plantReference.form-control-lg,
+#assemblyQuantity.form-control-lg {
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+#plantReference:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+#useDefaultRef {
+    font-size: 0.85em;
+    text-decoration: underline;
+}
+
+#useDefaultRef:hover {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+#quantityHint {
+    font-style: italic;
+    color: #6c757d;
+}
+
+/* Tooltip styling for info icons */
+.fa-info-circle {
+    cursor: help;
+}
+

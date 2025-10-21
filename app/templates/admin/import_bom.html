@@ -1,0 +1,206 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Import Pump BOM Data{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">
+        <a href="{{ url_for('admin.dashboard') }}">
+            <i class="fas fa-cogs mr-1"></i>Admin
+        </a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{{ url_for('admin.manage_items', item_type='pump-bom') }}">
+            <i class="fas fa-link mr-1"></i>Pump BOM
+        </a>
+    </li>
+    <li class="breadcrumb-item active">Import</li>
+{% endblock %}
+
+{% block head_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_forms.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="fas fa-file-upload mr-2"></i>Import Pump BOM Data</h1>
+            <p class="text-muted">Upload a CSV file to bulk import pump bill of materials</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('admin.manage_items', item_type='pump-bom') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to BOM
+            </a>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle mr-2"></i>How to Import BOM Data</h5>
+                <ol class="mb-2">
+                    <li><strong>Download the sample template</strong> to see the correct format</li>
+                    <li><strong>Prepare your data</strong> using the same column structure</li>
+                    <li><strong>Ensure pumps exist</strong> in the system (create them first if needed)</li>
+                    <li><strong>Upload your CSV file</strong> using the form below</li>
+                </ol>
+                <p class="mb-0"><strong>Note:</strong> The import will automatically create missing components if "Create Missing Components" is checked.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Templates -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-download mr-2"></i>Download Templates</h5>
+                </div>
+                <div class="card-body">
+                    <p>Download a template to help you format your data correctly:</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('admin.export_bom_sample') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-file-csv mr-2"></i>Download Sample Template
+                        </a>
+                        <a href="{{ url_for('admin.export_bom') }}" class="btn btn-outline-success">
+                            <i class="fas fa-download mr-2"></i>Export Current BOM Data
+                        </a>
+                    </div>
+                    <hr>
+                    <h6>CSV Format:</h6>
+                    <pre class="bg-light p-2" style="font-size: 0.8rem;">Pump Part Number, Pump Name, Inertia Base Part Number,
+Inertia Base Dimensions, Spring Part Number, Spring Quantity, Notes</pre>
+                    <p class="mb-0"><small><strong>Note:</strong> BOM includes default inertia base and springs. During configuration, user can swap inertia base for crossbar if desired.</small></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-warning">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle mr-2"></i>Important Notes</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>Pumps must exist</strong> before importing BOM data</li>
+                        <li><strong>BOM includes:</strong> Inertia Base (default) + Seismic Springs (with quantity)</li>
+                        <li><strong>Part numbers must match exactly</strong> for existing components</li>
+                        <li>Dimensions format: <code>length x width x depth</code> (e.g., 1200 x 800 x 200)</li>
+                        <li>Spring quantity defaults to 1 if not specified</li>
+                        <li><strong>Configuration options during pump selection:</strong>
+                            <ul>
+                                <li><strong>Swap Crossbar for Inertia Base</strong> (user choice)</li>
+                                <li>Motor Protection: Yes/No</li>
+                                <li>Drip Tray: Yes/No (max 1 per pump)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Overwrite mode</strong> will delete existing BOM entries for pumps in the file</li>
+                        <li><strong>Create missing components</strong> will auto-create components that don't exist</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="header-icon">
+                            <i class="fas fa-file-upload"></i>
+                        </div>
+                        <div class="header-content">
+                            <h4 class="mb-1">Upload BOM Data</h4>
+                            <p class="text-muted mb-0">Select your CSV file and configure import options</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-section">
+                            <!-- File Upload -->
+                            <div class="mb-4">
+                                <label for="{{ form.file.id }}" class="form-label fw-bold">
+                                    {{ form.file.label }} <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-file-csv"></i>
+                                    </span>
+                                    {{ form.file(class="form-control") }}
+                                </div>
+                                {% if form.file.description %}
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle text-info mr-1"></i>
+                                        {{ form.file.description }}
+                                    </div>
+                                {% endif %}
+                                {% if form.file.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.file.errors %}
+                                            <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Import Options -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Import Options</label>
+                                
+                                <div class="form-check mb-3">
+                                    {{ form.overwrite_existing(class="form-check-input") }}
+                                    <label class="form-check-label" for="{{ form.overwrite_existing.id }}">
+                                        {{ form.overwrite_existing.label.text }}
+                                    </label>
+                                    {% if form.overwrite_existing.description %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle text-warning mr-1"></i>
+                                            {{ form.overwrite_existing.description }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-check">
+                                    {{ form.create_missing_components(class="form-check-input", checked=True) }}
+                                    <label class="form-check-label" for="{{ form.create_missing_components.id }}">
+                                        {{ form.create_missing_components.label.text }}
+                                    </label>
+                                    {% if form.create_missing_components.description %}
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle text-success mr-1"></i>
+                                            {{ form.create_missing_components.description }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="form-actions">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ url_for('admin.manage_items', item_type='pump-bom') }}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-upload mr-2"></i>Import BOM Data
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_forms.js') }}"></script>
+{% endblock %}
+

@@ -1,0 +1,203 @@
+/* ============================================
+   LAYOUT VARIABLES & STATE MANAGEMENT
+   ============================================ */
+
+:root {
+    /* Core Layout Dimensions */
+    --nav-h: 56px;                    /* Navbar height */
+    --sidebar-w: 15rem;               /* Sidebar width when expanded */
+    --sidebar-w-collapsed: 4rem;     /* Sidebar width when collapsed */
+    --gutter-x: 1.5rem;              /* Horizontal padding/gutter */
+    
+    /* Debug: Force exact navbar height */
+    --sidebar-header-h: 56px;
+    
+    /* Z-Index Layers */
+    --z-sidebar: 1100;
+    --z-navbar: 1000;
+    --z-dropdown: 1200;
+    
+    /* Transition Timings */
+    --transition-sidebar: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: 150ms ease;
+}
+
+/* ============================================
+   STATE: SIDEBAR COLLAPSED
+   ============================================ */
+body.sidebar-collapsed {
+    --sidebar-w: 0;
+}
+
+/* ============================================
+   STATE: MOBILE (Overlay Sidebar)
+   ============================================ */
+@media (max-width: 768px) {
+    :root {
+        --sidebar-w: 0;  /* No sidebar offset on mobile by default */
+        --gutter-x: 1rem; /* Smaller gutter on mobile */
+    }
+    
+    /* When mobile sidebar is open, it's an overlay */
+    body.sidebar-open {
+        --sidebar-w: 0;  /* Keep navbar full-width even when sidebar overlay is open */
+        overflow: hidden; /* Prevent body scroll when overlay is open */
+    }
+}
+
+/* ============================================
+   LAYOUT STRUCTURE
+   ============================================ */
+
+/* Navbar stays within main content area (doesn't extend over sidebar) */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-navbar);
+    min-height: var(--nav-h);
+    width: 100%;
+    padding-left: 0;
+    padding-right: var(--gutter-x);
+    transition: all var(--transition-sidebar);
+}
+
+/* Navbar inner container */
+.navbar-container {
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: var(--sidebar-w);
+    z-index: var(--z-sidebar);
+    transition: width var(--transition-sidebar);
+    overflow: hidden;
+    will-change: width;
+}
+
+/* Simple approach: just use CSS variables */
+.w-sidebar {
+    width: var(--sidebar-w) !important;
+}
+
+/* When collapsed, sidebar width becomes 0 */
+body.sidebar-collapsed .sidebar,
+body.sidebar-collapsed aside#sidebar,
+body.sidebar-collapsed #sidebar {
+    width: 0 !important;
+}
+
+/* Sidebar header alignment with navbar */
+.sidebar-header,
+.sidebar .sidebar-header,
+aside .sidebar-header {
+    height: 72px !important;
+    min-height: 72px !important;
+    max-height: 72px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all var(--transition-sidebar);
+    box-sizing: border-box !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+}
+
+/* Main content area adjustment */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left var(--transition-sidebar);
+    margin-left: var(--sidebar-w) !important;
+    width: calc(100% - var(--sidebar-w)) !important;
+    will-change: margin-left, width;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE BEHAVIOR
+   ============================================ */
+@media (max-width: 768px) {
+    /* Navbar behavior on mobile (already full-width since sidebar is hidden) */
+    .navbar {
+        padding-left: var(--gutter-x);
+        padding-right: var(--gutter-x);
+    }
+    
+    /* Sidebar becomes off-canvas overlay */
+    .sidebar {
+        transform: translateX(-100%);
+        width: 16rem; /* Fixed width for mobile overlay */
+        box-shadow: none;
+    }
+    
+    /* Show sidebar overlay when open */
+    body.sidebar-open .sidebar {
+        transform: translateX(0);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Main content takes full width on mobile */
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    /* Mobile backdrop overlay */
+    body.sidebar-open::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: calc(var(--z-sidebar) - 1);
+        animation: fadeIn 0.2s ease-out;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============================================
+   CONTROL SIZING NORMALIZATION
+   ============================================ */
+
+/* Consistent control heights in navbar */
+.navbar .control-standard {
+    height: 2rem; /* h-8 */
+}
+
+.navbar .avatar-standard {
+    width: 2rem;  /* w-8 */
+    height: 2rem; /* h-8 */
+}
+
+/* ============================================
+   BREADCRUMB ALIGNMENT
+   ============================================ */
+
+/* Remove duplicate border between navbar and breadcrumb */
+.breadcrumb-container {
+    border-top: none; /* Navbar already has bottom border */
+}
+
+/* ============================================
+   DROPDOWN Z-INDEX FIX
+   ============================================ */
+
+.navbar .dropdown-menu {
+    z-index: var(--z-dropdown);
+}
+

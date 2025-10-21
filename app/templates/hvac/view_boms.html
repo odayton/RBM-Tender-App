@@ -1,0 +1,140 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Pump BOMs{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">
+        <a href="{{ url_for('hvac.pump_dashboard') }}">
+            <i class="fas fa-tachometer-alt mr-1"></i>Pump Dashboard
+        </a>
+    </li>
+    <li class="breadcrumb-item active">BOMs</li>
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-list-alt mr-2"></i>Pump Bills of Materials (BOMs)</h1>
+        <a href="{{ url_for('hvac.pump_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle mr-2"></i>
+        <strong>About BOMs:</strong> Bill of Materials shows which components (inertia bases and springs) 
+        are associated with each pump model.
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-0">
+                        <label for="bomSearch" class="font-weight-bold">Search Pumps:</label>
+                        <input type="text" id="bomSearch" class="form-control" placeholder="Search by pump part number or name...">
+                    </div>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="form-group mb-0 w-100">
+                        <label for="seriesFilter" class="font-weight-bold">Filter by Series:</label>
+                        <select id="seriesFilter" class="form-control">
+                            <option value="">All Series</option>
+                            {% set series_list = [] %}
+                            {% for pump_data in pump_bom_data %}
+                                {% if pump_data.series_code and pump_data.series_code not in series_list %}
+                                    {% set _ = series_list.append(pump_data.series_code) %}
+                                {% endif %}
+                            {% endfor %}
+                            {% for series in series_list|sort %}
+                                <option value="{{ series }}">{{ series }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configured BOMs -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Configured BOMs (<span id="pumpCount">{{ pump_bom_data|length }}</span> pumps)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" id="bomTable">
+                    <thead>
+                        <tr>
+                            <th>Item No</th>
+                            <th>Name</th>
+                            <th>Inertia PN</th>
+                            <th>Inertia Size</th>
+                            <th>Standard Spring PN</th>
+                            <th>Qty of Springs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pump_data in pump_bom_data %}
+                        <tr class="bom-row" 
+                            data-pump-part="{{ pump_data.pump_part }}" 
+                            data-pump-name="{{ pump_data.pump_name|lower }}"
+                            data-series="{{ pump_data.series_code }}">
+                            <td><strong>{{ pump_data.pump_part }}</strong></td>
+                            <td>{{ pump_data.pump_name }}</td>
+                            <td>{{ pump_data.inertia_pn or '-' }}</td>
+                            <td>{{ pump_data.inertia_size or '-' }}</td>
+                            <td>{{ pump_data.spring_pn or '-' }}</td>
+                            <td>{{ pump_data.spring_qty or '-' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">No BOM entries found. BOMs link pumps to their required components.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('bomSearch');
+    const seriesFilter = document.getElementById('seriesFilter');
+    const tableRows = document.querySelectorAll('.bom-row');
+    const pumpCount = document.getElementById('pumpCount');
+    
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedSeries = seriesFilter.value;
+        let visibleCount = 0;
+        
+        tableRows.forEach(function(row) {
+            const pumpPart = row.getAttribute('data-pump-part').toLowerCase();
+            const pumpName = row.getAttribute('data-pump-name');
+            const series = row.getAttribute('data-series');
+            
+            const matchesSearch = pumpPart.includes(searchTerm) || pumpName.includes(searchTerm);
+            const matchesSeries = !selectedSeries || series === selectedSeries;
+            
+            if (matchesSearch && matchesSeries) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        pumpCount.textContent = visibleCount;
+    }
+    
+    searchInput.addEventListener('keyup', filterTable);
+    seriesFilter.addEventListener('change', filterTable);
+});
+</script>
+{% endblock %}
