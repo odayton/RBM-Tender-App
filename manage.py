@@ -199,16 +199,18 @@ def db_migrate(message):
     
     Examples:
         python manage.py db-migrate "Add user email field"
+        FLASK_ENV=production python manage.py db-migrate "Migration message"
     """
-    os.environ.setdefault('FLASK_ENV', 'development')
+    env = os.environ.get('FLASK_ENV', 'development')
     
     logger.info(f"Creating migration: {message}")
+    logger.info(f"Using environment: {env}")
     
     try:
         from flask_migrate import Migrate, migrate as flask_migrate_cmd
         from app import db
         
-        app = create_app(config_dict['development'])
+        app = create_app(config_dict[env])
         migrate_obj = Migrate(app, db)
         
         with app.app_context():
@@ -230,16 +232,18 @@ def db_upgrade():
     
     Examples:
         python manage.py db-upgrade
+        FLASK_ENV=production python manage.py db-upgrade
     """
-    os.environ.setdefault('FLASK_ENV', 'development')
+    env = os.environ.get('FLASK_ENV', 'development')
     
     logger.info("Applying database migrations...")
+    logger.info(f"Using environment: {env}")
     
     try:
         from flask_migrate import Migrate, upgrade as flask_upgrade
         from app import db
         
-        app = create_app(config_dict['development'])
+        app = create_app(config_dict[env])
         migrate_obj = Migrate(app, db)
         
         with app.app_context():
@@ -264,17 +268,18 @@ def db_stamp(revision):
     
     Examples:
         python manage.py db-stamp head
-        python manage.py db-stamp b7c8d9e0f1a2
+        FLASK_ENV=production python manage.py db-stamp head
     """
-    os.environ.setdefault('FLASK_ENV', 'development')
+    env = os.environ.get('FLASK_ENV', 'development')
     
     logger.info(f"Stamping database with revision: {revision}")
+    logger.info(f"Using environment: {env}")
     
     try:
         from flask_migrate import Migrate, stamp as flask_stamp
         from app import db
         
-        app = create_app(config_dict['development'])
+        app = create_app(config_dict[env])
         migrate_obj = Migrate(app, db)
         
         with app.app_context():
