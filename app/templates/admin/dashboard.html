@@ -72,6 +72,10 @@
             <h3><i class="fas fa-file-import mr-2"></i>Import/Export Tools</h3>
         </div>
         <div class="list-group list-group-flush">
+            <a href="{{ url_for('admin.bulk_data_manager') }}" class="list-group-item list-group-item-action bg-primary text-white">
+                <i class="fas fa-database mr-2"></i><strong>Bulk Data Manager</strong>
+                <small class="d-block text-white-50">Import/export all component types in one place</small>
+            </a>
             <a href="{{ url_for('admin.import_bom') }}" class="list-group-item list-group-item-action">
                 <i class="fas fa-file-upload mr-2"></i>Import Pump BOM Data
                 <small class="text-muted d-block">Bulk import pump bill of materials from CSV</small>

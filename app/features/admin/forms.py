@@ -376,3 +376,14 @@ class SeismicSpringImportForm(FlaskForm):
     update_existing = BooleanField('Update Existing Springs', default=True,
                                   description='If checked, will update existing springs with new data')
     submit = SubmitField('Import Seismic Springs')
+
+
+class BulkComponentImportForm(FlaskForm):
+    """Generic form for bulk importing component data from CSV"""
+    file = FileField('CSV File', validators=[
+        FileRequired(),
+        FileAllowed(['csv'], 'CSV files only!')
+    ], description='Upload a CSV file with component data')
+    update_existing = BooleanField('Update Existing Items', default=True,
+                                  description='If checked, will update existing items with new data')
+    submit = SubmitField('Import Data')

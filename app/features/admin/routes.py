@@ -15,18 +15,29 @@ from app.features.admin.forms import (
     CreateUserForm, EditUserForm, CompanyForm, ContactForm, DiscountForm,
     PumpSeriesForm, PumpForm, InertiaBaseForm, SeismicSpringForm, RubberMountForm,
     CrossbarForm, MotorProtectionForm, DripTripTrayForm, PumpDutyPointForm,
-    PumpBOMForm, PumpComponentForm, BOMImportForm, SeismicSpringImportForm
+    PumpBOMForm, PumpComponentForm, BOMImportForm, SeismicSpringImportForm,
+    BulkComponentImportForm
 )
 from app.utils.db_utils.organization.db_companies import CompanyManager
 from app.utils.db_utils.organization.db_contacts import ContactManager
 from app.utils.db_utils.organization.db_deal_owners import DealOwnerManager
-# TODO: Uncomment when BOM and seismic spring import/export modules are implemented
-# from app.utils.bom_import_export import export_bom_to_csv, import_bom_from_csv, generate_sample_csv
-# from app.utils.seismic_spring_import_export import (
-#     export_seismic_springs_to_csv, 
-#     import_seismic_springs_from_csv, 
-#     generate_seismic_spring_sample_csv
-# )
+from app.utils.bom_import_export import export_bom_to_csv, import_bom_from_csv, generate_sample_csv
+from app.utils.seismic_spring_import_export import (
+    export_seismic_springs_to_csv, 
+    import_seismic_springs_from_csv, 
+    generate_seismic_spring_sample_csv
+)
+from app.utils.bulk_component_import_export import (
+    export_pump_series_to_csv, import_pump_series_from_csv,
+    export_pumps_to_csv, import_pumps_from_csv,
+    export_inertia_bases_to_csv, import_inertia_bases_from_csv,
+    export_rubber_mounts_to_csv, import_rubber_mounts_from_csv,
+    export_crossbars_to_csv, import_crossbars_from_csv,
+    export_motor_protection_to_csv, import_motor_protection_from_csv,
+    export_drip_trays_to_csv, import_drip_trays_from_csv,
+    export_duty_points_to_csv, import_duty_points_from_csv,
+    export_generic_components_to_csv, import_generic_components_from_csv
+)
 
 # Import helpers to register additional routes
 from . import helpers
@@ -967,3 +978,159 @@ def import_seismic_springs():
             flash(f'An error occurred while importing: {str(e)}', 'error')
     
     return render_template('admin/import_seismic_springs.html', form=form)
+
+
+# ============================================================================
+# BULK COMPONENT IMPORT/EXPORT ROUTES
+# ============================================================================
+
+# Mapping of component types to their import/export functions
+COMPONENT_TYPES = {
+    'pump-series': {
+        'display_name': 'Pump Series',
+        'export_func': export_pump_series_to_csv,
+        'import_func': import_pump_series_from_csv,
+        'filename': 'pump_series'
+    },
+    'pump': {
+        'display_name': 'Pumps',
+        'export_func': export_pumps_to_csv,
+        'import_func': import_pumps_from_csv,
+        'filename': 'pumps'
+    },
+    'inertia-base': {
+        'display_name': 'Inertia Bases',
+        'export_func': export_inertia_bases_to_csv,
+        'import_func': import_inertia_bases_from_csv,
+        'filename': 'inertia_bases'
+    },
+    'rubber-mount': {
+        'display_name': 'Rubber Mounts',
+        'export_func': export_rubber_mounts_to_csv,
+        'import_func': import_rubber_mounts_from_csv,
+        'filename': 'rubber_mounts'
+    },
+    'crossbar': {
+        'display_name': 'Crossbars',
+        'export_func': export_crossbars_to_csv,
+        'import_func': import_crossbars_from_csv,
+        'filename': 'crossbars'
+    },
+    'motor-protection': {
+        'display_name': 'Motor Protection',
+        'export_func': export_motor_protection_to_csv,
+        'import_func': import_motor_protection_from_csv,
+        'filename': 'motor_protection'
+    },
+    'drip-trip-tray': {
+        'display_name': 'Drip Trip Trays',
+        'export_func': export_drip_trays_to_csv,
+        'import_func': import_drip_trays_from_csv,
+        'filename': 'drip_trays'
+    },
+    'duty-point': {
+        'display_name': 'Duty Points',
+        'export_func': export_duty_points_to_csv,
+        'import_func': import_duty_points_from_csv,
+        'filename': 'duty_points'
+    },
+    'pump-component': {
+        'display_name': 'Generic Components',
+        'export_func': export_generic_components_to_csv,
+        'import_func': import_generic_components_from_csv,
+        'filename': 'generic_components'
+    }
+}
+
+
+@admin_bp.route('/bulk-data-manager')
+@login_required
+@admin_required
+@rate_limit(max_requests=20, window_seconds=60)
+def bulk_data_manager():
+    """Central hub for bulk data import/export operations"""
+    return render_template('admin/bulk_data_manager.html', component_types=COMPONENT_TYPES)
+
+
+@admin_bp.route('/<item_type>/export-csv')
+@login_required
+@admin_required
+@rate_limit(max_requests=10, window_seconds=60)
+def export_component_csv(item_type):
+    """Generic export route for component types"""
+    if item_type not in COMPONENT_TYPES:
+        flash(f'Invalid component type: {item_type}', 'error')
+        return redirect(url_for('admin.bulk_data_manager'))
+    
+    try:
+        from flask import make_response
+        from datetime import datetime
+        
+        config = COMPONENT_TYPES[item_type]
+        csv_data = config['export_func']()
+        
+        response = make_response(csv_data)
+        response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        response.headers['Content-Disposition'] = f'attachment; filename={config["filename"]}_export_{timestamp}.csv'
+        
+        logger.info(f"Admin {current_user.email} exported {config['display_name']} data")
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error exporting {item_type}: {e}", exc_info=True)
+        flash(f'An error occurred while exporting {config["display_name"]} data.', 'error')
+        return redirect(url_for('admin.bulk_data_manager'))
+
+
+@admin_bp.route('/<item_type>/import-csv', methods=['GET', 'POST'])
+@login_required
+@admin_required
+@rate_limit(max_requests=5, window_seconds=300)
+def import_component_csv(item_type):
+    """Generic import route for component types"""
+    if item_type not in COMPONENT_TYPES:
+        flash(f'Invalid component type: {item_type}', 'error')
+        return redirect(url_for('admin.bulk_data_manager'))
+    
+    config = COMPONENT_TYPES[item_type]
+    form = BulkComponentImportForm()
+    
+    if form.validate_on_submit():
+        try:
+            # Read file content
+            file = form.file.data
+            file_content = file.read().decode('utf-8')
+            
+            # Process import
+            successful, failed, errors = config['import_func'](
+                file_content,
+                update_existing=form.update_existing.data
+            )
+            
+            # Show results
+            if successful > 0:
+                flash(f'Successfully imported {successful} {config["display_name"]}!', 'success')
+            
+            if failed > 0:
+                flash(f'Failed to import {failed} items. See errors below.', 'warning')
+            
+            if errors:
+                for error in errors[:10]:  # Show first 10 errors
+                    flash(error, 'error')
+                if len(errors) > 10:
+                    flash(f'... and {len(errors) - 10} more errors', 'error')
+            
+            logger.info(f"Admin {current_user.email} imported {config['display_name']}: {successful} successful, {failed} failed")
+            
+            if successful > 0:
+                return redirect(url_for('admin.manage_items', item_type=item_type))
+                
+        except Exception as e:
+            logger.error(f"Error importing {item_type}: {e}", exc_info=True)
+            flash(f'An error occurred while importing: {str(e)}', 'error')
+    
+    return render_template('admin/bulk_import_generic.html', 
+                         form=form, 
+                         item_type=item_type, 
+                         config=config)
