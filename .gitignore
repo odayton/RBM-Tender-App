@@ -31,9 +31,16 @@ instance/
 .webassets-cache
 *.db
 
-# Environment variables
+# Environment variables (exclude templates/examples)
 .env
+.env.*
+!.env.example
+.env.development
+.env.production
+.env.local
 config/.env
+config/.env.*
+!config/.env.example
 
 # IDE
 .vscode/
