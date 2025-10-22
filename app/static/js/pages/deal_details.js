@@ -145,16 +145,19 @@ document.addEventListener('DOMContentLoaded', function() {
             selectedProductInfo.style.display = 'block';
         }
         
-        // Populate product display fields
-        addItemForm.querySelector('#item_sku_display').value = dataset.sku;
-        addItemForm.querySelector('#item_name_display').value = dataset.name;
+        // Populate product display fields - use document.getElementById for safety
+        const skuDisplay = document.getElementById('item_sku_display');
+        const nameDisplay = document.getElementById('item_name_display');
+        if (skuDisplay) skuDisplay.value = dataset.sku;
+        if (nameDisplay) nameDisplay.value = dataset.name;
         
         // Populate form fields
-        addItemForm.querySelector('input[name="product_id"]').value = dataset.productId;
+        const productIdInput = document.querySelector('input[name="product_id"]');
+        if (productIdInput) productIdInput.value = dataset.productId;
         
         // Populate list price and discount
-        const listPriceInput = addItemForm.querySelector('#list_price');
-        const discountInput = addItemForm.querySelector('input[name="discount"]');
+        const listPriceInput = document.getElementById('list_price');
+        const discountInput = document.querySelector('input[name="discount"]');
         
         if (listPriceInput) {
             listPriceInput.value = dataset.listPrice || '0.00';
@@ -174,9 +177,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function calculateUnitPrice() {
-        const listPriceInput = addItemForm.querySelector('#list_price');
-        const discountInput = addItemForm.querySelector('input[name="discount"]');
-        const unitPriceInput = addItemForm.querySelector('input[name="unit_price"]');
+        const listPriceInput = document.getElementById('list_price');
+        const discountInput = document.querySelector('input[name="discount"]');
+        const unitPriceInput = document.querySelector('input[name="unit_price"]');
         
         if (!listPriceInput || !discountInput || !unitPriceInput) return;
         
@@ -204,8 +207,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Clear the form when opening the modal
         $('#addItemForm')[0].reset();
-        $('#item_sku_display').val('');
-        $('#item_name_display').val('');
+        const skuDisplay = document.getElementById('item_sku_display');
+        const nameDisplay = document.getElementById('item_name_display');
+        if (skuDisplay) skuDisplay.value = '';
+        if (nameDisplay) nameDisplay.value = '';
         $('#productSearchResults').empty();
         $('#selectedProductInfo').hide();
     });
