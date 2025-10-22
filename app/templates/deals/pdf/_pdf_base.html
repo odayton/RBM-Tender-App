@@ -147,9 +147,9 @@
                             {% if item.notes and item.notes != (item.product.description if item.product else item.custom_name) %}<br><small>{{ item.notes }}</small>{% endif %}
                         </td>
                         <td class="text-right">{{ item.quantity }}</td>
-                        <td class="text-right">{{ item.unit_price|format_currency }}</td>
+                        <td class="text-right">{{ item.list_price|format_currency if item.list_price else '' }}</td>
                         <td class="text-right">{{ "%.2f"|format(item.discount) }}%</td>
-                        <td class="text-right">{{ (item.unit_price * (1 - item.discount / 100))|format_currency }}</td>
+                        <td class="text-right">{{ item.unit_price|format_currency }}</td>
                         <td class="text-right">{{ item.total_price|format_currency }}</td>
                     </tr>
                     {% else %}
