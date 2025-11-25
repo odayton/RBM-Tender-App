@@ -627,6 +627,7 @@ def update_deal(deal_id):
 
 @deals_bp.route('/update_stage/<int:deal_id>', methods=['POST'])
 @login_required
+@invalidate_deal_cache()
 def update_deal_stage(deal_id):
     """Updates the stage of a deal via AJAX (for kanban drag and drop)."""
     try:
@@ -653,6 +654,9 @@ def update_deal_stage(deal_id):
         # Update the deal stage
         old_stage = deal.stage.value
         deal.stage = stage_enum
+        
+        # Flush changes to database before commit
+        db.session.flush()
         db.session.commit()
         
         logger.info(f"Deal {deal_id} stage updated from '{old_stage}' to '{new_stage}' by user {current_user.username}")
@@ -907,14 +911,39 @@ def add_line_item(option_id):
         if product and product.discount and not form.discount.data:
             discount_percentage = product.discount.percentage
         
-        # Calculate unit_price from list_price and discount if list_price is provided
+        # Get list_price from form or product
         list_price = form.list_price.data
+        if list_price is None and product and product.list_price:
+            list_price = float(product.list_price)
+        
+        # Calculate unit_price - prioritize product's discounted price if available
         unit_price = form.unit_price.data
         
-        if list_price is not None and list_price > 0:
-            # Recalculate unit_price to ensure accuracy
+        # If we have a product with pricing, use its get_discounted_price method for accuracy
+        if product and product.list_price:
+            # Use product's discounted price calculation
+            discounted_price = product.get_discounted_price()
+            if discounted_price and discounted_price > 0:
+                unit_price = float(discounted_price)
+                # If discount wasn't manually set, use product's discount
+                if not form.discount.data and product.discount:
+                    discount_percentage = product.discount.percentage
+                # Set list_price from product if not provided
+                if list_price is None:
+                    list_price = float(product.list_price)
+        elif list_price is not None and list_price > 0:
+            # Fallback: calculate from list_price and discount
             discount = float(discount_percentage)
             unit_price = float(list_price) - (float(list_price) * discount / 100)
+        
+        # Ensure unit_price is set - use form value if product doesn't have pricing
+        if unit_price is None or unit_price <= 0:
+            # If form has a unit_price, use it (for custom items or products without pricing)
+            if form.unit_price.data and form.unit_price.data > 0:
+                unit_price = float(form.unit_price.data)
+            else:
+                # Last resort: set to 0
+                unit_price = 0.0
 
         new_item = QuoteLineItem(
             option_id=option.id,
@@ -1048,19 +1077,23 @@ def search_products():
         )
     ).limit(10).all()
     
-    results = [
-        {
+    results = []
+    for p in products:
+        list_price = float(p.list_price) if p.list_price else 0.0
+        discount_pct = float(p.discount.percentage) if p.discount and p.discount.is_valid() else 0.0
+        # Use product's get_discounted_price method to ensure correct calculation
+        discounted_price = float(p.get_discounted_price()) if p.list_price else 0.0
+        
+        results.append({
             'id': p.id,
             'series': p.series or '',
             'sku': p.item_no,
             'name': p.description,
-            'list_price': str(p.list_price),
+            'list_price': str(list_price) if list_price > 0 else '',
             'disc_code': p.discount_code or '',
-            'discount': float(p.discount.percentage) if p.discount else 0.0,
-            'unit_price': str(p.list_price * (1 - (p.discount.percentage / 100)) if p.discount else p.list_price)
-        }
-        for p in products
-    ]
+            'discount': discount_pct,
+            'unit_price': str(discounted_price) if discounted_price > 0 else ''
+        })
     return jsonify(results)
 
 @deals_bp.route('/api/line-item/<int:item_id>/update-field', methods=['POST'])

@@ -4,7 +4,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Utility function to format currency with thousand separators
     function formatCurrency(value) {
-        return parseFloat(value).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (!value || value === '' || value === 'None' || value === 'null') {
+            return '0.00';
+        }
+        const num = parseFloat(value);
+        if (isNaN(num)) {
+            return '0.00';
+        }
+        return num.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     // Function to handle revision tab switching (Tailwind version)
@@ -119,8 +126,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 row.dataset.sku = product.sku;
                 row.dataset.name = product.name;
                 row.dataset.series = product.series || '';
-                row.dataset.listPrice = product.list_price;
-                row.dataset.unitPrice = product.unit_price;
+                // Handle empty/null list_price and unit_price
+                row.dataset.listPrice = (product.list_price && product.list_price !== '' && product.list_price !== 'None') ? product.list_price : '';
+                row.dataset.unitPrice = (product.unit_price && product.unit_price !== '' && product.unit_price !== 'None') ? product.unit_price : '';
                 row.dataset.discCode = product.disc_code || '';
                 row.dataset.discount = product.discount || '0.0';
 
@@ -160,35 +168,80 @@ document.addEventListener('DOMContentLoaded', function() {
         const discountInput = document.querySelector('input[name="discount"]');
         
         if (listPriceInput) {
-            listPriceInput.value = dataset.listPrice || '0.00';
+            // Handle empty string, 'None', null, or undefined
+            const listPrice = dataset.listPrice;
+            if (listPrice && listPrice !== 'None' && listPrice !== 'null' && listPrice.toString().trim() !== '') {
+                // Remove any commas and set as plain number
+                const cleanPrice = listPrice.toString().replace(/,/g, '');
+                listPriceInput.value = cleanPrice;
+            } else {
+                listPriceInput.value = '0.00';
+            }
         }
         if (discountInput) {
             discountInput.value = dataset.discount || '0.0';
         }
         
-        // Calculate and set unit price
-        calculateUnitPrice();
+        // Small delay to ensure DOM is updated before calculating
+        setTimeout(() => {
+            calculateUnitPrice();
+        }, 100);
         
         console.log('Populated form with:', {
             sku: dataset.sku,
             listPrice: dataset.listPrice,
-            discount: dataset.discount
+            discount: dataset.discount,
+            listPriceInputValue: listPriceInput ? listPriceInput.value : 'not found',
+            discountInputValue: discountInput ? discountInput.value : 'not found'
         });
     }
     
     function calculateUnitPrice() {
         const listPriceInput = document.getElementById('list_price');
         const discountInput = document.querySelector('input[name="discount"]');
-        const unitPriceInput = document.querySelector('input[name="unit_price"]');
+        // Try multiple selectors to find unit_price field
+        let unitPriceInput = document.querySelector('input[name="unit_price"]') || 
+                            document.getElementById('unit_price') ||
+                            document.querySelector('#unit_price');
         
-        if (!listPriceInput || !discountInput || !unitPriceInput) return;
+        if (!listPriceInput || !discountInput || !unitPriceInput) {
+            console.warn('calculateUnitPrice: Missing inputs', {
+                listPriceInput: !!listPriceInput,
+                discountInput: !!discountInput,
+                unitPriceInput: !!unitPriceInput
+            });
+            return;
+        }
         
-        const listPrice = parseFloat(listPriceInput.value) || 0;
+        // Handle empty string, 'None', null, or invalid values
+        let listPriceValue = listPriceInput.value;
+        if (!listPriceValue || listPriceValue === 'None' || listPriceValue === 'null' || listPriceValue.trim() === '') {
+            listPriceValue = '0';
+        }
+        
+        // Remove any commas from list price value
+        listPriceValue = listPriceValue.replace(/,/g, '');
+        
+        const listPrice = parseFloat(listPriceValue) || 0;
         const discount = parseFloat(discountInput.value) || 0;
         
+        console.log('calculateUnitPrice:', {
+            listPriceValue: listPriceValue,
+            listPrice: listPrice,
+            discount: discount,
+            unitPriceInput: unitPriceInput
+        });
+        
         // Calculate unit price: list price - (list price * discount / 100)
-        const unitPrice = listPrice - (listPrice * discount / 100);
-        unitPriceInput.value = formatCurrency(unitPrice);
+        const unitPrice = listPrice > 0 ? listPrice - (listPrice * discount / 100) : 0;
+        
+        // Set as plain number (no commas) for input field - backend will handle formatting
+        unitPriceInput.value = unitPrice.toFixed(2);
+        
+        console.log('calculateUnitPrice result:', {
+            calculatedUnitPrice: unitPrice,
+            setValue: unitPriceInput.value
+        });
     }
 
     document.addEventListener('click', function (e) {
@@ -217,6 +270,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add event listeners for price calculation
     $(document).on('input change', '#addItemForm input[name="discount"]', function() {
+        calculateUnitPrice();
+    });
+    
+    // Also recalculate when list_price changes
+    $(document).on('input change', '#addItemForm #list_price', function() {
         calculateUnitPrice();
     });
 

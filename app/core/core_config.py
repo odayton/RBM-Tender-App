@@ -32,6 +32,13 @@ class Config:
     # Database configuration
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_size': 10,
+        'pool_recycle': 3600,
+        'pool_pre_ping': True,
+        'pool_timeout': 20,
+        'max_overflow': 20
+    }
     
     # Base path configuration
     BASE_DIR = Path(__file__).resolve().parent.parent
