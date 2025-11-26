@@ -117,11 +117,15 @@ class TestDiscountCalculations:
         db_session.add(option)
         db_session.flush()
         
+        # Calculate discounted unit price: 500 - (500 * 15%) = 425
+        discounted_unit_price = product.list_price - (product.list_price * Decimal('15.00') / Decimal('100'))
+        
         line_item = QuoteLineItem(
             option_id=option.id,
             product_id=product.id,
             quantity=2,
-            unit_price=product.list_price,
+            list_price=product.list_price,
+            unit_price=discounted_unit_price,  # Already discounted price
             discount=Decimal('15.00')  # 15% discount
         )
         db_session.add(line_item)
@@ -129,9 +133,8 @@ class TestDiscountCalculations:
         
         # Test total price calculation
         total_price = line_item.total_price
-        # Subtotal: 2 × 500 = 1000
-        # Discount: 1000 × 15% = 150
-        # Total: 1000 - 150 = 850
+        # Unit price is already discounted: 425
+        # Total: 2 × 425 = 850
         expected_total = Decimal('850.00')
         
         assert total_price == expected_total
@@ -200,18 +203,23 @@ class TestDiscountCalculations:
         db_session.flush()
         
         # Add line items
+        # Line item 1: no discount, unit_price = list_price
         line_item1 = QuoteLineItem(
             option_id=option.id,
             product_id=product1.id,
             quantity=1,
-            unit_price=Decimal('1000.00'),
+            list_price=Decimal('1000.00'),
+            unit_price=Decimal('1000.00'),  # No discount
             discount=Decimal('0.00')
         )
+        # Line item 2: 10% discount, unit_price = 500 - (500 * 10%) = 450
+        discounted_price_2 = Decimal('500.00') - (Decimal('500.00') * Decimal('10.00') / Decimal('100'))
         line_item2 = QuoteLineItem(
             option_id=option.id,
             product_id=product2.id,
             quantity=2,
-            unit_price=Decimal('500.00'),
+            list_price=Decimal('500.00'),
+            unit_price=discounted_price_2,  # Already discounted
             discount=Decimal('10.00')  # 10% discount
         )
         db_session.add_all([line_item1, line_item2])

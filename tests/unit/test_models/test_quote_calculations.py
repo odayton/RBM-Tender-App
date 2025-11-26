@@ -74,18 +74,23 @@ class TestQuoteCalculations:
         db_session.flush()
         
         # Add line items
+        # Line item 1: no discount
         line_item1 = QuoteLineItem(
             option_id=option.id,
             product_id=product1.id,
             quantity=2,
-            unit_price=product1.list_price,
+            list_price=product1.list_price,
+            unit_price=product1.list_price,  # No discount
             discount=Decimal('0.00')
         )
+        # Line item 2: 10% discount, unit_price = 500 - (500 * 10%) = 450
+        discounted_price_2 = product2.list_price - (product2.list_price * Decimal('10.00') / Decimal('100'))
         line_item2 = QuoteLineItem(
             option_id=option.id,
             product_id=product2.id,
             quantity=1,
-            unit_price=product2.list_price,
+            list_price=product2.list_price,
+            unit_price=discounted_price_2,  # Already discounted
             discount=Decimal('10.00')  # 10% discount
         )
         db_session.add_all([line_item1, line_item2])
@@ -170,22 +175,27 @@ class TestQuoteCalculations:
         db_session.flush()
         
         # Add line items to option 1
+        # No discount
         line_item1 = QuoteLineItem(
             option_id=option1.id,
             product_id=product1.id,
             quantity=1,
-            unit_price=product1.list_price,
+            list_price=product1.list_price,
+            unit_price=product1.list_price,  # No discount
             discount=Decimal('0.00')
         )
         db_session.add(line_item1)
         db_session.flush()
         
         # Add line items to option 2
+        # 5% discount: unit_price = 750 - (750 * 5%) = 712.50
+        discounted_price_2 = product2.list_price - (product2.list_price * Decimal('5.00') / Decimal('100'))
         line_item2 = QuoteLineItem(
             option_id=option2.id,
             product_id=product2.id,
             quantity=2,
-            unit_price=product2.list_price,
+            list_price=product2.list_price,
+            unit_price=discounted_price_2,  # Already discounted
             discount=Decimal('5.00')  # 5% discount
         )
         db_session.add(line_item2)
@@ -194,7 +204,7 @@ class TestQuoteCalculations:
         # Test total price calculation
         total_price = quote.total_price
         # Option 1: 1000 + 100 = 1100
-        # Option 2: (2 × 750 - 5%) + 200 = 1425 + 200 = 1625
+        # Option 2: (2 × 712.50) + 200 = 1425 + 200 = 1625
         # Total: 1100 + 1625 = 2725
         expected_total = Decimal('2725.00')
         
